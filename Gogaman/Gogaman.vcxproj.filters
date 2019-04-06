@@ -1,0 +1,168 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\vendor">
+      <UniqueIdentifier>{89e67720-a531-4bb7-be67-5c447d6faed9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\shadersOld">
+      <UniqueIdentifier>{6429da76-ec4b-42f3-8ece-6c29a2dd5f9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\graphics">
+      <UniqueIdentifier>{f3ca0ab0-ace0-4591-b200-7dd1f8805ef9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="vendor\glad.c">
+      <Filter>Source Files\vendor</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vendor\stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\Framebuffers.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\graphics\texture3D.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vendor\stb_image.h">
+      <Filter>Source Files\vendor</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Camera.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Mesh.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Model.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Shader.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\texture3D.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Framebuffers.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Config.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\Light.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\graphics\JitterSequences.h" />
+    <ClInclude Include="src\Core.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shadersOld\boxblurshader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\boxblurshader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\directPBR.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\directPBR.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\gbuffershader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\gbuffershader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\guassianblurshader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\guassianblurshader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\lampshader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\lampshader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\pbrdeferred.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\pbrdeferred.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\skyboxshader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\skyboxshader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\ssrshader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\ssrshader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\VCTshader.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\VCTshader.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelConeTracing.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelConeTracing2.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelization.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelization.gs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelization.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\test.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\test.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelInjectDirect.compute">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelInjectIndirect.compute">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\voxelClearDynamic.compute">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\postprocess.fs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+    <None Include="shadersOld\postprocess.vs">
+      <Filter>Source Files\shadersOld</Filter>
+    </None>
+  </ItemGroup>
+</Project>
