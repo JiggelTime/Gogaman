@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sandbox", "Sandbox\Sandbox.vcxproj", "{7BCE89FC-1F54-4B9F-8B51-1730E1984EAE}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Gogaman", "Gogaman\Gogaman.vcxproj", "{E8871270-05AD-4C7F-9644-B64D89C2BD92}"
 EndProject
 Global
@@ -15,6 +17,10 @@ Global
 		{E8871270-05AD-4C7F-9644-B64D89C2BD92}.Debug|x64.Build.0 = Debug|x64
 		{E8871270-05AD-4C7F-9644-B64D89C2BD92}.Release|x64.ActiveCfg = Release|x64
 		{E8871270-05AD-4C7F-9644-B64D89C2BD92}.Release|x64.Build.0 = Release|x64
+		{7BCE89FC-1F54-4B9F-8B51-1730E1984EAE}.Debug|x64.ActiveCfg = Debug|x64
+		{7BCE89FC-1F54-4B9F-8B51-1730E1984EAE}.Debug|x64.Build.0 = Debug|x64
+		{7BCE89FC-1F54-4B9F-8B51-1730E1984EAE}.Release|x64.ActiveCfg = Release|x64
+		{7BCE89FC-1F54-4B9F-8B51-1730E1984EAE}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,5 +1,15 @@
 #pragma once
 
+#ifdef GM_PLATFORM_WINDOWS
+	#ifdef GM_BUILD_DLL
+		#define GOGAMAN_API __declspec(dllexport)
+	#else
+		#define GOGAMAN_API __declspec(dllimport)
+	#endif
+#else
+	#error
+#endif
+
 #if GM_DEBUG
 	#define GM_LOG(x) std::cout << x << std::endl;
 #else

@@ -23,55 +23,61 @@
     <ClCompile Include="vendor\glad.c">
       <Filter>Source Files\vendor</Filter>
     </ClCompile>
-    <ClCompile Include="src\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="vendor\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\pch.cpp">
+    <ClCompile Include="src\Gogaman\graphics\Framebuffers.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\graphics\texture3D.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\Framebuffers.cpp">
-      <Filter>Source Files\graphics</Filter>
+    <ClCompile Include="src\Gogaman\pch.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\graphics\texture3D.cpp">
-      <Filter>Source Files\graphics</Filter>
+    <ClCompile Include="src\Gogaman\Application.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\stb_image.h">
       <Filter>Source Files\vendor</Filter>
     </ClInclude>
-    <ClInclude Include="src\pch.h">
+    <ClInclude Include="src\Gogaman\graphics\Camera.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\graphics\Framebuffers.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\graphics\JitterSequences.h" />
+    <ClInclude Include="src\Gogaman\graphics\Light.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\graphics\Mesh.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\graphics\Model.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\graphics\Shader.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\graphics\texture3D.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Config.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Camera.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\Mesh.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\Model.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\Shader.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\texture3D.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\Framebuffers.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Config.h">
+    <ClInclude Include="src\Gogaman\Core.h" />
+    <ClInclude Include="src\Gogaman\pch.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\graphics\Light.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\graphics\JitterSequences.h" />
-    <ClInclude Include="src\Core.h" />
+    <ClInclude Include="src\Gogaman\Application.h" />
+    <ClInclude Include="src\Gogaman.h" />
+    <ClInclude Include="src\Gogaman\EntryPoint.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

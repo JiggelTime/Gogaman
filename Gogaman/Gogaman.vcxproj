@@ -11,9 +11,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\graphics\Framebuffers.cpp" />
-    <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\pch.cpp">
+    <ClCompile Include="src\Gogaman\Application.cpp" />
+    <ClCompile Include="src\Gogaman\graphics\Framebuffers.cpp" />
+    <ClCompile Include="src\Gogaman\Main.cpp" />
+    <ClCompile Include="src\Gogaman\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
@@ -22,24 +23,27 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\graphics\texture3D.cpp" />
+    <ClCompile Include="src\Gogaman\graphics\texture3D.cpp" />
     <ClCompile Include="vendor\glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Config.h" />
-    <ClInclude Include="src\Core.h" />
-    <ClInclude Include="src\graphics\Camera.h" />
-    <ClInclude Include="src\graphics\Framebuffers.h" />
-    <ClInclude Include="src\graphics\Light.h" />
-    <ClInclude Include="src\graphics\JitterSequences.h" />
-    <ClInclude Include="src\graphics\Mesh.h" />
-    <ClInclude Include="src\graphics\Model.h" />
-    <ClInclude Include="src\pch.h" />
-    <ClInclude Include="src\graphics\Shader.h" />
-    <ClInclude Include="src\graphics\texture3D.h" />
+    <ClInclude Include="src\Gogaman.h" />
+    <ClInclude Include="src\Gogaman\Application.h" />
+    <ClInclude Include="src\Gogaman\Config.h" />
+    <ClInclude Include="src\Gogaman\Core.h" />
+    <ClInclude Include="src\Gogaman\EntryPoint.h" />
+    <ClInclude Include="src\Gogaman\graphics\Camera.h" />
+    <ClInclude Include="src\Gogaman\graphics\Framebuffers.h" />
+    <ClInclude Include="src\Gogaman\graphics\Light.h" />
+    <ClInclude Include="src\Gogaman\graphics\JitterSequences.h" />
+    <ClInclude Include="src\Gogaman\graphics\Mesh.h" />
+    <ClInclude Include="src\Gogaman\graphics\Model.h" />
+    <ClInclude Include="src\Gogaman\pch.h" />
+    <ClInclude Include="src\Gogaman\graphics\Shader.h" />
+    <ClInclude Include="src\Gogaman\graphics\texture3D.h" />
     <ClInclude Include="vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
@@ -92,13 +96,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -147,7 +151,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>GM_DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GM_DEBUG=1;GM_PLATFORM_WINDOWS;GM_BUILD_DLL;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
@@ -169,6 +173,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <PreprocessorDefinitions>GM_PLATFORM_WINDOWS;GM_BUILD_DLL;_WINDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
