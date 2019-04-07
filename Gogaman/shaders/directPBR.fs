@@ -46,13 +46,21 @@ uniform sampler3D voxelTexture;
 
 uniform int  renderMode;
 uniform bool debug;
-
-//Inverse square falloff attenuation
-float Attenuation(float dist) { return 1.0f / (dist * dist); }
+uniform bool debug2;
+/*
+vec3 worldPosFromDepth(float depth)
+{
+    vec4 p = vec4(In.texCoords, depth, 1.0);
+    p.xyz = p.xyz * 2.0 - 1.0;
+    p = u_viewProjInv * p;
+    return p.xyz / p.w;
+}*/
 float chrominanceEdgeDirectedReconstructionFilter(vec2 a0, vec2 a1, vec2 a2, vec2 a3, vec2 a4);
 vec3  DecodeAlbedo(sampler2D albedoTexture);
 vec2  SignNotZero(vec2 v) { return vec2((v.x >= 0.0f) ? 1.0f : -1.0f, (v.y >= 0.0f) ? 1.0f : -1.0f); }
 vec3  DecodeSignedOctahedronNormal(vec2 e);
+//Inverse square falloff attenuation
+float Attenuation(float dist) { return 1.0f / (dist * dist); }
 vec3  ComputePointLight(PointLight light);
 vec3  ComputeDirectRadiance();
 vec3  ComputeIndirectRadiance();
@@ -76,10 +84,10 @@ float metalness         = positionMetalness.a;
 //Retrieve normal
 vec3  normal            = DecodeSignedOctahedronNormal(texture(gNormal, texCoordsFrag).xy);
 //Retrieve albedo, emissivity, and roughness
-vec4  albedoEmissivityRoughness = texture(gAlbedoEmissivityRoughness, texCoordsFrag);
+vec4  albedoEmissivityRoughness = texture(gAlbedoEmissivityRoughness, texCoordsFrag).xyzw;
 vec3  albedo            = DecodeAlbedo(gAlbedoEmissivityRoughness);
-float emissivity        = albedoEmissivityRoughness.b;
-float roughness         = albedoEmissivityRoughness.a;
+float emissivity        = albedoEmissivityRoughness.z;
+float roughness         = albedoEmissivityRoughness.w;
 //Remap roughness by squaring
 float linearRoughness   = roughness * roughness;
 //Retrieve cone traced diffuse
@@ -213,6 +221,7 @@ vec3 ComputePointLight(PointLight light)
 	//Ensure energy conservation (Fr is already multiplied by F)
 	vec3 Kd = (1.0f - F) * (1.0f - metalness);
 	vec3 Lo = (Fd * Kd + Fr) * Li * Vis * NdotL;
+	if(debug2) Lo = vec3(Vis);
 	return Lo;
 }
 
@@ -319,15 +328,14 @@ vec4 ReadVoxel(vec3 worldPos, float mipLevel)
 
 float TraceShadowCone(vec3 direction, float aperture, float maxTracingDistance)
 {
-	float alpha = 0.0f;
+	float alpha    = 0.0f;
 	//Offset cone to prevent self-sampling (square root of 2 is diagonal half-extent)
-	float distance = voxelWorldSize;
-	vec3 startPos  = position + normal * distance * 2.0f * SQRT2;
+	float distance = SQRT2 * voxelWorldSize * 2.0f;
 	float maxDist  = min(CONE_TRACE_MAX_DISTANCE * voxelGridSize, maxTracingDistance);
 	
 	while((distance < maxDist) && (alpha < 1.0f))
 	{
-		vec3  samplePosition = startPos + direction * distance;
+		vec3  samplePosition = position + direction * distance;
 		float diameter       = max(2.0f * aperture * distance, voxelWorldSize);
 		float mipLevel       = log2(diameter / voxelWorldSize);
 

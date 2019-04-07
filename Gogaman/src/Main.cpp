@@ -369,17 +369,19 @@ int main()
 
 		//Update light(s)
 			//Pointlight 0
-			PointLight pointLight0;
-			pointLight0.position = glm::vec3(0.4f, 1.2f, -0.6f);
-			pointLight0.color    = glm::vec3(0.2f, 0.2f, 1.0f);
+				PointLight pointLight0;
+				pointLight0.position = glm::vec3(0.4f, 1.2f, -0.6f);
+				//Luminous intensity (candela)
+				pointLight0.color    = glm::vec3(1.0f, 1.0f, 1.0f);
 			//Pointlight 1
-			PointLight pointLight1;
-			pointLight1.position = glm::vec3(-0.4f, 1.2f, 0.6f);
-			pointLight1.color    = glm::vec3(1.0f, 0.2f, 0.2f);
+				PointLight pointLight1;
+				pointLight1.position = glm::vec3(-0.4f, 1.2f, 0.6f);
+				//Luminous intensity (candela)
+				pointLight1.color    = glm::vec3(2.0f, 2.0f, 2.0f);
 
 		//Update models
 			statueModel.SetScale(0.4f);
-			if(config.debug2) statueModel.SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
+			//if(config.debug2) statueModel.SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
 
 		//Update camera matrices
 			previousViewProjectionMatrix = viewProjectionMatrix;
@@ -630,7 +632,7 @@ int main()
 			voxelInjectDirectShader.setVec3("pointLights[1].position",      pointLight1.position);
 			voxelInjectDirectShader.setVec3("pointLights[1].color",         pointLight1.color);
 			voxelInjectDirectShader.setFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
-			voxelInjectDirectShader.setInt("numLights",                     2);
+			voxelInjectDirectShader.setInt("numLights",                     1);
 			voxelInjectDirectShader.setInt("voxelResolution",               config.voxelResolution);
 			voxelInjectDirectShader.setFloat("voxelGridSize",               config.voxelGridSize);
 			voxelInjectDirectShader.setFloat("voxelGridSizeInverse",        1.0f / config.voxelGridSize);
@@ -680,7 +682,7 @@ int main()
 			voxelConeTracingShader.setVec3("pointLights[0].color",    pointLight0.color);
 			voxelConeTracingShader.setVec3("pointLights[1].position", pointLight1.position);
 			voxelConeTracingShader.setVec3("pointLights[1].color",    pointLight1.color);
-			voxelConeTracingShader.setInt("numLights",                2);
+			voxelConeTracingShader.setInt("numLights",                1);
 			voxelConeTracingShader.setInt("renderMode",               config.renderMode);
 			voxelConeTracingShader.setFloat("voxelGridSize",          config.voxelGridSize);
 			voxelConeTracingShader.setFloat("voxelGridSizeInverse",   1.0f / config.voxelGridSize);
@@ -827,7 +829,7 @@ int main()
 			directPBRShader.setVec3("pointLights[1].position",      pointLight1.position);
 			directPBRShader.setVec3("pointLights[1].color",         pointLight1.color);
 			directPBRShader.setFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
-			directPBRShader.setInt("numLights",                     2);
+			directPBRShader.setInt("numLights",                     1);
 			directPBRShader.setVec3("cameraPos",                    camera.Position);
 			directPBRShader.setFloat("voxelGridSize",               config.voxelGridSize);
 			directPBRShader.setFloat("voxelGridSizeInverse",        1.0f / config.voxelGridSize);
@@ -836,6 +838,7 @@ int main()
 
 			directPBRShader.setInt("renderMode",                    config.renderMode);
 			directPBRShader.setBool("debug",                        config.debug);
+			directPBRShader.setBool("debug2",                       config.debug2);
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, framebuffers.gPositionMetalness);
@@ -888,15 +891,15 @@ int main()
 			lampShader.setMat4("projection", projectionMatrix);
 			lampShader.setMat4("view", viewMatrix);
 			//Light 0
-			lampShader.setVec3("lightColor", pointLight0.color);
-			sphereModel.SetPosition(pointLight0.position);
-			sphereModel.SetScale(0.025f);
-			sphereModel.Draw(lampShader);
-			//Light 0
-			lampShader.setVec3("lightColor", pointLight1.color);
-			sphereModel.SetPosition(pointLight1.position);
-			sphereModel.SetScale(0.025f);
-			sphereModel.Draw(lampShader);
+				lampShader.setVec3("lightColor", pointLight0.color);
+				sphereModel.SetPosition(pointLight0.position);
+				sphereModel.SetScale(0.025f);
+				sphereModel.Draw(lampShader);
+			//Light 1
+				//lampShader.setVec3("lightColor", pointLight1.color);
+				//sphereModel.SetPosition(pointLight1.position);
+				//sphereModel.SetScale(0.025f);
+				//sphereModel.Draw(lampShader);
 			/*
 				//Skybox
 			glDepthFunc(GL_LEQUAL);
