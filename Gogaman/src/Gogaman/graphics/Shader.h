@@ -6,7 +6,8 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
-class Shader {
+class Shader
+{
 public:
 	unsigned int id;
 

@@ -1,4 +1,5 @@
 #include "pch.h"
+
 #include <glad.h>
 #include <GLFW\glfw3.h>
 #include <glm.hpp>
@@ -14,7 +15,7 @@
 #include "graphics/Camera.h"
 #include "graphics/Model.h"
 #include "graphics/texture3D.h"
-#include "graphics/Light.h"
+#include "graphics/Lights/PointLight.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -369,16 +370,17 @@ int main()
 
 		//Update light(s)
 			//Pointlight 0
-				PointLight pointLight0;
+				Gogaman::PointLight pointLight0;
 				pointLight0.position = glm::vec3(0.4f, 1.2f, -0.6f);
 				//Luminous intensity (candela)
 				pointLight0.color    = glm::vec3(1.0f, 1.0f, 1.0f);
+				std::cout << Gogaman::PointLight::numLights << std::endl;
 			//Pointlight 1
-				PointLight pointLight1;
+				Gogaman::PointLight pointLight1;
 				pointLight1.position = glm::vec3(-0.4f, 1.2f, 0.6f);
 				//Luminous intensity (candela)
 				pointLight1.color    = glm::vec3(2.0f, 2.0f, 2.0f);
-
+				std::cout << Gogaman::PointLight::numLights << std::endl;
 		//Update models
 			statueModel.SetScale(0.4f);
 			//if(config.debug2) statueModel.SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));

@@ -35,10 +35,16 @@
     <ClCompile Include="src\Gogaman\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\pch.cpp">
+    <ClCompile Include="src\Gogaman\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Application.cpp">
+    <ClCompile Include="src\pch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Logging\Logger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\graphics\Lights\PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,9 +59,6 @@
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\graphics\JitterSequences.h" />
-    <ClInclude Include="src\Gogaman\graphics\Light.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Gogaman\graphics\Mesh.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
@@ -72,12 +75,16 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\Core.h" />
-    <ClInclude Include="src\Gogaman\pch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Gogaman\Application.h" />
     <ClInclude Include="src\Gogaman.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
+    <ClInclude Include="src\pch.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Logging\Logger.h" />
+    <ClInclude Include="src\Gogaman\graphics\Lights\PointLight.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

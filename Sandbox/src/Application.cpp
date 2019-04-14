@@ -6,12 +6,10 @@ class Sandbox : public Gogaman::Application
 public:
 	Sandbox()
 	{
-
 	}
 
 	~Sandbox()
 	{
-
 	}
 };
 

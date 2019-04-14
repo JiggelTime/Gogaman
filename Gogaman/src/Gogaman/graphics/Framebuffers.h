@@ -1,7 +1,7 @@
 #pragma once
 
 #include <glad.h>
-#include "../Config.h"
+#include "Gogaman/Config.h"
 
 class Framebuffers
 {
