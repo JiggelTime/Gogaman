@@ -26,15 +26,6 @@
     <ClCompile Include="vendor\stb_image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\graphics\Framebuffers.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\graphics\texture3D.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -44,32 +35,28 @@
     <ClCompile Include="src\Gogaman\Logging\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\graphics\Lights\PointLight.cpp">
+    <ClCompile Include="src\Gogaman\Logging\Log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Framebuffers.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\texture3D.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\stb_image.h">
       <Filter>Source Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\graphics\Camera.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\graphics\Framebuffers.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\graphics\JitterSequences.h" />
-    <ClInclude Include="src\Gogaman\graphics\Mesh.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\graphics\Model.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\graphics\Shader.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\graphics\texture3D.h">
-      <Filter>Source Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\Config.h">
       <Filter>Source Files</Filter>
@@ -82,9 +69,30 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
-    <ClInclude Include="src\Gogaman\graphics\Lights\PointLight.h">
+    <ClInclude Include="src\Gogaman\Logging\Log.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Lights\PointLight.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Camera.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Framebuffers.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Mesh.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Model.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Shader.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\texture3D.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

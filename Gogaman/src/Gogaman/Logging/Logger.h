@@ -7,36 +7,22 @@ namespace Gogaman
 {
 	enum class LogLevel
 	{
-		LogInfo, LogWarning, LogError
+		Trace, Info, Warning, Error
 	};
 
 	class GOGAMAN_API Logger
 	{
 	public:
-		void Log(const LogLevel level, const char *format, ...);
-		void Log(const LogLevel level, const std::string &message);
-
-		static Logger *GetLogger();
-
-		void SetLogLevel(LogLevel level);
-		LogLevel GetLogLevel();
-	private:
-		Logger();
+		Logger(std::string name);
 		~Logger();
+
+		void Log(const LogLevel level, const char *format, ...);
+
+		void SetLogLevel(LogLevel level) { m_LogLevel = level; }
+		inline LogLevel GetLogLevel() { return m_LogLevel; }
 	private:
-		static Logger *s_Instance;
-		static LogLevel m_LogLevel;
+		std::string m_LogName;
+		LogLevel m_LogLevel = LogLevel::Trace;
+		std::ostringstream m_OutputStringStream;
 	};
 }
-
-//Log macros
-#define GM_LOG_SET_LEVEL(x)    Gogaman::Logger::GetLogger()->SetLogLevel(x)
-#define GM_LOG_GET_LEVEL       Gogaman::Logger::GetLogger()->GetLogLevel()
-
-#define GM_LOG_INFO(x)         Gogaman::Logger::GetLogger()->Log(LogLevel::LogInfo, x)
-#define GM_LOG_WARNING(x)      Gogaman::Logger::GetLogger()->Log(LogLevel::LogWarning, x)
-#define GM_LOG_ERROR(x)        Gogaman::Logger::GetLogger()->Log(LogLevel::LogError, x)
-
-#define GM_LOG_INFO(x, ...)    Gogaman::Logger::GetLogger()->Log(LogLevel::LogInfo, x, __VA_ARGS__)
-#define GM_LOG_WARNING(x, ...) Gogaman::Logger::GetLogger()->Log(LogLevel::LogWarning, x, __VA_ARGS__)
-#define GM_LOG_ERROR(x, ...)   Gogaman::Logger::GetLogger()->Log(LogLevel::LogError, x, __VA_ARGS__)

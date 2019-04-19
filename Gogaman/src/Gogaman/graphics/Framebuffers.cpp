@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "Framebuffers.h"
 
-Framebuffers::Framebuffers(Config &config)
-	: m_Config(config)
+namespace Gogaman
 {
-	//Create precomputed BRDF framebuffer
+	Framebuffers::Framebuffers(Config& config)
+		: m_Config(config)
+	{
+		//Create precomputed BRDF framebuffer
 		glGenFramebuffers(1, &brdfFBO);
 		glGenRenderbuffers(1, &brdfRBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, brdfFBO);
@@ -13,7 +15,7 @@ Framebuffers::Framebuffers(Config &config)
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, brdfRBO);
 		CheckCompleteness();
 
-	//Create gBuffer
+		//Create gBuffer
 		glGenFramebuffers(1, &gBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 		//Create position color buffer
@@ -54,7 +56,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffers(4, fourColorAttachments);
 		CheckCompleteness();
 
-	//Create normal downsample FBO
+		//Create normal downsample FBO
 		glGenFramebuffers(1, &normalDownsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, normalDownsampleFBO);
 		//Create quarter-resolution color buffer
@@ -68,7 +70,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(oneColorAttachment);
 		CheckCompleteness();
 
-	//Create depth downsample FBO
+		//Create depth downsample FBO
 		glGenFramebuffers(1, &depthDownsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthDownsampleFBO);
 		//Create quarter-resolution color buffer
@@ -82,12 +84,12 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(oneColorAttachment);
 		CheckCompleteness();
 
-	//Create HDR FBO
+		//Create HDR FBO
 		glGenFramebuffers(1, &hdrFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
 		//Create 2 floating point color buffers
 		glGenTextures(2, colorBuffers);
-		for(unsigned int i = 0; i < 2; i++)
+		for (unsigned int i = 0; i < 2; i++)
 		{
 			glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -106,7 +108,7 @@ Framebuffers::Framebuffers(Config &config)
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 		CheckCompleteness();
 
-	//Create previous frame framebuffer
+		//Create previous frame framebuffer
 		glGenFramebuffers(1, &previousFrameFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, previousFrameFBO);
 		//Create floating point color buffers
@@ -119,12 +121,12 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create indirect lighting framebuffer
+		//Create indirect lighting framebuffer
 		glGenFramebuffers(1, &indirectFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, indirectFBO);
 		//Create 2 floating point color buffers
 		glGenTextures(2, indirectLightingBuffers);
-		for(unsigned int i = 0; i < 2; i++)
+		for (unsigned int i = 0; i < 2; i++)
 		{
 			glBindTexture(GL_TEXTURE_2D, indirectLightingBuffers[i]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.giResScale, config.screenHeight * config.giResScale, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -136,7 +138,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffers(2, twoColorAttachments);
 		CheckCompleteness();
 
-	//Create upsample framebuffer
+		//Create upsample framebuffer
 		glGenFramebuffers(1, &upsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, upsampleFBO);
 		//Create floating point color buffer
@@ -149,7 +151,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create second upsample framebuffer
+		//Create second upsample framebuffer
 		glGenFramebuffers(1, &upsampleFBO2);
 		glBindFramebuffer(GL_FRAMEBUFFER, upsampleFBO2);
 		//Create floating point color buffer
@@ -162,7 +164,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create previous upsample framebuffer
+		//Create previous upsample framebuffer
 		glGenFramebuffers(1, &previousUpsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, previousUpsampleFBO);
 		//Create floating point color buffer
@@ -175,7 +177,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create second previous upsample framebuffer
+		//Create second previous upsample framebuffer
 		glGenFramebuffers(1, &previousUpsampleFBO2);
 		glBindFramebuffer(GL_FRAMEBUFFER, previousUpsampleFBO2);
 		//Create floating point color buffer
@@ -188,7 +190,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create screen space reflections framebuffer
+		//Create screen space reflections framebuffer
 		glGenFramebuffers(1, &ssrFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, ssrFBO);
 		//Create color buffer
@@ -201,7 +203,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create circle of confusion framebuffer
+		//Create circle of confusion framebuffer
 		glGenFramebuffers(1, &cocFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, cocFBO);
 		//Create floating point buffer
@@ -214,7 +216,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create framebuffer for horizontal pass of separable circular blur
+		//Create framebuffer for horizontal pass of separable circular blur
 		glGenFramebuffers(1, &circularBlurHorizontalFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, circularBlurHorizontalFBO);
 		//Create red channel floating point color buffer
@@ -241,7 +243,7 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffers(3, threeColorAttachments);
 		CheckCompleteness();
 
-	//Create framebuffer for vertical pass of separable circular blur
+		//Create framebuffer for vertical pass of separable circular blur
 		glGenFramebuffers(1, &circularBlurVerticalFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, circularBlurVerticalFBO);
 		//Create floating point color buffer
@@ -254,10 +256,10 @@ Framebuffers::Framebuffers(Config &config)
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
-	//Create bloom guassian blur ping-pong framebuffers
+		//Create bloom guassian blur ping-pong framebuffers
 		glGenFramebuffers(2, pingpongFBO);
 		glGenTextures(2, pingpongColorbuffers);
-		for(unsigned int i = 0; i < 2; i++)
+		for (unsigned int i = 0; i < 2; i++)
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
 			glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
@@ -269,10 +271,11 @@ Framebuffers::Framebuffers(Config &config)
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
 			CheckCompleteness();
 		}
-}
+	}
 
-void Framebuffers::CheckCompleteness()
-{
-	if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Error: Framebuffer incomplete" << std::endl;
+	void Framebuffers::CheckCompleteness()
+	{
+		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			std::cout << "Error: Framebuffer incomplete" << std::endl;
+	}
 }

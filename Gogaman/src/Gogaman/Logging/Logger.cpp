@@ -3,10 +3,8 @@
 
 namespace Gogaman
 {
-	Logger* Logger::s_Instance = nullptr;
-	LogLevel Logger::m_LogLevel = LogLevel::LogInfo;
-
-	Logger::Logger()
+	Logger::Logger(std::string name)
+		: m_LogName(name)
 	{
 	}
 
@@ -25,65 +23,29 @@ namespace Gogaman
 			messageLength = _vscprintf(format, args) + 1;
 			message = new char[messageLength];
 			vsprintf_s(message, messageLength, format, args);
-			std::ostringstream oss;
+
+			m_OutputStringStream << "[" << m_LogName << "] ";
 			switch(level)
 			{
-			case LogLevel::LogInfo:
-				oss << "INFO:    ";
+			case LogLevel::Trace:
+				m_OutputStringStream << "TRACE:   ";
 				break;
-			case LogLevel::LogWarning:
-				oss << "WARNING: ";
+			case LogLevel::Info:
+				m_OutputStringStream << "INFO:    ";
 				break;
-			case LogLevel::LogError:
-				oss << "ERROR:   ";
+			case LogLevel::Warning:
+				m_OutputStringStream << "WARNING: ";
+				break;
+			case LogLevel::Error:
+				m_OutputStringStream << "ERROR:   ";
 				break;
 			}
 
-			oss << message << "\n";
-			std::cout << oss.str();
+			m_OutputStringStream << message << "\n";
+			std::cout << m_OutputStringStream.str();
+
 			va_end(args);
+			delete[] message;
 		}
-	}
-
-	void Logger::Log(const LogLevel level, const std::string &message)
-	{
-		std::ostringstream oss;
-
-		if(level >= m_LogLevel)
-		{
-			switch(level)
-			{
-			case LogLevel::LogInfo:
-				oss << "INFO:    ";
-				break;
-			case LogLevel::LogWarning:
-				oss << "WARNING: ";
-				break;
-			case LogLevel::LogError:
-				oss << "ERROR:   ";
-				break;
-			}
-
-			oss << message << "\n";
-			std::cout << oss.str();
-		}
-	}
-
-	Logger *Logger::GetLogger()
-	{
-		if(s_Instance == nullptr)
-			s_Instance = new Logger();
-
-		return s_Instance;
-	}
-
-	void Logger::SetLogLevel(LogLevel level)
-	{
-		m_LogLevel = level;
-	}
-
-	LogLevel Logger::GetLogLevel()
-	{
-		return m_LogLevel;
 	}
 }

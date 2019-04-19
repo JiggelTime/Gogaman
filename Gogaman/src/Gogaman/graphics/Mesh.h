@@ -1,136 +1,138 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 
+#include "Gogaman/Core.h"
+#include "Shader.h"
 #include <glad.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
-#include "Shader.h"
 
-struct Vertex 
+namespace Gogaman
 {
-	glm::vec3 Position;
-	glm::vec3 Normal;
-	glm::vec2 TexCoords;
-	glm::vec3 Tangent;
-};
-
-struct Texture 
-{
-	unsigned int id;
-	std::string type;
-	std::string path;
-};
-
-class Mesh 
-{
-public:
-	//Mesh data
-	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
-	std::vector<Texture> textures;
-	unsigned int VAO;
-
-	Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+	struct Vertex
 	{
-		this->vertices = vertices;
-		this->indices  = indices;
-		this->textures = textures;
+		glm::vec3 Position;
+		glm::vec3 Normal;
+		glm::vec2 TexCoords;
+		glm::vec3 Tangent;
+	};
 
-		setupMesh();
-	}
-
-	void Draw(Shader shader) 
+	struct Texture
 	{
-		unsigned int diffuseNr    = 1;
-		unsigned int roughnessNr  = 1;
-		unsigned int normalNr     = 1;
-		unsigned int heightNr     = 1;
-		unsigned int metalnessNr  = 1;
-		unsigned int emissivityNr = 1;
+		unsigned int id;
+		std::string type;
+		std::string path;
+	};
 
-		//Bind texture(s) before drawing
-		for(unsigned int i = 0; i < textures.size(); i++)
+	class GOGAMAN_API Mesh
+	{
+	public:
+		//Mesh data
+		std::vector<Vertex> vertices;
+		std::vector<unsigned int> indices;
+		std::vector<Texture> textures;
+		unsigned int VAO;
+
+		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 		{
-			//Activate texture unit before binding
-			glActiveTexture(GL_TEXTURE1 + i);
+			this->vertices = vertices;
+			this->indices = indices;
+			this->textures = textures;
 
-			//Retrieve texture number
-			std::string number;
-			std::string name = textures[i].type;
-
-			if(name == "texture_diffuse")
-				number = std::to_string(diffuseNr++);
-
-			else if(name == "texture_roughness")
-				number = std::to_string(roughnessNr++);
-
-			else if(name == "texture_normal")
-				number = std::to_string(normalNr++);
-
-			else if(name == "texture_height")
-				number = std::to_string(heightNr++);
-
-			else if(name == "texture_metalness")
-				number = std::to_string(metalnessNr++);
-
-			else if(name == "texture_emissivity")
-				number = std::to_string(emissivityNr++);
-
-			//Set sampler to the texture unit
-			shader.setInt((name + number), i + 1);
-
-			//Bind the texture
-			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			setupMesh();
 		}
-		
-		//Unbind texture
-		glActiveTexture(GL_TEXTURE0);
 
-		//Draw mesh
-		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-		
-		//Unbind VAO
-		glBindVertexArray(0);
-	}
+		void Draw(Shader shader)
+		{
+			unsigned int diffuseNr = 1;
+			unsigned int roughnessNr = 1;
+			unsigned int normalNr = 1;
+			unsigned int heightNr = 1;
+			unsigned int metalnessNr = 1;
+			unsigned int emissivityNr = 1;
 
-private:
-	//Render data
-	unsigned int VBO, EBO;
+			//Bind texture(s) before drawing
+			for (unsigned int i = 0; i < textures.size(); i++)
+			{
+				//Activate texture unit before binding
+				glActiveTexture(GL_TEXTURE1 + i);
 
-	//Functions
-	void setupMesh() 
-	{
-		//Configure VBO, VAO, and EBO
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
-		glGenBuffers(1, &EBO);
+				//Retrieve texture number
+				std::string number;
+				std::string name = textures[i].type;
 
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+				if (name == "texture_diffuse")
+					number = std::to_string(diffuseNr++);
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+				else if (name == "texture_roughness")
+					number = std::to_string(roughnessNr++);
 
-		//Vertex positions
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+				else if (name == "texture_normal")
+					number = std::to_string(normalNr++);
 
-		//Vertex normals
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+				else if (name == "texture_height")
+					number = std::to_string(heightNr++);
 
-		//Vertex texture coordinates
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+				else if (name == "texture_metalness")
+					number = std::to_string(metalnessNr++);
 
-		//Vertex tangent
-		glEnableVertexAttribArray(3);
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+				else if (name == "texture_emissivity")
+					number = std::to_string(emissivityNr++);
 
-		//Unbind VAO
-		glBindVertexArray(0);
-	}
-};
-#endif
+				//Set sampler to the texture unit
+				shader.setInt((name + number), i + 1);
+
+				//Bind the texture
+				glBindTexture(GL_TEXTURE_2D, textures[i].id);
+			}
+
+			//Unbind texture
+			glActiveTexture(GL_TEXTURE0);
+
+			//Draw mesh
+			glBindVertexArray(VAO);
+			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+
+			//Unbind VAO
+			glBindVertexArray(0);
+		}
+
+	private:
+		//Render data
+		unsigned int VBO, EBO;
+
+		//Functions
+		void setupMesh()
+		{
+			//Configure VBO, VAO, and EBO
+			glGenVertexArrays(1, &VAO);
+			glGenBuffers(1, &VBO);
+			glGenBuffers(1, &EBO);
+
+			glBindVertexArray(VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, VBO);
+			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+
+			//Vertex positions
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+			//Vertex normals
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
+
+			//Vertex texture coordinates
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
+
+			//Vertex tangent
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
+
+			//Unbind VAO
+			glBindVertexArray(0);
+		}
+	};
+}
