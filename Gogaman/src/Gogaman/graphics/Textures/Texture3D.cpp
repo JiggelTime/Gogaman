@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "texture3D.h"
+#include "Texture3D.h"
 
 namespace Gogaman
 {
@@ -20,7 +20,7 @@ namespace Gogaman
 		glTexStorage3D(GL_TEXTURE_3D, levels, formatInternal, width, height, depth);
 		glTexImage3D(GL_TEXTURE_3D, 0, formatInternal, width, height, depth, 0, format, type, &textureBuffer[0]);
 
-		if (generateMipmaps)
+		if(generateMipmaps)
 			glGenerateMipmap(GL_TEXTURE_3D);
 		glBindTexture(GL_TEXTURE_3D, 0);
 	}

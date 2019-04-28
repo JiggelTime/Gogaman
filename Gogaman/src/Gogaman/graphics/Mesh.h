@@ -41,7 +41,7 @@ namespace Gogaman
 			setupMesh();
 		}
 
-		void Draw(Shader shader)
+		void Render(Shader shader)
 		{
 			unsigned int diffuseNr = 1;
 			unsigned int roughnessNr = 1;
@@ -50,8 +50,8 @@ namespace Gogaman
 			unsigned int metalnessNr = 1;
 			unsigned int emissivityNr = 1;
 
-			//Bind texture(s) before drawing
-			for (unsigned int i = 0; i < textures.size(); i++)
+			//Bind texture(s) before rendering
+			for(unsigned int i = 0; i < textures.size(); i++)
 			{
 				//Activate texture unit before binding
 				glActiveTexture(GL_TEXTURE1 + i);
@@ -60,22 +60,17 @@ namespace Gogaman
 				std::string number;
 				std::string name = textures[i].type;
 
-				if (name == "texture_diffuse")
+				if(name == "texture_diffuse")
 					number = std::to_string(diffuseNr++);
-
-				else if (name == "texture_roughness")
+				else if(name == "texture_roughness")
 					number = std::to_string(roughnessNr++);
-
-				else if (name == "texture_normal")
+				else if(name == "texture_normal")
 					number = std::to_string(normalNr++);
-
-				else if (name == "texture_height")
+				else if(name == "texture_height")
 					number = std::to_string(heightNr++);
-
-				else if (name == "texture_metalness")
+				else if(name == "texture_metalness")
 					number = std::to_string(metalnessNr++);
-
-				else if (name == "texture_emissivity")
+				else if(name == "texture_emissivity")
 					number = std::to_string(emissivityNr++);
 
 				//Set sampler to the texture unit
@@ -88,7 +83,6 @@ namespace Gogaman
 			//Unbind texture
 			glActiveTexture(GL_TEXTURE0);
 
-			//Draw mesh
 			glBindVertexArray(VAO);
 			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 

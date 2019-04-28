@@ -1,130 +1,13 @@
 #include "pch.h"
 #include "Renderer.h"
-#include "Gogaman/Config.h"
 #include "Gogaman/Logging/Log.h"
-#include "Shader.h"
-#include "Camera.h"
 #include "Framebuffers.h"
-#include "Model.h"
-#include "texture3D.h"
 #include "JitterSequences.h"
 #include "Lights/PointLight.h"
 
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
-#include <AntTweakBar.h>
-
 namespace Gogaman
 {
-	GLFWwindow* m_Window;
-	TwBar* m_TweakBar;
-
-	//Initialize camera attributes
-	Camera camera(glm::vec3(0.0f, 0.5f, 0.0f));
-	const float cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
-	float exposure = 1.0f;
-
-	//Random stuff
-	Config config;
-	float aspectRatio = float(config.screenWidth) / float(config.screenHeight);
-	float lastX = config.screenWidth / 2.0f, lastY = config.screenHeight / 2.0f;
-	bool firstMouse = true;
-	bool firstIteration = true;
-
-	//Timing
-	float deltaTime = 0.0f, lastFrame = 0.0f;
-	unsigned int frameCounter = 0;
-
-	//Shaders
-	Shader precomputeBRDFShader("shaders/precomputeBRDF.vs", "shaders/precomputeBRDF.fs");
-	Shader gbufferShader("shaders/gbuffershader.vs", "shaders/gbuffershader.fs");
-	Shader downsampleNormalShader("shaders/downsampleNormal.vs", "shaders/downsampleNormal.fs");
-	Shader downsampleDepthShader("shaders/downsampleDepth.vs", "shaders/downsampleDepth.fs");
-	Shader voxelClearDynamicShader("shaders/voxelClearDynamic.compute");
-	Shader voxelizationShader("shaders/voxelization.vs", "shaders/voxelization.fs", "shaders/voxelization.gs");
-	Shader voxelInjectDirectShader("shaders/voxelInjectDirect.compute");
-	Shader voxelInjectIndirectShader("shaders/voxelInjectIndirect.compute");
-	Shader voxelConeTracingShader("shaders/voxelConeTracing.vs", "shaders/voxelConeTracing2.fs");
-	Shader upsampleShader("shaders/upsample.vs", "shaders/upsample.fs");
-	Shader directPBRShader("shaders/directPBR.vs", "shaders/directPBR.fs");
-	Shader ssrShader("shaders/ssr.vs", "shaders/ssr.fs");
-	Shader combineIndirectShader("shaders/combineIndirect.vs", "shaders/combineIndirect.fs");
-	Shader skyboxShader("shaders/skyboxshader.vs", "shaders/skyboxshader.fs");
-	Shader lampShader("shaders/lampshader.vs", "shaders/lampshader.fs");
-	Shader taaShader("shaders/taa.vs", "shaders/taa.fs");
-	Shader circleOfConfusionShader("shaders/coc.vs", "shaders/coc.fs");
-	Shader circularBlurVerticalShader("shaders/circularBlurVertical.vs", "shaders/circularBlurVertical.fs");
-	Shader circularBlurHorizontalShader("shaders/circularBlurHorizontal.vs", "shaders/circularBlurHorizontal.fs");
-	Shader gaussianBlurShader("shaders/gaussianblurshader.vs", "shaders/gaussianblurshader.fs");
-	Shader bloomShader("shaders/bloom.vs", "shaders/bloom.fs");
-	Shader postProcessShader("shaders/postprocess.vs", "shaders/postprocess.fs");
-
-	//Models
-	Model roomModel("D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
-	Model redModel("D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
-	Model blueModel("D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
-	Model statueModel("D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
-
-	Model sphereModel("D:/ProgrammingStuff/Resources/Models/Sphere.obj");
-
-	//Framebuffers
-	Framebuffers framebuffers(config);
-
-	//Fullscreen quad
-	float quadVertices[] =
-	{
-		-1.0f,  1.0f, 0.0f,		0.0f, 1.0f,
-		-1.0f, -1.0f, 0.0f,		0.0f, 0.0f,
-		 1.0f,  1.0f, 0.0f,		1.0f, 1.0f,
-		 1.0f, -1.0f, 0.0f,		1.0f, 0.0f
-	};
-	unsigned int quadVAO = 0, quadVBO;
-
-	//BRDF LUT
-	unsigned int brdfLUT;
-
-	//Voxel textures
-	unsigned int voxelMaxMipLevels = glm::ceil(log2(config.voxelResolution) - 1);
-	unsigned int voxelizationCounter;
-	Texture3D *voxelAlbedo, *voxelNormal, *voxelEmissivity, *voxelDirectRadiance, *voxelTotalRadiance, *voxelStaticFlag;
-
-	//Variables for temporal sampling
-	glm::vec2 temporalJitter = glm::vec2(0.0f);
-	glm::vec2 previousTemporalJitter = temporalJitter;
-	unsigned int temporalOffsetIterator = 0;
-	glm::vec2 screenTexelSize = 1.0f / (glm::vec2(config.screenWidth, config.screenHeight) * config.resScale);
-	glm::vec2 coneTraceJitter;
-	unsigned int coneTraceJitterIterator = 0;
-
-	//Initialize camera matrices
-	glm::mat4 projectionMatrix;
-	glm::mat4 viewMatrix;
-	glm::mat4 viewProjectionMatrix;
-	//Camera matrix from previous frame
-	glm::mat4 previousViewProjectionMatrix;
-
-	//Initialize OpenGL query timers
-	//Time in ms
-	float timeVCTGI = 0.0f, timeGeometryPass = 0.0f, timeSSR = 0.0f, timeDirectPBR = 0.0f, timeTAA = 0.0f, timeBloom = 0.0f, timeDOF = 0.0f;
-	float previousTimeVCTGI = 0.0f, previousTimeGeometryPass = 0.0f, previousTimeSSR = 0.0f, previousTimeDirectPBR = 0.0f, previousTimeTAA = 0.0f, previousTimeBloom = 0.0f, previousTimeDOF = 0.0f;
-	GLuint64 elapsedTime;
-	GLint timerResultAvailable = 0;
-	GLuint query;
-
 	Renderer::Renderer()
-	{
-	}
-
-	Renderer::~Renderer()
-	{
-	}
-
-	void WindowResizeCallback(GLFWwindow *window, int width, int height);
-	void MouseMovedCallback(GLFWwindow* window, double xPos, double yPos);
-	void MouseScrolledCallback(GLFWwindow* window, double xOffset, double yOffset);
-
-	void Renderer::Initialize()
 	{
 		//Initialize and configure GLFW
 		glfwInit();
@@ -134,7 +17,7 @@ namespace Gogaman
 
 		//Create GLFW window
 		m_Window = glfwCreateWindow(config.screenWidth, config.screenHeight, "Gogaman", NULL, NULL);
-		if(m_Window == nullptr)
+		if (m_Window == nullptr)
 		{
 			GM_LOG_CORE_ERROR("Failed to create GLFW window");
 			glfwTerminate();
@@ -146,7 +29,7 @@ namespace Gogaman
 		glfwSwapInterval(config.vSync ? 1 : 0);
 
 		//Initialize GLAD
-		if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
 			GM_LOG_CORE_ERROR("Failed to initialize GLAD");
 			return;
@@ -157,11 +40,55 @@ namespace Gogaman
 		TwWindowSize(config.screenWidth, config.screenHeight);
 		m_TweakBar = TwNewBar("Debug");
 
+		TwAddVarRO(m_TweakBar, "Cock Nigger", TW_TYPE_FLOAT, &config.screenWidth, NULL);
+
 		//Set GLFW event callbacks
-		glfwSetFramebufferSizeCallback(m_Window, WindowResizeCallback);
-		glfwSetCursorPosCallback(m_Window,       MouseMovedCallback);
-		glfwSetScrollCallback(m_Window,          MouseScrolledCallback);
+		//glfwSetFramebufferSizeCallback(m_Window, WindowResizeCallback);
+		//glfwSetCursorPosCallback(m_Window,       MouseMovedCallback);
+		//glfwSetScrollCallback(m_Window,          MouseScrolledCallback);
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+		//Initialize framebuffers
+		Framebuffers::Initialize(config);
+
+		//Voxel textures
+		voxelAlbedo = Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, true, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, voxelMaxMipLevels);
+		voxelNormal = Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, false, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_NEAREST, GL_NEAREST);
+		voxelDirectRadiance = Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, true, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, voxelMaxMipLevels);
+		voxelTotalRadiance = Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, true, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, voxelMaxMipLevels);
+		voxelStaticFlag = Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, false, GL_R8, GL_RED, GL_UNSIGNED_BYTE, 0, GL_NEAREST, GL_NEAREST);
+
+		//Shaders
+		precomputeBRDFShader = Shader("shaders/precomputeBRDF.vs", "shaders/precomputeBRDF.fs");
+		gbufferShader = Shader("shaders/gbuffershader.vs", "shaders/gbuffershader.fs");
+		downsampleNormalShader = Shader("shaders/downsampleNormal.vs", "shaders/downsampleNormal.fs");
+		downsampleDepthShader = Shader("shaders/downsampleDepth.vs", "shaders/downsampleDepth.fs");
+		voxelClearDynamicShader = Shader("shaders/voxelClearDynamic.compute");
+		voxelizationShader = Shader("shaders/voxelization.vs", "shaders/voxelization.fs", "shaders/voxelization.gs");
+		voxelInjectDirectShader = Shader("shaders/voxelInjectDirect.compute");
+		voxelInjectIndirectShader = Shader("shaders/voxelInjectIndirect.compute");
+		voxelConeTracingShader = Shader("shaders/voxelConeTracing.vs", "shaders/voxelConeTracing2.fs");
+		upsampleShader = Shader("shaders/upsample.vs", "shaders/upsample.fs");
+		directPBRShader = Shader("shaders/directPBR.vs", "shaders/directPBR.fs");
+		ssrShader = Shader("shaders/ssr.vs", "shaders/ssr.fs");
+		combineIndirectShader = Shader("shaders/combineIndirect.vs", "shaders/combineIndirect.fs");
+		skyboxShader = Shader("shaders/skyboxshader.vs", "shaders/skyboxshader.fs");
+		lampShader = Shader("shaders/lampshader.vs", "shaders/lampshader.fs");
+		taaShader = Shader("shaders/taa.vs", "shaders/taa.fs");
+		circleOfConfusionShader = Shader("shaders/coc.vs", "shaders/coc.fs");
+		circularBlurVerticalShader = Shader("shaders/circularBlurVertical.vs", "shaders/circularBlurVertical.fs");
+		circularBlurHorizontalShader = Shader("shaders/circularBlurHorizontal.vs", "shaders/circularBlurHorizontal.fs");
+		gaussianBlurShader = Shader("shaders/gaussianblurshader.vs", "shaders/gaussianblurshader.fs");
+		bloomShader = Shader("shaders/bloom.vs", "shaders/bloom.fs");
+		postProcessShader = Shader("shaders/postprocess.vs", "shaders/postprocess.fs");
+
+		//Models
+		roomModel   = Model("D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
+		redModel    = Model("D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
+		blueModel   = Model("D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
+		statueModel = Model("D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
+
+		sphereModel = Model("D:/ProgrammingStuff/Resources/Models/Sphere.obj");
 
 		//Configure global OpenGL state
 		glEnable(GL_DEPTH_TEST);
@@ -193,15 +120,15 @@ namespace Gogaman
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.brdfFBO);
-		glBindRenderbuffer(GL_RENDERBUFFER, framebuffers.brdfRBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::brdfFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, Framebuffers::brdfRBO);
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUT, 0);
 
 		glViewport(0, 0, 512, 512);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		precomputeBRDFShader.use();
+		precomputeBRDFShader->use();
 
 		//Render full screen quad
 		glBindVertexArray(quadVAO);
@@ -209,112 +136,104 @@ namespace Gogaman
 		glBindVertexArray(0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-		//Create voxel textures
-		//Albedo
-		voxelAlbedo = new Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, true, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, voxelMaxMipLevels);
-		//Normal and emissivity
-		voxelNormal = new Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, false, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, 0, GL_NEAREST, GL_NEAREST);
-		//Direct radiance
-		voxelDirectRadiance = new Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, true, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, voxelMaxMipLevels);
-		//Total radiance (direct + indirect)
-		voxelTotalRadiance = new Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, true, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, voxelMaxMipLevels);
-		//Static flag
-		voxelStaticFlag = new Texture3D(config.voxelResolution, config.voxelResolution, config.voxelResolution, false, GL_R8, GL_RED, GL_UNSIGNED_BYTE, 0, GL_NEAREST, GL_NEAREST);
-
 		//Set shader image units
-		downsampleNormalShader.use();
-		downsampleNormalShader.setInt("normalTexture", 0);
+		downsampleNormalShader->use();
+		downsampleNormalShader->setInt("normalTexture", 0);
 
-		downsampleDepthShader.use();
-		downsampleDepthShader.setInt("depthTexture", 0);
+		downsampleDepthShader->use();
+		downsampleDepthShader->setInt("depthTexture", 0);
 
-		voxelClearDynamicShader.use();
-		voxelClearDynamicShader.setInt("voxelAlbedo", 0);
-		voxelClearDynamicShader.setInt("voxelNormal", 1);
-		voxelClearDynamicShader.setInt("voxelStaticFlag", 2);
+		voxelClearDynamicShader->use();
+		voxelClearDynamicShader->setInt("voxelAlbedo", 0);
+		voxelClearDynamicShader->setInt("voxelNormal", 1);
+		voxelClearDynamicShader->setInt("voxelStaticFlag", 2);
 
-		voxelizationShader.use();
-		voxelizationShader.setInt("voxelAlbedo", 0);
-		voxelizationShader.setInt("voxelNormal", 1);
-		voxelizationShader.setInt("voxelStaticFlag", 2);
+		voxelizationShader->use();
+		voxelizationShader->setInt("voxelAlbedo", 0);
+		voxelizationShader->setInt("voxelNormal", 1);
+		voxelizationShader->setInt("voxelStaticFlag", 2);
 
-		voxelInjectDirectShader.use();
-		voxelInjectDirectShader.setInt("voxelAlbedo", 0);
-		voxelInjectDirectShader.setInt("voxelNormal", 1);
-		voxelInjectDirectShader.setInt("voxelDirectRadiance", 2);
+		voxelInjectDirectShader->use();
+		voxelInjectDirectShader->setInt("voxelAlbedo", 0);
+		voxelInjectDirectShader->setInt("voxelNormal", 1);
+		voxelInjectDirectShader->setInt("voxelDirectRadiance", 2);
 
-		voxelInjectIndirectShader.use();
-		voxelInjectIndirectShader.setInt("voxelAlbedo", 0);
-		voxelInjectIndirectShader.setInt("voxelNormal", 1);
-		voxelInjectIndirectShader.setInt("voxelDirectRadiance", 2);
-		voxelInjectIndirectShader.setInt("voxelTotalRadiance", 3);
+		voxelInjectIndirectShader->use();
+		voxelInjectIndirectShader->setInt("voxelAlbedo", 0);
+		voxelInjectIndirectShader->setInt("voxelNormal", 1);
+		voxelInjectIndirectShader->setInt("voxelDirectRadiance", 2);
+		voxelInjectIndirectShader->setInt("voxelTotalRadiance", 3);
 
-		voxelConeTracingShader.use();
-		voxelConeTracingShader.setInt("gPositionMetalness", 1);
-		voxelConeTracingShader.setInt("gNormal", 2);
-		voxelConeTracingShader.setInt("gAlbedoEmissivityRoughness", 3);
+		voxelConeTracingShader->use();
+		voxelConeTracingShader->setInt("gPositionMetalness", 1);
+		voxelConeTracingShader->setInt("gNormal", 2);
+		voxelConeTracingShader->setInt("gAlbedoEmissivityRoughness", 3);
 
-		upsampleShader.use();
-		upsampleShader.setInt("inputTexture", 0);
-		upsampleShader.setInt("previousInputTexture", 1);
-		upsampleShader.setInt("depthTexture", 2);
-		upsampleShader.setInt("depthCoarseTexture", 3);
-		upsampleShader.setInt("normalTexture", 4);
-		upsampleShader.setInt("normalCoarseTexture", 5);
-		upsampleShader.setInt("velocityTexture", 6);
+		upsampleShader->use();
+		upsampleShader->setInt("inputTexture", 0);
+		upsampleShader->setInt("previousInputTexture", 1);
+		upsampleShader->setInt("depthTexture", 2);
+		upsampleShader->setInt("depthCoarseTexture", 3);
+		upsampleShader->setInt("normalTexture", 4);
+		upsampleShader->setInt("normalCoarseTexture", 5);
+		upsampleShader->setInt("velocityTexture", 6);
 
-		directPBRShader.use();
-		directPBRShader.setInt("gPositionMetalness", 0);
-		directPBRShader.setInt("gNormal", 1);
-		directPBRShader.setInt("gAlbedoEmissivityRoughness", 2);
-		directPBRShader.setInt("brdfLUT", 3);
-		directPBRShader.setInt("coneTracedDiffuse", 4);
-		directPBRShader.setInt("coneTracedSpecular", 5);
+		directPBRShader->use();
+		directPBRShader->setInt("gPositionMetalness", 0);
+		directPBRShader->setInt("gNormal", 1);
+		directPBRShader->setInt("gAlbedoEmissivityRoughness", 2);
+		directPBRShader->setInt("brdfLUT", 3);
+		directPBRShader->setInt("coneTracedDiffuse", 4);
+		directPBRShader->setInt("coneTracedSpecular", 5);
 
-		ssrShader.use();
-		ssrShader.setInt("renderedImageTexture", 0);
-		ssrShader.setInt("depthTexture", 1);
-		ssrShader.setInt("normalTexture", 2);
+		ssrShader->use();
+		ssrShader->setInt("renderedImageTexture", 0);
+		ssrShader->setInt("depthTexture", 1);
+		ssrShader->setInt("normalTexture", 2);
 
-		//combineIndirectShader.use();
-		//combineIndirectShader.setInt("")
-		//combineIndirectShader.setInt("")
+		//combineIndirectShader->use();
+		//combineIndirectShader->setInt("")
+		//combineIndirectShader->setInt("")
 
-		skyboxShader.use();
-		skyboxShader.setInt("skybox", 0);
+		skyboxShader->use();
+		skyboxShader->setInt("skybox", 0);
 
-		taaShader.use();
-		taaShader.setInt("inputTexture", 0);
-		taaShader.setInt("previousInputTexture", 1);
-		taaShader.setInt("depthTexture", 2);
-		taaShader.setInt("velocityTexture", 3);
+		taaShader->use();
+		taaShader->setInt("inputTexture", 0);
+		taaShader->setInt("previousInputTexture", 1);
+		taaShader->setInt("depthTexture", 2);
+		taaShader->setInt("velocityTexture", 3);
 
-		circleOfConfusionShader.use();
-		circleOfConfusionShader.setInt("imageTexture", 0);
-		circleOfConfusionShader.setInt("depthTexture", 1);
+		circleOfConfusionShader->use();
+		circleOfConfusionShader->setInt("imageTexture", 0);
+		circleOfConfusionShader->setInt("depthTexture", 1);
 
-		circularBlurHorizontalShader.use();
-		circularBlurHorizontalShader.setInt("cocTexture", 0);
-		circularBlurHorizontalShader.setInt("imageTexture", 1);
+		circularBlurHorizontalShader->use();
+		circularBlurHorizontalShader->setInt("cocTexture", 0);
+		circularBlurHorizontalShader->setInt("imageTexture", 1);
 
-		circularBlurVerticalShader.use();
-		circularBlurVerticalShader.setInt("cocTexture", 0);
-		circularBlurVerticalShader.setInt("imageRedChannelTexture", 1);
-		circularBlurVerticalShader.setInt("imageGreenChannelTexture", 2);
-		circularBlurVerticalShader.setInt("imageBlueChannelTexture", 3);
+		circularBlurVerticalShader->use();
+		circularBlurVerticalShader->setInt("cocTexture", 0);
+		circularBlurVerticalShader->setInt("imageRedChannelTexture", 1);
+		circularBlurVerticalShader->setInt("imageGreenChannelTexture", 2);
+		circularBlurVerticalShader->setInt("imageBlueChannelTexture", 3);
 
-		gaussianBlurShader.use();
-		gaussianBlurShader.setInt("imageTexture", 0);
+		gaussianBlurShader->use();
+		gaussianBlurShader->setInt("imageTexture", 0);
 
-		bloomShader.use();
-		bloomShader.setInt("imageTexture", 0);
-		bloomShader.setInt("bloomTexture", 1);
+		bloomShader->use();
+		bloomShader->setInt("imageTexture", 0);
+		bloomShader->setInt("bloomTexture", 1);
 
-		postProcessShader.use();
-		postProcessShader.setInt("hdrTexture", 0);
+		postProcessShader->use();
+		postProcessShader->setInt("hdrTexture", 0);
 
 		//Generate query
 		glGenQueries(1, &query);
+	}
+
+	Renderer::~Renderer()
+	{
 	}
 
 	void Renderer::Draw()
@@ -359,8 +278,8 @@ namespace Gogaman
 		pointLight1.color = glm::vec3(2.0f, 2.0f, 2.0f);
 		std::cout << Gogaman::PointLight::numLights << std::endl;
 		//Update models
-		statueModel.SetScale(0.4f);
-		//if(config.debug2) statueModel.SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
+		statueModel->SetScale(0.4f);
+		//if(config.debug2) statueModel->SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
 
 	//Update camera matrices
 		previousViewProjectionMatrix = viewProjectionMatrix;
@@ -393,33 +312,33 @@ namespace Gogaman
 
 		glEnable(GL_DEPTH_TEST);
 		glViewport(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.gBuffer);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::gBuffer);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		gbufferShader.use();
-		gbufferShader.setMat4("VP", viewProjectionMatrix);
-		gbufferShader.setMat4("previousVP", previousViewProjectionMatrix);
-		gbufferShader.setVec2("temporalJitter", temporalJitter);
-		gbufferShader.setVec2("previousTemporalJitter", previousTemporalJitter);
-		gbufferShader.setBool("normalMapping", config.normalMapping);
-		gbufferShader.setBool("emissive", false);
+		gbufferShader->use();
+		gbufferShader->setMat4("VP", viewProjectionMatrix);
+		gbufferShader->setMat4("previousVP", previousViewProjectionMatrix);
+		gbufferShader->setVec2("temporalJitter", temporalJitter);
+		gbufferShader->setVec2("previousTemporalJitter", previousTemporalJitter);
+		gbufferShader->setBool("normalMapping", config.normalMapping);
+		gbufferShader->setBool("emissive", false);
 
-		gbufferShader.setBool("debug", config.debug);
+		gbufferShader->setBool("debug", config.debug);
 
-		//planeModel.Draw(gbufferShader, true);
-		//zisBodyModel.Draw(gbufferShader, true);
-		//zisInstrumentsModel.Draw(gbufferShader, true);
-		//zisInteriorModel.Draw(gbufferShader, true);
-		//zisLightsModel.Draw(gbufferShader, true);
-		//zisRoofModel.Draw(gbufferShader, true);
-		//zisSteeringWheelModel.Draw(gbufferShader, true);
-		//zisWheelsFrontModel.Draw(gbufferShader, true);
-		//zisWheelsRearModel.Draw(gbufferShader, true);
+		//planeModel->Draw(gbufferShader, true);
+		//zisBodyModel->Draw(gbufferShader, true);
+		//zisInstrumentsModel->Draw(gbufferShader, true);
+		//zisInteriorModel->Draw(gbufferShader, true);
+		//zisLightsModel->Draw(gbufferShader, true);
+		//zisRoofModel->Draw(gbufferShader, true);
+		//zisSteeringWheelModel->Draw(gbufferShader, true);
+		//zisWheelsFrontModel->Draw(gbufferShader, true);
+		//zisWheelsRearModel->Draw(gbufferShader, true);
 
-		roomModel.Draw(gbufferShader, true);
-		redModel.Draw(gbufferShader, true);
-		blueModel.Draw(gbufferShader, true);
-		statueModel.Draw(gbufferShader, true);
+		roomModel->Draw(*gbufferShader, true);
+		redModel->Draw(*gbufferShader, true);
+		blueModel->Draw(*gbufferShader, true);
+		statueModel->Draw(*gbufferShader, true);
 
 		glDisable(GL_DEPTH_TEST);
 
@@ -436,11 +355,11 @@ namespace Gogaman
 		timeGeometryPass = elapsedTime / 1000000.0f;
 
 		//Downsample normal
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.normalDownsampleFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::normalDownsampleFBO);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		downsampleNormalShader.use();
-		downsampleNormalShader.setBool("debug", config.debug);
+		downsampleNormalShader->use();
+		downsampleNormalShader->setBool("debug", config.debug);
 
 		int maxNormalMipLevels = floor(log2(std::max(config.screenWidth * config.resScale, config.screenHeight * config.resScale)));
 		maxNormalMipLevels = 6;
@@ -450,16 +369,16 @@ namespace Gogaman
 			int mipWidth = floor(config.screenWidth * config.resScale * 0.5f * std::pow(0.5f, i));
 			int mipHeight = floor(config.screenHeight * config.resScale * 0.5f * std::pow(0.5f, i));
 			glViewport(0, 0, mipWidth, mipHeight);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffers.normalDownsampleBuffer, i);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer, i);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			downsampleNormalShader.setInt("sampleMipLevel", sampleMipLevel);
+			downsampleNormalShader->setInt("sampleMipLevel", sampleMipLevel);
 
 			glActiveTexture(GL_TEXTURE0);
 			if (i == 0)
-				glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 			else
-				glBindTexture(GL_TEXTURE_2D, framebuffers.normalDownsampleBuffer);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer);
 
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
@@ -468,11 +387,11 @@ namespace Gogaman
 		}
 
 		//Downsample depth
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.depthDownsampleFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::depthDownsampleFBO);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		downsampleDepthShader.use();
-		downsampleDepthShader.setBool("debug", config.debug);
+		downsampleDepthShader->use();
+		downsampleDepthShader->setBool("debug", config.debug);
 
 		int maxDepthMipLevels = floor(log2(std::max(config.screenWidth * config.resScale, config.screenHeight * config.resScale)));
 		maxDepthMipLevels = 6;
@@ -482,16 +401,16 @@ namespace Gogaman
 			int mipWidth = floor(config.screenWidth * config.resScale * 0.5f * std::pow(0.5f, i));
 			int mipHeight = floor(config.screenHeight * config.resScale * 0.5f * std::pow(0.5f, i));
 			glViewport(0, 0, mipWidth, mipHeight);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, framebuffers.depthDownsampleBuffer, i);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer, i);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			downsampleDepthShader.setInt("sampleMipLevel", sampleMipLevel);
+			downsampleDepthShader->setInt("sampleMipLevel", sampleMipLevel);
 
 			glActiveTexture(GL_TEXTURE0);
 			if (i == 0)
-				glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			else
-				glBindTexture(GL_TEXTURE_2D, framebuffers.depthDownsampleBuffer);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer);
 
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
@@ -521,19 +440,19 @@ namespace Gogaman
 			//Voxelize static models
 			if (firstIteration == true)
 			{
-				voxelizationShader.use();
-				voxelizationShader.setMat4("VP", voxelViewProjection);
-				voxelizationShader.setInt("voxelResolution", config.voxelResolution);
-				voxelizationShader.setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
-				voxelizationShader.setVec3("voxelGridPos", config.voxelGridPos);
-				voxelizationShader.setBool("flagStatic", true);
-				voxelizationShader.setBool("emissive", false);
+				voxelizationShader->use();
+				voxelizationShader->setMat4("VP", voxelViewProjection);
+				voxelizationShader->setInt("voxelResolution", config.voxelResolution);
+				voxelizationShader->setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
+				voxelizationShader->setVec3("voxelGridPos", config.voxelGridPos);
+				voxelizationShader->setBool("flagStatic", true);
+				voxelizationShader->setBool("emissive", false);
 
-				voxelizationShader.setBool("debug", config.debug);
+				voxelizationShader->setBool("debug", config.debug);
 
-				voxelAlbedo->Activate(voxelizationShader, "voxelAlbedo", 0);
-				voxelNormal->Activate(voxelizationShader, "voxelNormal", 1);
-				voxelStaticFlag->Activate(voxelizationShader, "voxelStaticFlag", 2);
+				voxelAlbedo->Activate(*voxelizationShader, "voxelAlbedo", 0);
+				voxelNormal->Activate(*voxelizationShader, "voxelNormal", 1);
+				voxelStaticFlag->Activate(*voxelizationShader, "voxelStaticFlag", 2);
 
 				//Clear voxel textures
 				glClearTexImage(voxelAlbedo->textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
@@ -546,29 +465,29 @@ namespace Gogaman
 				glBindImageTexture(2, voxelStaticFlag->textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
 
 				//Draw static models
-				//planeModel.Draw(voxelizationShader);
-				//zisBodyModel.Draw(voxelizationShader);
-				//zisInstrumentsModel.Draw(voxelizationShader);
-				//zisInteriorModel.Draw(voxelizationShader);
-				//zisLightsModel.Draw(voxelizationShader);
-				//zisRoofModel.Draw(voxelizationShader);
-				//zisSteeringWheelModel.Draw(voxelizationShader);
-				//zisWheelsFrontModel.Draw(voxelizationShader);
-				//zisWheelsRearModel.Draw(voxelizationShader);
+				//planeModel->Draw(voxelizationShader);
+				//zisBodyModel->Draw(voxelizationShader);
+				//zisInstrumentsModel->Draw(voxelizationShader);
+				//zisInteriorModel->Draw(voxelizationShader);
+				//zisLightsModel->Draw(voxelizationShader);
+				//zisRoofModel->Draw(voxelizationShader);
+				//zisSteeringWheelModel->Draw(voxelizationShader);
+				//zisWheelsFrontModel->Draw(voxelizationShader);
+				//zisWheelsRearModel->Draw(voxelizationShader);
 
-				roomModel.Draw(voxelizationShader);
-				redModel.Draw(voxelizationShader);
-				blueModel.Draw(voxelizationShader);
+				roomModel->Draw(*voxelizationShader);
+				redModel->Draw(*voxelizationShader);
+				blueModel->Draw(*voxelizationShader);
 
 				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 			}
 
 			//Clear dynamic voxels
-			voxelClearDynamicShader.use();
-			voxelClearDynamicShader.setInt("voxelResolution", config.voxelResolution);
-			voxelAlbedo->Activate(voxelClearDynamicShader, "voxelAlbedo", 0);
-			voxelNormal->Activate(voxelClearDynamicShader, "voxelNormal", 1);
-			voxelStaticFlag->Activate(voxelClearDynamicShader, "voxelStaticFlag", 2);
+			voxelClearDynamicShader->use();
+			voxelClearDynamicShader->setInt("voxelResolution", config.voxelResolution);
+			voxelAlbedo->Activate(*voxelClearDynamicShader, "voxelAlbedo", 0);
+			voxelNormal->Activate(*voxelClearDynamicShader, "voxelNormal", 1);
+			voxelStaticFlag->Activate(*voxelClearDynamicShader, "voxelStaticFlag", 2);
 			glBindImageTexture(0, voxelAlbedo->textureID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
 			glBindImageTexture(1, voxelNormal->textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
 			glDispatchCompute(config.voxelComputeWorkGroups, config.voxelComputeWorkGroups, config.voxelComputeWorkGroups);
@@ -576,12 +495,12 @@ namespace Gogaman
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 
 			//Render dynamic models
-			voxelizationShader.use();
-			voxelizationShader.setMat4("VP", voxelViewProjection);
-			voxelizationShader.setInt("voxelResolution", config.voxelResolution);
-			voxelizationShader.setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
-			voxelizationShader.setVec3("voxelGridPos", config.voxelGridPos);
-			voxelizationShader.setBool("flagStatic", false);
+			voxelizationShader->use();
+			voxelizationShader->setMat4("VP", voxelViewProjection);
+			voxelizationShader->setInt("voxelResolution", config.voxelResolution);
+			voxelizationShader->setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
+			voxelizationShader->setVec3("voxelGridPos", config.voxelGridPos);
+			voxelizationShader->setBool("flagStatic", false);
 
 			//Bind voxel textures
 			glBindImageTexture(0, voxelAlbedo->textureID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
@@ -591,7 +510,7 @@ namespace Gogaman
 			glBindImageTexture(2, voxelStaticFlag->textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
 
 			//Draw dynamic models
-			statueModel.Draw(voxelizationShader);
+			statueModel->Draw(*voxelizationShader);
 
 			glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 
@@ -604,24 +523,24 @@ namespace Gogaman
 		}
 
 		//Voxel direct light injection
-		voxelInjectDirectShader.use();
-		voxelInjectDirectShader.setVec3("pointLights[0].position", pointLight0.position);
-		voxelInjectDirectShader.setVec3("pointLights[0].color", pointLight0.color);
-		voxelInjectDirectShader.setFloat("pointLights[0].coneAperture", pointLight0.coneAperture);
-		voxelInjectDirectShader.setVec3("pointLights[1].position", pointLight1.position);
-		voxelInjectDirectShader.setVec3("pointLights[1].color", pointLight1.color);
-		voxelInjectDirectShader.setFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
-		voxelInjectDirectShader.setInt("numLights", 1);
-		voxelInjectDirectShader.setInt("voxelResolution", config.voxelResolution);
-		voxelInjectDirectShader.setFloat("voxelGridSize", config.voxelGridSize);
-		voxelInjectDirectShader.setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
-		voxelInjectDirectShader.setVec3("voxelGridPos", config.voxelGridPos);
+		voxelInjectDirectShader->use();
+		voxelInjectDirectShader->setVec3("pointLights[0].position", pointLight0.position);
+		voxelInjectDirectShader->setVec3("pointLights[0].color", pointLight0.color);
+		voxelInjectDirectShader->setFloat("pointLights[0].coneAperture", pointLight0.coneAperture);
+		voxelInjectDirectShader->setVec3("pointLights[1].position", pointLight1.position);
+		voxelInjectDirectShader->setVec3("pointLights[1].color", pointLight1.color);
+		voxelInjectDirectShader->setFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
+		voxelInjectDirectShader->setInt("numLights", 1);
+		voxelInjectDirectShader->setInt("voxelResolution", config.voxelResolution);
+		voxelInjectDirectShader->setFloat("voxelGridSize", config.voxelGridSize);
+		voxelInjectDirectShader->setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
+		voxelInjectDirectShader->setVec3("voxelGridPos", config.voxelGridPos);
 
-		voxelInjectDirectShader.setBool("debug", config.debug);
+		voxelInjectDirectShader->setBool("debug", config.debug);
 
-		voxelAlbedo->Activate(voxelInjectDirectShader, "voxelAlbedo", 0);
-		voxelNormal->Activate(voxelInjectDirectShader, "voxelNormal", 1);
-		voxelDirectRadiance->Activate(voxelInjectDirectShader, "voxelDirectRadiance", 2);
+		voxelAlbedo->Activate(*voxelInjectDirectShader, "voxelAlbedo", 0);
+		voxelNormal->Activate(*voxelInjectDirectShader, "voxelNormal", 1);
+		voxelDirectRadiance->Activate(*voxelInjectDirectShader, "voxelDirectRadiance", 2);
 		glBindImageTexture(2, voxelDirectRadiance->textureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
 		glClearTexImage(voxelDirectRadiance->textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
 
@@ -631,18 +550,18 @@ namespace Gogaman
 		glGenerateTextureMipmap(voxelDirectRadiance->textureID);
 
 		//Voxel indirect light injection
-		voxelInjectIndirectShader.use();
-		voxelInjectIndirectShader.setInt("voxelResolution", config.voxelResolution);
-		voxelInjectIndirectShader.setFloat("voxelGridSize", config.voxelGridSize);
-		voxelInjectIndirectShader.setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
-		voxelInjectIndirectShader.setVec3("voxelGridPos", config.voxelGridPos);
+		voxelInjectIndirectShader->use();
+		voxelInjectIndirectShader->setInt("voxelResolution", config.voxelResolution);
+		voxelInjectIndirectShader->setFloat("voxelGridSize", config.voxelGridSize);
+		voxelInjectIndirectShader->setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
+		voxelInjectIndirectShader->setVec3("voxelGridPos", config.voxelGridPos);
 
-		voxelInjectIndirectShader.setBool("debug", config.debug2);
+		voxelInjectIndirectShader->setBool("debug", config.debug2);
 
-		voxelAlbedo->Activate(voxelInjectIndirectShader, "voxelAlbedo", 0);
-		voxelNormal->Activate(voxelInjectIndirectShader, "voxelNormal", 1);
-		voxelDirectRadiance->Activate(voxelInjectIndirectShader, "voxelDirectRadiance", 2);
-		voxelTotalRadiance->Activate(voxelInjectIndirectShader, "voxelTotalRadiance", 3);
+		voxelAlbedo->Activate(*voxelInjectIndirectShader, "voxelAlbedo", 0);
+		voxelNormal->Activate(*voxelInjectIndirectShader, "voxelNormal", 1);
+		voxelDirectRadiance->Activate(*voxelInjectIndirectShader, "voxelDirectRadiance", 2);
+		voxelTotalRadiance->Activate(*voxelInjectIndirectShader, "voxelTotalRadiance", 3);
 		glBindImageTexture(3, voxelTotalRadiance->textureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
 		glClearTexImage(voxelTotalRadiance->textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
 
@@ -653,32 +572,32 @@ namespace Gogaman
 
 		//Screen space voxel Cone Tracing
 		glViewport(0, 0, config.screenWidth * config.giResScale, config.screenHeight * config.giResScale);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.indirectFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::indirectFBO);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		voxelConeTracingShader.use();
-		voxelConeTracingShader.setVec3("pointLights[0].position", pointLight0.position);
-		voxelConeTracingShader.setVec3("pointLights[0].color", pointLight0.color);
-		voxelConeTracingShader.setVec3("pointLights[1].position", pointLight1.position);
-		voxelConeTracingShader.setVec3("pointLights[1].color", pointLight1.color);
-		voxelConeTracingShader.setInt("numLights", 1);
-		voxelConeTracingShader.setInt("renderMode", config.renderMode);
-		voxelConeTracingShader.setFloat("voxelGridSize", config.voxelGridSize);
-		voxelConeTracingShader.setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
-		voxelConeTracingShader.setFloat("voxelWorldSize", config.voxelGridSize / config.voxelResolution);
-		voxelConeTracingShader.setVec3("voxelGridPos", config.voxelGridPos);
-		voxelConeTracingShader.setVec3("cameraPos", camera.Position);
-		voxelConeTracingShader.setVec2("coordJitter", coneTraceJitter);
+		voxelConeTracingShader->use();
+		voxelConeTracingShader->setVec3("pointLights[0].position", pointLight0.position);
+		voxelConeTracingShader->setVec3("pointLights[0].color", pointLight0.color);
+		voxelConeTracingShader->setVec3("pointLights[1].position", pointLight1.position);
+		voxelConeTracingShader->setVec3("pointLights[1].color", pointLight1.color);
+		voxelConeTracingShader->setInt("numLights", 1);
+		voxelConeTracingShader->setInt("renderMode", config.renderMode);
+		voxelConeTracingShader->setFloat("voxelGridSize", config.voxelGridSize);
+		voxelConeTracingShader->setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
+		voxelConeTracingShader->setFloat("voxelWorldSize", config.voxelGridSize / config.voxelResolution);
+		voxelConeTracingShader->setVec3("voxelGridPos", config.voxelGridPos);
+		voxelConeTracingShader->setVec3("cameraPos", camera.Position);
+		voxelConeTracingShader->setVec2("coordJitter", coneTraceJitter);
 
-		voxelConeTracingShader.setBool("debug", config.debug);
+		voxelConeTracingShader->setBool("debug", config.debug);
 
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gPositionMetalness);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gPositionMetalness);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gAlbedoEmissivityRoughness);
-		voxelTotalRadiance->Activate(voxelConeTracingShader, "voxelTotalRadiance", 4);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gAlbedoEmissivityRoughness);
+		voxelTotalRadiance->Activate(*voxelConeTracingShader, "voxelTotalRadiance", 4);
 		//Render full screen quad
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -701,37 +620,37 @@ namespace Gogaman
 		{
 			//Diffuse
 			glViewport(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale);
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.upsampleFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::upsampleFBO);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			upsampleShader.use();
-			upsampleShader.setFloat("nearPlane", cameraNearPlane);
-			upsampleShader.setFloat("farPlane", cameraFarPlane);
-			upsampleShader.setInt("sampleTextureLod", std::max(floor(log2(1.0f / config.giResScale)) - 1.0f, 0.0f));
+			upsampleShader->use();
+			upsampleShader->setFloat("nearPlane", cameraNearPlane);
+			upsampleShader->setFloat("farPlane", cameraFarPlane);
+			upsampleShader->setInt("sampleTextureLod", std::max(floor(log2(1.0f / config.giResScale)) - 1.0f, 0.0f));
 
-			upsampleShader.setBool("debug", config.debug);
-			upsampleShader.setBool("debug2", config.debug2);
+			upsampleShader->setBool("debug", config.debug);
+			upsampleShader->setBool("debug2", config.debug2);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.indirectLightingBuffers[0]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[0]);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.previousUpsampleBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::previousUpsampleBuffer);
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			glActiveTexture(GL_TEXTURE3);
 			if (config.giResScale < config.resScale)
-				glBindTexture(GL_TEXTURE_2D, framebuffers.depthDownsampleBuffer);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer);
 			else
-				glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 			glActiveTexture(GL_TEXTURE5);
 			if (config.giResScale < config.resScale)
-				glBindTexture(GL_TEXTURE_2D, framebuffers.normalDownsampleBuffer);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer);
 			else
-				glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gVelocity);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gVelocity);
 
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
@@ -739,43 +658,43 @@ namespace Gogaman
 			glBindVertexArray(0);
 
 			//Copy upscaled image to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.previousUpsampleFBO);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousUpsampleFBO);
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.upsampleFBO);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::upsampleFBO);
 			glBlitFramebuffer(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 			//Specular
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.upsampleFBO2);
+			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::upsampleFBO2);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			upsampleShader.use();
-			upsampleShader.setFloat("nearPlane", cameraNearPlane);
-			upsampleShader.setFloat("farPlane", cameraFarPlane);
-			upsampleShader.setInt("sampleTextureLod", std::max(floor(log2(1.0f / config.giResScale)) - 1.0f, 0.0f));
+			upsampleShader->use();
+			upsampleShader->setFloat("nearPlane", cameraNearPlane);
+			upsampleShader->setFloat("farPlane", cameraFarPlane);
+			upsampleShader->setInt("sampleTextureLod", std::max(floor(log2(1.0f / config.giResScale)) - 1.0f, 0.0f));
 
-			upsampleShader.setBool("debug", config.debug);
-			upsampleShader.setBool("debug2", config.debug2);
+			upsampleShader->setBool("debug", config.debug);
+			upsampleShader->setBool("debug2", config.debug2);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.indirectLightingBuffers[1]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[1]);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.previousUpsampleBuffer2);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::previousUpsampleBuffer2);
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			glActiveTexture(GL_TEXTURE3);
 			if (config.giResScale < config.resScale)
-				glBindTexture(GL_TEXTURE_2D, framebuffers.depthDownsampleBuffer);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer);
 			else
-				glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 			glActiveTexture(GL_TEXTURE5);
 			if (config.giResScale < config.resScale)
-				glBindTexture(GL_TEXTURE_2D, framebuffers.normalDownsampleBuffer);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer);
 			else
-				glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+				glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gVelocity);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gVelocity);
 
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
@@ -783,9 +702,9 @@ namespace Gogaman
 			glBindVertexArray(0);
 
 			//Copy upscaled image to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.previousUpsampleFBO2);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousUpsampleFBO2);
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.upsampleFBO2);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::upsampleFBO2);
 			glBlitFramebuffer(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
@@ -798,46 +717,46 @@ namespace Gogaman
 
 	//Deferred shading
 		glViewport(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.hdrFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::hdrFBO);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		directPBRShader.use();
-		directPBRShader.setVec3("pointLights[0].position", pointLight0.position);
-		directPBRShader.setVec3("pointLights[0].color", pointLight0.color);
-		directPBRShader.setFloat("pointLights[0].coneAperture", pointLight0.coneAperture);
-		directPBRShader.setVec3("pointLights[1].position", pointLight1.position);
-		directPBRShader.setVec3("pointLights[1].color", pointLight1.color);
-		directPBRShader.setFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
-		directPBRShader.setInt("numLights", 1);
-		directPBRShader.setVec3("cameraPos", camera.Position);
-		directPBRShader.setFloat("voxelGridSize", config.voxelGridSize);
-		directPBRShader.setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
-		directPBRShader.setFloat("voxelWorldSize", config.voxelGridSize / config.voxelResolution);
-		directPBRShader.setVec3("voxelGridPos", config.voxelGridPos);
+		directPBRShader->use();
+		directPBRShader->setVec3("pointLights[0].position", pointLight0.position);
+		directPBRShader->setVec3("pointLights[0].color", pointLight0.color);
+		directPBRShader->setFloat("pointLights[0].coneAperture", pointLight0.coneAperture);
+		directPBRShader->setVec3("pointLights[1].position", pointLight1.position);
+		directPBRShader->setVec3("pointLights[1].color", pointLight1.color);
+		directPBRShader->setFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
+		directPBRShader->setInt("numLights", 1);
+		directPBRShader->setVec3("cameraPos", camera.Position);
+		directPBRShader->setFloat("voxelGridSize", config.voxelGridSize);
+		directPBRShader->setFloat("voxelGridSizeInverse", 1.0f / config.voxelGridSize);
+		directPBRShader->setFloat("voxelWorldSize", config.voxelGridSize / config.voxelResolution);
+		directPBRShader->setVec3("voxelGridPos", config.voxelGridPos);
 
-		directPBRShader.setInt("renderMode", config.renderMode);
-		directPBRShader.setBool("debug", config.debug);
-		directPBRShader.setBool("debug2", config.debug2);
+		directPBRShader->setInt("renderMode", config.renderMode);
+		directPBRShader->setBool("debug", config.debug);
+		directPBRShader->setBool("debug2", config.debug2);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gPositionMetalness);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gPositionMetalness);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gAlbedoEmissivityRoughness);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gAlbedoEmissivityRoughness);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, brdfLUT);
 		glActiveTexture(GL_TEXTURE4);
 		if (config.giUpscaling)
-			glBindTexture(GL_TEXTURE_2D, framebuffers.upsampleBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::upsampleBuffer);
 		else
-			glBindTexture(GL_TEXTURE_2D, framebuffers.indirectLightingBuffers[0]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[0]);
 		glActiveTexture(GL_TEXTURE5);
 		if (config.giUpscaling)
-			glBindTexture(GL_TEXTURE_2D, framebuffers.upsampleBuffer2);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::upsampleBuffer2);
 		else
-			glBindTexture(GL_TEXTURE_2D, framebuffers.indirectLightingBuffers[1]);
-		voxelTotalRadiance->Activate(directPBRShader, "voxelTexture", 6);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[1]);
+		voxelTotalRadiance->Activate(*directPBRShader, "voxelTexture", 6);
 
 		//Render full screen quad
 		glBindVertexArray(quadVAO);
@@ -857,35 +776,35 @@ namespace Gogaman
 		timeDirectPBR = elapsedTime / 1000000.0f;
 
 		//Copy gBuffer depth to HDR FBO
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.gBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.hdrFBO);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::gBuffer);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::hdrFBO);
 		glBlitFramebuffer(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.hdrFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::hdrFBO);
 
 		//Forward rendering
 		glEnable(GL_DEPTH_TEST);
 
 		//Lights
-		lampShader.use();
-		lampShader.setMat4("projection", projectionMatrix);
-		lampShader.setMat4("view", viewMatrix);
+		lampShader->use();
+		lampShader->setMat4("projection", projectionMatrix);
+		lampShader->setMat4("view", viewMatrix);
 		//Light 0
-		lampShader.setVec3("lightColor", pointLight0.color);
-		sphereModel.SetPosition(pointLight0.position);
-		sphereModel.SetScale(0.025f);
-		sphereModel.Draw(lampShader);
+		lampShader->setVec3("lightColor", pointLight0.color);
+		sphereModel->SetPosition(pointLight0.position);
+		sphereModel->SetScale(0.025f);
+		sphereModel->Draw(*lampShader);
 		//Light 1
-			//lampShader.setVec3("lightColor", pointLight1.color);
-			//sphereModel.SetPosition(pointLight1.position);
-			//sphereModel.SetScale(0.025f);
-			//sphereModel.Draw(lampShader);
+			//lampShader->setVec3("lightColor", pointLight1.color);
+			//sphereModel->SetPosition(pointLight1.position);
+			//sphereModel->SetScale(0.025f);
+			//sphereModel->Draw(*lampShader);
 		/*
 			//Skybox
 		glDepthFunc(GL_LEQUAL);
-		skyboxShader.use();
+		skyboxShader->use();
 		glm::mat4 cubemapView(glm::mat3(camera.GetViewMatrix()));
-		skyboxShader.setMat4("projection", projectionMatrix);
-		skyboxShader.setMat4("view", cubemapView);
+		skyboxShader->setMat4("projection", projectionMatrix);
+		skyboxShader->setMat4("view", cubemapView);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		glBindVertexArray(skyboxVAO);
@@ -897,38 +816,38 @@ namespace Gogaman
 		glDisable(GL_DEPTH_TEST);
 		/*
 	//Screen space indirect specular
-		ssrShader.use();
-		ssrShader.setMat3("transposeInverseV", glm::transpose(glm::inverse(glm::mat3(viewMatrix))));
-		ssrShader.setMat4("P",                 projectionMatrix);
-		ssrShader.setMat4("inverseP",          glm::inverse(projectionMatrix));
+		ssrShader->use();
+		ssrShader->setMat3("transposeInverseV", glm::transpose(glm::inverse(glm::mat3(viewMatrix))));
+		ssrShader->setMat4("P",                 projectionMatrix);
+		ssrShader->setMat4("inverseP",          glm::inverse(projectionMatrix));
 
-		ssrShader.setBool("debug",             config.debug);
-		ssrShader.setBool("debug2",            config.debug2);
+		ssrShader->setBool("debug",             config.debug);
+		ssrShader->setBool("debug2",            config.debug2);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.colorBuffers[0]);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gNormal);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
 		//Render full screen quad
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 
 	//Combine indirect lighting
-		glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.ssrFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::ssrFBO);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		combineIndirectShader.use();
+		combineIndirectShader->use();
 
-		combineIndirectShader.setBool("debug", config.debug);
-		combineIndirectShader.setBool("debug2", config.debug2);
+		combineIndirectShader->setBool("debug", config.debug);
+		combineIndirectShader->setBool("debug2", config.debug2);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.colorBuffers[0]);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, framebuffers.gAlbedoEmissivityRoughness);
+		glBindTexture(GL_TEXTURE_2D, Framebuffers::gAlbedoEmissivityRoughness);
 		//Render full screen quad
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -941,28 +860,28 @@ namespace Gogaman
 		//Temporal anti-aliasing
 		if (config.taa)
 		{
-			taaShader.use();
+			taaShader->use();
 
-			taaShader.setBool("debug", config.debug);
-			taaShader.setBool("debug2", config.debug2);
+			taaShader->setBool("debug", config.debug);
+			taaShader->setBool("debug2", config.debug2);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.colorBuffers[0]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.previousFrameBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::previousFrameBuffer);
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gVelocity);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gVelocity);
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 
 			//Copy frame to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffers.previousFrameFBO);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousFrameFBO);
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffers.hdrFBO);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::hdrFBO);
 			glBlitFramebuffer(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
@@ -987,21 +906,21 @@ namespace Gogaman
 			glViewport(0, 0, config.screenWidth * config.dofResScale, config.screenHeight * config.dofResScale);
 
 			//Compute circle of confusion
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.cocFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::cocFBO);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			circleOfConfusionShader.use();
-			circleOfConfusionShader.setFloat("nearPlane", cameraNearPlane);
-			circleOfConfusionShader.setFloat("farPlane", cameraFarPlane);
-			circleOfConfusionShader.setFloat("focalDistance", config.focalDistance);
-			circleOfConfusionShader.setFloat("fStop", config.fStop);
-			circleOfConfusionShader.setFloat("focalLength", config.focalLength);
+			circleOfConfusionShader->use();
+			circleOfConfusionShader->setFloat("nearPlane", cameraNearPlane);
+			circleOfConfusionShader->setFloat("farPlane", cameraFarPlane);
+			circleOfConfusionShader->setFloat("focalDistance", config.focalDistance);
+			circleOfConfusionShader->setFloat("fStop", config.fStop);
+			circleOfConfusionShader->setFloat("focalLength", config.focalLength);
 
-			circleOfConfusionShader.setBool("debug", config.debug);
-			circleOfConfusionShader.setBool("debug2", config.debug2);
+			circleOfConfusionShader->setBool("debug", config.debug);
+			circleOfConfusionShader->setBool("debug2", config.debug2);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.gDepth);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -1009,38 +928,38 @@ namespace Gogaman
 
 			//Circular blur
 				//Horizontal pass
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.circularBlurHorizontalFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::circularBlurHorizontalFBO);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			circularBlurHorizontalShader.use();
+			circularBlurHorizontalShader->use();
 
-			circularBlurHorizontalShader.setBool("debug", config.debug);
+			circularBlurHorizontalShader->setBool("debug", config.debug);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.cocBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::cocBuffer);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.colorBuffers[0]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 			glBindVertexArray(0);
 
 			//Vertical pass and final composite
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.circularBlurVerticalFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::circularBlurVerticalFBO);
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			circularBlurVerticalShader.use();
+			circularBlurVerticalShader->use();
 
-			circularBlurVerticalShader.setBool("debug", config.debug);
+			circularBlurVerticalShader->setBool("debug", config.debug);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.cocBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::cocBuffer);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.circularBlurRedBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurRedBuffer);
 			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.circularBlurGreenBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurGreenBuffer);
 			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.circularBlurBlueBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurBlueBuffer);
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -1071,17 +990,17 @@ namespace Gogaman
 			float screenDiagonal = glm::sqrt((config.screenWidth * config.screenWidth) + (config.screenHeight * config.screenHeight));
 			unsigned int bloomBlurIterations = glm::ceil(screenDiagonal * config.bloomBlurAmount);
 
-			gaussianBlurShader.use();
+			gaussianBlurShader->use();
 
 			glViewport(0, 0, config.screenWidth * config.bloomResScale, config.screenHeight * config.bloomResScale);
 			for (unsigned int i = 0; i < bloomBlurIterations; i++)
 			{
-				glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.pingpongFBO[horizontal]);
+				glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::pingpongFBO[horizontal]);
 				if (firstBlurIteration)
 					glClear(GL_COLOR_BUFFER_BIT);
-				gaussianBlurShader.setBool("horizontal", horizontal);
+				gaussianBlurShader->setBool("horizontal", horizontal);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, firstBlurIteration ? framebuffers.colorBuffers[1] : framebuffers.pingpongColorbuffers[!horizontal]);
+				glBindTexture(GL_TEXTURE_2D, firstBlurIteration ? Framebuffers::colorBuffers[1] : Framebuffers::pingpongColorbuffers[!horizontal]);
 				//Render full screen quad
 				glBindVertexArray(quadVAO);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -1093,15 +1012,15 @@ namespace Gogaman
 
 			//Apply bloom to image
 			glViewport(0, 0, config.screenWidth * config.resScale, config.screenHeight * config.resScale);
-			glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.hdrFBO);
+			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::hdrFBO);
 
-			bloomShader.use();
-			bloomShader.setFloat("bloomStrength", config.bloomStrength);
+			bloomShader->use();
+			bloomShader->setFloat("bloomStrength", config.bloomStrength);
 
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.colorBuffers[0]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, framebuffers.pingpongColorbuffers[!horizontal]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::pingpongColorbuffers[!horizontal]);
 			//Render full screen quad
 			glBindVertexArray(quadVAO);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -1125,17 +1044,17 @@ namespace Gogaman
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		postProcessShader.use();
-		postProcessShader.setFloat("exposureBias", exposure);
-		postProcessShader.setFloat("time", glfwGetTime());
+		postProcessShader->use();
+		postProcessShader->setFloat("exposureBias", exposure);
+		postProcessShader->setFloat("time", glfwGetTime());
 
-		postProcessShader.setBool("debug", config.debug);
+		postProcessShader->setBool("debug", config.debug);
 
 		glActiveTexture(GL_TEXTURE0);
 		if(config.dof)
-			glBindTexture(GL_TEXTURE_2D, framebuffers.circularBlurVerticalBuffer);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurVerticalBuffer);
 		else
-			glBindTexture(GL_TEXTURE_2D, framebuffers.colorBuffers[0]);
+			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 		//Render full screen quad
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -1152,8 +1071,6 @@ namespace Gogaman
 
 		if(firstIteration == true)
 			firstIteration = false;
-
-		TwAddVarRO(m_TweakBar, "Cock Nigger", TW_TYPE_FLOAT, &config.screenWidth, NULL);
 
 		//Render debug GUI
 		TwDraw();
@@ -1300,12 +1217,12 @@ namespace Gogaman
 			config.renderMode = 8;
 	}
 
-	void WindowResizeCallback(GLFWwindow *window, int width, int height)
+	void Renderer::WindowResizeCallback(GLFWwindow *window, int width, int height)
 	{
 		glViewport(0, 0, width, height);
 	}
 
-	void MouseMovedCallback(GLFWwindow *window, double xPos, double yPos)
+	void Renderer::MouseMovedCallback(GLFWwindow *window, double xPos, double yPos)
 	{
 		if(firstMouse)
 		{
@@ -1322,7 +1239,7 @@ namespace Gogaman
 		camera.ProcessMouseInput(xOffset, yOffset);
 	}
 
-	void MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset)
+	void Renderer::MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset)
 	{
 		camera.ProcessMouseScrollInput(yOffset);
 	}

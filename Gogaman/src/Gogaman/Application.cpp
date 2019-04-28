@@ -1,25 +1,20 @@
 #include "pch.h"
 #include "Application.h"
-#include "Graphics/Renderer.h"
+#include "Graphics/ResourceManager.h"
 
 namespace Gogaman
 {
 	Application::Application()
-	{
-	}
+	{}
 
 	Application::~Application()
-	{
-	}
+	{}
 
 	void Application::Run()
 	{
-		Renderer gogaRenderer;
-		gogaRenderer.Initialize();
-
 		while(true)
 		{
-			gogaRenderer.Draw();
+			GM_LOG("pleen");
 		}
 	}
 }

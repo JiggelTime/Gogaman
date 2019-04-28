@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Gogaman/Core.h"
-#include "Shader.h"
+#include "../Shader.h"
+
 #include <glad.h>
 
 namespace Gogaman

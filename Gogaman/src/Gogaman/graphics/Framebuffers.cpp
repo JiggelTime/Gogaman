@@ -3,9 +3,70 @@
 
 namespace Gogaman
 {
-	Framebuffers::Framebuffers(Config& config)
-		: m_Config(config)
+	unsigned int Framebuffers::brdfFBO;
+	unsigned int Framebuffers::brdfRBO;
+
+	unsigned int Framebuffers::gBuffer;
+	unsigned int Framebuffers::gPositionMetalness;
+	unsigned int Framebuffers::gNormal;
+	unsigned int Framebuffers::gAlbedoEmissivityRoughness;
+	unsigned int Framebuffers::gVelocity;
+	unsigned int Framebuffers::gDepth;
+
+	unsigned int Framebuffers::normalDownsampleFBO;
+	unsigned int Framebuffers::normalDownsampleBuffer;
+
+	unsigned int Framebuffers::depthDownsampleFBO;
+	unsigned int Framebuffers::depthDownsampleBuffer;
+
+	unsigned int Framebuffers::hdrFBO;
+	unsigned int Framebuffers::colorBuffers[3];
+	unsigned int Framebuffers::rboDepth;
+
+	unsigned int Framebuffers::previousFrameFBO;
+	unsigned int Framebuffers::previousFrameBuffer;
+
+	unsigned int Framebuffers::indirectFBO;
+	unsigned int Framebuffers::indirectLightingBuffers[2];
+
+	unsigned int Framebuffers::upsampleFBO;
+	unsigned int Framebuffers::upsampleBuffer;
+
+	unsigned int Framebuffers::upsampleFBO2;
+	unsigned int Framebuffers::upsampleBuffer2;
+
+	unsigned int Framebuffers::previousUpsampleFBO;
+	unsigned int Framebuffers::previousUpsampleBuffer;
+
+	unsigned int Framebuffers::previousUpsampleFBO2;
+	unsigned int Framebuffers::previousUpsampleBuffer2;
+
+	unsigned int Framebuffers::ssrFBO;
+	unsigned int Framebuffers::ssrBuffer;
+
+	unsigned int Framebuffers::cocFBO;
+	unsigned int Framebuffers::cocBuffer;
+
+	unsigned int Framebuffers::circularBlurHorizontalFBO;
+	unsigned int Framebuffers::circularBlurRedBuffer;
+	unsigned int Framebuffers::circularBlurGreenBuffer;
+	unsigned int Framebuffers::circularBlurBlueBuffer;
+
+	unsigned int Framebuffers::circularBlurVerticalFBO;
+	unsigned int Framebuffers::circularBlurVerticalBuffer;
+
+	unsigned int Framebuffers::pingpongFBO[2];
+	unsigned int Framebuffers::pingpongColorbuffers[2];
+
+	//Framebuffers::Framebuffers(Config config)
+		//: m_Config(config)
+	void Framebuffers::Initialize(Config config)
 	{
+		unsigned int oneColorAttachment       = GL_COLOR_ATTACHMENT0;
+		unsigned int twoColorAttachments[2]   = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		unsigned int threeColorAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+		unsigned int fourColorAttachments[4]  = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+
 		//Create precomputed BRDF framebuffer
 		glGenFramebuffers(1, &brdfFBO);
 		glGenRenderbuffers(1, &brdfRBO);

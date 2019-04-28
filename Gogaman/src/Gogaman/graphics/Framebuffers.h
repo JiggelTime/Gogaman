@@ -10,65 +10,63 @@ namespace Gogaman
 	class GOGAMAN_API Framebuffers
 	{
 	public:
-		Framebuffers(Config& config);
+		static void Initialize(Config config);
 	public:
-		unsigned int brdfFBO, brdfRBO;
+		static unsigned int brdfFBO;
+		static unsigned int brdfRBO;
 
-		unsigned int gBuffer;
-		unsigned int gPositionMetalness, gNormal, gAlbedoEmissivityRoughness, gVelocity, gDepth;
+		static unsigned int gBuffer;
+		static unsigned int gPositionMetalness;
+		static unsigned int gNormal;
+		static unsigned int gAlbedoEmissivityRoughness;
+		static unsigned int gVelocity;
+		static unsigned int gDepth;
 
-		unsigned int normalDownsampleFBO;
-		unsigned int normalDownsampleBuffer;
+		static unsigned int normalDownsampleFBO;
+		static unsigned int normalDownsampleBuffer;
 
-		unsigned int depthDownsampleFBO;
-		unsigned int depthDownsampleBuffer;
+		static unsigned int depthDownsampleFBO;
+		static unsigned int depthDownsampleBuffer;
 
-		unsigned int hdrFBO;
-		unsigned int colorBuffers[3];
-		unsigned int rboDepth;
+		static unsigned int hdrFBO;
+		static unsigned int colorBuffers[3];
+		static unsigned int rboDepth;
 
-		unsigned int previousFrameFBO;
-		unsigned int previousFrameBuffer;
+		static unsigned int previousFrameFBO;
+		static unsigned int previousFrameBuffer;
 
-		unsigned int indirectFBO;
-		unsigned int indirectLightingBuffers[2];
+		static unsigned int indirectFBO;
+		static unsigned int indirectLightingBuffers[2];
 
-		unsigned int upsampleFBO;
-		unsigned int upsampleBuffer;
+		static unsigned int upsampleFBO;
+		static unsigned int upsampleBuffer;
 
-		unsigned int upsampleFBO2;
-		unsigned int upsampleBuffer2;
+		static unsigned int upsampleFBO2;
+		static unsigned int upsampleBuffer2;
 
-		unsigned int previousUpsampleFBO;
-		unsigned int previousUpsampleBuffer;
+		static unsigned int previousUpsampleFBO;
+		static unsigned int previousUpsampleBuffer;
 
-		unsigned int previousUpsampleFBO2;
-		unsigned int previousUpsampleBuffer2;
+		static unsigned int previousUpsampleFBO2;
+		static unsigned int previousUpsampleBuffer2;
 
-		unsigned int ssrFBO;
-		unsigned int ssrBuffer;
+		static unsigned int ssrFBO;
+		static unsigned int ssrBuffer;
 
-		unsigned int cocFBO;
-		unsigned int cocBuffer;
+		static unsigned int cocFBO;
+		static unsigned int cocBuffer;
 
-		unsigned int circularBlurHorizontalFBO;
-		unsigned int circularBlurRedBuffer;
-		unsigned int circularBlurGreenBuffer;
-		unsigned int circularBlurBlueBuffer;
+		static unsigned int circularBlurHorizontalFBO;
+		static unsigned int circularBlurRedBuffer;
+		static unsigned int circularBlurGreenBuffer;
+		static unsigned int circularBlurBlueBuffer;
 
-		unsigned int circularBlurVerticalFBO;
-		unsigned int circularBlurVerticalBuffer;
+		static unsigned int circularBlurVerticalFBO;
+		static unsigned int circularBlurVerticalBuffer;
 
-		unsigned int pingpongFBO[2];
-		unsigned int pingpongColorbuffers[2];
+		static unsigned int pingpongFBO[2];
+		static unsigned int pingpongColorbuffers[2];
 	private:
-		void CheckCompleteness();
-	private:
-		Config m_Config;
-
-		const unsigned int oneColorAttachment = GL_COLOR_ATTACHMENT0;
-		const unsigned int twoColorAttachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		const unsigned int threeColorAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		const unsigned int fourColorAttachments[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		static void CheckCompleteness();
 	};
 }

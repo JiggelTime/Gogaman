@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.14.1)
+cmake_minimum_required(VERSION 3.14)
 
-project(Gogaman C CXX)
+project(Gogaman LANGUAGES C CXX)
 
 set(workspace_root ${CMAKE_CURRENT_SOURCE_DIR})
 set(Gogaman_root ${workspace_root}/Gogaman)
