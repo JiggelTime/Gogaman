@@ -24,7 +24,7 @@ namespace Gogaman
 
 		Model(std::string &filePath);
 
-		void Render(Shader& shader, bool setPreviousModelMatrixUniform = false);
+		void Render(Shader &shader, bool setPreviousModelMatrixUniform = false);
 
 		void UpdateModelMatrix()
 		{
@@ -32,13 +32,13 @@ namespace Gogaman
 			modelMatrix = glm::mat4();
 
 			//Apply translation
-			if (position != glm::vec3(0.0f))
+			if(position != glm::vec3(0.0f))
 				modelMatrix = glm::translate(modelMatrix, position);
 			//Apply rotation
-			if (rotationAngle != 0.0f)
+			if(rotationAngle != 0.0f)
 				modelMatrix = glm::rotate(modelMatrix, rotationAngle, rotation);
 			//Apply scale
-			if (scale != glm::vec3(1.0f))
+			if(scale != glm::vec3(1.0f))
 				modelMatrix = glm::scale(modelMatrix, scale);
 		}
 

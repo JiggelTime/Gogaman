@@ -7,7 +7,6 @@ namespace Gogaman
 	Model::Model(std::string &filePath)
 	{
 		LoadModel(filePath);
-		GM_LOG_CORE_INFO("Loaded model at: %s", filePath);
 	}
 
 	void Model::Render(Shader &shader, bool setPreviousModelMatrixUniform)

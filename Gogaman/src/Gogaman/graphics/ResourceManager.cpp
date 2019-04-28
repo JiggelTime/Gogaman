@@ -8,12 +8,29 @@ namespace Gogaman
 {
 	std::map<std::string, Shader> ResourceManager::m_Shaders;
 	std::map<std::string, Texture2D> ResourceManager::m_Texture2Ds;
+	std::map<std::string, Model> ResourceManager::m_Models;
+	float ResourceManager::m_MaxAF;
 
 	ResourceManager::ResourceManager()
-	{}
+	{
+		InitializeMaxAF();
+	}
 
 	ResourceManager::~ResourceManager()
 	{}
+
+	void ResourceManager::InitializeMaxAF()
+	{
+		if(GL_ARB_texture_filter_anisotropic)
+		{
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &m_MaxAF);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, m_MaxAF);
+		}
+		else
+			m_MaxAF = 0.0f;
+
+		GM_LOG_CORE_INFO("Max anisotropic texture filtering: x%d", m_MaxAF);
+	}
 
 	Shader ResourceManager::LoadShader(std::string name, const GLchar *vertexShaderPath, const GLchar *fragmentShaderPath, const GLchar *geometryShaderPath)
 	{
@@ -31,6 +48,12 @@ namespace Gogaman
 	{
 		m_Texture2Ds[name] = LoadTexture2DFromFile(filePath, alpha);
 		return m_Texture2Ds[name];
+	}
+
+	Model ResourceManager::LoadModel(std::string name, const GLchar *filePath)
+	{
+		m_Models[name] = LoadModelFromFile(filePath);
+		return m_Models[name];
 	}
 
 	void ResourceManager::Clear()
@@ -139,7 +162,10 @@ namespace Gogaman
 		if(data)
 		{
 			if(components == 1)
+			{
 				texture2D.formatImage = GL_RED;
+				texture2D.formatInternal = GL_RED;
+			}
 			else if(components == 3)
 			{
 				texture2D.formatImage = GL_RGB;
@@ -158,5 +184,13 @@ namespace Gogaman
 
 		stbi_image_free(data);
 		return texture2D;
+	}
+
+	Model ResourceManager::LoadModelFromFile(const GLchar *filePath)
+	{
+		std::string filePathString(filePath);
+		Model model(filePathString);
+		GM_LOG_CORE_INFO("Loaded model at: %s", filePath);
+		return model;
 	}
 }
