@@ -3,41 +3,29 @@
 
 namespace Gogaman
 {
-	Texture3D::Texture3D(const int _width, const int _height, const int _depth, const bool generateMipmaps, const GLenum _formatInternal, const GLenum _format, const GLenum _type, const int _levels, const GLenum _filterMin, const GLenum _filterMag)
-		: width(_width), height(_height), depth(_depth), clearData(4 * _width* _height* _depth, 0.0f), formatInternal(_formatInternal), format(_format), type(_type), levels(_levels), filterMin(_filterMin), filterMag(_filterMag)
+	Texture3D::Texture3D()
+		: width(0), height(0), depth(0), formatInternal(GL_RGB), formatImage(GL_RGB), wrapS(GL_REPEAT), wrapT(GL_REPEAT), wrapR(GL_REPEAT), filterMin(GL_NEAREST), filterMax(GL_NEAREST)
 	{
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_3D, textureID);
+		glGenTextures(1, &id);
+	}
 
-		const auto wrap = GL_CLAMP_TO_BORDER;
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, wrap);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, wrap);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, wrap);
+	Texture3D::~Texture3D()
+	{}
 
+	void Texture3D::Generate(GLuint width, GLuint height, GLuint depth, unsigned char *data)
+	{
+		this->width = width;
+		this->height = height;
+
+		glBindTexture(GL_TEXTURE_3D, id);
+		glTexImage3D(GL_TEXTURE_3D, 0, formatInternal, width, height, depth, 0, formatImage, GL_UNSIGNED_BYTE, data);
+		//Set texture properties
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, wrapS);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, wrapT);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, wrapR);
 		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filterMin);
-		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, filterMag);
+		glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, filterMax);
 
-		glTexStorage3D(GL_TEXTURE_3D, levels, formatInternal, width, height, depth);
-		glTexImage3D(GL_TEXTURE_3D, 0, formatInternal, width, height, depth, 0, format, type, &textureBuffer[0]);
-
-		if(generateMipmaps)
-			glGenerateMipmap(GL_TEXTURE_3D);
 		glBindTexture(GL_TEXTURE_3D, 0);
-	}
-
-	void Texture3D::Activate(Shader shaderProgram, const std::string glSamplerName, const int textureUnit)
-	{
-		glActiveTexture(GL_TEXTURE0 + textureUnit);
-		glBindTexture(GL_TEXTURE_3D, textureID);
-		shaderProgram.setInt(glSamplerName, textureUnit);
-	}
-
-	void Texture3D::Clear(GLfloat clearColor[4])
-	{
-		GLint previousBoundTextureID;
-		glGetIntegerv(GL_TEXTURE_BINDING_3D, &previousBoundTextureID);
-		glBindTexture(GL_TEXTURE_3D, textureID);
-		glClearTexImage(textureID, 0, format, GL_FLOAT, &clearColor);
-		glBindTexture(GL_TEXTURE_3D, previousBoundTextureID);
 	}
 }

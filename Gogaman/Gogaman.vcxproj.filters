@@ -44,9 +44,6 @@
     <ClCompile Include="src\Gogaman\Graphics\Textures\Texture2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Framebuffers.cpp">
       <Filter>Source Files\graphics</Filter>
     </ClCompile>
@@ -57,6 +54,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D_old.cpp">
+      <Filter>Source Files\graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -80,9 +86,6 @@
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\Textures\Texture2D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\Camera.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
@@ -100,6 +103,11 @@
     <ClInclude Include="src\Gogaman\Graphics\Shader.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D_old.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

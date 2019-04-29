@@ -11,12 +11,6 @@
 #endif
 
 #if GM_DEBUG
-	#define GM_LOG(x) std::cout << x << std::endl;
-#else
-	#define GM_LOG(x)
-#endif
-
-#if GM_DEBUG
 	#define GM_ASSERT(x, ...) \
 	if(!x) \
 	{ \

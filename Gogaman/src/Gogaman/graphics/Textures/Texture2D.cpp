@@ -27,9 +27,4 @@ namespace Gogaman
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-
-	void Texture2D::Bind() const
-	{
-		glBindTexture(GL_TEXTURE_2D, id);
-	}
 }

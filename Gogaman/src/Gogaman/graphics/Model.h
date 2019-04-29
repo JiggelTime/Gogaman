@@ -20,9 +20,13 @@ namespace Gogaman
 		//Model data
 		std::vector<Mesh> meshes;
 		std::string       directory;
-		bool              gammaCorrection;
+		bool              gammaCorrection = false;
 
-		Model(std::string &filePath);
+		Model();
+		~Model();
+
+		//Loads model from file and stores resulting meshes in the meshes vector
+		void LoadModel(std::string &filePath);
 
 		void Render(Shader &shader, bool setPreviousModelMatrixUniform = false);
 
@@ -54,10 +58,7 @@ namespace Gogaman
 			modelMatrixShouldUpdate = true;
 		}
 
-		glm::vec3 GetScale()
-		{
-			return scale;
-		}
+		inline glm::vec3 GetScale() { return scale; }
 
 		void Scale(glm::vec3 scale)
 		{
@@ -84,10 +85,7 @@ namespace Gogaman
 			modelMatrixShouldUpdate = true;
 		}
 
-		glm::vec3 GetPosition()
-		{
-			return position;
-		}
+		glm::vec3 GetPosition() { return position; }
 
 		void Translate(glm::vec3 translation)
 		{
@@ -107,7 +105,7 @@ namespace Gogaman
 	private:
 		//Model properties
 		glm::vec3 scale = glm::vec3(1.0f), rotation, position;
-		float rotationAngle;
+		float rotationAngle = 0.0f;
 		//Dynamic or static
 		bool isDynamic = false;
 
@@ -117,67 +115,14 @@ namespace Gogaman
 
 		std::vector<Texture> textures_loaded;
 
-		//Loads model from file and stores resulting meshes in the meshes vector
-		void LoadModel(std::string &filePath);
-
 		//Recursively proccesses a node
 		void ProcessNode(aiNode *node, const aiScene *scene);
 
 		Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
 
-		unsigned int LoadTextureFromFile(const char* path, const std::string & directory, bool gamma = false)
-		{
-			std::string filename = std::string(path);
-			filename = directory + '/' + filename;
+		unsigned int LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 
-			unsigned int textureID;
-			glGenTextures(1, &textureID);
-
-			int width, height, nrComponents;
-
-			unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
-			if(data)
-			{
-				GLenum format;
-				if(nrComponents == 1)
-					format = GL_RED;
-				else if(nrComponents == 3)
-					format = GL_RGB;
-				else if(nrComponents == 4)
-					format = GL_RGBA;
-
-				glBindTexture(GL_TEXTURE_2D, textureID);
-				if(gamma == true && nrComponents == 3)
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-				else if(gamma == true && nrComponents == 4)
-					glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB_ALPHA, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-				else
-					glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-
-				glGenerateMipmap(GL_TEXTURE_2D);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				if(GL_ARB_texture_filter_anisotropic)
-				{
-					float maxAF = 0.0f;
-					glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &maxAF);
-					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, maxAF);
-				}
-
-				stbi_image_free(data);
-			}
-			else
-			{
-				std::cout << "Texture failed to load at: " << path << std::endl;
-				stbi_image_free(data);
-			}
-
-			return textureID;
-		}
-
-		std::vector<Texture> loadMaterialTextures(aiMaterial * mat, aiTextureType type, std::string typeName)
+		std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
 		{
 			std::vector<Texture> textures;
 			for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)

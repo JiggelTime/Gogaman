@@ -13,7 +13,7 @@ namespace Gogaman
 		~Texture2D();
 
 		void Generate(GLuint width, GLuint height, unsigned char *data);
-		void Bind() const;
+		inline void Bind() const { glBindTexture(GL_TEXTURE_2D, id); }
 	public:
 		GLuint id;
 		GLuint width, height;

@@ -84,7 +84,7 @@ namespace Gogaman
 				glGetShaderiv(object, GL_INFO_LOG_LENGTH, &logSize);
 				GLchar* infoLog = new GLchar[logSize];
 				glGetShaderInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Unable to compile %s", name);
+				GM_LOG_CORE_ERROR("Failed to compile %s", name);
 				GM_LOG_CORE_ERROR("%s", infoLog);
 			}
 		}
@@ -97,7 +97,7 @@ namespace Gogaman
 				glGetProgramiv(object, GL_INFO_LOG_LENGTH, &logSize);
 				GLchar* infoLog = new GLchar[logSize];
 				glGetProgramInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Unable to link %s", name);
+				GM_LOG_CORE_ERROR("Failed to link %s", name);
 				GM_LOG_CORE_ERROR("%s", infoLog);
 			}
 		}

@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Application.h"
-#include "Graphics/ResourceManager.h"
+#include "Graphics/Renderer.h"
 
 namespace Gogaman
 {
@@ -12,9 +12,10 @@ namespace Gogaman
 
 	void Application::Run()
 	{
+		Renderer gogaRenderer;
+
 		while(true)
 		{
-			GM_LOG("pleen");
 		}
 	}
 }

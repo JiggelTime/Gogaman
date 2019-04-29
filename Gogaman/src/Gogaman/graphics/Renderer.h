@@ -3,9 +3,6 @@
 #include "Gogaman/Core.h"
 #include "Gogaman/Config.h"
 #include "Camera.h"
-#include "Texture3D.h"
-#include "Shader.h"
-#include "Model.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -22,7 +19,7 @@ namespace Gogaman
 		Renderer();
 		~Renderer();
 
-		void Draw();
+		//void Draw();
 	private:
 		void ProcessInput(GLFWwindow *window);
 		void WindowResizeCallback(GLFWwindow *window, int width, int height);
@@ -57,13 +54,6 @@ namespace Gogaman
 		unsigned int voxelMaxMipLevels = glm::ceil(log2(config.voxelResolution) - 1);
 		unsigned int voxelizationCounter;
 
-		//Voxel textures
-		Texture3D voxelAlbedo;
-		Texture3D voxelNormal;
-		Texture3D voxelDirectRadiance;
-		Texture3D voxelTotalRadiance;
-		Texture3D voxelStaticFlag;
-
 		//Variables for temporal sampling
 		glm::vec2 temporalJitter = glm::vec2(0.0f);
 		glm::vec2 previousTemporalJitter = temporalJitter;
@@ -86,37 +76,5 @@ namespace Gogaman
 		GLuint64 elapsedTime;
 		GLint timerResultAvailable = 0;
 		GLuint query;
-
-		//Shaders
-		Shader precomputeBRDFShader;
-		Shader gbufferShader;
-		Shader downsampleNormalShader;
-		Shader downsampleDepthShader;
-		Shader voxelClearDynamicShader;
-		Shader voxelizationShader;
-		Shader voxelInjectDirectShader;
-		Shader voxelInjectIndirectShader;
-		Shader voxelConeTracingShader;
-		Shader upsampleShader;
-		Shader directPBRShader;
-		Shader ssrShader;
-		Shader combineIndirectShader;
-		Shader skyboxShader;
-		Shader lampShader;
-		Shader taaShader;
-		Shader circleOfConfusionShader;
-		Shader circularBlurVerticalShader;
-		Shader circularBlurHorizontalShader;
-		Shader gaussianBlurShader;
-		Shader bloomShader;
-		Shader postProcessShader;
-
-		//Models
-		Model roomModel;
-		Model redModel;
-		Model blueModel;
-		Model statueModel;
-
-		Model sphereModel;
 	};
 }

@@ -13,8 +13,10 @@
   <ItemGroup>
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\ResourceManager.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Shader.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Textures\Texture2D.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Logger.cpp" />
@@ -29,14 +31,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D_old.cpp" />
     <ClCompile Include="vendor\glad.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
     <ClInclude Include="src\Gogaman\Graphics\ResourceManager.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h" />
     <ClInclude Include="src\Gogaman\Graphics\Textures\Texture2D.h" />
     <ClInclude Include="src\Gogaman\Logging\Log.h" />
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
@@ -53,7 +57,7 @@
     <ClInclude Include="src\Gogaman\Graphics\Model.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Gogaman\Graphics\Shader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D_old.h" />
     <ClInclude Include="vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>

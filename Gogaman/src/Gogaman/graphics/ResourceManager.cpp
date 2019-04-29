@@ -32,25 +32,25 @@ namespace Gogaman
 		GM_LOG_CORE_INFO("Max anisotropic texture filtering: x%d", m_MaxAF);
 	}
 
-	Shader ResourceManager::LoadShader(std::string name, const GLchar *vertexShaderPath, const GLchar *fragmentShaderPath, const GLchar *geometryShaderPath)
+	Shader ResourceManager::LoadShader(std::string name, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
 	{
 		m_Shaders[name] = LoadShaderFromFile(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
 		return m_Shaders[name];
 	}
 
-	Shader ResourceManager::LoadShader(std::string name, const GLchar *computeShaderPath)
+	Shader ResourceManager::LoadShader(std::string name, const char *computeShaderPath)
 	{
 		m_Shaders[name] = LoadShaderFromFile(computeShaderPath);
 		return m_Shaders[name];
 	}
 
-	Texture2D ResourceManager::LoadTexture2D(std::string name, const GLchar *filePath, GLboolean alpha)
+	Texture2D ResourceManager::LoadTexture2D(std::string name, const char *filePath, GLboolean alpha)
 	{
 		m_Texture2Ds[name] = LoadTexture2DFromFile(filePath, alpha);
 		return m_Texture2Ds[name];
 	}
 
-	Model ResourceManager::LoadModel(std::string name, const GLchar *filePath)
+	Model ResourceManager::LoadModel(std::string name, const char *filePath)
 	{
 		m_Models[name] = LoadModelFromFile(filePath);
 		return m_Models[name];
@@ -65,7 +65,7 @@ namespace Gogaman
 			glDeleteTextures(1, &i.second.id);
 	}
 
-	Shader ResourceManager::LoadShaderFromFile(const GLchar *vertexShaderPath, const GLchar *fragmentShaderPath, const GLchar *geometryShaderPath)
+	Shader ResourceManager::LoadShaderFromFile(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
 	{
 		bool geometryShaderPresent = (geometryShaderPath == nullptr) ? false : true;
 
@@ -110,21 +110,27 @@ namespace Gogaman
 		}
 		catch(std::ifstream::failure e)
 		{
+			std::clog << e.what() << " (" << e.code() << ")" << std::endl;
+
 			GM_LOG_CORE_ERROR("Failed to read shader file at location %s", vertexShaderPath);
 			GM_LOG_CORE_ERROR("Failed to read shader file at location %s", fragmentShaderPath);
-			GM_LOG_CORE_ERROR("Failed to read shader file at location %s", geometryShaderPath);
+			if(geometryShaderPresent)
+				GM_LOG_CORE_ERROR("Failed to read shader file at location %s", geometryShaderPath);
 		}
 
-		const char *vertexShaderSource   = vertexData.c_str();
-		const char *fragmentShaderSource = fragmentData.c_str();
-		const char *geometryShaderSource = geometryData.c_str();
+		//const char *vertexShaderSource   = vertexData.c_str();
+		//const char *fragmentShaderSource = fragmentData.c_str();
+		//const char *geometryShaderSource = geometryData.c_str();
+		const GLchar *vertexShaderSource   = vertexData.c_str();
+		const GLchar *fragmentShaderSource = fragmentData.c_str();
+		const GLchar *geometryShaderSource = geometryData.c_str();
 
 		Shader shader;
 		shader.Compile(vertexShaderSource, fragmentShaderSource, geometryShaderPresent ? geometryShaderSource : nullptr);
 		return shader;
 	}
 
-	Shader ResourceManager::LoadShaderFromFile(const GLchar *computeShaderPath)
+	Shader ResourceManager::LoadShaderFromFile(const char *computeShaderPath)
 	{
 		std::string data;
 		std::ifstream inputStream;
@@ -146,7 +152,6 @@ namespace Gogaman
 			GM_LOG_CORE_ERROR("Failed to read shader file at location %s", computeShaderPath);
 		}
 
-		GM_LOG_CORE_ERROR("Failed to read shader file at location %s", computeShaderPath);
 		const char *source = data.c_str();
 		
 		Shader shader;
@@ -154,24 +159,24 @@ namespace Gogaman
 		return shader;
 	}
 
-	Texture2D ResourceManager::LoadTexture2DFromFile(const GLchar *filePath, GLboolean sRGB)
+	Texture2D ResourceManager::LoadTexture2DFromFile(const char *filePath, GLboolean sRGB)
 	{
 		Texture2D texture2D;
-		int width, height, components;
-		unsigned char *data = stbi_load(filePath, &width, &height, &components, 0);
+		int width, height, channels;
+		unsigned char *data = stbi_load(filePath, &width, &height, &channels, 0);
 		if(data)
 		{
-			if(components == 1)
+			if(channels == 1)
 			{
 				texture2D.formatImage = GL_RED;
 				texture2D.formatInternal = GL_RED;
 			}
-			else if(components == 3)
+			else if(channels == 3)
 			{
 				texture2D.formatImage = GL_RGB;
 				texture2D.formatInternal = sRGB ? GL_SRGB : GL_RGB;
 			}
-			else if(components == 4)
+			else if(channels == 4)
 			{
 				texture2D.formatImage = GL_RGBA;
 				texture2D.formatInternal = sRGB ? GL_SRGB_ALPHA : GL_RGBA;
@@ -181,16 +186,18 @@ namespace Gogaman
 			GM_LOG_CORE_ERROR("Texture failed to load at location %s", filePath);
 		
 		texture2D.Generate(width, height, data);
-
+		GM_LOG_CORE_INFO("Loaded texture at location %s", filePath);
 		stbi_image_free(data);
 		return texture2D;
 	}
 
-	Model ResourceManager::LoadModelFromFile(const GLchar *filePath)
+	Model ResourceManager::LoadModelFromFile(const char *filePath)
 	{
 		std::string filePathString(filePath);
-		Model model(filePathString);
-		GM_LOG_CORE_INFO("Loaded model at: %s", filePath);
+		filePathString = "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj";
+		Model model;
+		model.LoadModel(filePathString);
+		GM_LOG_CORE_INFO("Loaded model at location %s", filePath);
 		return model;
 	}
 }
