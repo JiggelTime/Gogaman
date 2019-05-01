@@ -1,10 +1,10 @@
 #include "pch.h"
-#include "Texture3D.h"
+#include "Texture3D_old.h"
 
 namespace Gogaman
 {
-	Texture3D::Texture3D(const int _width, const int _height, const int _depth, const bool generateMipmaps, const GLenum _formatInternal, const GLenum _format, const GLenum _type, const int _levels, const GLenum _filterMin, const GLenum _filterMag)
-		: width(_width), height(_height), depth(_depth), clearData(4 * _width* _height* _depth, 0.0f), formatInternal(_formatInternal), format(_format), type(_type), levels(_levels), filterMin(_filterMin), filterMag(_filterMag)
+	Texture3D::Texture3D(int _width, int _height, int _depth, bool generateMipmaps, GLenum _formatInternal, GLenum _format, GLenum _type, int _levels, GLenum _filterMin, GLenum _filterMag)
+		: width(_width), height(_height), depth(_depth), clearData(4 *_width * _height * _depth, 0.0f), formatInternal(_formatInternal), format(_format), type(_type), levels(_levels), filterMin(_filterMin), filterMag(_filterMag)
 	{
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_3D, textureID);

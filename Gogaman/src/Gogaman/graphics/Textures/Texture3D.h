@@ -12,13 +12,17 @@ namespace Gogaman
 		Texture3D();
 		~Texture3D();
 
-		void Generate(GLuint width, GLuint height, GLuint depth, unsigned char *data);
-		inline void Bind() const { glBindTexture(GL_TEXTURE_2D, id); }
+		void Generate(GLsizei width, GLsizei height, GLsizei depth, unsigned char *imageData = nullptr);
+		void GenerateMipmap() const;
+		inline void BindTextureUnit(GLuint unit) const { glBindTextureUnit(unit, id); }
+		inline void BindImageUnit(GLuint unit, GLint level, GLenum access, GLenum format) const { glBindImageTexture(unit, id, level, mipmapLevels > 0 ? GL_TRUE : GL_FALSE, 0, access, format); }
+		inline void Clear() const { glClearTexImage(id, 0, formatImage, GL_UNSIGNED_BYTE, nullptr); }
 	public:
-		GLuint id;
-		GLuint width, height, depth;
-		GLuint formatInternal, formatImage;
-		GLuint wrapS, wrapT, wrapR;
-		GLuint filterMin, filterMax;
+		GLuint  id;
+		GLsizei width, height, depth;
+		GLuint  formatInternal, formatImage;
+		GLuint  wrapS, wrapT, wrapR;
+		GLuint  filterMin, filterMag;
+		GLuint  mipmapLevels;
 	};
 }

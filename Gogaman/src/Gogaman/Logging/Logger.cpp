@@ -24,25 +24,26 @@ namespace Gogaman
 			message = new char[messageLength];
 			vsprintf_s(message, messageLength, format, args);
 
-			m_OutputStringStream << "[" << m_LogName << "] ";
+			std::ostringstream outputStringStream;
+			outputStringStream << "[" << m_LogName << "] ";
 			switch(level)
 			{
 			case LogLevel::Trace:
-				m_OutputStringStream << "TRACE:   ";
+				outputStringStream << "TRACE:   ";
 				break;
 			case LogLevel::Info:
-				m_OutputStringStream << "INFO:    ";
+				outputStringStream << "INFO:    ";
 				break;
 			case LogLevel::Warning:
-				m_OutputStringStream << "WARNING: ";
+				outputStringStream << "WARNING: ";
 				break;
 			case LogLevel::Error:
-				m_OutputStringStream << "ERROR:   ";
+				outputStringStream << "ERROR:   ";
 				break;
 			}
 
-			m_OutputStringStream << message << "\n";
-			std::cout << m_OutputStringStream.str();
+			outputStringStream << message << "\n";
+			std::cout << outputStringStream.str();
 
 			va_end(args);
 			delete[] message;

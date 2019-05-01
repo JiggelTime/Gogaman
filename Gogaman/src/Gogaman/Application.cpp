@@ -16,6 +16,7 @@ namespace Gogaman
 
 		while(true)
 		{
+			gogaRenderer.Render();
 		}
 	}
 }

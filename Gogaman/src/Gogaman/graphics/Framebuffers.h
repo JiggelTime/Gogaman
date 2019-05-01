@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Gogaman/Core.h"
-#include "Gogaman/Config.h"
 
 #include <glad.h>
 
@@ -10,7 +9,7 @@ namespace Gogaman
 	class GOGAMAN_API Framebuffers
 	{
 	public:
-		static void Initialize(Config config);
+		static void Initialize();
 	public:
 		static unsigned int brdfFBO;
 		static unsigned int brdfRBO;

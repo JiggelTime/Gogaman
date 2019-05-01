@@ -28,7 +28,7 @@ namespace Gogaman
 		//Loads model from file and stores resulting meshes in the meshes vector
 		void LoadModel(std::string &filePath);
 
-		void Render(Shader &shader, bool setPreviousModelMatrixUniform = false);
+		void Render(const Shader &shader, bool setPreviousModelMatrixUniform = false);
 
 		void UpdateModelMatrix()
 		{
@@ -103,6 +103,11 @@ namespace Gogaman
 			return isDynamic;
 		}
 	private:
+		void ProcessNode(aiNode *node, const aiScene *scene);
+		Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
+		std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+		unsigned int LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
+	private:
 		//Model properties
 		glm::vec3 scale = glm::vec3(1.0f), rotation, position;
 		float rotationAngle = 0.0f;
@@ -114,50 +119,5 @@ namespace Gogaman
 		bool modelMatrixShouldUpdate = false;
 
 		std::vector<Texture> textures_loaded;
-
-		//Recursively proccesses a node
-		void ProcessNode(aiNode *node, const aiScene *scene);
-
-		Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
-
-		unsigned int LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
-
-		std::vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
-		{
-			std::vector<Texture> textures;
-			for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
-			{
-				aiString str;
-				mat->GetTexture(type, i, &str);
-				bool skip = false;
-				for(unsigned int j = 0; j < textures_loaded.size(); j++)
-				{
-					if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
-					{
-						textures.push_back(textures_loaded[j]);
-						skip = true;
-						break;
-					}
-				}
-
-				//Load the texture if it hasn't already been loaded
-				if(!skip)
-				{
-					Texture texture;
-					if(typeName == "texture_diffuse")
-						texture.id = LoadTextureFromFile(str.C_Str(), directory, true);
-					else
-						texture.id = LoadTextureFromFile(str.C_Str(), directory);
-					texture.type = typeName;
-					texture.path = str.C_Str();
-					textures.push_back(texture);
-
-					//Add to loaded textures
-					textures_loaded.push_back(texture);
-				}
-			}
-
-			return textures;
-		}
 	};
 }

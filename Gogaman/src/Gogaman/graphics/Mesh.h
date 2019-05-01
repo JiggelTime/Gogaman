@@ -74,7 +74,7 @@ namespace Gogaman
 					number = std::to_string(emissivityNr++);
 
 				//Set sampler to the texture unit
-				shader.setInt((name + number), i + 1);
+				shader.SetUniformInt((name + number), i + 1);
 
 				//Bind the texture
 				glBindTexture(GL_TEXTURE_2D, textures[i].id);

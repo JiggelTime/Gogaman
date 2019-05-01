@@ -11,8 +11,17 @@ namespace Gogaman
 	class GOGAMAN_API Config
 	{
 	public:
+		static Config &GetConfig()
+		{
+			static Config instance;
+			return instance;
+		}
+	private:
+		Config() {}
+		~Config() {}
+	public:
 		//Window
-			//Rendering resolution scale
+		//Rendering resolution scale
 		const float resScale = 1.0f;
 		//Window resolution
 		const unsigned int screenWidth = 1920;
@@ -58,9 +67,9 @@ namespace Gogaman
 
 		//Voxel cone traced global illumination
 			//GI resolution scale
-		const float giResScale = 0.25f * resScale;
+		const float giResScale = 1.0f * resScale;
 		//Toggle spatio-temporal indirect lighting upscaling
-		bool giUpscaling = true;
+		bool giUpscaling = false;
 		bool giUpscalingKeyPressed = false;
 		//Automatic voxelization toggle
 		bool autoVoxelize = false;
@@ -82,3 +91,5 @@ namespace Gogaman
 		bool debug2KeyPressed = false;
 	};
 }
+
+#define GM_CONFIG Gogaman::Config::GetConfig()

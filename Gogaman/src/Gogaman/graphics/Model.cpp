@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Model.h"
 #include "Gogaman/Logging/Log.h"
+#include "Textures/Texture2D.h"
 
 namespace Gogaman
 {
@@ -10,16 +11,16 @@ namespace Gogaman
 	Model::~Model()
 	{}
 
-	void Model::Render(Shader &shader, bool setPreviousModelMatrixUniform)
+	void Model::Render(const Shader &shader, bool setPreviousModelMatrixUniform)
 	{
 		if(modelMatrixShouldUpdate)
 			UpdateModelMatrix();
 
 		modelMatrixShouldUpdate = false;
 
-		shader.setMat4("M", modelMatrix);
+		shader.SetUniformMat4("M", modelMatrix);
 		if(setPreviousModelMatrixUniform)
-			shader.setMat4("previousM", previousModelMatrix);
+			shader.SetUniformMat4("previousM", previousModelMatrix);
 
 		for(unsigned int i = 0; i < meshes.size(); i++)
 			meshes[i].Render(shader);
@@ -117,32 +118,70 @@ namespace Gogaman
 			aiMaterial *material = scene->mMaterials[mesh->mMaterialIndex];
 
 			//Diffuse
-			std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+			std::vector<Texture> diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
 			textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
 			//Specular
-			std::vector<Texture> roughnessMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_roughness");
+			std::vector<Texture> roughnessMaps = LoadMaterialTextures(material, aiTextureType_SPECULAR, "texture_roughness");
 			textures.insert(textures.end(), roughnessMaps.begin(), roughnessMaps.end());
 
 			//Normal
-			std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+			std::vector<Texture> normalMaps = LoadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
 			textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 
 			//Height
-			std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
+			std::vector<Texture> heightMaps = LoadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
 			textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
 			//Metalness
-			std::vector<Texture> metalnessMaps = loadMaterialTextures(material, aiTextureType_SHININESS, "texture_metalness");
+			std::vector<Texture> metalnessMaps = LoadMaterialTextures(material, aiTextureType_SHININESS, "texture_metalness");
 			textures.insert(textures.end(), metalnessMaps.begin(), metalnessMaps.end());
 
 			//Emissivity
-			std::vector<Texture> emissivityMaps = loadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emissivity");
+			std::vector<Texture> emissivityMaps = LoadMaterialTextures(material, aiTextureType_EMISSIVE, "texture_emissivity");
 			textures.insert(textures.end(), emissivityMaps.begin(), emissivityMaps.end());
 
 			//Return the mesh object
 			return Mesh(vertices, indices, textures);
 		}
+	}
+
+	std::vector<Texture> Model::LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName)
+	{
+		std::vector<Texture> textures;
+		for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
+		{
+			aiString str;
+			mat->GetTexture(type, i, &str);
+			bool skip = false;
+			for(unsigned int j = 0; j < textures_loaded.size(); j++)
+			{
+				if(std::strcmp(textures_loaded[j].path.data(), str.C_Str()) == 0)
+				{
+					textures.push_back(textures_loaded[j]);
+					skip = true;
+					break;
+				}
+			}
+
+			//Load the texture if it hasn't already been loaded
+			if(!skip)
+			{
+				Texture texture;
+				if(typeName == "texture_diffuse")
+					texture.id = LoadTextureFromFile(str.C_Str(), directory, true);
+				else
+					texture.id = LoadTextureFromFile(str.C_Str(), directory);
+				texture.type = typeName;
+				texture.path = str.C_Str();
+				textures.push_back(texture);
+
+				//Add to loaded textures
+				textures_loaded.push_back(texture);
+			}
+		}
+
+		return textures;
 	}
 
 	unsigned int Model::LoadTextureFromFile(const char *path, const std::string &directory, bool gamma)

@@ -3,6 +3,7 @@
 #include "Gogaman/Core.h"
 #include "Gogaman/Config.h"
 #include "Camera.h"
+#include "Textures/Texture3D.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -19,15 +20,13 @@ namespace Gogaman
 		Renderer();
 		~Renderer();
 
-		//void Draw();
+		void Render();
 	private:
 		void ProcessInput(GLFWwindow *window);
 		void WindowResizeCallback(GLFWwindow *window, int width, int height);
 		void MouseMovedCallback(GLFWwindow *window, double xPos, double yPos);
 		void MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset);
 	private:
-		Config config;
-
 		GLFWwindow *m_Window;
 		TwBar *m_TweakBar;
 
@@ -35,8 +34,8 @@ namespace Gogaman
 		const float cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
 		float exposure = 1.0f;
 
-		float aspectRatio = float(config.screenWidth) / float(config.screenHeight);
-		float lastX = config.screenWidth / 2.0f, lastY = config.screenHeight / 2.0f;
+		float aspectRatio = float(GM_CONFIG.screenWidth) / float(GM_CONFIG.screenHeight);
+		float lastX = GM_CONFIG.screenWidth / 2.0f, lastY = GM_CONFIG.screenHeight / 2.0f;
 		bool firstMouse = true;
 		bool firstIteration = true;
 
@@ -51,14 +50,21 @@ namespace Gogaman
 		//BRDF LUT
 		unsigned int brdfLUT;
 
-		unsigned int voxelMaxMipLevels = glm::ceil(log2(config.voxelResolution) - 1);
+		//VCTGI variables
 		unsigned int voxelizationCounter;
+		unsigned int voxelMaxMipmapLevel = glm::ceil(log2(GM_CONFIG.voxelResolution) - 1);
+		//VCTGI textures
+		Texture3D voxelAlbedo;
+		Texture3D voxelNormal;
+		Texture3D voxelDirectRadiance;
+		Texture3D voxelTotalRadiance;
+		Texture3D voxelStaticFlag;
 
-		//Variables for temporal sampling
+		//TAA variables
 		glm::vec2 temporalJitter = glm::vec2(0.0f);
 		glm::vec2 previousTemporalJitter = temporalJitter;
 		unsigned int temporalOffsetIterator = 0;
-		glm::vec2 screenTexelSize = 1.0f / (glm::vec2(config.screenWidth, config.screenHeight) * config.resScale);
+		glm::vec2 screenTexelSize = 1.0f / (glm::vec2(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight) * GM_CONFIG.resScale);
 		glm::vec2 coneTraceJitter;
 		unsigned int coneTraceJitterIterator = 0;
 

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Framebuffers.h"
+#include "Gogaman/Config.h"
 
 namespace Gogaman
 {
@@ -60,7 +61,7 @@ namespace Gogaman
 
 	//Framebuffers::Framebuffers(Config config)
 		//: m_Config(config)
-	void Framebuffers::Initialize(Config config)
+	void Framebuffers::Initialize()
 	{
 		unsigned int oneColorAttachment       = GL_COLOR_ATTACHMENT0;
 		unsigned int twoColorAttachments[2]   = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -82,35 +83,35 @@ namespace Gogaman
 		//Create position color buffer
 		glGenTextures(1, &gPositionMetalness);
 		glBindTexture(GL_TEXTURE_2D, gPositionMetalness);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPositionMetalness, 0);
 		//Create normal buffer
 		glGenTextures(1, &gNormal);
 		glBindTexture(GL_TEXTURE_2D, gNormal);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RG, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RG, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
 		//Create albedo and roughness color buffer
 		glGenTextures(1, &gAlbedoEmissivityRoughness);
 		glBindTexture(GL_TEXTURE_2D, gAlbedoEmissivityRoughness);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoEmissivityRoughness, 0);
 		//Create velocity buffer
 		glGenTextures(1, &gVelocity);
 		glBindTexture(GL_TEXTURE_2D, gVelocity);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RG, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RG, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gVelocity, 0);
 		//Create depth buffer
 		glGenTextures(1, &gDepth);
 		glBindTexture(GL_TEXTURE_2D, gDepth);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gDepth, 0);
@@ -123,7 +124,7 @@ namespace Gogaman
 		//Create quarter-resolution color buffer
 		glGenTextures(1, &normalDownsampleBuffer);
 		glBindTexture(GL_TEXTURE_2D, normalDownsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, config.screenWidth * config.resScale * 0.5f, config.screenHeight * config.resScale * 0.5f, 0, GL_RG, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale * 0.5f, GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f, 0, GL_RG, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -137,7 +138,7 @@ namespace Gogaman
 		//Create quarter-resolution color buffer
 		glGenTextures(1, &depthDownsampleBuffer);
 		glBindTexture(GL_TEXTURE_2D, depthDownsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, config.screenWidth * config.resScale * 0.5f, config.screenHeight * config.resScale * 0.5f, 0, GL_RED, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, GM_CONFIG.screenWidth * GM_CONFIG.resScale * 0.5f, GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f, 0, GL_RED, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glGenerateMipmap(GL_TEXTURE_2D);
@@ -153,7 +154,7 @@ namespace Gogaman
 		for (unsigned int i = 0; i < 2; i++)
 		{
 			glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -165,7 +166,7 @@ namespace Gogaman
 		//Create depth buffer
 		glGenRenderbuffers(1, &rboDepth);
 		glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, config.screenWidth * config.resScale, config.screenHeight * config.resScale);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
 		CheckCompleteness();
 
@@ -175,7 +176,7 @@ namespace Gogaman
 		//Create floating point color buffers
 		glGenTextures(1, &previousFrameBuffer);
 		glBindTexture(GL_TEXTURE_2D, previousFrameBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousFrameBuffer, 0);
@@ -190,7 +191,7 @@ namespace Gogaman
 		for (unsigned int i = 0; i < 2; i++)
 		{
 			glBindTexture(GL_TEXTURE_2D, indirectLightingBuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.giResScale, config.screenHeight * config.giResScale, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.giResScale, GM_CONFIG.screenHeight * GM_CONFIG.giResScale, 0, GL_RGBA, GL_FLOAT, NULL);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, indirectLightingBuffers[i], 0);
@@ -205,7 +206,7 @@ namespace Gogaman
 		//Create floating point color buffer
 		glGenTextures(1, &upsampleBuffer);
 		glBindTexture(GL_TEXTURE_2D, upsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, upsampleBuffer, 0);
@@ -218,7 +219,7 @@ namespace Gogaman
 		//Create floating point color buffer
 		glGenTextures(1, &upsampleBuffer2);
 		glBindTexture(GL_TEXTURE_2D, upsampleBuffer2);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, upsampleBuffer2, 0);
@@ -231,7 +232,7 @@ namespace Gogaman
 		//Create floating point color buffer
 		glGenTextures(1, &previousUpsampleBuffer);
 		glBindTexture(GL_TEXTURE_2D, previousUpsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousUpsampleBuffer, 0);
@@ -244,7 +245,7 @@ namespace Gogaman
 		//Create floating point color buffer
 		glGenTextures(1, &previousUpsampleBuffer2);
 		glBindTexture(GL_TEXTURE_2D, previousUpsampleBuffer2);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousUpsampleBuffer2, 0);
@@ -257,7 +258,7 @@ namespace Gogaman
 		//Create color buffer
 		glGenTextures(1, &ssrBuffer);
 		glBindTexture(GL_TEXTURE_2D, ssrBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, config.screenWidth * config.resScale, config.screenHeight * config.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssrBuffer, 0);
@@ -270,7 +271,7 @@ namespace Gogaman
 		//Create floating point buffer
 		glGenTextures(1, &cocBuffer);
 		glBindTexture(GL_TEXTURE_2D, cocBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, config.screenWidth * config.dofResScale, config.screenHeight * config.dofResScale, 0, GL_RED, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RED, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, cocBuffer, 0);
@@ -283,21 +284,21 @@ namespace Gogaman
 		//Create red channel floating point color buffer
 		glGenTextures(1, &circularBlurRedBuffer);
 		glBindTexture(GL_TEXTURE_2D, circularBlurRedBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.dofResScale, config.screenHeight * config.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, circularBlurRedBuffer, 0);
 		//Create green channel floating point color buffer
 		glGenTextures(1, &circularBlurGreenBuffer);
 		glBindTexture(GL_TEXTURE_2D, circularBlurGreenBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.dofResScale, config.screenHeight * config.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, circularBlurGreenBuffer, 0);
 		//Create blue channel floating point color buffer
 		glGenTextures(1, &circularBlurBlueBuffer);
 		glBindTexture(GL_TEXTURE_2D, circularBlurBlueBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.dofResScale, config.screenHeight * config.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, circularBlurBlueBuffer, 0);
@@ -310,7 +311,7 @@ namespace Gogaman
 		//Create floating point color buffer
 		glGenTextures(1, &circularBlurVerticalBuffer);
 		glBindTexture(GL_TEXTURE_2D, circularBlurVerticalBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, config.screenWidth * config.dofResScale, config.screenHeight * config.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, circularBlurVerticalBuffer, 0);
@@ -324,7 +325,7 @@ namespace Gogaman
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
 			glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, config.screenWidth * config.bloomResScale, config.screenHeight * config.bloomResScale, 0, GL_RGB, GL_FLOAT, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, GM_CONFIG.screenWidth * GM_CONFIG.bloomResScale, GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale, 0, GL_RGB, GL_FLOAT, NULL);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

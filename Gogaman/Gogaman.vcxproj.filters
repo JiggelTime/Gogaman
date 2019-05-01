@@ -50,19 +50,16 @@
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D_old.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,15 +96,12 @@
     <ClInclude Include="src\Gogaman\Graphics\Model.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Gogaman\Graphics\ResourceManager.h" />
     <ClInclude Include="src\Gogaman\Graphics\Shader.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D_old.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

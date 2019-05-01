@@ -23,6 +23,5 @@ namespace Gogaman
 	private:
 		std::string m_LogName;
 		LogLevel m_LogLevel = LogLevel::Trace;
-		std::ostringstream m_OutputStringStream;
 	};
 }

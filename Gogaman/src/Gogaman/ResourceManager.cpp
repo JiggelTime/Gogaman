@@ -1,67 +1,51 @@
 #include "pch.h"
 #include "ResourceManager.h"
-#include "Gogaman/Logging/Log.h"
+#include "Logging/Log.h"
 
 #include <stb_image.h>
 
 namespace Gogaman
 {
-	std::map<std::string, Shader> ResourceManager::m_Shaders;
-	std::map<std::string, Texture2D> ResourceManager::m_Texture2Ds;
-	std::map<std::string, Model> ResourceManager::m_Models;
-	float ResourceManager::m_MaxAF;
+	std::unordered_map<std::string, Shader> ResourceManager::shaders;
+	std::unordered_map<std::string, Texture2D> ResourceManager::texture2Ds;
+	std::unordered_map<std::string, Model> ResourceManager::models;
 
 	ResourceManager::ResourceManager()
-	{
-		InitializeMaxAF();
-	}
+	{}
 
 	ResourceManager::~ResourceManager()
 	{}
 
-	void ResourceManager::InitializeMaxAF()
-	{
-		if(GL_ARB_texture_filter_anisotropic)
-		{
-			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, &m_MaxAF);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, m_MaxAF);
-		}
-		else
-			m_MaxAF = 0.0f;
-
-		GM_LOG_CORE_INFO("Max anisotropic texture filtering: x%d", m_MaxAF);
-	}
-
 	Shader ResourceManager::LoadShader(std::string name, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
 	{
-		m_Shaders[name] = LoadShaderFromFile(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
-		return m_Shaders[name];
+		shaders[name] = LoadShaderFromFile(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
+		return shaders[name];
 	}
 
 	Shader ResourceManager::LoadShader(std::string name, const char *computeShaderPath)
 	{
-		m_Shaders[name] = LoadShaderFromFile(computeShaderPath);
-		return m_Shaders[name];
+		shaders[name] = LoadShaderFromFile(computeShaderPath);
+		return shaders[name];
 	}
 
 	Texture2D ResourceManager::LoadTexture2D(std::string name, const char *filePath, GLboolean alpha)
 	{
-		m_Texture2Ds[name] = LoadTexture2DFromFile(filePath, alpha);
-		return m_Texture2Ds[name];
+		texture2Ds[name] = LoadTexture2DFromFile(filePath, alpha);
+		return texture2Ds[name];
 	}
 
 	Model ResourceManager::LoadModel(std::string name, const char *filePath)
 	{
-		m_Models[name] = LoadModelFromFile(filePath);
-		return m_Models[name];
+		models[name] = LoadModelFromFile(filePath);
+		return models[name];
 	}
 
 	void ResourceManager::Clear()
 	{
-		for(auto i : m_Shaders)
+		for(auto i : shaders)
 			glDeleteProgram(i.second.id);
 
-		for(auto i : m_Texture2Ds)
+		for(auto i : texture2Ds)
 			glDeleteTextures(1, &i.second.id);
 	}
 
@@ -75,7 +59,6 @@ namespace Gogaman
 		std::ifstream vertexInputStream;
 		std::ifstream fragmentInputStream;
 		std::ifstream geometryInputStream;
-
 		vertexInputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 		fragmentInputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 		geometryInputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -110,20 +93,15 @@ namespace Gogaman
 		}
 		catch(std::ifstream::failure e)
 		{
-			std::clog << e.what() << " (" << e.code() << ")" << std::endl;
-
 			GM_LOG_CORE_ERROR("Failed to read shader file at location %s", vertexShaderPath);
 			GM_LOG_CORE_ERROR("Failed to read shader file at location %s", fragmentShaderPath);
 			if(geometryShaderPresent)
 				GM_LOG_CORE_ERROR("Failed to read shader file at location %s", geometryShaderPath);
 		}
 
-		//const char *vertexShaderSource   = vertexData.c_str();
-		//const char *fragmentShaderSource = fragmentData.c_str();
-		//const char *geometryShaderSource = geometryData.c_str();
-		const GLchar *vertexShaderSource   = vertexData.c_str();
-		const GLchar *fragmentShaderSource = fragmentData.c_str();
-		const GLchar *geometryShaderSource = geometryData.c_str();
+		const char *vertexShaderSource   = vertexData.c_str();
+		const char *fragmentShaderSource = fragmentData.c_str();
+		const char *geometryShaderSource = geometryData.c_str();
 
 		Shader shader;
 		shader.Compile(vertexShaderSource, fragmentShaderSource, geometryShaderPresent ? geometryShaderSource : nullptr);
@@ -194,7 +172,6 @@ namespace Gogaman
 	Model ResourceManager::LoadModelFromFile(const char *filePath)
 	{
 		std::string filePathString(filePath);
-		filePathString = "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj";
 		Model model;
 		model.LoadModel(filePathString);
 		GM_LOG_CORE_INFO("Loaded model at location %s", filePath);
