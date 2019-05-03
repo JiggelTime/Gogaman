@@ -24,8 +24,8 @@ namespace Gogaman
 		//Rendering resolution scale
 		const float resScale = 1.0f;
 		//Window resolution
-		const unsigned int screenWidth = 1920;
-		const unsigned int screenHeight = 1080;
+		const uint screenWidth = 1920;
+		const uint screenHeight = 1080;
 		//Vertical synchronization toggle
 		const bool vSync = true;
 
@@ -67,7 +67,7 @@ namespace Gogaman
 
 		//Voxel cone traced global illumination
 			//GI resolution scale
-		const float giResScale = 1.0f * resScale;
+		const float giResScale = 0.5f * resScale;
 		//Toggle spatio-temporal indirect lighting upscaling
 		bool giUpscaling = false;
 		bool giUpscalingKeyPressed = false;
@@ -75,16 +75,16 @@ namespace Gogaman
 		bool autoVoxelize = false;
 		bool autoVoxelizeKeyPressed = false;
 		//Width, length, and height of voxel volume
-		const unsigned int voxelResolution = 64;
+		const uint voxelResolution = 64;
 		//Number of voxel GI compute shader work groups
-		const unsigned int voxelComputeWorkGroups = glm::ceil(voxelResolution / 8.0f);
+		const uint voxelComputeWorkGroups = glm::ceil(voxelResolution / 8.0f);
 		float voxelGridSize = 1.7f;
 		glm::vec3 voxelGridPos = glm::vec3(0.0f, 0.0f, 0.0f);
 		//Frequency of re-voxelization (every N frames)
-		const unsigned int voxelizationFrequency = 1;
+		const uint voxelizationFrequency = 1;
 
 		//Debug
-		unsigned int renderMode = 0;
+		uint renderMode = 0;
 		bool debug = false;
 		bool debugKeyPressed = false;
 		bool debug2 = false;

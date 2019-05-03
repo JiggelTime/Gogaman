@@ -14,6 +14,8 @@
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture1D.cpp" />
     <ClCompile Include="src\Gogaman\ResourceManager.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Shader.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Textures\Texture2D.cpp" />
@@ -22,6 +24,7 @@
     <ClCompile Include="src\Gogaman\Logging\Logger.cpp" />
     <ClCompile Include="src\Gogaman\Application.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Framebuffers.cpp" />
+    <ClCompile Include="src\Gogaman\Scene\SceneNode.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -38,6 +41,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture1D.h" />
     <ClInclude Include="src\Gogaman\ResourceManager.h" />
     <ClInclude Include="src\Gogaman\Graphics\Textures\Texture2D.h" />
     <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h" />
@@ -54,6 +59,8 @@
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\Gogaman\Graphics\Mesh.h" />
     <ClInclude Include="src\Gogaman\Graphics\Model.h" />
+    <ClInclude Include="src\Gogaman\Scene\SceneNode.h" />
+    <ClInclude Include="src\Gogaman\TypeDefs.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Gogaman\Graphics\Shader.h" />
     <ClInclude Include="vendor\stb_image.h" />

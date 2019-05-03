@@ -1,29 +1,27 @@
 #include "pch.h"
-#include "Texture2D.h"
+#include "Texture1D.h"
 #include "Gogaman/Logging/Log.h"
 
 namespace Gogaman
 {
-	Texture2D::Texture2D()
-		: Texture(), width(0), height(0), wrapS(GL_REPEAT), wrapT(GL_REPEAT)
+	Texture1D::Texture1D()
+		: Texture(), width(0), wrapS(GL_REPEAT)
 	{}
 
-	Texture2D::~Texture2D()
+	Texture1D::~Texture1D()
 	{}
 
-	void Texture2D::Generate(const GLsizei &width, const GLsizei &height, const unsigned char *imageData)
+	void Texture1D::Generate(const GLsizei &width, const unsigned char *imageData)
 	{
 		this->width  = width;
-		this->height = height;
 
-		glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
-		glTextureStorage2D(m_ID, levels == 0 ? floor(log2(max(width, height))) + 1 : levels, formatInternal, width, height);
+		glCreateTextures(GL_TEXTURE_1D, 1, &m_ID);
+		glTextureStorage1D(m_ID, levels == 0 ? floor(log2(width)) + 1 : levels, formatInternal, width);
 		if(imageData != nullptr)
-			glTextureSubImage2D(m_ID, 0, 0, 0, width, height, formatImage, GL_UNSIGNED_BYTE, imageData);
+			glTextureSubImage1D(m_ID, 0, 0, width, formatImage, GL_UNSIGNED_BYTE, imageData);
 
 		//Set texture properties
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, wrapS);
-		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, wrapT);
 		glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, filterMin);
 		glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, filterMag);
 		if(filterMin != GL_NEAREST && filterMin != GL_LINEAR && levels == 1)

@@ -72,10 +72,10 @@ namespace Gogaman
 		glDeleteShader(computeShader);
 	}
 
-	void Shader::CheckCompileErrors(GLuint object, std::string name)
+	void Shader::CheckCompileErrors(const GLuint &object, const std::string &type)
 	{
 		int success;
-		if(name != "shader program")
+		if(type != "shader program")
 		{
 			glGetShaderiv(object, GL_COMPILE_STATUS, &success);
 			if(!success)
@@ -84,7 +84,7 @@ namespace Gogaman
 				glGetShaderiv(object, GL_INFO_LOG_LENGTH, &logSize);
 				GLchar* infoLog = new GLchar[logSize];
 				glGetShaderInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Failed to compile %s", name);
+				GM_LOG_CORE_ERROR("Failed to compile %s", type);
 				GM_LOG_CORE_ERROR("%s", infoLog);
 			}
 		}
@@ -97,7 +97,7 @@ namespace Gogaman
 				glGetProgramiv(object, GL_INFO_LOG_LENGTH, &logSize);
 				GLchar* infoLog = new GLchar[logSize];
 				glGetProgramInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Failed to link %s", name);
+				GM_LOG_CORE_ERROR("Failed to link %s", type);
 				GM_LOG_CORE_ERROR("%s", infoLog);
 			}
 		}

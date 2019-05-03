@@ -2,21 +2,21 @@ cmake_minimum_required(VERSION 3.14)
 
 project(Gogaman LANGUAGES C CXX)
 
-set(workspace_root ${CMAKE_CURRENT_SOURCE_DIR})
-set(Gogaman_root ${workspace_root}/Gogaman)
-set(Dependencies_root ${workspace_root}/Dependencies)
+set(WORKSPACE_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+set(GOGAMAN_ROOT ${WORKSPACE_ROOT}/Gogaman)
+set(DEPENDENCIES_ROOT ${WORKSPACE_ROOT}/Dependencies)
 
 if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
-	set(system_architecture "x64")
+	set(SYSTEM_ARCHITECTURE "x64")
 else() 
-	set(system_architecture "x86")
+	set(SYSTEM_ARCHITECTURE "x86")
 endif()
 
-set(output_directory ${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${system_architecture})
+set(OUTPUT_DIRECTORY ${WORKSPACE_ROOT}/build/${CMAKE_BUILD_TYPE}-${CMAKE_SYSTEM_NAME}-${SYSTEM_ARCHITECTURE})
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-include_directories(${workspace_root})
+include_directories(${WORKSPACE_ROOT})
 
 #Preprocessor definitions
 if(${CMAKE_BUILD_TYPE} MATCHES "Debug")

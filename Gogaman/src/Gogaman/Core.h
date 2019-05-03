@@ -1,5 +1,7 @@
 #pragma once
 
+#include "TypeDefs.h"
+
 #ifdef GM_PLATFORM_WINDOWS
 	#ifdef GM_BUILD_DLL
 		#define GOGAMAN_API __declspec(dllexport)

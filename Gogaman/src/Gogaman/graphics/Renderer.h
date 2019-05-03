@@ -21,6 +21,7 @@ namespace Gogaman
 		~Renderer();
 
 		void Render();
+		void RenderFullscreenQuad() const;
 	private:
 		void ProcessInput(GLFWwindow *window);
 		void WindowResizeCallback(GLFWwindow *window, int width, int height);
@@ -41,18 +42,17 @@ namespace Gogaman
 
 		//Timing
 		float deltaTime = 0.0f, lastFrame = 0.0f;
-		unsigned int frameCounter = 0;
+		uint frameCounter = 0;
 
 		//Fullscreen quad
 		float quadVertices[20]{ -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f };
-		unsigned int quadVAO = 0, quadVBO;
+		uint quadVAO = 0, quadVBO;
 
 		//BRDF LUT
-		unsigned int brdfLUT;
+		uint brdfLUT;
 
 		//VCTGI variables
-		unsigned int voxelizationCounter;
-		unsigned int voxelMaxMipmapLevel = glm::ceil(log2(GM_CONFIG.voxelResolution) - 1);
+		uint voxelizationCounter;
 		//VCTGI textures
 		Texture3D voxelAlbedo;
 		Texture3D voxelNormal;
@@ -63,10 +63,10 @@ namespace Gogaman
 		//TAA variables
 		glm::vec2 temporalJitter = glm::vec2(0.0f);
 		glm::vec2 previousTemporalJitter = temporalJitter;
-		unsigned int temporalOffsetIterator = 0;
+		uint temporalOffsetIterator = 0;
 		glm::vec2 screenTexelSize = 1.0f / (glm::vec2(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight) * GM_CONFIG.resScale);
 		glm::vec2 coneTraceJitter;
-		unsigned int coneTraceJitterIterator = 0;
+		uint coneTraceJitterIterator = 0;
 
 		//Initialize camera matrices
 		glm::mat4 projectionMatrix;

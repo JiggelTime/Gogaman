@@ -32,6 +32,9 @@ namespace Gogaman
 
 		void UpdateModelMatrix()
 		{
+			if(previousModelMatrix != modelMatrix)
+				SetDynamic(true);
+
 			previousModelMatrix = modelMatrix;
 			modelMatrix = glm::mat4();
 
@@ -93,20 +96,16 @@ namespace Gogaman
 			modelMatrixShouldUpdate = true;
 		}
 
-		void SetDynamic(bool isDynamic)
-		{
-			this->isDynamic = isDynamic;
-		}
+		inline void SetDynamic(const bool &isDynamic)
+		{ this->isDynamic = isDynamic; }
 
-		bool IsDynamic()
-		{
-			return isDynamic;
-		}
+		inline bool IsDynamic() const
+		{ return isDynamic; }
 	private:
 		void ProcessNode(aiNode *node, const aiScene *scene);
 		Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
-		std::vector<Texture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
-		unsigned int LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
+		std::vector<ModelTexture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+		uint LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 	private:
 		//Model properties
 		glm::vec3 scale = glm::vec3(1.0f), rotation, position;
@@ -118,6 +117,6 @@ namespace Gogaman
 		glm::mat4 previousModelMatrix;
 		bool modelMatrixShouldUpdate = false;
 
-		std::vector<Texture> textures_loaded;
+		std::vector<ModelTexture> textures_loaded;
 	};
 }

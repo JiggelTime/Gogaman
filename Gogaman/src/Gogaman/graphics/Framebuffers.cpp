@@ -4,69 +4,79 @@
 
 namespace Gogaman
 {
-	unsigned int Framebuffers::brdfFBO;
-	unsigned int Framebuffers::brdfRBO;
+	uint Framebuffers::brdfFBO;
+	uint Framebuffers::brdfRBO;
 
-	unsigned int Framebuffers::gBuffer;
-	unsigned int Framebuffers::gPositionMetalness;
-	unsigned int Framebuffers::gNormal;
-	unsigned int Framebuffers::gAlbedoEmissivityRoughness;
-	unsigned int Framebuffers::gVelocity;
-	unsigned int Framebuffers::gDepth;
+	uint Framebuffers::gBuffer;
+	Texture2D Framebuffers::gPositionMetalness;
+	Texture2D Framebuffers::gNormal;
+	Texture2D Framebuffers::gAlbedoEmissivityRoughness;
+	Texture2D Framebuffers::gVelocity;
+	Texture2D Framebuffers::gDepth;
 
-	unsigned int Framebuffers::normalDownsampleFBO;
-	unsigned int Framebuffers::normalDownsampleBuffer;
+	uint Framebuffers::normalDownsampleFBO;
+	Texture2D Framebuffers::normalDownsampleBuffer;
 
-	unsigned int Framebuffers::depthDownsampleFBO;
-	unsigned int Framebuffers::depthDownsampleBuffer;
+	uint Framebuffers::depthDownsampleFBO;
+	Texture2D Framebuffers::depthDownsampleBuffer;
 
-	unsigned int Framebuffers::hdrFBO;
-	unsigned int Framebuffers::colorBuffers[3];
-	unsigned int Framebuffers::rboDepth;
+	uint Framebuffers::hdrFBO;
+	Texture2D Framebuffers::colorBuffers[3];
+	uint Framebuffers::rboDepth;
 
-	unsigned int Framebuffers::previousFrameFBO;
-	unsigned int Framebuffers::previousFrameBuffer;
+	uint Framebuffers::previousFrameFBO;
+	Texture2D Framebuffers::previousFrameBuffer;
 
-	unsigned int Framebuffers::indirectFBO;
-	unsigned int Framebuffers::indirectLightingBuffers[2];
+	uint Framebuffers::indirectFBO;
+	Texture2D Framebuffers::indirectLightingBuffers[2];
 
-	unsigned int Framebuffers::upsampleFBO;
-	unsigned int Framebuffers::upsampleBuffer;
+	uint Framebuffers::upsampleFBO;
+	Texture2D Framebuffers::upsampleBuffer;
 
-	unsigned int Framebuffers::upsampleFBO2;
-	unsigned int Framebuffers::upsampleBuffer2;
+	uint Framebuffers::upsampleFBO2;
+	Texture2D Framebuffers::upsampleBuffer2;
 
-	unsigned int Framebuffers::previousUpsampleFBO;
-	unsigned int Framebuffers::previousUpsampleBuffer;
+	uint Framebuffers::previousUpsampleFBO;
+	Texture2D Framebuffers::previousUpsampleBuffer;
 
-	unsigned int Framebuffers::previousUpsampleFBO2;
-	unsigned int Framebuffers::previousUpsampleBuffer2;
+	uint Framebuffers::previousUpsampleFBO2;
+	Texture2D Framebuffers::previousUpsampleBuffer2;
 
-	unsigned int Framebuffers::ssrFBO;
-	unsigned int Framebuffers::ssrBuffer;
+	uint Framebuffers::ssrFBO;
+	Texture2D Framebuffers::ssrBuffer;
 
-	unsigned int Framebuffers::cocFBO;
-	unsigned int Framebuffers::cocBuffer;
+	uint Framebuffers::cocFBO;
+	Texture2D Framebuffers::cocBuffer;
 
-	unsigned int Framebuffers::circularBlurHorizontalFBO;
-	unsigned int Framebuffers::circularBlurRedBuffer;
-	unsigned int Framebuffers::circularBlurGreenBuffer;
-	unsigned int Framebuffers::circularBlurBlueBuffer;
+	uint Framebuffers::circularBlurHorizontalFBO;
+	Texture2D Framebuffers::circularBlurRedBuffer;
+	Texture2D Framebuffers::circularBlurGreenBuffer;
+	Texture2D Framebuffers::circularBlurBlueBuffer;
 
-	unsigned int Framebuffers::circularBlurVerticalFBO;
-	unsigned int Framebuffers::circularBlurVerticalBuffer;
+	uint Framebuffers::circularBlurVerticalFBO;
+	Texture2D Framebuffers::circularBlurVerticalBuffer;
 
-	unsigned int Framebuffers::pingpongFBO[2];
-	unsigned int Framebuffers::pingpongColorbuffers[2];
+	uint Framebuffers::pingpongFBO[2];
+	Texture2D Framebuffers::pingpongColorbuffers[2];
 
-	//Framebuffers::Framebuffers(Config config)
-		//: m_Config(config)
 	void Framebuffers::Initialize()
 	{
-		unsigned int oneColorAttachment       = GL_COLOR_ATTACHMENT0;
-		unsigned int twoColorAttachments[2]   = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		unsigned int threeColorAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		unsigned int fourColorAttachments[4]  = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		const uint oneColorAttachment       = GL_COLOR_ATTACHMENT0;
+		const uint twoColorAttachments[2]   = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		const uint threeColorAttachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+		const uint fourColorAttachments[4]  = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+
+		const uint renderResWidth  = GM_CONFIG.screenWidth  * GM_CONFIG.resScale;
+		const uint renderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.resScale;
+
+		const uint giRenderResWidth  = GM_CONFIG.screenWidth  * GM_CONFIG.giResScale;
+		const uint giRenderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.giResScale;
+
+		const uint dofRenderResWidth  = GM_CONFIG.screenWidth  * GM_CONFIG.dofResScale;
+		const uint dofRenderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.dofResScale;
+
+		const uint bloomRenderResWidth  = GM_CONFIG.screenWidth  * GM_CONFIG.bloomResScale;
+		const uint bloomRenderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale;
 
 		//Create precomputed BRDF framebuffer
 		glGenFramebuffers(1, &brdfFBO);
@@ -80,88 +90,88 @@ namespace Gogaman
 		//Create gBuffer
 		glGenFramebuffers(1, &gBuffer);
 		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-		//Create position color buffer
-		glGenTextures(1, &gPositionMetalness);
-		glBindTexture(GL_TEXTURE_2D, gPositionMetalness);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPositionMetalness, 0);
+		//Create position buffer
+		gPositionMetalness.formatInternal = GL_RGBA16F;
+		gPositionMetalness.formatImage = GL_RGBA;
+		gPositionMetalness.filterMin = GL_NEAREST;
+		gPositionMetalness.filterMag = GL_NEAREST;
+		gPositionMetalness.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPositionMetalness.GetID(), 0);
 		//Create normal buffer
-		glGenTextures(1, &gNormal);
-		glBindTexture(GL_TEXTURE_2D, gNormal);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RG, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-		//Create albedo and roughness color buffer
-		glGenTextures(1, &gAlbedoEmissivityRoughness);
-		glBindTexture(GL_TEXTURE_2D, gAlbedoEmissivityRoughness);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoEmissivityRoughness, 0);
+		gNormal.formatInternal = GL_RG16F;
+		gNormal.formatImage = GL_RG;
+		gNormal.filterMin = GL_NEAREST;
+		gNormal.filterMag = GL_NEAREST;
+		gNormal.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal.GetID(), 0);
+		//Create albedo and roughness buffer
+		gAlbedoEmissivityRoughness.formatInternal = GL_RGBA8;
+		gAlbedoEmissivityRoughness.formatImage = GL_RGBA;
+		gAlbedoEmissivityRoughness.filterMin = GL_LINEAR;
+		gAlbedoEmissivityRoughness.filterMag = GL_LINEAR;
+		gAlbedoEmissivityRoughness.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoEmissivityRoughness.GetID(), 0);
 		//Create velocity buffer
-		glGenTextures(1, &gVelocity);
-		glBindTexture(GL_TEXTURE_2D, gVelocity);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RG, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gVelocity, 0);
+		gVelocity.formatInternal = GL_RG16F;
+		gVelocity.formatImage = GL_RG;
+		gVelocity.filterMin = GL_NEAREST;
+		gVelocity.filterMag = GL_NEAREST;
+		gVelocity.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gVelocity.GetID(), 0);
 		//Create depth buffer
-		glGenTextures(1, &gDepth);
-		glBindTexture(GL_TEXTURE_2D, gDepth);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gDepth, 0);
+		gDepth.formatInternal = GL_DEPTH_COMPONENT32;
+		gDepth.formatImage = GL_DEPTH_COMPONENT;
+		gDepth.filterMin = GL_NEAREST;
+		gDepth.filterMag = GL_NEAREST;
+		gDepth.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, gDepth.GetID(), 0);
 		glDrawBuffers(4, fourColorAttachments);
 		CheckCompleteness();
 
 		//Create normal downsample FBO
 		glGenFramebuffers(1, &normalDownsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, normalDownsampleFBO);
-		//Create quarter-resolution color buffer
-		glGenTextures(1, &normalDownsampleBuffer);
-		glBindTexture(GL_TEXTURE_2D, normalDownsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale * 0.5f, GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f, 0, GL_RG, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalDownsampleBuffer, 0);
+		//Create quarter-resolution buffer
+		normalDownsampleBuffer.formatInternal = GL_RG16F;
+		normalDownsampleBuffer.formatImage = GL_RG;
+		normalDownsampleBuffer.filterMin = GL_NEAREST_MIPMAP_NEAREST;
+		normalDownsampleBuffer.filterMag = GL_NEAREST;
+		normalDownsampleBuffer.levels = 0;
+		normalDownsampleBuffer.Generate(renderResWidth * 0.5f, renderResHeight * 0.5f);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, normalDownsampleBuffer.GetID(), 0);
 		glDrawBuffer(oneColorAttachment);
 		CheckCompleteness();
 
 		//Create depth downsample FBO
 		glGenFramebuffers(1, &depthDownsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, depthDownsampleFBO);
-		//Create quarter-resolution color buffer
-		glGenTextures(1, &depthDownsampleBuffer);
-		glBindTexture(GL_TEXTURE_2D, depthDownsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, GM_CONFIG.screenWidth * GM_CONFIG.resScale * 0.5f, GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f, 0, GL_RED, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthDownsampleBuffer, 0);
+		//Create quarter-resolution buffer
+		depthDownsampleBuffer.formatInternal = GL_R32F;
+		depthDownsampleBuffer.formatImage = GL_RED;
+		depthDownsampleBuffer.filterMin = GL_NEAREST_MIPMAP_NEAREST;
+		depthDownsampleBuffer.filterMag = GL_NEAREST;
+		depthDownsampleBuffer.levels = 0;
+		depthDownsampleBuffer.Generate(renderResWidth* 0.5f, renderResHeight* 0.5f);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, depthDownsampleBuffer.GetID(), 0);
 		glDrawBuffer(oneColorAttachment);
 		CheckCompleteness();
 
 		//Create HDR FBO
 		glGenFramebuffers(1, &hdrFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-		//Create 2 floating point color buffers
-		glGenTextures(2, colorBuffers);
-		for (unsigned int i = 0; i < 2; i++)
-		{
-			glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0);
-		}
-
+		//Create 2 floating point buffers
+		colorBuffers[0].formatInternal = GL_RGBA16F;
+		colorBuffers[0].formatImage = GL_RGBA;
+		colorBuffers[0].filterMin = GL_LINEAR;
+		colorBuffers[0].filterMag = GL_LINEAR;
+		colorBuffers[0].Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffers[0].GetID(), 0);
+		colorBuffers[1].formatInternal = GL_RGBA16F;
+		colorBuffers[1].formatImage = GL_RGBA;
+		colorBuffers[1].filterMin = GL_LINEAR;
+		colorBuffers[1].filterMag = GL_LINEAR;
+		colorBuffers[1].Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, colorBuffers[1].GetID(), 0);
 		glDrawBuffers(2, twoColorAttachments);
 		//Create depth buffer
 		glGenRenderbuffers(1, &rboDepth);
@@ -173,30 +183,32 @@ namespace Gogaman
 		//Create previous frame framebuffer
 		glGenFramebuffers(1, &previousFrameFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, previousFrameFBO);
-		//Create floating point color buffers
-		glGenTextures(1, &previousFrameBuffer);
-		glBindTexture(GL_TEXTURE_2D, previousFrameBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousFrameBuffer, 0);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		//Create floating point buffer
+		previousFrameBuffer.formatInternal = GL_RGBA16F;
+		previousFrameBuffer.formatImage = GL_RGBA;
+		previousFrameBuffer.filterMin = GL_NEAREST;
+		previousFrameBuffer.filterMag = GL_NEAREST;
+		previousFrameBuffer.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousFrameBuffer.GetID(), 0);
+		glDrawBuffer(oneColorAttachment);
 		CheckCompleteness();
 
 		//Create indirect lighting framebuffer
 		glGenFramebuffers(1, &indirectFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, indirectFBO);
 		//Create 2 floating point color buffers
-		glGenTextures(2, indirectLightingBuffers);
-		for (unsigned int i = 0; i < 2; i++)
-		{
-			glBindTexture(GL_TEXTURE_2D, indirectLightingBuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.giResScale, GM_CONFIG.screenHeight * GM_CONFIG.giResScale, 0, GL_RGBA, GL_FLOAT, NULL);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, indirectLightingBuffers[i], 0);
-		}
-
+		indirectLightingBuffers[0].formatInternal = GL_RGBA16F;
+		indirectLightingBuffers[0].formatImage = GL_RGBA;
+		indirectLightingBuffers[0].filterMin = GL_LINEAR;
+		indirectLightingBuffers[0].filterMag = GL_LINEAR;
+		indirectLightingBuffers[0].Generate(giRenderResWidth, giRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, indirectLightingBuffers[0].GetID(), 0);
+		indirectLightingBuffers[1].formatInternal = GL_RGBA16F;
+		indirectLightingBuffers[1].formatImage = GL_RGBA;
+		indirectLightingBuffers[1].filterMin = GL_LINEAR;
+		indirectLightingBuffers[1].filterMag = GL_LINEAR;
+		indirectLightingBuffers[1].Generate(giRenderResWidth, giRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, indirectLightingBuffers[1].GetID(), 0);
 		glDrawBuffers(2, twoColorAttachments);
 		CheckCompleteness();
 
@@ -204,12 +216,12 @@ namespace Gogaman
 		glGenFramebuffers(1, &upsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, upsampleFBO);
 		//Create floating point color buffer
-		glGenTextures(1, &upsampleBuffer);
-		glBindTexture(GL_TEXTURE_2D, upsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, upsampleBuffer, 0);
+		upsampleBuffer.formatInternal = GL_RGBA16F;
+		upsampleBuffer.formatImage = GL_RGBA;
+		upsampleBuffer.filterMin = GL_NEAREST;
+		upsampleBuffer.filterMag = GL_NEAREST;
+		upsampleBuffer.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, upsampleBuffer.GetID(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
@@ -217,12 +229,12 @@ namespace Gogaman
 		glGenFramebuffers(1, &upsampleFBO2);
 		glBindFramebuffer(GL_FRAMEBUFFER, upsampleFBO2);
 		//Create floating point color buffer
-		glGenTextures(1, &upsampleBuffer2);
-		glBindTexture(GL_TEXTURE_2D, upsampleBuffer2);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, upsampleBuffer2, 0);
+		upsampleBuffer2.formatInternal = GL_RGBA16F;
+		upsampleBuffer2.formatImage = GL_RGBA;
+		upsampleBuffer2.filterMin = GL_NEAREST;
+		upsampleBuffer2.filterMag = GL_NEAREST;
+		upsampleBuffer2.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, upsampleBuffer2.GetID(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
@@ -230,12 +242,12 @@ namespace Gogaman
 		glGenFramebuffers(1, &previousUpsampleFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, previousUpsampleFBO);
 		//Create floating point color buffer
-		glGenTextures(1, &previousUpsampleBuffer);
-		glBindTexture(GL_TEXTURE_2D, previousUpsampleBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousUpsampleBuffer, 0);
+		previousUpsampleBuffer.formatInternal = GL_RGBA16F;
+		previousUpsampleBuffer.formatImage = GL_RGBA;
+		previousUpsampleBuffer.filterMin = GL_LINEAR;
+		previousUpsampleBuffer.filterMag = GL_LINEAR;
+		previousUpsampleBuffer.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousUpsampleBuffer.GetID(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
@@ -243,12 +255,12 @@ namespace Gogaman
 		glGenFramebuffers(1, &previousUpsampleFBO2);
 		glBindFramebuffer(GL_FRAMEBUFFER, previousUpsampleFBO2);
 		//Create floating point color buffer
-		glGenTextures(1, &previousUpsampleBuffer2);
-		glBindTexture(GL_TEXTURE_2D, previousUpsampleBuffer2);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousUpsampleBuffer2, 0);
+		previousUpsampleBuffer2.formatInternal = GL_RGBA16F;
+		previousUpsampleBuffer2.formatImage = GL_RGBA;
+		previousUpsampleBuffer2.filterMin = GL_LINEAR;
+		previousUpsampleBuffer2.filterMag = GL_LINEAR;
+		previousUpsampleBuffer2.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, previousUpsampleBuffer2.GetID(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
@@ -256,12 +268,12 @@ namespace Gogaman
 		glGenFramebuffers(1, &ssrFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, ssrFBO);
 		//Create color buffer
-		glGenTextures(1, &ssrBuffer);
-		glBindTexture(GL_TEXTURE_2D, ssrBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssrBuffer, 0);
+		ssrBuffer.formatInternal = GL_RGBA16F;
+		ssrBuffer.formatImage = GL_RGBA;
+		ssrBuffer.filterMin = GL_NEAREST;
+		ssrBuffer.filterMag = GL_NEAREST;
+		ssrBuffer.Generate(renderResWidth, renderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssrBuffer.GetID(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
@@ -269,12 +281,12 @@ namespace Gogaman
 		glGenFramebuffers(1, &cocFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, cocFBO);
 		//Create floating point buffer
-		glGenTextures(1, &cocBuffer);
-		glBindTexture(GL_TEXTURE_2D, cocBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_R16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RED, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, cocBuffer, 0);
+		cocBuffer.formatInternal = GL_R16F;
+		cocBuffer.formatImage = GL_RED;
+		cocBuffer.filterMin = GL_NEAREST;
+		cocBuffer.filterMag = GL_NEAREST;
+		cocBuffer.Generate(dofRenderResWidth, dofRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, cocBuffer.GetID(), 0);
 		glDrawBuffer(GL_COLOR_ATTACHMENT0);
 		CheckCompleteness();
 
@@ -282,26 +294,26 @@ namespace Gogaman
 		glGenFramebuffers(1, &circularBlurHorizontalFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, circularBlurHorizontalFBO);
 		//Create red channel floating point color buffer
-		glGenTextures(1, &circularBlurRedBuffer);
-		glBindTexture(GL_TEXTURE_2D, circularBlurRedBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, circularBlurRedBuffer, 0);
+		circularBlurRedBuffer.formatInternal = GL_RGBA16F;
+		circularBlurRedBuffer.formatImage = GL_RGBA;
+		circularBlurRedBuffer.filterMin = GL_NEAREST;
+		circularBlurRedBuffer.filterMag = GL_NEAREST;
+		circularBlurRedBuffer.Generate(dofRenderResWidth, dofRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, circularBlurRedBuffer.GetID(), 0);
 		//Create green channel floating point color buffer
-		glGenTextures(1, &circularBlurGreenBuffer);
-		glBindTexture(GL_TEXTURE_2D, circularBlurGreenBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, circularBlurGreenBuffer, 0);
+		circularBlurGreenBuffer.formatInternal = GL_RGBA16F;
+		circularBlurGreenBuffer.formatImage = GL_RGBA;
+		circularBlurGreenBuffer.filterMin = GL_NEAREST;
+		circularBlurGreenBuffer.filterMag = GL_NEAREST;
+		circularBlurGreenBuffer.Generate(dofRenderResWidth, dofRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, circularBlurGreenBuffer.GetID(), 0);
 		//Create blue channel floating point color buffer
-		glGenTextures(1, &circularBlurBlueBuffer);
-		glBindTexture(GL_TEXTURE_2D, circularBlurBlueBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, circularBlurBlueBuffer, 0);
+		circularBlurBlueBuffer.formatInternal = GL_RGBA16F;
+		circularBlurBlueBuffer.formatImage = GL_RGBA;
+		circularBlurBlueBuffer.filterMin = GL_NEAREST;
+		circularBlurBlueBuffer.filterMag = GL_NEAREST;
+		circularBlurBlueBuffer.Generate(dofRenderResWidth, dofRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, circularBlurBlueBuffer.GetID(), 0);
 		glDrawBuffers(3, threeColorAttachments);
 		CheckCompleteness();
 
@@ -309,30 +321,33 @@ namespace Gogaman
 		glGenFramebuffers(1, &circularBlurVerticalFBO);
 		glBindFramebuffer(GL_FRAMEBUFFER, circularBlurVerticalFBO);
 		//Create floating point color buffer
-		glGenTextures(1, &circularBlurVerticalBuffer);
-		glBindTexture(GL_TEXTURE_2D, circularBlurVerticalBuffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale, 0, GL_RGBA, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, circularBlurVerticalBuffer, 0);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0);
+		circularBlurVerticalBuffer.formatInternal = GL_RGBA16F;
+		circularBlurVerticalBuffer.formatImage = GL_RGBA;
+		circularBlurVerticalBuffer.filterMin = GL_LINEAR;
+		circularBlurVerticalBuffer.filterMag = GL_LINEAR;
+		circularBlurVerticalBuffer.Generate(dofRenderResWidth, dofRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, circularBlurVerticalBuffer.GetID(), 0);
+		glDrawBuffer(oneColorAttachment);
 		CheckCompleteness();
 
 		//Create bloom guassian blur ping-pong framebuffers
 		glGenFramebuffers(2, pingpongFBO);
-		glGenTextures(2, pingpongColorbuffers);
-		for (unsigned int i = 0; i < 2; i++)
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-			glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, GM_CONFIG.screenWidth * GM_CONFIG.bloomResScale, GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale, 0, GL_RGB, GL_FLOAT, NULL);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
-			CheckCompleteness();
-		}
+		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[0]);
+		pingpongColorbuffers[0].formatInternal = GL_RGB16F;
+		pingpongColorbuffers[0].formatImage = GL_RGB;
+		pingpongColorbuffers[0].filterMin = GL_LINEAR;
+		pingpongColorbuffers[0].filterMag = GL_LINEAR;
+		pingpongColorbuffers[0].Generate(bloomRenderResWidth, bloomRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[0].GetID(), 0);
+		CheckCompleteness();
+		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[1]);
+		pingpongColorbuffers[1].formatInternal = GL_RGB16F;
+		pingpongColorbuffers[1].formatImage = GL_RGB;
+		pingpongColorbuffers[1].filterMin = GL_LINEAR;
+		pingpongColorbuffers[1].filterMag = GL_LINEAR;
+		pingpongColorbuffers[1].Generate(bloomRenderResWidth, bloomRenderResHeight);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[1].GetID(), 0);
+		CheckCompleteness();
 	}
 
 	void Framebuffers::CheckCompleteness()

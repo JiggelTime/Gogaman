@@ -16,9 +16,9 @@ namespace Gogaman
 		glm::vec3 Tangent;
 	};
 
-	struct Texture
+	struct ModelTexture
 	{
-		unsigned int id;
+		uint id;
 		std::string type;
 		std::string path;
 	};
@@ -28,11 +28,11 @@ namespace Gogaman
 	public:
 		//Mesh data
 		std::vector<Vertex> vertices;
-		std::vector<unsigned int> indices;
-		std::vector<Texture> textures;
-		unsigned int VAO;
+		std::vector<uint> indices;
+		std::vector<ModelTexture> textures;
+		uint VAO;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
+		Mesh(std::vector<Vertex> vertices, std::vector<uint> indices, std::vector<ModelTexture> textures)
 		{
 			this->vertices = vertices;
 			this->indices = indices;
@@ -43,15 +43,15 @@ namespace Gogaman
 
 		void Render(Shader shader)
 		{
-			unsigned int diffuseNr = 1;
-			unsigned int roughnessNr = 1;
-			unsigned int normalNr = 1;
-			unsigned int heightNr = 1;
-			unsigned int metalnessNr = 1;
-			unsigned int emissivityNr = 1;
+			uint diffuseNr = 1;
+			uint roughnessNr = 1;
+			uint normalNr = 1;
+			uint heightNr = 1;
+			uint metalnessNr = 1;
+			uint emissivityNr = 1;
 
 			//Bind texture(s) before rendering
-			for(unsigned int i = 0; i < textures.size(); i++)
+			for(uint i = 0; i < textures.size(); i++)
 			{
 				//Activate texture unit before binding
 				glActiveTexture(GL_TEXTURE1 + i);
@@ -92,7 +92,7 @@ namespace Gogaman
 
 	private:
 		//Render data
-		unsigned int VBO, EBO;
+		uint VBO, EBO;
 
 		//Functions
 		void setupMesh()
@@ -107,7 +107,7 @@ namespace Gogaman
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(uint), &indices[0], GL_STATIC_DRAW);
 
 			//Vertex positions
 			glEnableVertexAttribArray(0);

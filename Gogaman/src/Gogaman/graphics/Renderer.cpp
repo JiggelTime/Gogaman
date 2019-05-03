@@ -51,41 +51,40 @@ namespace Gogaman
 
 		//Initialize framebuffers
 		Framebuffers::Initialize();
+		GM_LOG_CORE_INFO("Optimization: change internal format of separable circular blur convolution textures from floating point");
 
 		//Voxel textures
 		voxelAlbedo.formatInternal = GL_RGBA8;
 		voxelAlbedo.formatImage = GL_RGBA;
 		voxelAlbedo.filterMin = GL_LINEAR_MIPMAP_LINEAR;
 		voxelAlbedo.filterMag = GL_LINEAR;
-		voxelAlbedo.mipmapLevels = voxelMaxMipmapLevel;
+		voxelAlbedo.levels = 0;
 		voxelAlbedo.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelNormal.formatInternal = GL_RGBA8;
 		voxelNormal.formatImage = GL_RGBA;
 		voxelNormal.filterMin = GL_NEAREST;
 		voxelNormal.filterMag = GL_NEAREST;
-		voxelNormal.mipmapLevels = 0;
 		voxelNormal.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelDirectRadiance.formatInternal = GL_RGBA8;
 		voxelDirectRadiance.formatImage = GL_RGBA;
 		voxelDirectRadiance.filterMin = GL_LINEAR_MIPMAP_LINEAR;
 		voxelDirectRadiance.filterMag = GL_LINEAR;
-		voxelDirectRadiance.mipmapLevels = voxelMaxMipmapLevel;
+		voxelDirectRadiance.levels = 0;
 		voxelDirectRadiance.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelTotalRadiance.formatInternal = GL_RGBA8;
 		voxelTotalRadiance.formatImage = GL_RGBA;
 		voxelTotalRadiance.filterMin = GL_LINEAR_MIPMAP_LINEAR;
 		voxelTotalRadiance.filterMag = GL_LINEAR;
-		voxelTotalRadiance.mipmapLevels = voxelMaxMipmapLevel;
+		voxelTotalRadiance.levels = 0;
 		voxelTotalRadiance.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelStaticFlag.formatInternal = GL_R8;
 		voxelStaticFlag.formatImage = GL_RED;
 		voxelStaticFlag.filterMin = GL_NEAREST;
 		voxelStaticFlag.filterMag = GL_NEAREST;
-		voxelStaticFlag.mipmapLevels = 0;
 		voxelStaticFlag.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		//Shaders
@@ -116,7 +115,7 @@ namespace Gogaman
 		Model roomModel   = ResourceManager::LoadModel("roomModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
 		Model redModel    = ResourceManager::LoadModel("redModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
 		Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
-		Model statueModel = ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
+		//Model statueModel = ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
 
 		Model sphereModel = ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
 
@@ -160,10 +159,8 @@ namespace Gogaman
 
 		precomputeBRDFShader.Bind();
 
-		//Render full screen quad
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		RenderFullscreenQuad();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		//Set shader image units
@@ -294,18 +291,17 @@ namespace Gogaman
 		glm::mat4 jitterTranslationMatrix = glm::translate(glm::mat4(), glm::vec3(temporalJitter, 0.0f));
 
 		//Update light(s)
-			//Pointlight 0
+		//Pointlight 0
 		Gogaman::PointLight pointLight0;
-		pointLight0.position = glm::vec3(0.4f, 1.2f, -0.6f);
+		pointLight0.SetPosition(glm::vec3(0.4f, 1.2f, -0.6f));
 		//Luminous intensity (candela)
-		pointLight0.color = glm::vec3(1.0f, 1.0f, 1.0f);
-		std::cout << Gogaman::PointLight::numLights << std::endl;
+		pointLight0.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
 		//Pointlight 1
 		Gogaman::PointLight pointLight1;
-		pointLight1.position = glm::vec3(-0.4f, 1.2f, 0.6f);
+		pointLight1.SetPosition(glm::vec3(-0.4f, 1.2f, 0.6f));
 		//Luminous intensity (candela)
-		pointLight1.color = glm::vec3(2.0f, 2.0f, 2.0f);
-		std::cout << Gogaman::PointLight::numLights << std::endl;
+		pointLight1.SetColor(glm::vec3(2.0f, 2.0f, 2.0f));
+		
 		//Update models
 		GM_MODEL(statueModel).SetScale(0.4f);
 		GM_MODEL(statueModel).SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
@@ -354,24 +350,14 @@ namespace Gogaman
 
 		GM_SHADER(gbufferShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-		//planeModel.Render(gbufferShader, true);
-		//zisBodyModel.Render(gbufferShader, true);
-		//zisInstrumentsModel.Render(gbufferShader, true);
-		//zisInteriorModel.Render(gbufferShader, true);
-		//zisLightsModel.Render(gbufferShader, true);
-		//zisRoofModel.Render(gbufferShader, true);
-		//zisSteeringWheelModel.Render(gbufferShader, true);
-		//zisWheelsFrontModel.Render(gbufferShader, true);
-		//zisWheelsRearModel.Render(gbufferShader, true);
-
-		//for(auto i : ResourceManager::models)
-			//i.second.Render(GM_SHADER(gbufferShader), true);
+		for(auto i : ResourceManager::models)
+			i.second.Render(GM_SHADER(gbufferShader), true);
 
 		//Remove me if the above iterator works :)
-		GM_MODEL(roomModel).Render(GM_SHADER(gbufferShader), true);
-		GM_MODEL(redModel).Render(GM_SHADER(gbufferShader), true);
-		GM_MODEL(blueModel).Render(GM_SHADER(gbufferShader), true);
-		GM_MODEL(statueModel).Render(GM_SHADER(gbufferShader), true);
+		//GM_MODEL(roomModel).Render(GM_SHADER(gbufferShader), true);
+		//GM_MODEL(redModel).Render(GM_SHADER(gbufferShader), true);
+		//GM_MODEL(blueModel).Render(GM_SHADER(gbufferShader), true);
+		//GM_MODEL(statueModel).Render(GM_SHADER(gbufferShader), true);
 
 		glDisable(GL_DEPTH_TEST);
 
@@ -396,27 +382,22 @@ namespace Gogaman
 
 		int maxNormalMipLevels = floor(log2(std::max(GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale)));
 		maxNormalMipLevels = 6;
-		for (int i = 0; i < maxNormalMipLevels; i++)
+		for(int i = 0; i < maxNormalMipLevels; i++)
 		{
 			int sampleMipLevel = i == 0 ? 0 : i - 1;
-			int mipWidth = floor(GM_CONFIG.screenWidth * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
+			int mipWidth  = floor(GM_CONFIG.screenWidth  * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			int mipHeight = floor(GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			glViewport(0, 0, mipWidth, mipHeight);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer, i);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer.GetID(), i);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(downsampleNormalShader).SetUniformInt("sampleMipLevel", sampleMipLevel);
-
-			glActiveTexture(GL_TEXTURE0);
-			if (i == 0)
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
+			if(i == 0)
+				Framebuffers::gNormal.BindTextureUnit(0);
 			else
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer);
+				Framebuffers::normalDownsampleBuffer.BindTextureUnit(0);
 
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			RenderFullscreenQuad();
 		}
 
 		//Downsample depth
@@ -428,38 +409,33 @@ namespace Gogaman
 
 		int maxDepthMipLevels = floor(log2(std::max(GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale)));
 		maxDepthMipLevels = 6;
-		for (int i = 0; i < maxDepthMipLevels; i++)
+		for(int i = 0; i < maxDepthMipLevels; i++)
 		{
 			int sampleMipLevel = i == 0 ? 0 : i - 1;
-			int mipWidth = floor(GM_CONFIG.screenWidth * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
+			int mipWidth  = floor(GM_CONFIG.screenWidth  * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			int mipHeight = floor(GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			glViewport(0, 0, mipWidth, mipHeight);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer, i);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer.GetID(), i);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(downsampleDepthShader).SetUniformInt("sampleMipLevel", sampleMipLevel);
-
-			glActiveTexture(GL_TEXTURE0);
 			if(i == 0)
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
+				Framebuffers::gDepth.BindTextureUnit(0);
 			else
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer);
+				Framebuffers::depthDownsampleBuffer.BindTextureUnit(0);
 
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			RenderFullscreenQuad();
 		}
 
-		//Reset render mode if wireframe mode was enabled
-		if (GM_CONFIG.wireframe)
+		//Reset render mode back to fill
+		if(GM_CONFIG.wireframe)
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 		//Begin VCTGI timer
 		glBeginQuery(GL_TIME_ELAPSED, query);
 
 		//Voxelization
-		if ((GM_CONFIG.autoVoxelize == true && voxelizationCounter >= GM_CONFIG.voxelizationFrequency) || firstIteration == true)
+		if((GM_CONFIG.autoVoxelize == true && voxelizationCounter >= GM_CONFIG.voxelizationFrequency) || firstIteration == true)
 		{
 			glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
 			glDisable(GL_CULL_FACE);
@@ -491,9 +467,6 @@ namespace Gogaman
 				voxelStaticFlag.BindTextureUnit(2);
 
 				//Clear voxel textures
-				//glClearTexImage(voxelAlbedo.textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
-				//glClearTexImage(voxelNormal.textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
-				//glClearTexImage(voxelStaticFlag.textureID, 0, GL_RED, GL_FLOAT, &clearColor[0]);
 				voxelAlbedo.Clear();
 				voxelNormal.Clear();
 				voxelStaticFlag.Clear();
@@ -502,30 +475,17 @@ namespace Gogaman
 				voxelAlbedo.BindImageUnit(0, 0, GL_READ_WRITE, GL_R32UI);
 				voxelNormal.BindImageUnit(1, 0, GL_READ_WRITE, GL_R32UI);
 				voxelStaticFlag.BindImageUnit(2, 0, GL_READ_ONLY, GL_R8);
-				//glBindImageTexture(0, voxelAlbedo.textureID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
-				//glBindImageTexture(1, voxelNormal.textureID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
-				//glBindImageTexture(2, voxelStaticFlag.textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
 
 				//Draw static models
-				//planeModel.Render(voxelizationShader);
-				//zisBodyModel.Render(voxelizationShader);
-				//zisInstrumentsModel.Render(voxelizationShader);
-				//zisInteriorModel.Render(voxelizationShader);
-				//zisLightsModel.Render(voxelizationShader);
-				//zisRoofModel.Render(voxelizationShader);
-				//zisSteeringWheelModel.Render(voxelizationShader);
-				//zisWheelsFrontModel.Render(voxelizationShader);
-				//zisWheelsRearModel.Render(voxelizationShader);
-
-				GM_MODEL(roomModel).Render(GM_SHADER(voxelizationShader));
-				GM_MODEL(redModel).Render(GM_SHADER(voxelizationShader));
-				GM_MODEL(blueModel).Render(GM_SHADER(voxelizationShader));/*
+				//GM_MODEL(roomModel).Render(GM_SHADER(voxelizationShader));
+				//GM_MODEL(redModel).Render(GM_SHADER(voxelizationShader));
+				//GM_MODEL(blueModel).Render(GM_SHADER(voxelizationShader));
 				for(auto i : ResourceManager::models)
 				{
 					if(!i.second.IsDynamic())
 						i.second.Render(GM_SHADER(voxelizationShader));
 				}
-				*/
+				
 				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 			}
 
@@ -542,8 +502,6 @@ namespace Gogaman
 
 			voxelAlbedo.BindImageUnit(0, 0, GL_READ_WRITE, GL_RGBA8);
 			voxelNormal.BindImageUnit(1, 0, GL_WRITE_ONLY, GL_RGBA8);
-			//glBindImageTexture(0, voxelAlbedo.textureID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
-			//glBindImageTexture(1, voxelNormal.textureID, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA8);
 			
 			glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
 
@@ -559,11 +517,6 @@ namespace Gogaman
 			voxelAlbedo.BindImageUnit(0, 0, GL_READ_WRITE, GL_R32UI);
 			voxelNormal.BindImageUnit(1, 0, GL_READ_WRITE, GL_R32UI);
 			voxelStaticFlag.BindImageUnit(2, 0, GL_READ_ONLY, GL_R8);
-			//glBindImageTexture(0, voxelAlbedo.textureID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32UI);
-			//glBindImageTexture(1, voxelNormal.textureID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_R32UI);
-			//glBindImageTexture(0, voxelAlbedo.textureID, 0, GL_TRUE, 0, GL_READ_WRITE, GL_RGBA8);
-			//glBindImageTexture(1, voxelNormal.textureID, 0, GL_FALSE, 0, GL_READ_WRITE, GL_RGBA8);
-			//glBindImageTexture(2, voxelStaticFlag.textureID, 0, GL_FALSE, 0, GL_READ_ONLY, GL_R8);
 
 			//Render dynamic models
 			//statueModel.Render(voxelizationShader);
@@ -585,12 +538,12 @@ namespace Gogaman
 
 		//Voxel direct light injection
 		GM_SHADER(voxelInjectDirectShader).Bind();
-		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[0].position", pointLight0.position);
-		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[0].color", pointLight0.color);
-		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.coneAperture);
-		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[1].position", pointLight1.position);
-		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[1].color", pointLight1.color);
-		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
+		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[0].position", pointLight0.GetPosition());
+		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[0].color", pointLight0.GetColor());
+		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.GetConeAperture());
+		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
+		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
+		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
 		GM_SHADER(voxelInjectDirectShader).SetUniformInt("numLights", 1);
 		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelResolution", GM_CONFIG.voxelResolution);
 		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
@@ -603,23 +556,14 @@ namespace Gogaman
 		voxelAlbedo.BindTextureUnit(0);
 		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelNormal", 1);
 		voxelNormal.BindTextureUnit(1);
-		//GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelDirectRadiance", 2);
-		//voxelDirectRadiance.BindTextureUnit(2);
-		//^^^ NOT NEEDED? ^^^
-		//voxelAlbedo.Activate(voxelInjectDirectShader, "voxelAlbedo", 0);
-		//voxelNormal.Activate(voxelInjectDirectShader, "voxelNormal", 1);
-		//voxelDirectRadiance.Activate(voxelInjectDirectShader, "voxelDirectRadiance", 2);
 
 		voxelDirectRadiance.BindImageUnit(2, 0, GL_WRITE_ONLY, GL_RGBA8);
-		//glBindImageTexture(2, voxelDirectRadiance.textureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
 		voxelDirectRadiance.Clear();
-		//glClearTexImage(voxelDirectRadiance.textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
 
 		glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 		voxelDirectRadiance.GenerateMipmap();
-		//glGenerateTextureMipmap(voxelDirectRadiance.textureID);
 
 		//Voxel indirect light injection
 		GM_SHADER(voxelInjectIndirectShader).Bind();
@@ -637,13 +581,6 @@ namespace Gogaman
 		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelDirectRadiance", 2);
 		voxelDirectRadiance.BindTextureUnit(2);
 
-		//voxelAlbedo.Activate(voxelInjectIndirectShader, "voxelAlbedo", 0);
-		//voxelNormal.Activate(voxelInjectIndirectShader, "voxelNormal", 1);
-		//voxelDirectRadiance.Activate(voxelInjectIndirectShader, "voxelDirectRadiance", 2);
-		//voxelTotalRadiance.Activate(voxelInjectIndirectShader, "voxelTotalRadiance", 3);
-		//^^^ NOT NECESSARY? ^^^
-		//glBindImageTexture(3, voxelTotalRadiance.textureID, 0, GL_TRUE, 0, GL_WRITE_ONLY, GL_RGBA8);
-		//glClearTexImage(voxelTotalRadiance.textureID, 0, GL_RGBA, GL_FLOAT, &clearColor);
 		voxelTotalRadiance.BindImageUnit(3, 0, GL_WRITE_ONLY, GL_RGBA8);
 		voxelTotalRadiance.Clear();
 
@@ -651,7 +588,6 @@ namespace Gogaman
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
 		voxelTotalRadiance.GenerateMipmap();
-		//glGenerateTextureMipmap(voxelTotalRadiance.textureID);
 
 		//Screen space voxel Cone Tracing
 		glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.giResScale, GM_CONFIG.screenHeight * GM_CONFIG.giResScale);
@@ -659,10 +595,10 @@ namespace Gogaman
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		GM_SHADER(voxelConeTracingShader).Bind();
-		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[0].position", pointLight0.position);
-		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[0].color", pointLight0.color);
-		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[1].position", pointLight1.position);
-		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[1].color", pointLight1.color);
+		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[0].position", pointLight0.GetPosition());
+		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[0].color", pointLight0.GetColor());
+		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
+		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
 		GM_SHADER(voxelConeTracingShader).SetUniformInt("numLights", 1);
 		GM_SHADER(voxelConeTracingShader).SetUniformInt("renderMode", GM_CONFIG.renderMode);
 		GM_SHADER(voxelConeTracingShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
@@ -674,20 +610,14 @@ namespace Gogaman
 
 		GM_SHADER(voxelConeTracingShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, Framebuffers::gPositionMetalness);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, Framebuffers::gAlbedoEmissivityRoughness);
+		Framebuffers::gPositionMetalness.BindTextureUnit(1);
+		Framebuffers::gNormal.BindTextureUnit(2);
+		Framebuffers::gAlbedoEmissivityRoughness.BindTextureUnit(3);
 
-		//voxelTotalRadiance.Activate(voxelConeTracingShader, "voxelTotalRadiance", 4);
 		GM_SHADER(voxelConeTracingShader).SetUniformInt("voxelTotalRadiance", 4);
 		voxelTotalRadiance.BindTextureUnit(4);
-		//Render full screen quad
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		
+		RenderFullscreenQuad();
 
 		//End VCTGI timer
 		glEndQuery(GL_TIME_ELAPSED);
@@ -717,31 +647,21 @@ namespace Gogaman
 			GM_SHADER(upsampleShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(upsampleShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[0]);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::previousUpsampleBuffer);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
-			glActiveTexture(GL_TEXTURE3);
-			if (GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer);
+			Framebuffers::indirectLightingBuffers[0].BindTextureUnit(0);
+			Framebuffers::previousUpsampleBuffer.BindTextureUnit(1);
+			Framebuffers::gDepth.BindTextureUnit(2);
+			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
+				Framebuffers::depthDownsampleBuffer.BindTextureUnit(3);
 			else
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-			glActiveTexture(GL_TEXTURE5);
-			if (GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer);
+				Framebuffers::gDepth.BindTextureUnit(3);
+			Framebuffers::gNormal.BindTextureUnit(4);
+			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
+				Framebuffers::normalDownsampleBuffer.BindTextureUnit(5);
 			else
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gVelocity);
+				Framebuffers::gNormal.BindTextureUnit(5);
+			Framebuffers::gVelocity.BindTextureUnit(6);
 
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			RenderFullscreenQuad();
 
 			//Copy upscaled image to history buffer
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousUpsampleFBO);
@@ -761,31 +681,21 @@ namespace Gogaman
 			GM_SHADER(upsampleShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(upsampleShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[1]);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::previousUpsampleBuffer2);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
-			glActiveTexture(GL_TEXTURE3);
-			if (GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer);
+			Framebuffers::indirectLightingBuffers[1].BindTextureUnit(0);
+			Framebuffers::previousUpsampleBuffer2.BindTextureUnit(1);
+			Framebuffers::gDepth.BindTextureUnit(2);
+			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
+				Framebuffers::depthDownsampleBuffer.BindTextureUnit(3);
 			else
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-			glActiveTexture(GL_TEXTURE5);
-			if (GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer);
+				Framebuffers::gDepth.BindTextureUnit(3);
+			Framebuffers::gNormal.BindTextureUnit(4);
+			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
+				Framebuffers::normalDownsampleBuffer.BindTextureUnit(5);
 			else
-				glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-			glActiveTexture(GL_TEXTURE6);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gVelocity);
+				Framebuffers::gNormal.BindTextureUnit(5);
+			Framebuffers::gVelocity.BindTextureUnit(6);
 
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			RenderFullscreenQuad();
 
 			//Copy upscaled image to history buffer
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousUpsampleFBO2);
@@ -798,7 +708,7 @@ namespace Gogaman
 		glBeginQuery(GL_TIME_ELAPSED, query);
 
 		//TODO: Render shadows at half-resolution (possibly quarter) stored in RGBA8 texture (possibly with 2 maps packed into each 8bit channel)
-		//Do SSR with reprojected frame and VCT fallback. Upscale shadows, diffuse, and specular all in one pass, using MRT's to seperate results as needed.
+		//Do SSR with reprojected frame and VCT fallback. Upscale shadows, diffuse, and specular all in one pass, using MRT's to store results.
 		//Possibly store upsampled indirect radiance in one texture (chroma subsampling).
 
 	//Deferred shading
@@ -807,12 +717,12 @@ namespace Gogaman
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		GM_SHADER(directPBRShader).Bind();
-		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[0].position", pointLight0.position);
-		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[0].color", pointLight0.color);
-		GM_SHADER(directPBRShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.coneAperture);
-		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].position", pointLight1.position);
-		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].color", pointLight1.color);
-		GM_SHADER(directPBRShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.coneAperture);
+		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[0].position", pointLight0.GetPosition());
+		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[0].color", pointLight0.GetColor());
+		GM_SHADER(directPBRShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.GetConeAperture());
+		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
+		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
+		GM_SHADER(directPBRShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
 		GM_SHADER(directPBRShader).SetUniformInt("numLights", 1);
 		GM_SHADER(directPBRShader).SetUniformVec3("cameraPos", camera.Position);
 		GM_SHADER(directPBRShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
@@ -824,39 +734,31 @@ namespace Gogaman
 		GM_SHADER(directPBRShader).SetUniformBool("debug", GM_CONFIG.debug);
 		GM_SHADER(directPBRShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, Framebuffers::gPositionMetalness);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, Framebuffers::gAlbedoEmissivityRoughness);
+		Framebuffers::gPositionMetalness.BindTextureUnit(0);
+		Framebuffers::gNormal.BindTextureUnit(1);
+		Framebuffers::gAlbedoEmissivityRoughness.BindTextureUnit(2);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, brdfLUT);
-		glActiveTexture(GL_TEXTURE4);
-		if (GM_CONFIG.giUpscaling)
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::upsampleBuffer);
+		if(GM_CONFIG.giUpscaling)
+			Framebuffers::upsampleBuffer.BindTextureUnit(4);
 		else
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[0]);
+			Framebuffers::indirectLightingBuffers[0].BindTextureUnit(4);
 		glActiveTexture(GL_TEXTURE5);
-		if (GM_CONFIG.giUpscaling)
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::upsampleBuffer2);
+		if(GM_CONFIG.giUpscaling)
+			Framebuffers::upsampleBuffer2.BindTextureUnit(5);
 		else
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::indirectLightingBuffers[1]);
+			Framebuffers::indirectLightingBuffers[1].BindTextureUnit(5);
 
 		GM_SHADER(directPBRShader).SetUniformInt("voxelTexture", 6);
 		voxelTotalRadiance.BindTextureUnit(6);
-		//voxelTotalRadiance.Activate(directPBRShader, "voxelTexture", 6);
 
-		//Render full screen quad
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		RenderFullscreenQuad();
 
 		//End deferred shading timer
 		glEndQuery(GL_TIME_ELAPSED);
 		//Wait until the query result are available
 		timerResultAvailable = 0;
-		while (!timerResultAvailable)
+		while(!timerResultAvailable)
 			glGetQueryObjectiv(query, GL_QUERY_RESULT_AVAILABLE, &timerResultAvailable);
 
 		//Get query result
@@ -878,8 +780,8 @@ namespace Gogaman
 		GM_SHADER(lampShader).SetUniformMat4("projection", projectionMatrix);
 		GM_SHADER(lampShader).SetUniformMat4("view", viewMatrix);
 		//Light 0
-		GM_SHADER(lampShader).SetUniformVec3("lightColor", pointLight0.color);
-		GM_MODEL(sphereModel).SetPosition(pointLight0.position);
+		GM_SHADER(lampShader).SetUniformVec3("lightColor", pointLight0.GetColor());
+		GM_MODEL(sphereModel).SetPosition(pointLight0.GetPosition());
 		GM_MODEL(sphereModel).SetScale(0.025f);
 		GM_MODEL(sphereModel).Render(GM_SHADER(lampShader));
 		//Light 1
@@ -919,10 +821,8 @@ namespace Gogaman
 		glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D, Framebuffers::gNormal);
-		//Render full screen quad
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		
+		RenderFullscreenQuad();
 
 	//Combine indirect lighting
 		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::ssrFBO);
@@ -937,10 +837,8 @@ namespace Gogaman
 		glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D, Framebuffers::gAlbedoEmissivityRoughness);
-		//Render full screen quad
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+		
+		RenderFullscreenQuad();
 		*/
 
 		//Begin temporal anti-aliasing timer
@@ -954,18 +852,12 @@ namespace Gogaman
 			GM_SHADER(taaShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(taaShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::previousFrameBuffer);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gVelocity);
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			Framebuffers::colorBuffers[0].BindTextureUnit(0);
+			Framebuffers::previousFrameBuffer.BindTextureUnit(1);
+			Framebuffers::gDepth.BindTextureUnit(2);
+			Framebuffers::gVelocity.BindTextureUnit(3);
+			
+			RenderFullscreenQuad();
 
 			//Copy frame to history buffer
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousFrameFBO);
@@ -1008,12 +900,9 @@ namespace Gogaman
 			GM_SHADER(circleOfConfusionShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(circleOfConfusionShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::gDepth);
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			Framebuffers::gDepth.BindTextureUnit(0);
+			
+			RenderFullscreenQuad();
 
 			//Circular blur
 				//Horizontal pass
@@ -1024,14 +913,10 @@ namespace Gogaman
 
 			GM_SHADER(circularBlurHorizontalShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::cocBuffer);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			Framebuffers::cocBuffer.BindTextureUnit(0);
+			Framebuffers::colorBuffers[0].BindTextureUnit(1);
+			
+			RenderFullscreenQuad();
 
 			//Vertical pass and final composite
 			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::circularBlurVerticalFBO);
@@ -1041,18 +926,12 @@ namespace Gogaman
 
 			GM_SHADER(circularBlurVerticalShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::cocBuffer);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurRedBuffer);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurGreenBuffer);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurBlueBuffer);
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			Framebuffers::cocBuffer.BindTextureUnit(0);
+			Framebuffers::circularBlurRedBuffer.BindTextureUnit(1);
+			Framebuffers::circularBlurGreenBuffer.BindTextureUnit(2);
+			Framebuffers::circularBlurBlueBuffer.BindTextureUnit(3);
+			
+			RenderFullscreenQuad();
 
 			//End depth of field timer
 			glEndQuery(GL_TIME_ELAPSED);
@@ -1077,19 +956,21 @@ namespace Gogaman
 			bool horizontal = true, firstBlurIteration = true;
 			//Blur radius is resolution independent
 			float screenDiagonal = glm::sqrt((GM_CONFIG.screenWidth * GM_CONFIG.screenWidth) + (GM_CONFIG.screenHeight * GM_CONFIG.screenHeight));
-			unsigned int bloomBlurIterations = glm::ceil(screenDiagonal * GM_CONFIG.bloomBlurAmount);
+			uint bloomBlurIterations = glm::ceil(screenDiagonal * GM_CONFIG.bloomBlurAmount);
 
 			GM_SHADER(gaussianBlurShader).Bind();
 
 			glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.bloomResScale, GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale);
-			for(unsigned int i = 0; i < bloomBlurIterations; i++)
+			for(uint i = 0; i < bloomBlurIterations; i++)
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::pingpongFBO[horizontal]);
 				if(firstBlurIteration)
 					glClear(GL_COLOR_BUFFER_BIT);
 				GM_SHADER(gaussianBlurShader).SetUniformBool("horizontal", horizontal);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, firstBlurIteration ? Framebuffers::colorBuffers[1] : Framebuffers::pingpongColorbuffers[!horizontal]);
+				if(firstBlurIteration)
+					Framebuffers::colorBuffers[1].BindTextureUnit(0);
+				else
+					Framebuffers::pingpongColorbuffers[!horizontal].BindTextureUnit(0);
 				//Render full screen quad
 				glBindVertexArray(quadVAO);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -1106,14 +987,10 @@ namespace Gogaman
 			GM_SHADER(bloomShader).Bind();
 			GM_SHADER(bloomShader).SetUniformFloat("bloomStrength", GM_CONFIG.bloomStrength);
 
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::pingpongColorbuffers[!horizontal]);
-			//Render full screen quad
-			glBindVertexArray(quadVAO);
-			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-			glBindVertexArray(0);
+			Framebuffers::colorBuffers[0].BindTextureUnit(0);
+			Framebuffers::pingpongColorbuffers[!horizontal].BindTextureUnit(1);
+			
+			RenderFullscreenQuad();
 
 			//End bloom timer
 			glEndQuery(GL_TIME_ELAPSED);
@@ -1139,22 +1016,18 @@ namespace Gogaman
 
 		GM_SHADER(postProcessShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-		glActiveTexture(GL_TEXTURE0);
 		if(GM_CONFIG.dof)
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::circularBlurVerticalBuffer);
+			Framebuffers::circularBlurVerticalBuffer.BindTextureUnit(0);
 		else
-			glBindTexture(GL_TEXTURE_2D, Framebuffers::colorBuffers[0]);
-		//Render full screen quad
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+			Framebuffers::colorBuffers[0].BindTextureUnit(0);
+		
+		RenderFullscreenQuad();
 
 		//Print settings and timings
-		std::cout << "Exposure: " << exposure << " | DOF: " << (GM_CONFIG.dof ? "ON" : "OFF") << " | Bloom: " << (GM_CONFIG.bloom ? "ON" : "OFF") << " | Normal mapping: " << (GM_CONFIG.normalMapping ? "ON" : "OFF") << " | Debug: " << (GM_CONFIG.debug ? "ON" : "OFF") << " | Debug 2: " << (GM_CONFIG.debug2 ? "ON" : "OFF") << " | TAA: " << (GM_CONFIG.taa ? "ON" : "OFF") << " | AutoVoxelize: " << GM_CONFIG.autoVoxelize << std::endl;
-		std::cout << "" << std::endl;
-		std::cout << std::fixed << std::setprecision(2) << "Timings (ms); geometry pass: " << (timeGeometryPass + previousTimeGeometryPass) / 2.0f << ", VCTGI: " << (timeVCTGI + previousTimeVCTGI) / 2.0f << ", direct PBR: " << (timeDirectPBR + previousTimeDirectPBR) / 2.0f << ", TAA: " << (timeTAA + previousTimeTAA) / 2.0f << ", DOF: " << (timeDOF + previousTimeDOF) / 2.0f << ", bloom: " << (timeBloom + previousTimeBloom) / 2.0f << std::endl;
-		std::cout << "" << std::endl;
-		//GM_LOG_INFO("Exposure: %f | DOF: %d | Bloom: %d | Normal mapping: %d | Debug: %d | Debug 2: %d | TAA: %d | Autovoxelize: %d", exposure, GM_CONFIG.dof, GM_CONFIG.bloom, GM_CONFIG.normalMapping, GM_CONFIG.debug, GM_CONFIG.debug2, GM_CONFIG.taa, GM_CONFIG.autoVoxelize);
+		//std::cout << "Exposure: " << exposure << " | DOF: " << (GM_CONFIG.dof ? "ON" : "OFF") << " | Bloom: " << (GM_CONFIG.bloom ? "ON" : "OFF") << " | Normal mapping: " << (GM_CONFIG.normalMapping ? "ON" : "OFF") << " | Debug: " << (GM_CONFIG.debug ? "ON" : "OFF") << " | Debug 2: " << (GM_CONFIG.debug2 ? "ON" : "OFF") << " | TAA: " << (GM_CONFIG.taa ? "ON" : "OFF") << " | AutoVoxelize: " << GM_CONFIG.autoVoxelize << std::endl;
+		//std::cout << "" << std::endl;
+		//std::cout << std::fixed << std::setprecision(2) << "Timings (ms); geometry pass: " << (timeGeometryPass + previousTimeGeometryPass) / 2.0f << ", VCTGI: " << (timeVCTGI + previousTimeVCTGI) / 2.0f << ", direct PBR: " << (timeDirectPBR + previousTimeDirectPBR) / 2.0f << ", TAA: " << (timeTAA + previousTimeTAA) / 2.0f << ", DOF: " << (timeDOF + previousTimeDOF) / 2.0f << ", bloom: " << (timeBloom + previousTimeBloom) / 2.0f << std::endl;
+		//std::cout << "" << std::endl;
 
 		voxelizationCounter++;
 
@@ -1167,6 +1040,13 @@ namespace Gogaman
 		//GLFW: Swap buffers and poll IO events
 		glfwSwapBuffers(m_Window);
 		glfwPollEvents();
+	}
+
+	void Renderer::RenderFullscreenQuad() const
+	{
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 	}
 
 	void Renderer::ProcessInput(GLFWwindow *window)
