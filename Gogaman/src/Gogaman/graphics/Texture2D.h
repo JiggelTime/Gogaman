@@ -13,7 +13,7 @@ namespace Gogaman
 		Texture2D();
 		~Texture2D();
 
-		void Generate(const GLsizei &width, const GLsizei &height, const unsigned char *imageData = nullptr);
+		void Generate(const GLsizei width, const GLsizei height, const unsigned char *imageData = nullptr);
 	public:
 		GLsizei width, height;
 		GLuint  wrapS, wrapT;

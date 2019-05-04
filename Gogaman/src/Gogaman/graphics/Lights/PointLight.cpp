@@ -5,7 +5,7 @@ namespace Gogaman
 {
 	uint PointLight::m_TotalPointLights = 0;
 
-	PointLight::PointLight(const glm::vec3 &position, const glm::vec3 &color, const float &coneAperture)
+	PointLight::PointLight(const glm::vec3 &position, const glm::vec3 &color, const float coneAperture)
 		: m_Position(position), m_Color(color), m_ConeAperture(coneAperture)
 	{
 		m_TotalPointLights++;

@@ -11,15 +11,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Gogaman\Graphics\Framebuffer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture1D.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Renderbuffer.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Texture.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Texture1D.cpp" />
     <ClCompile Include="src\Gogaman\ResourceManager.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Shader.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture2D.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\Textures\Texture3D.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Texture2D.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Texture3D.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Logger.cpp" />
     <ClCompile Include="src\Gogaman\Application.cpp" />
@@ -40,12 +42,14 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Gogaman\Graphics\Framebuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture1D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Renderbuffer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture1D.h" />
     <ClInclude Include="src\Gogaman\ResourceManager.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture2D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Textures\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture2D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture3D.h" />
     <ClInclude Include="src\Gogaman\Logging\Log.h" />
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman.h" />

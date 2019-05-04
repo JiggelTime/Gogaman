@@ -11,7 +11,7 @@ namespace Gogaman
 	Texture::~Texture()
 	{}
 
-	void Texture::GenerateMipmap() const
+	void Texture::RegenerateMipmap() const
 	{
 		glGenerateTextureMipmap(m_ID);
 		if(levels == 1)

@@ -136,6 +136,8 @@ void main()
 		else
 			color = vec3(linearRoughness);
 
+	color = vec3(texture(brdfLUT, texCoordsFrag).xy, 0.0f);
+
 	FragColor = vec4(color, 1.0f);
 }
 

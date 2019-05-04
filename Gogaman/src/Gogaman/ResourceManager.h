@@ -2,7 +2,7 @@
 
 #include "Core.h"
 #include "Graphics/Shader.h"
-#include "Graphics/Textures/Texture2D.h"
+#include "Graphics/Texture2D.h"
 #include "Graphics/Model.h"
 
 #include <glad.h>

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Gogaman/Core.h"
-#include "Textures/Texture2D.h"
+#include "Framebuffer.h"
+#include "Texture2D.h"
+#include "Renderbuffer.h"
 
 #include <glad.h>
 
@@ -14,6 +16,8 @@ namespace Gogaman
 	public:
 		static uint brdfFBO;
 		static uint brdfRBO;
+		//static Framebuffer brdfFBO;
+		//static Renderbuffer brdfRBO;
 
 		static uint gBuffer;
 		static Texture2D gPositionMetalness;

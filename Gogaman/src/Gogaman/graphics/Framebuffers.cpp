@@ -6,6 +6,8 @@ namespace Gogaman
 {
 	uint Framebuffers::brdfFBO;
 	uint Framebuffers::brdfRBO;
+	//Framebuffer Framebuffers::brdfFBO;
+	//Renderbuffer Framebuffers::brdfRBO;
 
 	uint Framebuffers::gBuffer;
 	Texture2D Framebuffers::gPositionMetalness;

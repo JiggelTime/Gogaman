@@ -14,12 +14,11 @@
 
 #if GM_DEBUG
 	#define GM_ASSERT(x, ...) \
-	if(!x) \
+	if(!(x)) \
 	{ \
-		std::cout << "ERROR: Assertion failed" << std::endl; \
-		std::cout << __FILE__ << ": Line " << __LINE__ << std::endl; \
-		std::cout << "Condition: " << #x << std::endl; \
-		__debugbreak(); \
+		std::cerr << "Assertion failed at " << __FILE__ << ": line " << __LINE__ << std::endl; \
+		std::cerr << "Condition: " << #x << std::endl; \
+		abort(); \
 	}
 #else
 	#define GM_ASSERT(x, ...)

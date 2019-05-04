@@ -11,7 +11,7 @@ namespace Gogaman
 	Texture3D::~Texture3D()
 	{}
 
-	void Texture3D::Generate(const GLsizei &width, const GLsizei &height, const GLsizei &depth, const unsigned char *imageData)
+	void Texture3D::Generate(const GLsizei width, const GLsizei height, const GLsizei depth, const unsigned char *imageData)
 	{
 		this->width  = width;
 		this->height = height;

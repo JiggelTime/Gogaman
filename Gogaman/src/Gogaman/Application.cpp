@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "Application.h"
+
 #include "Graphics/Renderer.h"
-#include "Graphics/Textures/Texture1D.h"
-#include "Logging/Log.h"
 
 namespace Gogaman
 {
@@ -14,7 +13,7 @@ namespace Gogaman
 
 	void Application::Run()
 	{
-		Renderer gogaRenderer;
+		Renderer gogaRenderer("Gogaman");
 
 		while(true)
 		{

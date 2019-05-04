@@ -8,7 +8,7 @@
 
 namespace Gogaman
 {
-	Renderer::Renderer()
+	Renderer::Renderer(const std::string &name)
 	{
 		//Initialize and configure GLFW
 		glfwInit();
@@ -17,7 +17,7 @@ namespace Gogaman
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 		//Create GLFW window
-		m_Window = glfwCreateWindow(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight, "Gogaman", NULL, NULL);
+		m_Window = glfwCreateWindow(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight, name.c_str(), NULL, NULL);
 		if (m_Window == nullptr)
 		{
 			GM_LOG_CORE_ERROR("Failed to create GLFW window");
@@ -51,7 +51,6 @@ namespace Gogaman
 
 		//Initialize framebuffers
 		Framebuffers::Initialize();
-		GM_LOG_CORE_INFO("Optimization: change internal format of separable circular blur convolution textures from floating point");
 
 		//Voxel textures
 		voxelAlbedo.formatInternal = GL_RGBA8;
@@ -113,8 +112,8 @@ namespace Gogaman
 
 		//Models
 		Model roomModel   = ResourceManager::LoadModel("roomModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
-		Model redModel    = ResourceManager::LoadModel("redModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
-		Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
+		//Model redModel    = ResourceManager::LoadModel("redModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
+		//Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
 		//Model statueModel = ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
 
 		Model sphereModel = ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
@@ -563,7 +562,7 @@ namespace Gogaman
 		glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
-		voxelDirectRadiance.GenerateMipmap();
+		voxelDirectRadiance.RegenerateMipmap();
 
 		//Voxel indirect light injection
 		GM_SHADER(voxelInjectIndirectShader).Bind();
@@ -587,7 +586,7 @@ namespace Gogaman
 		glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
 
 		glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
-		voxelTotalRadiance.GenerateMipmap();
+		voxelTotalRadiance.RegenerateMipmap();
 
 		//Screen space voxel Cone Tracing
 		glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.giResScale, GM_CONFIG.screenHeight * GM_CONFIG.giResScale);
@@ -710,6 +709,8 @@ namespace Gogaman
 		//TODO: Render shadows at half-resolution (possibly quarter) stored in RGBA8 texture (possibly with 2 maps packed into each 8bit channel)
 		//Do SSR with reprojected frame and VCT fallback. Upscale shadows, diffuse, and specular all in one pass, using MRT's to store results.
 		//Possibly store upsampled indirect radiance in one texture (chroma subsampling).
+
+		//TODO: Optimization: change internal format of separable circular blur convolution textures from floating point
 
 	//Deferred shading
 		glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale);

@@ -11,7 +11,7 @@ namespace Gogaman
 	Texture2D::~Texture2D()
 	{}
 
-	void Texture2D::Generate(const GLsizei &width, const GLsizei &height, const unsigned char *imageData)
+	void Texture2D::Generate(const GLsizei width, const GLsizei height, const unsigned char *imageData)
 	{
 		this->width  = width;
 		this->height = height;

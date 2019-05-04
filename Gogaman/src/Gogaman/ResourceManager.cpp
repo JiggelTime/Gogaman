@@ -47,10 +47,10 @@ namespace Gogaman
 	void ResourceManager::ReleaseAll()
 	{
 		for(auto i : shaders)
-			i.second.Delete();
+			i.second.Destroy();
 
 		for(auto i : texture2Ds)
-			i.second.Delete();
+			i.second.Destroy();
 	}
 
 	Shader ResourceManager::LoadShaderFromFile(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)

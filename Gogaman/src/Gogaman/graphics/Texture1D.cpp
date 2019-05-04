@@ -11,7 +11,7 @@ namespace Gogaman
 	Texture1D::~Texture1D()
 	{}
 
-	void Texture1D::Generate(const GLsizei &width, const unsigned char *imageData)
+	void Texture1D::Generate(const GLsizei width, const unsigned char *imageData)
 	{
 		this->width  = width;
 

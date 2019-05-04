@@ -38,13 +38,13 @@ namespace Gogaman
 		}
 
 		//Compile shader program
-		id = glCreateProgram();
-		glAttachShader(id, vertexShader);
-		glAttachShader(id, fragmentShader);
+		m_ID = glCreateProgram();
+		glAttachShader(m_ID, vertexShader);
+		glAttachShader(m_ID, fragmentShader);
 		if(geometryShaderPresent)
-			glAttachShader(id, geometryShader);
-		glLinkProgram(id);
-		CheckCompileErrors(id, "shader program");
+			glAttachShader(m_ID, geometryShader);
+		glLinkProgram(m_ID);
+		CheckCompileErrors(m_ID, "shader program");
 
 		//Delete shaders
 		glDeleteShader(vertexShader);
@@ -64,15 +64,15 @@ namespace Gogaman
 		CheckCompileErrors(computeShader, "compute shader");
 
 		//Compile shader program
-		id = glCreateProgram();
-		glAttachShader(id, computeShader);
-		glLinkProgram(id);
-		CheckCompileErrors(id, "shader program");
+		m_ID = glCreateProgram();
+		glAttachShader(m_ID, computeShader);
+		glLinkProgram(m_ID);
+		CheckCompileErrors(m_ID, "shader program");
 
 		glDeleteShader(computeShader);
 	}
 
-	void Shader::CheckCompileErrors(const GLuint &object, const std::string &type)
+	void Shader::CheckCompileErrors(const GLuint object, const std::string &type)
 	{
 		int success;
 		if(type != "shader program")

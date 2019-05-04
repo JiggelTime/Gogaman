@@ -3,7 +3,7 @@
 #include "Gogaman/Core.h"
 #include "Gogaman/Config.h"
 #include "Camera.h"
-#include "Textures/Texture3D.h"
+#include "Texture3D.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -17,7 +17,7 @@ namespace Gogaman
 	class GOGAMAN_API Renderer
 	{
 	public:
-		Renderer();
+		Renderer(const std::string &name);
 		~Renderer();
 
 		void Render();
