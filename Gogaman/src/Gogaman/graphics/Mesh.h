@@ -41,7 +41,7 @@ namespace Gogaman
 			setupMesh();
 		}
 
-		void Render(Shader shader)
+		void Render(Shader &shader)
 		{
 			uint diffuseNr = 1;
 			uint roughnessNr = 1;

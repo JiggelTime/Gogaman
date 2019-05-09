@@ -5,11 +5,16 @@
 namespace Gogaman
 {
 	Texture::Texture()
-		: formatInternal(GL_RGB8), formatImage(GL_RGB), filterMin(GL_NEAREST), filterMag(GL_NEAREST), levels(1)
+		: m_ID(0), formatInternal(GL_RGBA8), formatImage(GL_RGBA), filterMin(GL_NEAREST), filterMag(GL_NEAREST), levels(1)
 	{}
 
 	Texture::~Texture()
-	{}
+	{
+		if(!m_ID)
+			return;
+
+		glDeleteTextures(1, &m_ID);
+	}
 
 	void Texture::RegenerateMipmap() const
 	{

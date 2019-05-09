@@ -13,12 +13,16 @@ namespace Gogaman
 
 	void Texture3D::Generate(const GLsizei width, const GLsizei height, const GLsizei depth, const unsigned char *imageData)
 	{
+		GM_ASSERT(width > 0 && height > 0 && depth > 0);
+
 		this->width  = width;
 		this->height = height;
 		this->depth  = depth;
+		if(levels == 0)
+			levels = floor(log2(max(width, max(height, depth)))) + 1;
 
 		glCreateTextures(GL_TEXTURE_3D, 1, &m_ID);
-		glTextureStorage3D(m_ID, levels == 0 ? floor(log2(max(width, max(height, depth)))) + 1 : levels, formatInternal, width, height, depth);
+		glTextureStorage3D(m_ID, levels, formatInternal, width, height, depth);
 		if(imageData != nullptr)
 			glTextureSubImage3D(m_ID, 0, 0, 0, 0, width, height, depth, formatImage, GL_UNSIGNED_BYTE, imageData);
 		

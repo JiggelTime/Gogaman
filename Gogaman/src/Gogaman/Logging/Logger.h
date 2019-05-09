@@ -18,10 +18,10 @@ namespace Gogaman
 
 		void Log(const LogLevel level, const char *format, ...);
 
-		void SetLogLevel(LogLevel level) { m_LogLevel = level; }
+		inline void SetLogLevel(LogLevel level) { m_LogLevel = level; }
 		inline LogLevel GetLogLevel() { return m_LogLevel; }
 	private:
 		std::string m_LogName;
-		LogLevel m_LogLevel = LogLevel::Trace;
+		LogLevel m_LogLevel;
 	};
 }

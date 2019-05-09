@@ -11,7 +11,13 @@ namespace Gogaman
 	{
 	public:
 		Texture1D();
+		Texture1D(const Texture1D &) = delete;
+		Texture1D(Texture1D &&) noexcept = default;
+
 		~Texture1D();
+
+		Texture1D &operator=(const Texture1D &) = delete;
+		Texture1D &operator=(Texture1D &&) noexcept = default;
 
 		void Generate(const GLsizei width, const unsigned char *imageData = nullptr);
 	public:

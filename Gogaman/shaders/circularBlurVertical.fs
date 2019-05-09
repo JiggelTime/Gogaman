@@ -98,7 +98,7 @@ void main()
 	result.g = dot(greenChannelValue.xy, KERNEL0_WEIGHTS) + dot(greenChannelValue.zw, KERNEL1_WEIGHTS);
 	result.b = dot(blueChannelValue.xy,  KERNEL0_WEIGHTS) + dot(blueChannelValue.zw,  KERNEL1_WEIGHTS);
 
-	//if(debug) result = vec3(filterRadius);
+	if(debug) result = vec3(filterRadius);
 
 	FragColor = vec4(result, 1.0f);
 	//Write bright fragments to bloom buffer

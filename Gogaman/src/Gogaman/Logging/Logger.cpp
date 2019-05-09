@@ -4,7 +4,7 @@
 namespace Gogaman
 {
 	Logger::Logger(std::string name)
-		: m_LogName(name)
+		: m_LogName(name), m_LogLevel(LogLevel::Trace)
 	{
 	}
 

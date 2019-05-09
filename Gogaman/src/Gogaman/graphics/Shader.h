@@ -13,13 +13,24 @@ namespace Gogaman
 	{
 	public:
 		Shader();
+		Shader(const Shader &) = delete;
+		Shader(Shader &&other) noexcept
+			: m_ID(std::exchange(other.m_ID, 0))
+		{}
+
 		~Shader();
+
+		Shader &operator=(const Shader &) = delete;
+		Shader &operator=(Shader &&other) noexcept
+		{
+			std::swap(m_ID, other.m_ID);
+			return *this;
+		}
 
 		void Compile(const GLchar *vertexShaderPath, const GLchar *fragmentShaderPath, const GLchar *geometryShaderPath = nullptr);
 		void Compile(const GLchar *computerShaderPath);
 
 		inline void Bind() const { glUseProgram(m_ID); }
-		inline void Destroy() const { glDeleteProgram(m_ID); }
 
 		inline void SetUniformBool(const std::string &name, const bool value) const { glUniform1i(glGetUniformLocation(m_ID, name.c_str()), (int)value); }
 		inline void SetUniformInt(const std::string &name, const int value) const { glUniform1i(glGetUniformLocation(m_ID, name.c_str()), value); }
@@ -36,6 +47,6 @@ namespace Gogaman
 	private:
 		void CheckCompileErrors(const GLuint object, const std::string &type);
 	private:
-		uint m_ID;
+		GLuint m_ID;
 	};
 }

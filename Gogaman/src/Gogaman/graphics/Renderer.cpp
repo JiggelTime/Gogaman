@@ -2,7 +2,7 @@
 #include "Renderer.h"
 #include "Gogaman/Logging/Log.h"
 #include "Gogaman/ResourceManager.h"
-#include "Framebuffers.h"
+//#include "Framebuffers.h"
 #include "JitterSequences.h"
 #include "Lights/PointLight.h"
 
@@ -18,7 +18,7 @@ namespace Gogaman
 
 		//Create GLFW window
 		m_Window = glfwCreateWindow(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight, name.c_str(), NULL, NULL);
-		if (m_Window == nullptr)
+		if(m_Window == nullptr)
 		{
 			GM_LOG_CORE_ERROR("Failed to create GLFW window");
 			glfwTerminate();
@@ -30,7 +30,7 @@ namespace Gogaman
 		glfwSwapInterval(GM_CONFIG.vSync ? 1 : 0);
 
 		//Initialize GLAD
-		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+		if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 		{
 			GM_LOG_CORE_ERROR("Failed to initialize GLAD");
 			return;
@@ -50,7 +50,8 @@ namespace Gogaman
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 		//Initialize framebuffers
-		Framebuffers::Initialize();
+		//Framebuffers::Initialize();
+		InitializeFramebuffers();
 
 		//Voxel textures
 		voxelAlbedo.formatInternal = GL_RGBA8;
@@ -87,36 +88,36 @@ namespace Gogaman
 		voxelStaticFlag.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		//Shaders
-		Shader precomputeBRDFShader = ResourceManager::LoadShader("precomputeBRDFShader", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.vs", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.fs");
-		Shader gbufferShader        = ResourceManager::LoadShader("gbufferShader", "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.vs", "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.fs");
-		Shader downsampleNormalShader = ResourceManager::LoadShader("downsampleNormalShader", "D:/dev/Gogaman/Gogaman/shaders/downsampleNormal.vs", "D:/dev/Gogaman/Gogaman/shaders/downsampleNormal.fs");
-		Shader downsampleDepthShader = ResourceManager::LoadShader("downsampleDepthShader", "D:/dev/Gogaman/Gogaman/shaders/downsampleDepth.vs", "D:/dev/Gogaman/Gogaman/shaders/downsampleDepth.fs");
-		Shader voxelClearDynamicShader = ResourceManager::LoadShader("voxelClearDynamicShader", "D:/dev/Gogaman/Gogaman/shaders/voxelClearDynamic.compute");
-		Shader voxelizationShader = ResourceManager::LoadShader("voxelizationShader", "D:/dev/Gogaman/Gogaman/shaders/voxelization.vs", "D:/dev/Gogaman/Gogaman/shaders/voxelization.fs", "D:/dev/Gogaman/Gogaman/shaders/voxelization.gs");
-		Shader voxelInjectDirectShader = ResourceManager::LoadShader("voxelInjectDirectShader", "D:/dev/Gogaman/Gogaman/shaders/voxelInjectDirect.compute");
-		Shader voxelInjectIndirectShader = ResourceManager::LoadShader("voxelInjectIndirectShader", "D:/dev/Gogaman/Gogaman/shaders/voxelInjectIndirect.compute");
-		Shader voxelConeTracingShader = ResourceManager::LoadShader("voxelConeTracingShader", "D:/dev/Gogaman/Gogaman/shaders/voxelConeTracing.vs", "D:/dev/Gogaman/Gogaman/shaders/voxelConeTracing2.fs");
-		Shader upsampleShader = ResourceManager::LoadShader("upsampleShader", "D:/dev/Gogaman/Gogaman/shaders/upsample.vs", "D:/dev/Gogaman/Gogaman/shaders/upsample.fs");
-		Shader directPBRShader = ResourceManager::LoadShader("directPBRShader", "D:/dev/Gogaman/Gogaman/shaders/directPBR.vs", "D:/dev/Gogaman/Gogaman/shaders/directPBR.fs");
-		Shader ssrShader = ResourceManager::LoadShader("ssrShader", "D:/dev/Gogaman/Gogaman/shaders/ssr.vs", "D:/dev/Gogaman/Gogaman/shaders/ssr.fs");
-		//Shader combineIndirectShader = ResourceManager::LoadShader("combineIndirectShader", "D:/dev/Gogaman/Gogaman/shaders/combineIndirect.vs", "D:/dev/Gogaman/Gogaman/shaders/combineIndirect.fs");
-		Shader skyboxShader = ResourceManager::LoadShader("skyboxShader", "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.vs", "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.fs");
-		Shader lampShader = ResourceManager::LoadShader("lampShader", "D:/dev/Gogaman/Gogaman/shaders/lampshader.vs", "D:/dev/Gogaman/Gogaman/shaders/lampshader.fs");
-		Shader taaShader = ResourceManager::LoadShader("taaShader", "D:/dev/Gogaman/Gogaman/shaders/taa.vs", "D:/dev/Gogaman/Gogaman/shaders/taa.fs");
-		Shader circleOfConfusionShader = ResourceManager::LoadShader("circleOfConfusionShader", "D:/dev/Gogaman/Gogaman/shaders/coc.vs", "D:/dev/Gogaman/Gogaman/shaders/coc.fs");
-		Shader circularBlurVerticalShader = ResourceManager::LoadShader("circularBlurVerticalShader", "D:/dev/Gogaman/Gogaman/shaders/circularBlurVertical.vs", "D:/dev/Gogaman/Gogaman/shaders/circularBlurVertical.fs");
-		Shader circularBlurHorizontalShader = ResourceManager::LoadShader("circularBlurHorizontalShader", "D:/dev/Gogaman/Gogaman/shaders/circularBlurHorizontal.vs", "D:/dev/Gogaman/Gogaman/shaders/circularBlurHorizontal.fs");
-		Shader gaussianBlurShader = ResourceManager::LoadShader("gaussianBlurShader", "D:/dev/Gogaman/Gogaman/shaders/gaussianblurshader.vs", "D:/dev/Gogaman/Gogaman/shaders/gaussianblurshader.fs");
-		Shader bloomShader = ResourceManager::LoadShader("bloomShader", "D:/dev/Gogaman/Gogaman/shaders/bloom.vs", "D:/dev/Gogaman/Gogaman/shaders/bloom.fs");
-		Shader postProcessShader = ResourceManager::LoadShader("postProcessShader", "D:/dev/Gogaman/Gogaman/shaders/postprocess.vs", "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
+		ResourceManager::LoadShader("precomputeBRDFShader", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.vs", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.fs");
+		ResourceManager::LoadShader("gbufferShader", "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.vs", "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.fs");
+		ResourceManager::LoadShader("downsampleNormalShader", "D:/dev/Gogaman/Gogaman/shaders/downsampleNormal.vs", "D:/dev/Gogaman/Gogaman/shaders/downsampleNormal.fs");
+		ResourceManager::LoadShader("downsampleDepthShader", "D:/dev/Gogaman/Gogaman/shaders/downsampleDepth.vs", "D:/dev/Gogaman/Gogaman/shaders/downsampleDepth.fs");
+		ResourceManager::LoadShader("voxelClearDynamicShader", "D:/dev/Gogaman/Gogaman/shaders/voxelClearDynamic.compute");
+		ResourceManager::LoadShader("voxelizationShader", "D:/dev/Gogaman/Gogaman/shaders/voxelization.vs", "D:/dev/Gogaman/Gogaman/shaders/voxelization.fs", "D:/dev/Gogaman/Gogaman/shaders/voxelization.gs");
+		ResourceManager::LoadShader("voxelInjectDirectShader", "D:/dev/Gogaman/Gogaman/shaders/voxelInjectDirect.compute");
+		ResourceManager::LoadShader("voxelInjectIndirectShader", "D:/dev/Gogaman/Gogaman/shaders/voxelInjectIndirect.compute");
+		ResourceManager::LoadShader("voxelConeTracingShader", "D:/dev/Gogaman/Gogaman/shaders/voxelConeTracing.vs", "D:/dev/Gogaman/Gogaman/shaders/voxelConeTracing2.fs");
+		ResourceManager::LoadShader("upsampleShader", "D:/dev/Gogaman/Gogaman/shaders/upsample.vs", "D:/dev/Gogaman/Gogaman/shaders/upsample.fs");
+		ResourceManager::LoadShader("directPBRShader", "D:/dev/Gogaman/Gogaman/shaders/directPBR.vs", "D:/dev/Gogaman/Gogaman/shaders/directPBR.fs");
+		ResourceManager::LoadShader("ssrShader", "D:/dev/Gogaman/Gogaman/shaders/ssr.vs", "D:/dev/Gogaman/Gogaman/shaders/ssr.fs");
+		//ResourceManager::LoadShader("combineIndirectShader", "D:/dev/Gogaman/Gogaman/shaders/combineIndirect.vs", "D:/dev/Gogaman/Gogaman/shaders/combineIndirect.fs");
+		ResourceManager::LoadShader("skyboxShader", "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.vs", "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.fs");
+		ResourceManager::LoadShader("lampShader", "D:/dev/Gogaman/Gogaman/shaders/lampshader.vs", "D:/dev/Gogaman/Gogaman/shaders/lampshader.fs");
+		ResourceManager::LoadShader("taaShader", "D:/dev/Gogaman/Gogaman/shaders/taa.vs", "D:/dev/Gogaman/Gogaman/shaders/taa.fs");
+		ResourceManager::LoadShader("circleOfConfusionShader", "D:/dev/Gogaman/Gogaman/shaders/coc.vs", "D:/dev/Gogaman/Gogaman/shaders/coc.fs");
+		ResourceManager::LoadShader("circularBlurVerticalShader", "D:/dev/Gogaman/Gogaman/shaders/circularBlurVertical.vs", "D:/dev/Gogaman/Gogaman/shaders/circularBlurVertical.fs");
+		ResourceManager::LoadShader("circularBlurHorizontalShader", "D:/dev/Gogaman/Gogaman/shaders/circularBlurHorizontal.vs", "D:/dev/Gogaman/Gogaman/shaders/circularBlurHorizontal.fs");
+		ResourceManager::LoadShader("gaussianBlurShader", "D:/dev/Gogaman/Gogaman/shaders/gaussianblurshader.vs", "D:/dev/Gogaman/Gogaman/shaders/gaussianblurshader.fs");
+		ResourceManager::LoadShader("bloomShader", "D:/dev/Gogaman/Gogaman/shaders/bloom.vs", "D:/dev/Gogaman/Gogaman/shaders/bloom.fs");
+		ResourceManager::LoadShader("postProcessShader", "D:/dev/Gogaman/Gogaman/shaders/postprocess.vs", "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
 
 		//Models
-		Model roomModel   = ResourceManager::LoadModel("roomModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
+		ResourceManager::LoadModel("roomModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
 		//Model redModel    = ResourceManager::LoadModel("redModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
 		//Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
-		//Model statueModel = ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
+		ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
 
-		Model sphereModel = ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
+		ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
 
 		//Configure global OpenGL state
 		glEnable(GL_DEPTH_TEST);
@@ -139,120 +140,105 @@ namespace Gogaman
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 		glBindVertexArray(0);
 
-		//Generate BRDF LUT
-		glGenTextures(1, &brdfLUT);
-		glBindTexture(GL_TEXTURE_2D, brdfLUT);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::brdfFBO);
-		glBindRenderbuffer(GL_RENDERBUFFER, Framebuffers::brdfRBO);
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUT, 0);
-
+		//Generate BRDF LUT for split-sum approximation
 		glViewport(0, 0, 512, 512);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_Framebuffers["BRDF_LUT_FB"].Bind();
 
-		precomputeBRDFShader.Bind();
+		GM_SHADER(precomputeBRDFShader).Bind();
 
 		RenderFullscreenQuad();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
 		//Set shader image units
-		downsampleNormalShader.Bind();
-		downsampleNormalShader.SetUniformInt("normalTexture", 0);
+		GM_SHADER(downsampleNormalShader).Bind();
+		GM_SHADER(downsampleNormalShader).SetUniformInt("normalTexture", 0);
 
-		downsampleDepthShader.Bind();
-		downsampleDepthShader.SetUniformInt("depthTexture", 0);
+		GM_SHADER(downsampleDepthShader).Bind();
+		GM_SHADER(downsampleDepthShader).SetUniformInt("depthTexture", 0);
 
-		voxelClearDynamicShader.Bind();
-		voxelClearDynamicShader.SetUniformInt("voxelAlbedo", 0);
-		voxelClearDynamicShader.SetUniformInt("voxelNormal", 1);
-		voxelClearDynamicShader.SetUniformInt("voxelStaticFlag", 2);
+		GM_SHADER(voxelClearDynamicShader).Bind();
+		GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelAlbedo", 0);
+		GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelNormal", 1);
+		GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelStaticFlag", 2);
 
-		voxelizationShader.Bind();
-		voxelizationShader.SetUniformInt("voxelAlbedo", 0);
-		voxelizationShader.SetUniformInt("voxelNormal", 1);
-		voxelizationShader.SetUniformInt("voxelStaticFlag", 2);
+		GM_SHADER(voxelizationShader).Bind();
+		GM_SHADER(voxelizationShader).SetUniformInt("voxelAlbedo", 0);
+		GM_SHADER(voxelizationShader).SetUniformInt("voxelNormal", 1);
+		GM_SHADER(voxelizationShader).SetUniformInt("voxelStaticFlag", 2);
 
-		voxelInjectDirectShader.Bind();
-		voxelInjectDirectShader.SetUniformInt("voxelAlbedo", 0);
-		voxelInjectDirectShader.SetUniformInt("voxelNormal", 1);
-		voxelInjectDirectShader.SetUniformInt("voxelDirectRadiance", 2);
+		GM_SHADER(voxelInjectDirectShader).Bind();
+		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelAlbedo", 0);
+		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelNormal", 1);
+		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelDirectRadiance", 2);
 
-		voxelInjectIndirectShader.Bind();
-		voxelInjectIndirectShader.SetUniformInt("voxelAlbedo", 0);
-		voxelInjectIndirectShader.SetUniformInt("voxelNormal", 1);
-		voxelInjectIndirectShader.SetUniformInt("voxelDirectRadiance", 2);
-		voxelInjectIndirectShader.SetUniformInt("voxelTotalRadiance", 3);
+		GM_SHADER(voxelInjectIndirectShader).Bind();
+		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelAlbedo", 0);
+		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelNormal", 1);
+		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelDirectRadiance", 2);
+		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelTotalRadiance", 3);
 
-		voxelConeTracingShader.Bind();
-		voxelConeTracingShader.SetUniformInt("gPositionMetalness", 1);
-		voxelConeTracingShader.SetUniformInt("gNormal", 2);
-		voxelConeTracingShader.SetUniformInt("gAlbedoEmissivityRoughness", 3);
+		GM_SHADER(voxelConeTracingShader).Bind();
+		GM_SHADER(voxelConeTracingShader).SetUniformInt("gPositionMetalness", 1);
+		GM_SHADER(voxelConeTracingShader).SetUniformInt("gNormal", 2);
+		GM_SHADER(voxelConeTracingShader).SetUniformInt("gAlbedoEmissivityRoughness", 3);
 
-		upsampleShader.Bind();
-		upsampleShader.SetUniformInt("inputTexture", 0);
-		upsampleShader.SetUniformInt("previousInputTexture", 1);
-		upsampleShader.SetUniformInt("depthTexture", 2);
-		upsampleShader.SetUniformInt("depthCoarseTexture", 3);
-		upsampleShader.SetUniformInt("normalTexture", 4);
-		upsampleShader.SetUniformInt("normalCoarseTexture", 5);
-		upsampleShader.SetUniformInt("velocityTexture", 6);
+		GM_SHADER(upsampleShader).Bind();
+		GM_SHADER(upsampleShader).SetUniformInt("inputTexture", 0);
+		GM_SHADER(upsampleShader).SetUniformInt("previousInputTexture", 1);
+		GM_SHADER(upsampleShader).SetUniformInt("depthTexture", 2);
+		GM_SHADER(upsampleShader).SetUniformInt("depthCoarseTexture", 3);
+		GM_SHADER(upsampleShader).SetUniformInt("normalTexture", 4);
+		GM_SHADER(upsampleShader).SetUniformInt("normalCoarseTexture", 5);
+		GM_SHADER(upsampleShader).SetUniformInt("velocityTexture", 6);
 
-		directPBRShader.Bind();
-		directPBRShader.SetUniformInt("gPositionMetalness", 0);
-		directPBRShader.SetUniformInt("gNormal", 1);
-		directPBRShader.SetUniformInt("gAlbedoEmissivityRoughness", 2);
-		directPBRShader.SetUniformInt("brdfLUT", 3);
-		directPBRShader.SetUniformInt("coneTracedDiffuse", 4);
-		directPBRShader.SetUniformInt("coneTracedSpecular", 5);
+		GM_SHADER(directPBRShader).Bind();
+		GM_SHADER(directPBRShader).SetUniformInt("gPositionMetalness", 0);
+		GM_SHADER(directPBRShader).SetUniformInt("gNormal", 1);
+		GM_SHADER(directPBRShader).SetUniformInt("gAlbedoEmissivityRoughness", 2);
+		GM_SHADER(directPBRShader).SetUniformInt("BRDF_LUT", 3);
+		GM_SHADER(directPBRShader).SetUniformInt("coneTracedDiffuse", 4);
+		GM_SHADER(directPBRShader).SetUniformInt("coneTracedSpecular", 5);
 
-		ssrShader.Bind();
-		ssrShader.SetUniformInt("renderedImageTexture", 0);
-		ssrShader.SetUniformInt("depthTexture", 1);
-		ssrShader.SetUniformInt("normalTexture", 2);
+		GM_SHADER(ssrShader).Bind();
+		GM_SHADER(ssrShader).SetUniformInt("renderedImageTexture", 0);
+		GM_SHADER(ssrShader).SetUniformInt("depthTexture", 1);
+		GM_SHADER(ssrShader).SetUniformInt("normalTexture", 2);
 
-		//combineIndirectShader.Bind();
-		//combineIndirectShader.SetUniformInt("")
-		//combineIndirectShader.SetUniformInt("")
+		//GM_SHADER(combineIndirectShader).Bind();
+		//GM_SHADER(combineIndirectShader).SetUniformInt("")
+		//GM_SHADER(combineIndirectShader).SetUniformInt("")
 
-		skyboxShader.Bind();
-		skyboxShader.SetUniformInt("skybox", 0);
+		GM_SHADER(skyboxShader).Bind();
+		GM_SHADER(skyboxShader).SetUniformInt("skybox", 0);
 
-		taaShader.Bind();
-		taaShader.SetUniformInt("inputTexture", 0);
-		taaShader.SetUniformInt("previousInputTexture", 1);
-		taaShader.SetUniformInt("depthTexture", 2);
-		taaShader.SetUniformInt("velocityTexture", 3);
+		GM_SHADER(taaShader).Bind();
+		GM_SHADER(taaShader).SetUniformInt("inputTexture", 0);
+		GM_SHADER(taaShader).SetUniformInt("previousInputTexture", 1);
+		GM_SHADER(taaShader).SetUniformInt("depthTexture", 2);
+		GM_SHADER(taaShader).SetUniformInt("velocityTexture", 3);
 
-		circleOfConfusionShader.Bind();
-		circleOfConfusionShader.SetUniformInt("imageTexture", 0);
-		circleOfConfusionShader.SetUniformInt("depthTexture", 1);
+		GM_SHADER(circleOfConfusionShader).Bind();
+		GM_SHADER(circleOfConfusionShader).SetUniformInt("imageTexture", 0);
+		GM_SHADER(circleOfConfusionShader).SetUniformInt("depthTexture", 1);
 
-		circularBlurHorizontalShader.Bind();
-		circularBlurHorizontalShader.SetUniformInt("cocTexture", 0);
-		circularBlurHorizontalShader.SetUniformInt("imageTexture", 1);
+		GM_SHADER(circularBlurHorizontalShader).Bind();
+		GM_SHADER(circularBlurHorizontalShader).SetUniformInt("cocTexture", 0);
+		GM_SHADER(circularBlurHorizontalShader).SetUniformInt("imageTexture", 1);
 
-		circularBlurVerticalShader.Bind();
-		circularBlurVerticalShader.SetUniformInt("cocTexture", 0);
-		circularBlurVerticalShader.SetUniformInt("imageRedChannelTexture", 1);
-		circularBlurVerticalShader.SetUniformInt("imageGreenChannelTexture", 2);
-		circularBlurVerticalShader.SetUniformInt("imageBlueChannelTexture", 3);
+		GM_SHADER(circularBlurVerticalShader).Bind();
+		GM_SHADER(circularBlurVerticalShader).SetUniformInt("cocTexture", 0);
+		GM_SHADER(circularBlurVerticalShader).SetUniformInt("imageRedChannelTexture", 1);
+		GM_SHADER(circularBlurVerticalShader).SetUniformInt("imageGreenChannelTexture", 2);
+		GM_SHADER(circularBlurVerticalShader).SetUniformInt("imageBlueChannelTexture", 3);
 
-		gaussianBlurShader.Bind();
-		gaussianBlurShader.SetUniformInt("imageTexture", 0);
+		GM_SHADER(gaussianBlurShader).Bind();
+		GM_SHADER(gaussianBlurShader).SetUniformInt("imageTexture", 0);
 
-		bloomShader.Bind();
-		bloomShader.SetUniformInt("imageTexture", 0);
-		bloomShader.SetUniformInt("bloomTexture", 1);
+		GM_SHADER(bloomShader).Bind();
+		GM_SHADER(bloomShader).SetUniformInt("imageTexture", 0);
+		GM_SHADER(bloomShader).SetUniformInt("bloomTexture", 1);
 
-		postProcessShader.Bind();
-		postProcessShader.SetUniformInt("hdrTexture", 0);
+		GM_SHADER(postProcessShader).Bind();
+		GM_SHADER(postProcessShader).SetUniformInt("hdrTexture", 0);
 
 		//Generate query
 		glGenQueries(1, &query);
@@ -260,6 +246,192 @@ namespace Gogaman
 
 	Renderer::~Renderer()
 	{}
+
+	void Renderer::InitializeFramebuffers()
+	{
+		//Precomputed BRDF
+		m_Texture2Ds["BRDF_LUT"].formatInternal = GL_RG16F;
+		m_Texture2Ds["BRDF_LUT"].formatImage    = GL_RG;
+		m_Texture2Ds["BRDF_LUT"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["BRDF_LUT"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["BRDF_LUT"].Generate(512, 512);
+		m_Framebuffers["BRDF_LUT_FB"].AttachColorBuffer(m_Texture2Ds["BRDF_LUT"]);
+
+		//G-Buffer
+		m_Texture2Ds["gPositionMetalness"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["gPositionMetalness"].formatImage    = GL_RGBA;
+		m_Texture2Ds["gPositionMetalness"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["gPositionMetalness"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["gPositionMetalness"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["gBufferFB"].AttachColorBuffer(m_Texture2Ds["gPositionMetalness"]);
+		m_Texture2Ds["gNormal"].formatInternal = GL_RG16F;
+		m_Texture2Ds["gNormal"].formatImage    = GL_RG;
+		m_Texture2Ds["gNormal"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["gNormal"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["gNormal"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["gBufferFB"].AttachColorBuffer(m_Texture2Ds["gNormal"]);
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].formatInternal = GL_RGBA8;
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].formatImage    = GL_RGBA;
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["gBufferFB"].AttachColorBuffer(m_Texture2Ds["gAlbedoEmissivityRoughness"]);
+		m_Texture2Ds["gVelocity"].formatInternal = GL_RG16F;
+		m_Texture2Ds["gVelocity"].formatImage    = GL_RG;
+		m_Texture2Ds["gVelocity"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["gVelocity"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["gVelocity"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["gBufferFB"].AttachColorBuffer(m_Texture2Ds["gVelocity"]);
+		m_Texture2Ds["gDepth"].formatInternal = GL_DEPTH_COMPONENT32;
+		m_Texture2Ds["gDepth"].formatImage    = GL_DEPTH_COMPONENT;
+		m_Texture2Ds["gDepth"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["gDepth"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["gDepth"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["gBufferFB"].AttachDepthBuffer(m_Texture2Ds["gDepth"]);
+		
+		//G-buffer normal mipmap
+		m_Texture2Ds["gNormalMipmap"].formatInternal = GL_RG16F;
+		m_Texture2Ds["gNormalMipmap"].formatImage    = GL_RG;
+		m_Texture2Ds["gNormalMipmap"].filterMin      = GL_NEAREST_MIPMAP_NEAREST;
+		m_Texture2Ds["gNormalMipmap"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["gNormalMipmap"].levels         = 0;
+		m_Texture2Ds["gNormalMipmap"].Generate(renderResWidth * 0.5f, renderResHeight * 0.5f);
+		m_Framebuffers["gNormalMipmapFB"].AttachColorBuffer(m_Texture2Ds["gNormalMipmap"]);
+
+		//G-buffer depth mipmap
+		m_Texture2Ds["gDepthMipmap"].formatInternal = GL_R32F;
+		m_Texture2Ds["gDepthMipmap"].formatImage    = GL_RED;
+		m_Texture2Ds["gDepthMipmap"].filterMin      = GL_NEAREST_MIPMAP_NEAREST;
+		m_Texture2Ds["gDepthMipmap"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["gDepthMipmap"].levels         = 0;
+		m_Texture2Ds["gDepthMipmap"].Generate(renderResWidth * 0.5f, renderResHeight * 0.5f);
+		m_Framebuffers["gDepthMipmapFB"].AttachColorBuffer(m_Texture2Ds["gDepthMipmap"]);
+
+		//Final image
+		m_Texture2Ds["finalImage"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["finalImage"].formatImage    = GL_RGBA;
+		m_Texture2Ds["finalImage"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["finalImage"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["finalImage"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["finalImageFB"].AttachColorBuffer(m_Texture2Ds["finalImage"]);
+		m_Renderbuffers["finalImageDepth"].formatInternal = GL_DEPTH_COMPONENT32;
+		m_Renderbuffers["finalImageDepth"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["finalImageFB"].AttachDepthBuffer(m_Renderbuffers["finalImageDepth"]);
+
+		//Final image history
+		m_Texture2Ds["finalImageHistory"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["finalImageHistory"].formatImage    = GL_RGBA;
+		m_Texture2Ds["finalImageHistory"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["finalImageHistory"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["finalImageHistory"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["finalImageHistoryFB"].AttachColorBuffer(m_Texture2Ds["finalImageHistory"]);
+
+		//VCTGI
+		m_Texture2Ds["VCTGI_Diffuse"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["VCTGI_Diffuse"].formatImage    = GL_RGBA;
+		m_Texture2Ds["VCTGI_Diffuse"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_Diffuse"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_Diffuse"].Generate(giRenderResWidth, giRenderResHeight);
+		m_Framebuffers["VCTGI_FB"].AttachColorBuffer(m_Texture2Ds["VCTGI_Diffuse"]);
+		m_Texture2Ds["VCTGI_Specular"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["VCTGI_Specular"].formatImage    = GL_RGBA;
+		m_Texture2Ds["VCTGI_Specular"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_Specular"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_Specular"].Generate(giRenderResWidth, giRenderResHeight);
+		m_Framebuffers["VCTGI_FB"].AttachColorBuffer(m_Texture2Ds["VCTGI_Specular"]);
+
+		//VCTGI diffuse upsample
+		m_Texture2Ds["VCTGI_DiffuseUpsample"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["VCTGI_DiffuseUpsample"].formatImage    = GL_RGBA;
+		m_Texture2Ds["VCTGI_DiffuseUpsample"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["VCTGI_DiffuseUpsample"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["VCTGI_DiffuseUpsample"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["VCTGI_DiffuseUpsampleFB"].AttachColorBuffer(m_Texture2Ds["VCTGI_DiffuseUpsample"]);
+
+		//VCTGI specular upsample
+		m_Texture2Ds["VCTGI_SpecularUpsample"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["VCTGI_SpecularUpsample"].formatImage    = GL_RGBA;
+		m_Texture2Ds["VCTGI_SpecularUpsample"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["VCTGI_SpecularUpsample"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["VCTGI_SpecularUpsample"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["VCTGI_SpecularUpsampleFB"].AttachColorBuffer(m_Texture2Ds["VCTGI_SpecularUpsample"]);
+
+		//VCTGI diffuse upsample history
+		m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"].formatImage    = GL_RGBA;
+		m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["VCTGI_DiffuseUpsampleHistoryFB"].AttachColorBuffer(m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"]);
+
+		//VCTGI specular upsample history
+		m_Texture2Ds["VCTGI_SpecularUpsampleHistory"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["VCTGI_SpecularUpsampleHistory"].formatImage    = GL_RGBA;
+		m_Texture2Ds["VCTGI_SpecularUpsampleHistory"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_SpecularUpsampleHistory"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["VCTGI_SpecularUpsampleHistory"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["VCTGI_SpecularUpsampleHistoryFB"].AttachColorBuffer(m_Texture2Ds["VCTGI_SpecularUpsampleHistory"]);
+
+		//SSR
+		m_Texture2Ds["SSR"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["SSR"].formatImage = GL_RGBA;
+		m_Texture2Ds["SSR"].filterMin = GL_NEAREST;
+		m_Texture2Ds["SSR"].filterMag = GL_NEAREST;
+		m_Texture2Ds["SSR"].Generate(renderResWidth, renderResHeight);
+		m_Framebuffers["SSR_FB"].AttachColorBuffer(m_Texture2Ds["SSR"]);
+
+		//Depth of field circle of confusion
+		m_Texture2Ds["DOF_COC"].formatInternal = GL_R16F;
+		m_Texture2Ds["DOF_COC"].formatImage    = GL_RED;
+		m_Texture2Ds["DOF_COC"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["DOF_COC"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["DOF_COC"].Generate(dofRenderResWidth, dofRenderResHeight);
+		m_Framebuffers["DOF_COC_FB"].AttachColorBuffer(m_Texture2Ds["DOF_COC"]);
+
+		//Depth of field separable circular blur horizontal pass
+		m_Texture2Ds["DOF_BlurHorizontalRed"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["DOF_BlurHorizontalRed"].formatImage    = GL_RGBA;
+		m_Texture2Ds["DOF_BlurHorizontalRed"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["DOF_BlurHorizontalRed"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["DOF_BlurHorizontalRed"].Generate(dofRenderResWidth, dofRenderResHeight);
+		m_Framebuffers["DOF_BlurHorizontalFB"].AttachColorBuffer(m_Texture2Ds["DOF_BlurHorizontalRed"]);
+		m_Texture2Ds["DOF_BlurHorizontalGreen"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["DOF_BlurHorizontalGreen"].formatImage    = GL_RGBA;
+		m_Texture2Ds["DOF_BlurHorizontalGreen"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["DOF_BlurHorizontalGreen"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["DOF_BlurHorizontalGreen"].Generate(dofRenderResWidth, dofRenderResHeight);
+		m_Framebuffers["DOF_BlurHorizontalFB"].AttachColorBuffer(m_Texture2Ds["DOF_BlurHorizontalGreen"]);
+		m_Texture2Ds["DOF_BlurHorizontalBlue"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["DOF_BlurHorizontalBlue"].formatImage    = GL_RGBA;
+		m_Texture2Ds["DOF_BlurHorizontalBlue"].filterMin      = GL_NEAREST;
+		m_Texture2Ds["DOF_BlurHorizontalBlue"].filterMag      = GL_NEAREST;
+		m_Texture2Ds["DOF_BlurHorizontalBlue"].Generate(dofRenderResWidth, dofRenderResHeight);
+		m_Framebuffers["DOF_BlurHorizontalFB"].AttachColorBuffer(m_Texture2Ds["DOF_BlurHorizontalBlue"]);
+
+		//Depth of field separable circular blur vertical pass
+		m_Texture2Ds["DOF_BlurVertical"].formatInternal = GL_RGBA16F;
+		m_Texture2Ds["DOF_BlurVertical"].formatImage    = GL_RGBA;
+		m_Texture2Ds["DOF_BlurVertical"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["DOF_BlurVertical"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["DOF_BlurVertical"].Generate(dofRenderResWidth, dofRenderResHeight);
+		m_Framebuffers["DOF_BlurVerticalFB"].AttachColorBuffer(m_Texture2Ds["DOF_BlurVertical"]);
+
+		//Bloom separable Gaussian blur vertical pass
+		m_Texture2Ds["bloomBlurVertical"].formatInternal = GL_RGB16F;
+		m_Texture2Ds["bloomBlurVertical"].formatImage    = GL_RGB;
+		m_Texture2Ds["bloomBlurVertical"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["bloomBlurVertical"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["bloomBlurVertical"].Generate(bloomRenderResWidth, bloomRenderResHeight);
+		m_Framebuffers["bloomBlurVerticalFB"].AttachColorBuffer(m_Texture2Ds["bloomBlurVertical"]);
+
+		//Bloom separable Gaussian blur horizontal pass
+		m_Texture2Ds["bloomBlurHorizontal"].formatInternal = GL_RGB16F;
+		m_Texture2Ds["bloomBlurHorizontal"].formatImage    = GL_RGB;
+		m_Texture2Ds["bloomBlurHorizontal"].filterMin      = GL_LINEAR;
+		m_Texture2Ds["bloomBlurHorizontal"].filterMag      = GL_LINEAR;
+		m_Texture2Ds["bloomBlurHorizontal"].Generate(bloomRenderResWidth, bloomRenderResHeight);
+		m_Framebuffers["bloomBlurHorizontalFB"].AttachColorBuffer(m_Texture2Ds["bloomBlurHorizontal"]);
+	}
 
 	void Renderer::Render()
 	{
@@ -290,20 +462,24 @@ namespace Gogaman
 		glm::mat4 jitterTranslationMatrix = glm::translate(glm::mat4(), glm::vec3(temporalJitter, 0.0f));
 
 		//Update light(s)
+		std::vector<PointLight> pointLights;
 		//Pointlight 0
-		Gogaman::PointLight pointLight0;
-		pointLight0.SetPosition(glm::vec3(0.4f, 1.2f, -0.6f));
-		//Luminous intensity (candela)
-		pointLight0.SetColor(glm::vec3(1.0f, 1.0f, 1.0f));
+			Gogaman::PointLight pointLight0;
+			pointLight0.SetPosition(glm::vec3(0.4f, 1.2f, -0.6f));
+			pointLights.push_back(pointLight0);
+			//Luminous intensity (candela)
+			pointLight0.SetColor(glm::vec3(1.0f, 0.0f, 1.0f));
 		//Pointlight 1
-		Gogaman::PointLight pointLight1;
-		pointLight1.SetPosition(glm::vec3(-0.4f, 1.2f, 0.6f));
-		//Luminous intensity (candela)
-		pointLight1.SetColor(glm::vec3(2.0f, 2.0f, 2.0f));
-		
+			Gogaman::PointLight pointLight1;
+			pointLight1.SetPosition(glm::vec3(-0.4f, 1.2f, 0.6f));
+			//Luminous intensity (candela)
+			pointLight1.SetColor(glm::vec3(0.0f, 1.0f, 1.0f));
+			pointLights.push_back(pointLight1);
+
 		//Update models
 		GM_MODEL(statueModel).SetScale(0.4f);
-		GM_MODEL(statueModel).SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
+		//GM_MODEL(statueModel).SetPosition(glm::vec3(sin(glfwGetTime() * 2.0f) * 1.2f, 0.0f, 0.0f));
+		GM_MODEL(statueModel).Rotate(glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
 
 	//Update camera matrices
 		previousViewProjectionMatrix = viewProjectionMatrix;
@@ -324,7 +500,7 @@ namespace Gogaman
 		GM_CONFIG.voxelGridSize /= 2.0f;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		GLfloat clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		const GLfloat clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		//Set render mode to wireframe if enabled
 		if(GM_CONFIG.wireframe)
@@ -336,7 +512,7 @@ namespace Gogaman
 
 		glEnable(GL_DEPTH_TEST);
 		glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale);
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::gBuffer);
+		m_Framebuffers["gBufferFB"].Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		GM_SHADER(gbufferShader).Bind();
@@ -349,10 +525,9 @@ namespace Gogaman
 
 		GM_SHADER(gbufferShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-		for(auto i : ResourceManager::models)
+		for(auto &i : ResourceManager::models)
 			i.second.Render(GM_SHADER(gbufferShader), true);
 
-		//Remove me if the above iterator works :)
 		//GM_MODEL(roomModel).Render(GM_SHADER(gbufferShader), true);
 		//GM_MODEL(redModel).Render(GM_SHADER(gbufferShader), true);
 		//GM_MODEL(blueModel).Render(GM_SHADER(gbufferShader), true);
@@ -371,9 +546,9 @@ namespace Gogaman
 		glGetQueryObjectui64v(query, GL_QUERY_RESULT, &elapsedTime);
 		previousTimeGeometryPass = timeGeometryPass;
 		timeGeometryPass = elapsedTime / 1000000.0f;
-
-		//Downsample normal
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::normalDownsampleFBO);
+		
+		//Build gNormal mip pyramid
+		m_Framebuffers["gNormalMipmapFB"].Bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		GM_SHADER(downsampleNormalShader).Bind();
@@ -386,21 +561,22 @@ namespace Gogaman
 			int sampleMipLevel = i == 0 ? 0 : i - 1;
 			int mipWidth  = floor(GM_CONFIG.screenWidth  * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			int mipHeight = floor(GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
+
 			glViewport(0, 0, mipWidth, mipHeight);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::normalDownsampleBuffer.GetID(), i);
+			m_Framebuffers["gNormalMipmapFB"].AttachColorBuffer(m_Texture2Ds["gNormalMipmap"], i + 1, 0, true);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(downsampleNormalShader).SetUniformInt("sampleMipLevel", sampleMipLevel);
 			if(i == 0)
-				Framebuffers::gNormal.BindTextureUnit(0);
+				m_Texture2Ds["gNormal"].BindTexture(0);
 			else
-				Framebuffers::normalDownsampleBuffer.BindTextureUnit(0);
+				m_Texture2Ds["gNormalMipmap"].BindTexture(0);
 
 			RenderFullscreenQuad();
 		}
 
-		//Downsample depth
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::depthDownsampleFBO);
+		//Build gDepth mip pyramid
+		m_Framebuffers["gDepthMipmapFB"].Bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		GM_SHADER(downsampleDepthShader).Bind();
@@ -414,14 +590,14 @@ namespace Gogaman
 			int mipWidth  = floor(GM_CONFIG.screenWidth  * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			int mipHeight = floor(GM_CONFIG.screenHeight * GM_CONFIG.resScale * 0.5f * std::pow(0.5f, i));
 			glViewport(0, 0, mipWidth, mipHeight);
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, Framebuffers::depthDownsampleBuffer.GetID(), i);
+			m_Framebuffers["gDepthMipmapFB"].AttachColorBuffer(m_Texture2Ds["gDepthMipmap"], i + 1, 0, true);
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(downsampleDepthShader).SetUniformInt("sampleMipLevel", sampleMipLevel);
 			if(i == 0)
-				Framebuffers::gDepth.BindTextureUnit(0);
+				m_Texture2Ds["gDepth"].BindTexture(0);
 			else
-				Framebuffers::depthDownsampleBuffer.BindTextureUnit(0);
+				m_Texture2Ds["gDepthMipmap"].BindTexture(0);
 
 			RenderFullscreenQuad();
 		}
@@ -459,11 +635,11 @@ namespace Gogaman
 				GM_SHADER(voxelizationShader).SetUniformBool("debug", GM_CONFIG.debug);
 
 				GM_SHADER(voxelizationShader).SetUniformInt("voxelAlbedo", 0);
-				voxelAlbedo.BindTextureUnit(0);
+				voxelAlbedo.BindTexture(0);
 				GM_SHADER(voxelizationShader).SetUniformInt("voxelNormal", 1);
-				voxelNormal.BindTextureUnit(1);
+				voxelNormal.BindTexture(1);
 				GM_SHADER(voxelizationShader).SetUniformInt("voxelStaticFlag", 2);
-				voxelStaticFlag.BindTextureUnit(2);
+				voxelStaticFlag.BindTexture(2);
 
 				//Clear voxel textures
 				voxelAlbedo.Clear();
@@ -471,15 +647,15 @@ namespace Gogaman
 				voxelStaticFlag.Clear();
 
 				//Bind voxel textures
-				voxelAlbedo.BindImageUnit(0, 0, GL_READ_WRITE, GL_R32UI);
-				voxelNormal.BindImageUnit(1, 0, GL_READ_WRITE, GL_R32UI);
-				voxelStaticFlag.BindImageUnit(2, 0, GL_READ_ONLY, GL_R8);
+				voxelAlbedo.BindImage(0, 1, GL_READ_WRITE, GL_R32UI);
+				voxelNormal.BindImage(1, 1, GL_READ_WRITE, GL_R32UI);
+				voxelStaticFlag.BindImage(2, 1, GL_READ_ONLY, GL_R8);
 
 				//Draw static models
 				//GM_MODEL(roomModel).Render(GM_SHADER(voxelizationShader));
 				//GM_MODEL(redModel).Render(GM_SHADER(voxelizationShader));
 				//GM_MODEL(blueModel).Render(GM_SHADER(voxelizationShader));
-				for(auto i : ResourceManager::models)
+				for(auto &i : ResourceManager::models)
 				{
 					if(!i.second.IsDynamic())
 						i.second.Render(GM_SHADER(voxelizationShader));
@@ -493,14 +669,14 @@ namespace Gogaman
 			GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelResolution", GM_CONFIG.voxelResolution);
 
 			GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelAlbedo", 0);
-			voxelAlbedo.BindTextureUnit(0);
+			voxelAlbedo.BindTexture(0);
 			GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelNormal", 1);
-			voxelNormal.BindTextureUnit(1);
+			voxelNormal.BindTexture(1);
 			GM_SHADER(voxelClearDynamicShader).SetUniformInt("voxelStaticFlag", 2);
-			voxelStaticFlag.BindTextureUnit(2);
+			voxelStaticFlag.BindTexture(2);
 
-			voxelAlbedo.BindImageUnit(0, 0, GL_READ_WRITE, GL_RGBA8);
-			voxelNormal.BindImageUnit(1, 0, GL_WRITE_ONLY, GL_RGBA8);
+			voxelAlbedo.BindImage(0, 1, GL_READ_WRITE, GL_RGBA8);
+			voxelNormal.BindImage(1, 1, GL_WRITE_ONLY, GL_RGBA8);
 			
 			glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
 
@@ -513,13 +689,12 @@ namespace Gogaman
 			GM_SHADER(voxelizationShader).SetUniformVec3("voxelGridPos", GM_CONFIG.voxelGridPos);
 			GM_SHADER(voxelizationShader).SetUniformBool("flagStatic", false);
 
-			voxelAlbedo.BindImageUnit(0, 0, GL_READ_WRITE, GL_R32UI);
-			voxelNormal.BindImageUnit(1, 0, GL_READ_WRITE, GL_R32UI);
-			voxelStaticFlag.BindImageUnit(2, 0, GL_READ_ONLY, GL_R8);
+			voxelAlbedo.BindImage(0, 1, GL_READ_WRITE, GL_R32UI);
+			voxelNormal.BindImage(1, 1, GL_READ_WRITE, GL_R32UI);
+			voxelStaticFlag.BindImage(2, 1, GL_READ_ONLY, GL_R8);
 
 			//Render dynamic models
-			//statueModel.Render(voxelizationShader);
-			for(auto i : ResourceManager::models)
+			for(auto &i : ResourceManager::models)
 			{
 				if(i.second.IsDynamic())
 					i.second.Render(GM_SHADER(voxelizationShader));
@@ -543,7 +718,7 @@ namespace Gogaman
 		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
 		GM_SHADER(voxelInjectDirectShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
 		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
-		GM_SHADER(voxelInjectDirectShader).SetUniformInt("numLights", 1);
+		GM_SHADER(voxelInjectDirectShader).SetUniformInt("numLights", pointLights.size());
 		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelResolution", GM_CONFIG.voxelResolution);
 		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
 		GM_SHADER(voxelInjectDirectShader).SetUniformFloat("voxelGridSizeInverse", 1.0f / GM_CONFIG.voxelGridSize);
@@ -552,11 +727,11 @@ namespace Gogaman
 		GM_SHADER(voxelInjectDirectShader).SetUniformBool("debug", GM_CONFIG.debug);
 
 		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelAlbedo", 0);
-		voxelAlbedo.BindTextureUnit(0);
+		voxelAlbedo.BindTexture(0);
 		GM_SHADER(voxelInjectDirectShader).SetUniformInt("voxelNormal", 1);
-		voxelNormal.BindTextureUnit(1);
+		voxelNormal.BindTexture(1);
 
-		voxelDirectRadiance.BindImageUnit(2, 0, GL_WRITE_ONLY, GL_RGBA8);
+		voxelDirectRadiance.BindImage(2, 1, GL_WRITE_ONLY, GL_RGBA8);
 		voxelDirectRadiance.Clear();
 
 		glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
@@ -574,13 +749,13 @@ namespace Gogaman
 		GM_SHADER(voxelInjectIndirectShader).SetUniformBool("debug", GM_CONFIG.debug2);
 
 		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelAlbedo", 0);
-		voxelAlbedo.BindTextureUnit(0);
+		voxelAlbedo.BindTexture(0);
 		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelNormal", 1);
-		voxelNormal.BindTextureUnit(1);
+		voxelNormal.BindTexture(1);
 		GM_SHADER(voxelInjectIndirectShader).SetUniformInt("voxelDirectRadiance", 2);
-		voxelDirectRadiance.BindTextureUnit(2);
+		voxelDirectRadiance.BindTexture(2);
 
-		voxelTotalRadiance.BindImageUnit(3, 0, GL_WRITE_ONLY, GL_RGBA8);
+		voxelTotalRadiance.BindImage(3, 1, GL_WRITE_ONLY, GL_RGBA8);
 		voxelTotalRadiance.Clear();
 
 		glDispatchCompute(GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups, GM_CONFIG.voxelComputeWorkGroups);
@@ -590,7 +765,7 @@ namespace Gogaman
 
 		//Screen space voxel Cone Tracing
 		glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.giResScale, GM_CONFIG.screenHeight * GM_CONFIG.giResScale);
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::indirectFBO);
+		m_Framebuffers["VCTGI_FB"].Bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		GM_SHADER(voxelConeTracingShader).Bind();
@@ -598,7 +773,7 @@ namespace Gogaman
 		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[0].color", pointLight0.GetColor());
 		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
 		GM_SHADER(voxelConeTracingShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
-		GM_SHADER(voxelConeTracingShader).SetUniformInt("numLights", 1);
+		GM_SHADER(voxelConeTracingShader).SetUniformInt("numLights", pointLights.size());
 		GM_SHADER(voxelConeTracingShader).SetUniformInt("renderMode", GM_CONFIG.renderMode);
 		GM_SHADER(voxelConeTracingShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
 		GM_SHADER(voxelConeTracingShader).SetUniformFloat("voxelGridSizeInverse", 1.0f / GM_CONFIG.voxelGridSize);
@@ -609,12 +784,12 @@ namespace Gogaman
 
 		GM_SHADER(voxelConeTracingShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-		Framebuffers::gPositionMetalness.BindTextureUnit(1);
-		Framebuffers::gNormal.BindTextureUnit(2);
-		Framebuffers::gAlbedoEmissivityRoughness.BindTextureUnit(3);
+		m_Texture2Ds["gPositionMetalness"].BindTexture(1);
+		m_Texture2Ds["gNormal"].BindTexture(2);
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].BindTexture(3);
 
 		GM_SHADER(voxelConeTracingShader).SetUniformInt("voxelTotalRadiance", 4);
-		voxelTotalRadiance.BindTextureUnit(4);
+		voxelTotalRadiance.BindTexture(4);
 		
 		RenderFullscreenQuad();
 
@@ -635,7 +810,7 @@ namespace Gogaman
 		{
 			//Diffuse
 			glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale);
-			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::upsampleFBO);
+			m_Framebuffers["VCTGI_DiffuseUpsampleFB"].Bind();
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(upsampleShader).Bind();
@@ -646,60 +821,60 @@ namespace Gogaman
 			GM_SHADER(upsampleShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(upsampleShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			Framebuffers::indirectLightingBuffers[0].BindTextureUnit(0);
-			Framebuffers::previousUpsampleBuffer.BindTextureUnit(1);
-			Framebuffers::gDepth.BindTextureUnit(2);
+			m_Texture2Ds["VCTGI_Diffuse"].BindTexture(0);
+			m_Texture2Ds["VCTGI_DiffuseUpsampleHistory"].BindTexture(1);
+			m_Texture2Ds["gDepth"].BindTexture(2);
 			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				Framebuffers::depthDownsampleBuffer.BindTextureUnit(3);
+				m_Texture2Ds["gDepthMipmap"].BindTexture(3);
 			else
-				Framebuffers::gDepth.BindTextureUnit(3);
-			Framebuffers::gNormal.BindTextureUnit(4);
+				m_Texture2Ds["gDepth"].BindTexture(3);
+			m_Texture2Ds["gNormal"].BindTexture(4);
 			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				Framebuffers::normalDownsampleBuffer.BindTextureUnit(5);
+				m_Texture2Ds["gNormalMipmap"].BindTexture(5);
 			else
-				Framebuffers::gNormal.BindTextureUnit(5);
-			Framebuffers::gVelocity.BindTextureUnit(6);
+				m_Texture2Ds["gNormal"].BindTexture(5);
+			m_Texture2Ds["gVelocity"].BindTexture(6);
 
 			RenderFullscreenQuad();
 
 			//Copy upscaled image to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousUpsampleFBO);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["VCTGI_DiffuseUpsampleHistoryFB"].GetID());
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::upsampleFBO);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["VCTGI_DiffuseUpsampleFB"].GetID());
 			glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 			//Specular
-			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::upsampleFBO2);
+			m_Framebuffers["VCTGI_SpecularUpsampleFB"].Bind();
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(upsampleShader).Bind();
-			GM_SHADER(upsampleShader).SetUniformFloat("nearPlane", cameraNearPlane);
-			GM_SHADER(upsampleShader).SetUniformFloat("farPlane", cameraFarPlane);
+			GM_SHADER(upsampleShader).SetUniformFloat("nearPlane",      cameraNearPlane);
+			GM_SHADER(upsampleShader).SetUniformFloat("farPlane",       cameraFarPlane);
 			GM_SHADER(upsampleShader).SetUniformInt("sampleTextureLod", std::max(floor(log2(1.0f / GM_CONFIG.giResScale)) - 1.0f, 0.0f));
 
-			GM_SHADER(upsampleShader).SetUniformBool("debug", GM_CONFIG.debug);
+			GM_SHADER(upsampleShader).SetUniformBool("debug",  GM_CONFIG.debug);
 			GM_SHADER(upsampleShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			Framebuffers::indirectLightingBuffers[1].BindTextureUnit(0);
-			Framebuffers::previousUpsampleBuffer2.BindTextureUnit(1);
-			Framebuffers::gDepth.BindTextureUnit(2);
+			m_Texture2Ds["VCTGI_Specular"].BindTexture(0);
+			m_Texture2Ds["VCTGI_SpecularUpsampleHistory"].BindTexture(1);
+			m_Texture2Ds["gDepth"].BindTexture(2);
 			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				Framebuffers::depthDownsampleBuffer.BindTextureUnit(3);
+				m_Texture2Ds["gDepthMipmap"].BindTexture(3);
 			else
-				Framebuffers::gDepth.BindTextureUnit(3);
-			Framebuffers::gNormal.BindTextureUnit(4);
+				m_Texture2Ds["gDepth"].BindTexture(3);
+			m_Texture2Ds["gNormal"].BindTexture(4);
 			if(GM_CONFIG.giResScale < GM_CONFIG.resScale)
-				Framebuffers::normalDownsampleBuffer.BindTextureUnit(5);
+				m_Texture2Ds["gNormalMipmap"].BindTexture(5);
 			else
-				Framebuffers::gNormal.BindTextureUnit(5);
-			Framebuffers::gVelocity.BindTextureUnit(6);
+				m_Texture2Ds["gNormal"].BindTexture(5);
+			m_Texture2Ds["gVelocity"].BindTexture(6);
 
 			RenderFullscreenQuad();
 
 			//Copy upscaled image to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousUpsampleFBO2);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["VCTGI_SpecularUpsampleHistoryFB"].GetID());
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::upsampleFBO2);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["VCTGI_SpecularUpsampleFB"].GetID());
 			glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
@@ -714,7 +889,7 @@ namespace Gogaman
 
 	//Deferred shading
 		glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale);
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::hdrFBO);
+		m_Framebuffers["finalImageFB"].Bind();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		GM_SHADER(directPBRShader).Bind();
@@ -724,7 +899,7 @@ namespace Gogaman
 		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
 		GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
 		GM_SHADER(directPBRShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
-		GM_SHADER(directPBRShader).SetUniformInt("numLights", 1);
+		GM_SHADER(directPBRShader).SetUniformInt("numLights", pointLights.size());
 		GM_SHADER(directPBRShader).SetUniformVec3("cameraPos", camera.Position);
 		GM_SHADER(directPBRShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
 		GM_SHADER(directPBRShader).SetUniformFloat("voxelGridSizeInverse", 1.0f / GM_CONFIG.voxelGridSize);
@@ -735,23 +910,22 @@ namespace Gogaman
 		GM_SHADER(directPBRShader).SetUniformBool("debug", GM_CONFIG.debug);
 		GM_SHADER(directPBRShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-		Framebuffers::gPositionMetalness.BindTextureUnit(0);
-		Framebuffers::gNormal.BindTextureUnit(1);
-		Framebuffers::gAlbedoEmissivityRoughness.BindTextureUnit(2);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, brdfLUT);
+		m_Texture2Ds["gPositionMetalness"].BindTexture(0);
+		m_Texture2Ds["gNormal"].BindTexture(1);
+		m_Texture2Ds["gAlbedoEmissivityRoughness"].BindTexture(2);
+		m_Texture2Ds["BRDF_LUT"].BindTexture(3);
 		if(GM_CONFIG.giUpscaling)
-			Framebuffers::upsampleBuffer.BindTextureUnit(4);
+			m_Texture2Ds["VCTGI_DiffuseUpsample"].BindTexture(4);
 		else
-			Framebuffers::indirectLightingBuffers[0].BindTextureUnit(4);
+			m_Texture2Ds["VCTGI_Diffuse"].BindTexture(4);
 		glActiveTexture(GL_TEXTURE5);
 		if(GM_CONFIG.giUpscaling)
-			Framebuffers::upsampleBuffer2.BindTextureUnit(5);
+			m_Texture2Ds["VCTGI_SpecularUpsample"].BindTexture(5);
 		else
-			Framebuffers::indirectLightingBuffers[1].BindTextureUnit(5);
+			m_Texture2Ds["VCTGI_Specular"].BindTexture(5);
 
 		GM_SHADER(directPBRShader).SetUniformInt("voxelTexture", 6);
-		voxelTotalRadiance.BindTextureUnit(6);
+		voxelTotalRadiance.BindTexture(6);
 
 		RenderFullscreenQuad();
 
@@ -768,10 +942,10 @@ namespace Gogaman
 		timeDirectPBR = elapsedTime / 1000000.0f;
 
 		//Copy gBuffer depth to HDR FBO
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::gBuffer);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::hdrFBO);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["gBufferFB"].GetID());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["finalImageFB"].GetID());
 		glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::hdrFBO);
+		m_Framebuffers["finalImageFB"].Bind();
 
 		//Forward rendering
 		glEnable(GL_DEPTH_TEST);
@@ -853,17 +1027,17 @@ namespace Gogaman
 			GM_SHADER(taaShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(taaShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			Framebuffers::colorBuffers[0].BindTextureUnit(0);
-			Framebuffers::previousFrameBuffer.BindTextureUnit(1);
-			Framebuffers::gDepth.BindTextureUnit(2);
-			Framebuffers::gVelocity.BindTextureUnit(3);
+			m_Texture2Ds["finalImage"].BindTexture(0);
+			m_Texture2Ds["finalImageHistory"].BindTexture(1);
+			m_Texture2Ds["gDepth"].BindTexture(2);
+			m_Texture2Ds["gVelocity"].BindTexture(3);
 			
 			RenderFullscreenQuad();
 
 			//Copy frame to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, Framebuffers::previousFrameFBO);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["finalImageHistoryFB"].GetID());
 			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, Framebuffers::hdrFBO);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["finalImageFB"].GetID());
 			glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
@@ -888,7 +1062,7 @@ namespace Gogaman
 			glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.dofResScale, GM_CONFIG.screenHeight * GM_CONFIG.dofResScale);
 
 			//Compute circle of confusion
-			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::cocFBO);
+			m_Framebuffers["DOF_COC_FB"].Bind();
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(circleOfConfusionShader).Bind();
@@ -901,36 +1075,38 @@ namespace Gogaman
 			GM_SHADER(circleOfConfusionShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(circleOfConfusionShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
-			Framebuffers::gDepth.BindTextureUnit(0);
-			
+			m_Texture2Ds["finalImage"].BindTexture(0);
+			m_Texture2Ds["gDepth"].BindTexture(1);
+
 			RenderFullscreenQuad();
 
 			//Circular blur
 				//Horizontal pass
-			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::circularBlurHorizontalFBO);
+			m_Framebuffers["DOF_BlurHorizontalFB"].Bind();
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(circularBlurHorizontalShader).Bind();
 
 			GM_SHADER(circularBlurHorizontalShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-			Framebuffers::cocBuffer.BindTextureUnit(0);
-			Framebuffers::colorBuffers[0].BindTextureUnit(1);
+			m_Texture2Ds["DOF_COC"].BindTexture(0);
+			m_Texture2Ds["finalImage"].BindTexture(1);
 			
 			RenderFullscreenQuad();
 
 			//Vertical pass and final composite
-			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::circularBlurVerticalFBO);
+			m_Framebuffers["DOF_BlurVerticalFB"].Bind();
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			GM_SHADER(circularBlurVerticalShader).Bind();
 
 			GM_SHADER(circularBlurVerticalShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-			Framebuffers::cocBuffer.BindTextureUnit(0);
-			Framebuffers::circularBlurRedBuffer.BindTextureUnit(1);
-			Framebuffers::circularBlurGreenBuffer.BindTextureUnit(2);
-			Framebuffers::circularBlurBlueBuffer.BindTextureUnit(3);
+			//Framebuffers::cocBuffer.BindTexture(0);
+			m_Texture2Ds["DOF_COC"].BindTexture(0);
+			m_Texture2Ds["DOF_BlurHorizontalRed"].BindTexture(1);
+			m_Texture2Ds["DOF_BlurHorizontalGreen"].BindTexture(2);
+			m_Texture2Ds["DOF_BlurHorizontalBlue"].BindTexture(3);
 			
 			RenderFullscreenQuad();
 
@@ -948,6 +1124,7 @@ namespace Gogaman
 		}
 
 		//Bloom
+		//TODO: make uniform for firstBlurIteration and cut off < 1.0 luminance
 		if(GM_CONFIG.bloom)
 		{
 			//Begin bloom timer
@@ -957,21 +1134,30 @@ namespace Gogaman
 			bool horizontal = true, firstBlurIteration = true;
 			//Blur radius is resolution independent
 			float screenDiagonal = glm::sqrt((GM_CONFIG.screenWidth * GM_CONFIG.screenWidth) + (GM_CONFIG.screenHeight * GM_CONFIG.screenHeight));
-			uint bloomBlurIterations = glm::ceil(screenDiagonal * GM_CONFIG.bloomBlurAmount);
+			int bloomBlurIterations = glm::ceil(screenDiagonal * GM_CONFIG.bloomBlurAmount);
 
 			GM_SHADER(gaussianBlurShader).Bind();
 
 			glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.bloomResScale, GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale);
-			for(uint i = 0; i < bloomBlurIterations; i++)
+			for(int i = 0; i < bloomBlurIterations; i++)
 			{
-				glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::pingpongFBO[horizontal]);
+				if(horizontal)
+					m_Framebuffers["bloomBlurHorizontalFB"].Bind();
+				else
+					m_Framebuffers["bloomBlurVerticalFB"].Bind();
 				if(firstBlurIteration)
 					glClear(GL_COLOR_BUFFER_BIT);
 				GM_SHADER(gaussianBlurShader).SetUniformBool("horizontal", horizontal);
 				if(firstBlurIteration)
-					Framebuffers::colorBuffers[1].BindTextureUnit(0);
+					m_Texture2Ds["finalImage"].BindTexture(0);
 				else
-					Framebuffers::pingpongColorbuffers[!horizontal].BindTextureUnit(0);
+				{
+					if(horizontal)
+						m_Texture2Ds["bloomBlurVertical"].BindTexture(0);
+					else
+						m_Texture2Ds["bloomBlurHorizontal"].BindTexture(0);
+				}
+
 				//Render full screen quad
 				glBindVertexArray(quadVAO);
 				glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
@@ -983,13 +1169,16 @@ namespace Gogaman
 
 			//Apply bloom to image
 			glViewport(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale);
-			glBindFramebuffer(GL_FRAMEBUFFER, Framebuffers::hdrFBO);
+			m_Framebuffers["finalImageFB"].Bind();
 
 			GM_SHADER(bloomShader).Bind();
 			GM_SHADER(bloomShader).SetUniformFloat("bloomStrength", GM_CONFIG.bloomStrength);
 
-			Framebuffers::colorBuffers[0].BindTextureUnit(0);
-			Framebuffers::pingpongColorbuffers[!horizontal].BindTextureUnit(1);
+			m_Texture2Ds["finalImage"].BindTexture(0);
+			if(horizontal)
+				m_Texture2Ds["bloomBlurVertical"].BindTexture(1);
+			else
+				m_Texture2Ds["bloomBlurHorizontal"].BindTexture(1);
 			
 			RenderFullscreenQuad();
 
@@ -1018,10 +1207,10 @@ namespace Gogaman
 		GM_SHADER(postProcessShader).SetUniformBool("debug", GM_CONFIG.debug);
 
 		if(GM_CONFIG.dof)
-			Framebuffers::circularBlurVerticalBuffer.BindTextureUnit(0);
+			m_Texture2Ds["DOF_BlurVertical"].BindTexture(0);
 		else
-			Framebuffers::colorBuffers[0].BindTextureUnit(0);
-		
+			m_Texture2Ds["finalImage"].BindTexture(0);
+
 		RenderFullscreenQuad();
 
 		//Print settings and timings

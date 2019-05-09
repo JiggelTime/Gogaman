@@ -13,10 +13,14 @@ namespace Gogaman
 
 	void Texture1D::Generate(const GLsizei width, const unsigned char *imageData)
 	{
+		GM_ASSERT(width > 0);
+
 		this->width  = width;
+		if(levels == 0)
+			levels = floor(log2(width)) + 1;
 
 		glCreateTextures(GL_TEXTURE_1D, 1, &m_ID);
-		glTextureStorage1D(m_ID, levels == 0 ? floor(log2(width)) + 1 : levels, formatInternal, width);
+		glTextureStorage1D(m_ID, levels, formatInternal, width);
 		if(imageData != nullptr)
 			glTextureSubImage1D(m_ID, 0, 0, width, formatImage, GL_UNSIGNED_BYTE, imageData);
 

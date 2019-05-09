@@ -10,7 +10,7 @@ namespace Gogaman
 	Model::~Model()
 	{}
 
-	void Model::Render(const Shader &shader, bool setPreviousModelMatrixUniform)
+	void Model::Render(Shader &shader, bool setPreviousModelMatrixUniform)
 	{
 		if(modelMatrixShouldUpdate)
 			UpdateModelMatrix();

@@ -5,10 +5,16 @@
 namespace Gogaman
 {
 	Shader::Shader()
+		: m_ID(0)
 	{}
 
 	Shader::~Shader()
-	{}
+	{
+		if(!m_ID)
+			return;
+
+		glDeleteProgram(m_ID);
+	}
 
 	void Shader::Compile(const GLchar *vertexShaderSource, const GLchar *fragmentShaderSource, const GLchar *geometryShaderSource)
 	{

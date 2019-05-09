@@ -3,7 +3,10 @@
 #include "Gogaman/Core.h"
 #include "Gogaman/Config.h"
 #include "Camera.h"
+#include "Texture2D.h"
 #include "Texture3D.h"
+#include "Renderbuffer.h"
+#include "Framebuffer.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -23,14 +26,16 @@ namespace Gogaman
 		void Render();
 		void RenderFullscreenQuad() const;
 	private:
+		void InitializeFramebuffers();
+
 		void ProcessInput(GLFWwindow *window);
 		void WindowResizeCallback(GLFWwindow *window, int width, int height);
 		void MouseMovedCallback(GLFWwindow *window, double xPos, double yPos);
 		void MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset);
 	private:
-		GLFWwindow *m_Window;
 		TwBar *m_TweakBar;
 
+		//Camera
 		Camera camera = Camera(glm::vec3(0.0f, 0.5f, 0.0f));
 		const float cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
 		float exposure = 1.0f;
@@ -40,16 +45,31 @@ namespace Gogaman
 		bool firstMouse = true;
 		bool firstIteration = true;
 
+		//Window
+		GLFWwindow *m_Window;
+		const uint renderResWidth       = GM_CONFIG.screenWidth * GM_CONFIG.resScale;
+		const uint renderResHeight      = GM_CONFIG.screenHeight * GM_CONFIG.resScale;
+
+		const uint giRenderResWidth     = GM_CONFIG.screenWidth * GM_CONFIG.giResScale;
+		const uint giRenderResHeight    = GM_CONFIG.screenHeight * GM_CONFIG.giResScale;
+
+		const uint dofRenderResWidth    = GM_CONFIG.screenWidth * GM_CONFIG.dofResScale;
+		const uint dofRenderResHeight   = GM_CONFIG.screenHeight * GM_CONFIG.dofResScale;
+
+		const uint bloomRenderResWidth  = GM_CONFIG.screenWidth * GM_CONFIG.bloomResScale;
+		const uint bloomRenderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale;
+
 		//Timing
 		float deltaTime = 0.0f, lastFrame = 0.0f;
 		uint frameCounter = 0;
 
+		std::unordered_map<std::string, Texture2D>    m_Texture2Ds;
+		std::unordered_map<std::string, Renderbuffer> m_Renderbuffers;
+		std::unordered_map<std::string, Framebuffer>  m_Framebuffers;
+
 		//Fullscreen quad
 		float quadVertices[20]{ -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f };
 		uint quadVAO = 0, quadVBO;
-
-		//BRDF LUT
-		uint brdfLUT;
 
 		//VCTGI variables
 		uint voxelizationCounter;

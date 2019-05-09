@@ -16,41 +16,45 @@ namespace Gogaman
 	ResourceManager::~ResourceManager()
 	{}
 
-	Shader ResourceManager::LoadShader(const std::string &name, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
+	void ResourceManager::LoadShader(const std::string &name, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
 	{
+		GM_ASSERT(!name.empty());
+
 		if(shaders.find(name) == shaders.end())
-			shaders[name] = LoadShaderFromFile(vertexShaderPath, fragmentShaderPath, geometryShaderPath);
-		return shaders[name];
+			shaders[name] = std::move(LoadShaderFromFile(vertexShaderPath, fragmentShaderPath, geometryShaderPath));
 	}
 
-	Shader ResourceManager::LoadShader(const std::string &name, const char *computeShaderPath)
+	void ResourceManager::LoadShader(const std::string &name, const char *computeShaderPath)
 	{
+		GM_ASSERT(!name.empty());
+
 		if(shaders.find(name) == shaders.end())
-			shaders[name] = LoadShaderFromFile(computeShaderPath);
-		return shaders[name];
+			shaders[name] = std::move(LoadShaderFromFile(computeShaderPath));
 	}
 
-	Texture2D ResourceManager::LoadTexture2D(const std::string &name, const char *filePath, const GLboolean &sRGB)
+	void ResourceManager::LoadTexture2D(const std::string &name, const char *filePath, const GLboolean sRGB)
 	{
+		GM_ASSERT(!name.empty());
+
 		if(texture2Ds.find(name) == texture2Ds.end())
-			texture2Ds[name] = LoadTexture2DFromFile(filePath, sRGB);
-		return texture2Ds[name];
+			texture2Ds[name] = std::move(LoadTexture2DFromFile(filePath, sRGB));
 	}
 
-	Model ResourceManager::LoadModel(const std::string &name, const char *filePath)
+	void ResourceManager::LoadModel(const std::string &name, const char *filePath)
 	{
+		GM_ASSERT(!name.empty());
+
 		if(models.find(name) == models.end())
 			models[name] = LoadModelFromFile(filePath);
-		return models[name];
 	}
 
 	void ResourceManager::ReleaseAll()
 	{
-		for(auto i : shaders)
-			i.second.Destroy();
+		//for(auto i : shaders)
+			//i.second.Release();
 
-		for(auto i : texture2Ds)
-			i.second.Destroy();
+		//for(auto i : texture2Ds)
+			//i.second.Release();
 	}
 
 	Shader ResourceManager::LoadShaderFromFile(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
@@ -141,7 +145,7 @@ namespace Gogaman
 		return shader;
 	}
 
-	Texture2D ResourceManager::LoadTexture2DFromFile(const char *filePath, const GLboolean &sRGB)
+	Texture2D ResourceManager::LoadTexture2DFromFile(const char *filePath, const GLboolean sRGB)
 	{
 		Texture2D texture2D;
 		int width, height, channels;

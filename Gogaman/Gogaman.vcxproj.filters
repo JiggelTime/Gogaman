@@ -56,9 +56,6 @@
     <ClCompile Include="src\Gogaman\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Scene\SceneNode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -115,7 +112,6 @@
     </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
     <ClInclude Include="src\Gogaman\ResourceManager.h" />
-    <ClInclude Include="src\Gogaman\Scene\SceneNode.h" />
     <ClInclude Include="src\Gogaman\TypeDefs.h" />
     <ClInclude Include="src\Gogaman\Graphics\Framebuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\Renderbuffer.h" />

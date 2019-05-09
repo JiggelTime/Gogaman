@@ -28,7 +28,7 @@ namespace Gogaman
 		//Loads model from file and stores resulting meshes in the meshes vector
 		void LoadModel(std::string &filePath);
 
-		void Render(const Shader &shader, bool setPreviousModelMatrixUniform = false);
+		void Render(Shader &shader, bool setPreviousModelMatrixUniform = false);
 
 		void UpdateModelMatrix()
 		{

@@ -39,7 +39,7 @@ uniform vec3       voxelGridPos;
 uniform sampler2D gPositionMetalness;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoEmissivityRoughness;
-uniform sampler2D brdfLUT;
+uniform sampler2D BRDF_LUT;
 uniform sampler2D coneTracedDiffuse;
 uniform sampler2D coneTracedSpecular;
 uniform sampler3D voxelTexture;
@@ -136,7 +136,7 @@ void main()
 		else
 			color = vec3(linearRoughness);
 
-	color = vec3(texture(brdfLUT, texCoordsFrag).xy, 0.0f);
+	//color = vec3(texture(BRDF_LUT, texCoordsFrag).xy, 0.0f);
 
 	FragColor = vec4(color, 1.0f);
 }
@@ -243,7 +243,7 @@ vec3 ComputeDirectRadiance()
 
 vec3 ComputeIndirectRadiance()
 {
-	vec2 precomputedBRDF = texture(brdfLUT, vec2(max(dot(normal, viewDir), 0.0f), linearRoughness)).rg;
+	vec2 precomputedBRDF = texture(BRDF_LUT, vec2(max(dot(normal, viewDir), 0.0f), linearRoughness)).rg;
 
 	vec3 F  = FresnelSchlickRoughness(max(dot(normal, viewDir), 0.0f), f0, roughness);
 	vec3 Fd = indirectDiffuse * albedo / PI;
