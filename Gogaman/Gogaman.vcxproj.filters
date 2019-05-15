@@ -41,37 +41,37 @@
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Framebuffers.cpp">
-      <Filter>Source Files\graphics</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Gogaman\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Framebuffer.cpp">
+    <ClCompile Include="src\Platform\OpenGL\Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Renderbuffer.cpp">
+    <ClCompile Include="src\Platform\OpenGL\Renderbuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Texture.cpp">
+    <ClCompile Include="src\Platform\OpenGL\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Texture1D.cpp">
+    <ClCompile Include="src\Platform\OpenGL\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Texture2D.cpp">
+    <ClCompile Include="src\Platform\OpenGL\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Texture3D.cpp">
+    <ClCompile Include="src\Platform\OpenGL\Texture1D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\Texture2D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\Texture3D.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -97,9 +97,6 @@
     <ClInclude Include="src\Gogaman\Graphics\Camera.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Gogaman\Graphics\Framebuffers.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\Gogaman\Graphics\Mesh.h">
       <Filter>Source Files\graphics</Filter>
@@ -107,18 +104,23 @@
     <ClInclude Include="src\Gogaman\Graphics\Model.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Gogaman\Graphics\Shader.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
     <ClInclude Include="src\Gogaman\ResourceManager.h" />
     <ClInclude Include="src\Gogaman\TypeDefs.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Framebuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Renderbuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture3D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture1D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture2D.h" />
+    <ClInclude Include="src\Platform\OpenGL\Framebuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\Renderbuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\Renderer.h" />
+    <ClInclude Include="src\Platform\OpenGL\Shader.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Platform\OpenGL\Texture.h" />
+    <ClInclude Include="src\Platform\OpenGL\Texture1D.h" />
+    <ClInclude Include="src\Platform\OpenGL\Texture2D.h" />
+    <ClInclude Include="src\Platform\OpenGL\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\Input.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\Gogaman\Events\Event.h" />
+    <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
+    <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

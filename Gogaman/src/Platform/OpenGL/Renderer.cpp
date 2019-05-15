@@ -2,9 +2,8 @@
 #include "Renderer.h"
 #include "Gogaman/Logging/Log.h"
 #include "Gogaman/ResourceManager.h"
-//#include "Framebuffers.h"
-#include "JitterSequences.h"
-#include "Lights/PointLight.h"
+#include "Gogaman/Graphics/JitterSequences.h"
+#include "Gogaman/Graphics/Lights/PointLight.h"
 
 namespace Gogaman
 {
@@ -117,7 +116,7 @@ namespace Gogaman
 		//Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
 		ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
 
-		ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
+		//ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
 
 		//Configure global OpenGL state
 		glEnable(GL_DEPTH_TEST);
@@ -838,10 +837,7 @@ namespace Gogaman
 			RenderFullscreenQuad();
 
 			//Copy upscaled image to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["VCTGI_DiffuseUpsampleHistoryFB"].GetID());
-			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["VCTGI_DiffuseUpsampleFB"].GetID());
-			glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			m_Framebuffers["VCTGI_DiffuseUpsampleHistoryFB"].BlitColorBuffer(m_Framebuffers["VCTGI_DiffuseUpsampleFB"], renderResWidth, renderResHeight, GL_NEAREST);
 
 			//Specular
 			m_Framebuffers["VCTGI_SpecularUpsampleFB"].Bind();
@@ -872,10 +868,7 @@ namespace Gogaman
 			RenderFullscreenQuad();
 
 			//Copy upscaled image to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["VCTGI_SpecularUpsampleHistoryFB"].GetID());
-			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["VCTGI_SpecularUpsampleFB"].GetID());
-			glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			m_Framebuffers["VCTGI_SpecularUpsampleHistoryFB"].BlitColorBuffer(m_Framebuffers["VCTGI_SpecularUpsampleFB"], renderResWidth, renderResHeight, GL_NEAREST);
 		}
 
 		//Begin deferred shading timer
@@ -942,23 +935,21 @@ namespace Gogaman
 		timeDirectPBR = elapsedTime / 1000000.0f;
 
 		//Copy gBuffer depth to HDR FBO
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["gBufferFB"].GetID());
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["finalImageFB"].GetID());
-		glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		m_Framebuffers["finalImageFB"].BlitDepthBuffer(m_Framebuffers["gBufferFB"], renderResWidth, renderResHeight, GL_NEAREST);
 		m_Framebuffers["finalImageFB"].Bind();
 
 		//Forward rendering
 		glEnable(GL_DEPTH_TEST);
 
 		//Lights
-		GM_SHADER(lampShader).Bind();
-		GM_SHADER(lampShader).SetUniformMat4("projection", projectionMatrix);
-		GM_SHADER(lampShader).SetUniformMat4("view", viewMatrix);
+		//GM_SHADER(lampShader).Bind();
+		//GM_SHADER(lampShader).SetUniformMat4("projection", projectionMatrix);
+		//GM_SHADER(lampShader).SetUniformMat4("view", viewMatrix);
 		//Light 0
-		GM_SHADER(lampShader).SetUniformVec3("lightColor", pointLight0.GetColor());
-		GM_MODEL(sphereModel).SetPosition(pointLight0.GetPosition());
-		GM_MODEL(sphereModel).SetScale(0.025f);
-		GM_MODEL(sphereModel).Render(GM_SHADER(lampShader));
+		//GM_SHADER(lampShader).SetUniformVec3("lightColor", pointLight0.GetColor());
+		//GM_MODEL(sphereModel).SetPosition(pointLight0.GetPosition());
+		//GM_MODEL(sphereModel).SetScale(0.025f);
+		//GM_MODEL(sphereModel).Render(GM_SHADER(lampShader));
 		//Light 1
 			//lampShader.SetUniformVec3("lightColor", pointLight1.color);
 			//sphereModel.SetPosition(pointLight1.position);
@@ -1024,7 +1015,7 @@ namespace Gogaman
 		{
 			GM_SHADER(taaShader).Bind();
 
-			GM_SHADER(taaShader).SetUniformBool("debug", GM_CONFIG.debug);
+			GM_SHADER(taaShader).SetUniformBool("debug",  GM_CONFIG.debug);
 			GM_SHADER(taaShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
 			m_Texture2Ds["finalImage"].BindTexture(0);
@@ -1035,10 +1026,7 @@ namespace Gogaman
 			RenderFullscreenQuad();
 
 			//Copy frame to history buffer
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["finalImageHistoryFB"].GetID());
-			glClear(GL_COLOR_BUFFER_BIT);
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["finalImageFB"].GetID());
-			glBlitFramebuffer(0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, 0, 0, GM_CONFIG.screenWidth * GM_CONFIG.resScale, GM_CONFIG.screenHeight * GM_CONFIG.resScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+			m_Framebuffers["finalImageHistoryFB"].BlitColorBuffer(m_Framebuffers["finalImageFB"], renderResWidth, renderResHeight, GL_NEAREST);
 		}
 
 		//End temporal anti-aliasing timer
@@ -1070,7 +1058,7 @@ namespace Gogaman
 			GM_SHADER(circleOfConfusionShader).SetUniformFloat("farPlane", cameraFarPlane);
 			GM_SHADER(circleOfConfusionShader).SetUniformFloat("focalDistance", GM_CONFIG.focalDistance);
 			GM_SHADER(circleOfConfusionShader).SetUniformFloat("fStop", GM_CONFIG.fStop);
-			GM_SHADER(circleOfConfusionShader).SetUniformFloat("focalLength", GM_CONFIG.focalLength);
+			GM_SHADER(circleOfConfusionShader).SetUniformFloat("focalLength", GM_CONFIG.focalLength / 1000.0f);
 
 			GM_SHADER(circleOfConfusionShader).SetUniformBool("debug", GM_CONFIG.debug);
 			GM_SHADER(circleOfConfusionShader).SetUniformBool("debug2", GM_CONFIG.debug2);

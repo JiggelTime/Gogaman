@@ -2,7 +2,7 @@
 
 #include "Gogaman/Core.h"
 #include "Gogaman/Config.h"
-#include "Camera.h"
+#include "Gogaman/Graphics/Camera.h"
 #include "Texture2D.h"
 #include "Texture3D.h"
 #include "Renderbuffer.h"

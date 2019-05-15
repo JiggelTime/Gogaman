@@ -36,8 +36,7 @@ namespace Gogaman
 		//Distance to the point of focus (meters)
 		const float focalDistance = 10.0f;
 		//Ratio of the aperture (f-stop)
-		//const float fStop = 1.6f;
-		const float fStop = 200.0f;
+		const float fStop = 0.1f;
 		//Distance between the lens and the film (mm)
 		const float focalLength = 50.0f;
 

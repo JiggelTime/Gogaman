@@ -20,6 +20,6 @@ namespace Gogaman
 	{
 		glGenerateTextureMipmap(m_ID);
 		if(levels == 1)
-			GM_LOG_CORE_WARNING("Generating texture mipmap with no mipmap levels");
+			GM_LOG_CORE_WARNING("Regenerating texture mipmap with no mipmap levels");
 	}
 }

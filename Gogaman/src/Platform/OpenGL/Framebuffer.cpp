@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Framebuffer.h"
+#include "Gogaman/Logging/Log.h"
 
 namespace Gogaman
 {
@@ -17,7 +18,7 @@ namespace Gogaman
 		glDeleteFramebuffers(1, &m_ID);
 	}
 
-	void Framebuffer::AttachColorBuffer(const Texture2D &texture, const int level, const int attachmentIndex, bool renderTarget)
+	void Framebuffer::AttachColorBuffer(const Texture &texture, const int level, const int attachmentIndex, bool isRenderTarget)
 	{
 		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0);
 		GM_ASSERT(level >= 1);
@@ -28,7 +29,7 @@ namespace Gogaman
 		if(attachmentIndex == m_NumColorAttachments)
 		{
 			m_NumColorAttachments++;
-			if(renderTarget)
+			if(isRenderTarget)
 			{
 				m_RenderTargets.emplace_back(GL_COLOR_ATTACHMENT0 + attachmentIndex);
 				glNamedFramebufferDrawBuffers(m_ID, m_RenderTargets.size(), m_RenderTargets.data());
@@ -50,7 +51,7 @@ namespace Gogaman
 		}
 	}
 
-	void Framebuffer::AttachDepthBuffer(const Texture2D &texture)
+	void Framebuffer::AttachDepthBuffer(const Texture &texture)
 	{
 		GM_ASSERT(texture.formatImage == GL_DEPTH_COMPONENT);
 

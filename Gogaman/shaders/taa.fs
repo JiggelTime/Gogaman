@@ -6,14 +6,11 @@
 #define USE_CLOSEST_VELOCITY 1
 #define AABB_CLIP 1
 //History blending weight when incoherent with current frame
-#define WEIGHT_MINIMUM 0.85f
+#define WEIGHT_MINIMUM 0.87f
 //History blending weight when coherent with current frame
-#define WEIGHT_MAXIMUM 0.92f
-//Bloom luminance threshold
-#define BLOOM_THRESHOLD 1.1f
+#define WEIGHT_MAXIMUM 0.95f
 
 layout(location = 0) out vec4 FragColor;
-layout(location = 1) out vec4 BloomColor;
 
 in vec2 texCoordsFrag;
 
@@ -53,9 +50,6 @@ void main()
 	result.a    = texture(inputTexture, texCoordsFrag).a;
 
 	FragColor = result;
-	//Write bright fragments to bloom buffer
-	float luminance = dot(FragColor.rgb, vec3(0.3f, 0.59f, 0.11f));
-	BloomColor = luminance > BLOOM_THRESHOLD ? vec4(FragColor.rgb, 1.0f) : vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 vec4 FetchSampleValue(sampler2D inputTexture, vec2 texCoords)

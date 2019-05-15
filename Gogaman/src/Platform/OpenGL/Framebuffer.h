@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Core.h"
-#include "Texture2D.h"
+#include "Texture.h"
 #include "Renderbuffer.h"
 
 #include <glad.h>
@@ -24,20 +24,19 @@ namespace Gogaman
 		{
 			std::swap(m_ID,                  other.m_ID);
 			std::swap(m_NumColorAttachments, other.m_NumColorAttachments);
-			//std::swap(m_NumRenderTargets,    other.m_NumRenderTargets);
 			std::swap(m_RenderTargets,       other.m_RenderTargets);
 			return *this;
 		}
 
-		void AttachColorBuffer(const Texture2D &texture) { AttachColorBuffer(texture, true); }
-		void AttachColorBuffer(const Texture2D &texture, bool renderTarget) { AttachColorBuffer(texture, 1, renderTarget); }
-		void AttachColorBuffer(const Texture2D &texture, const int level, bool renderTarget) { AttachColorBuffer(texture, level, m_NumColorAttachments, renderTarget); }
-		void AttachColorBuffer(const Texture2D &texture, const int level, const int attachmentIndex, bool renderTarget);
+		void AttachColorBuffer(const Texture &texture) { AttachColorBuffer(texture, true); }
+		void AttachColorBuffer(const Texture &texture, bool isRenderTarget) { AttachColorBuffer(texture, 1, isRenderTarget); }
+		void AttachColorBuffer(const Texture &texture, const int level, bool isRenderTarget) { AttachColorBuffer(texture, level, m_NumColorAttachments, isRenderTarget); }
+		void AttachColorBuffer(const Texture &texture, const int level, const int attachmentIndex, bool isRenderTarget);
 
 		void AttachColorBuffer(const Renderbuffer &renderbuffer) { AttachColorBuffer(renderbuffer, m_NumColorAttachments); }
 		void AttachColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex);
 		
-		void AttachDepthBuffer(const Texture2D    &texture);
+		void AttachDepthBuffer(const Texture    &texture);
 		void AttachDepthBuffer(const Renderbuffer &renderbuffer);
 
 		inline void Bind()   const { glBindFramebuffer(GL_FRAMEBUFFER, m_ID); }
@@ -45,14 +44,16 @@ namespace Gogaman
 		
 		void Clear() const;
 
+		inline void BlitColorBuffer(const Framebuffer &source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, filter); }
+		inline void BlitDepthBuffer(const Framebuffer& source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, filter); }
+		inline void BlitStencilBuffer(const Framebuffer& source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, filter); }
+
 		inline GLuint GetID()               const { return m_ID; }
 		inline int GetNumColorAttachments() const { return m_NumColorAttachments; }
-		//inline int GetNumRenderTargets()    const { return m_NumRenderTargets; }
-		inline uint GetNumRenderTargets()    const { return m_RenderTargets.size(); }
+		inline uint GetNumRenderTargets()   const { return m_RenderTargets.size(); }
 	private:
 		GLuint m_ID;
 		int m_NumColorAttachments;
-		//int m_NumRenderTargets;
 		std::vector<GLenum> m_RenderTargets;
 	};
 }

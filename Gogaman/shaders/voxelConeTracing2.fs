@@ -226,6 +226,7 @@ vec3 ComputeIndirectSpecular()
 {
 	vec3  coneDirection = normalize(reflect(-viewDir, normal));
 	float coneAperture  = max(tan(0.0003474660443456835f + (roughness * (1.3331290497744692f - (roughness * 0.5040552688878546f)))), MIN_SPECULAR_CONE_APERTURE);
+	coneAperture = 0.001f;
 	vec3 radiance       = traceCone(coneDirection, coneAperture, SPECULAR_CONE_OFFSET);
 	return radiance;
 }

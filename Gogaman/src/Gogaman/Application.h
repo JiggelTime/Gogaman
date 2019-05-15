@@ -11,6 +11,8 @@ namespace Gogaman
 		virtual ~Application();
 
 		void Run();
+	private:
+		inline bool OnEvent(KeyPressEvent &event) { std::cout << "NIGGER" << std::endl; return true; }
 	};
 
 	Application *CreateApplication();

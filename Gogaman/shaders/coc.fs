@@ -21,10 +21,10 @@ float LinearizeDepth(float depth) { return -farPlane * nearPlane / (depth * (far
 void main()
 {
 	float linearDepth = LinearizeDepth(texture(depthTexture, texCoordsFrag).x);
+	float objectDistance = linearDepth;
 	#ifdef AUTO_FOCUS
 		float focalDistance = LinearizeDepth(texture(depthTexture, vec2(0.5f, 0.5f)).x);
 	#endif
-	float objectDistance = linearDepth;
 
 	float cocRadius = (focalLength * focalLength * (focalDistance - objectDistance)) / (objectDistance * fStop * (focalDistance - focalLength));
 	cocRadius = clamp(abs(cocRadius), 0.0f, 1.0f);

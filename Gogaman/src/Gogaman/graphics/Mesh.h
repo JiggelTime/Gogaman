@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Core.h"
-#include "Shader.h"
+#include "Platform/OpenGL/Shader.h"
 #include <glad.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

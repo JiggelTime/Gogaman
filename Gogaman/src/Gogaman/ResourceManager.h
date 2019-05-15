@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Core.h"
-#include "Graphics/Shader.h"
-#include "Graphics/Texture2D.h"
+#include "Platform/OpenGL/Shader.h"
+#include "Platform/OpenGL/Texture2D.h"
 #include "Graphics/Model.h"
 
 #include <glad.h>
