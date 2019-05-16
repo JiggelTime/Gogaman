@@ -71,7 +71,7 @@
     <ClCompile Include="src\Platform\OpenGL\Texture3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
+    <ClCompile Include="src\Gogaman\Events\EventQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -117,10 +117,11 @@
     <ClInclude Include="src\Platform\OpenGL\Texture2D.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture3D.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Gogaman\Events\Event.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
+    <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
+    <ClInclude Include="src\Gogaman\Events\EventListener.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

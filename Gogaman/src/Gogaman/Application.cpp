@@ -18,9 +18,6 @@ namespace Gogaman
 	{
 		//Renderer gogaRenderer("Gogaman");
 
-		EventDispatcher goga(KeyPressEvent);
-		goga.Dispatch(GM_BIND_EVENT_CALLBACK(OnEvent));
-
 		while(true)
 		{
 			//gogaRenderer.Render();

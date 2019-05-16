@@ -1,5 +1,4 @@
 #include <Gogaman.h>
-#include <iostream>
 
 class Sandbox : public Gogaman::Application
 {

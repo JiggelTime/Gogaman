@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Gogaman\Events\EventQueue.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Framebuffer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp" />
@@ -30,7 +31,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="vendor\stb_image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Events\Event.h" />
+    <ClInclude Include="src\Gogaman\Events\EventListener.h" />
+    <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
@@ -68,7 +70,6 @@
     <ClInclude Include="src\Gogaman\TypeDefs.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Platform\OpenGL\Shader.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
