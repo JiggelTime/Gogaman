@@ -8,6 +8,10 @@
 #include "Renderbuffer.h"
 #include "Framebuffer.h"
 
+#include "Gogaman/Events/EventListener.h"
+#include "Gogaman/Events/EventQueue.h"
+#include "Gogaman/Events/KeyboardEvent.h"
+
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
@@ -17,7 +21,7 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API Renderer
+	class GOGAMAN_API Renderer : EventListener
 	{
 	public:
 		Renderer(const std::string &name);
@@ -25,7 +29,11 @@ namespace Gogaman
 
 		void Render();
 		void RenderFullscreenQuad() const;
+
+		virtual bool OnEvent(Event &event) override;
 	private:
+		bool OnKeyPress(KeyPressEvent &event) { std::cout << "Goga \n"; return false; }
+
 		void InitializeFramebuffers();
 
 		void ProcessInput(GLFWwindow *window);

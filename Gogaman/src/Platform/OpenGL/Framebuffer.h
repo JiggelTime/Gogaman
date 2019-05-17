@@ -36,7 +36,7 @@ namespace Gogaman
 		void AttachColorBuffer(const Renderbuffer &renderbuffer) { AttachColorBuffer(renderbuffer, m_NumColorAttachments); }
 		void AttachColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex);
 		
-		void AttachDepthBuffer(const Texture    &texture);
+		void AttachDepthBuffer(const Texture      &texture);
 		void AttachDepthBuffer(const Renderbuffer &renderbuffer);
 
 		inline void Bind()   const { glBindFramebuffer(GL_FRAMEBUFFER, m_ID); }

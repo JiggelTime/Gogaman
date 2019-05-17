@@ -9,13 +9,16 @@ namespace Gogaman
 {
 	class GOGAMAN_API EventDispatcher
 	{
+		template<typename T>
+		using EventCallback = std::function<bool(T &)>;
 	public:
 		EventDispatcher(Event &event)
 			: m_Event(event)
 		{}
 
 		template<typename T>
-		bool Dispatch(std::function<bool(T &)> &callback)
+		//bool Dispatch(std::function<bool(T &)> &callback)
+		bool Dispatch(EventCallback<T> &callback)
 		{
 			if(m_Event.handled)
 				return false;
@@ -38,11 +41,13 @@ namespace Gogaman
 		EventQueue();
 		~EventQueue();
 
+		void ProcessEvents();
+
 		void AddListener(EventListener &listener, Event &event);
 		void RemoveListenerEvent(EventListener &listener, Event &event);
 		void RemoveListener(EventListener &listener);
 	private:
-		static const int m_MaxPendingEvents;
-		static std::vector<Event> m_PendingEvents;
+		std::vector<EventListener> m_EventListeners;
+		std::vector<Event> m_PendingEvents;
 	};
 }

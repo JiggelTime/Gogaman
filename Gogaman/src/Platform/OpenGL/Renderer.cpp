@@ -1227,6 +1227,13 @@ namespace Gogaman
 		glBindVertexArray(0);
 	}
 
+	bool Renderer::OnEvent(Event &event)
+	{
+		EventDispatcher dispatcher(event);
+		//dispatcher.Dispatch(GM_BIND_EVENT_CALLBACK(OnKeyPress));
+		dispatcher.Dispatch(std::bind(&OnKeyPress, this, std::placeholders::_1));
+	}
+
 	void Renderer::ProcessInput(GLFWwindow *window)
 	{
 		//Close window

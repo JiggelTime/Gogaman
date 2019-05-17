@@ -74,6 +74,12 @@
     <ClCompile Include="src\Gogaman\Events\EventQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\VertexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\VertexArrayBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\stb_image.h">
@@ -122,6 +128,8 @@
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
     <ClInclude Include="src\Gogaman\Events\EventListener.h" />
+    <ClInclude Include="src\Platform\OpenGL\VertexBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\VertexArrayBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

@@ -95,7 +95,7 @@ namespace Gogaman
 		uint VBO, EBO;
 
 		//Functions
-		void setupMesh()
+		inline void setupMesh()
 		{
 			//Configure VBO, VAO, and EBO
 			glGenVertexArrays(1, &VAO);

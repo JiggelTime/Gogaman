@@ -3,8 +3,6 @@
 #include "Logging/Log.h"
 
 #include "Platform/OpenGL/Renderer.h"
-#include "Events/Event.h"
-#include "Events/KeyboardEvent.h"
 
 namespace Gogaman
 {
