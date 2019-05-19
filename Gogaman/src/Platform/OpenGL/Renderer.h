@@ -9,7 +9,6 @@
 #include "Framebuffer.h"
 
 #include "Gogaman/Events/EventListener.h"
-#include "Gogaman/Events/EventQueue.h"
 #include "Gogaman/Events/KeyboardEvent.h"
 
 #include <glm.hpp>
@@ -21,7 +20,7 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API Renderer : EventListener
+	class GOGAMAN_API Renderer : public EventListener
 	{
 	public:
 		Renderer(const std::string &name);
@@ -30,10 +29,14 @@ namespace Gogaman
 		void Render();
 		void RenderFullscreenQuad() const;
 
-		virtual bool OnEvent(Event &event) override;
+		virtual void OnEvent(Event &event) override;
 	private:
-		bool OnKeyPress(KeyPressEvent &event) { std::cout << "Goga \n"; return false; }
-
+		bool OnKeyPress(KeyPressEvent &event)
+		{
+			std::cout << "Key pressed \n";
+			return true;
+		}
+	
 		void InitializeFramebuffers();
 
 		void ProcessInput(GLFWwindow *window);

@@ -3,6 +3,7 @@
 #include "Logging/Log.h"
 
 #include "Platform/OpenGL/Renderer.h"
+#include "Events/KeyboardEvent.h"
 
 namespace Gogaman
 {
@@ -14,11 +15,17 @@ namespace Gogaman
 
 	void Application::Run()
 	{
-		//Renderer gogaRenderer("Gogaman");
+		Renderer gogaRenderer("Gogaman");
+		KeyPressEvent goga(3, 1);
+		EventQueue::Enqueue(goga);
 
 		while(true)
 		{
-			//gogaRenderer.Render();
+			gogaRenderer.Render();	
+
+			EventQueue::DispatchEvents();
 		}
+
+		EventQueue::Clear();
 	}
 }

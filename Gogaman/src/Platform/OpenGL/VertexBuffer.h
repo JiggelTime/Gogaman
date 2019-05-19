@@ -12,7 +12,7 @@ namespace Gogaman
 		VertexBuffer();
 		~VertexBuffer();
 
-		inline void UploadData(const size_t &size, const void *data, const GLenum usage) { glNamedBufferData(m_ID, size, data, usage); } 
+		inline void UploadData(const size_t dataSize, const void *data, GLenum usage) { glNamedBufferData(m_ID, dataSize, data, usage);  }
 
 		inline GLuint GetID() const { return m_ID; }
 	private:

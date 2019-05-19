@@ -32,22 +32,19 @@ namespace Gogaman
 		std::vector<ModelTexture> textures;
 		uint VAO;
 
-		Mesh(std::vector<Vertex> vertices, std::vector<uint> indices, std::vector<ModelTexture> textures)
+		Mesh(std::vector<Vertex> &vertices, std::vector<uint> &indices, std::vector<ModelTexture> &textures)
+			: vertices(vertices), indices(indices), textures(textures), m_Hidden(false)
 		{
-			this->vertices = vertices;
-			this->indices = indices;
-			this->textures = textures;
-
 			setupMesh();
 		}
 
 		void Render(Shader &shader)
 		{
-			uint diffuseNr = 1;
-			uint roughnessNr = 1;
-			uint normalNr = 1;
-			uint heightNr = 1;
-			uint metalnessNr = 1;
+			uint diffuseNr    = 1;
+			uint roughnessNr  = 1;
+			uint normalNr     = 1;
+			uint heightNr     = 1;
+			uint metalnessNr  = 1;
 			uint emissivityNr = 1;
 
 			//Bind texture(s) before rendering
@@ -90,7 +87,13 @@ namespace Gogaman
 			glBindVertexArray(0);
 		}
 
+		inline void Hide()   { m_Hidden = true; }
+		inline void Unhide() { m_Hidden = false; }
+
+		inline bool IsHidden() const { return m_Hidden; }
 	private:
+		bool m_Hidden;
+
 		//Render data
 		uint VBO, EBO;
 

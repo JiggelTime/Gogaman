@@ -45,12 +45,12 @@ namespace Gogaman
 		void Clear() const;
 
 		inline void BlitColorBuffer(const Framebuffer &source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, filter); }
-		inline void BlitDepthBuffer(const Framebuffer& source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, filter); }
-		inline void BlitStencilBuffer(const Framebuffer& source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, filter); }
+		inline void BlitDepthBuffer(const Framebuffer &source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, filter); }
+		inline void BlitStencilBuffer(const Framebuffer &source, const GLint width, const GLint height, GLenum filter) const { glBlitNamedFramebuffer(source.GetID(), m_ID, 0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, filter); }
 
-		inline GLuint GetID()               const { return m_ID; }
-		inline int GetNumColorAttachments() const { return m_NumColorAttachments; }
-		inline uint GetNumRenderTargets()   const { return m_RenderTargets.size(); }
+		inline GLuint GetID()                  const { return m_ID; }
+		inline size_t GetNumColorAttachments() const { return m_NumColorAttachments; }
+		inline size_t GetNumRenderTargets()    const { return m_RenderTargets.size(); }
 	private:
 		GLuint m_ID;
 		int m_NumColorAttachments;

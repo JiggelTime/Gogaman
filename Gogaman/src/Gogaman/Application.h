@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "Events/EventQueue.h"
 #include "Events/KeyboardEvent.h"
 
 namespace Gogaman
@@ -13,7 +14,6 @@ namespace Gogaman
 
 		void Run();
 	private:
-		inline bool OnEvent(KeyPressEvent &event) { std::cout << "NIGGER" << std::endl; return true; }
 	};
 
 	Application *CreateApplication();

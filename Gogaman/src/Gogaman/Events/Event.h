@@ -7,8 +7,9 @@ namespace Gogaman
 	enum EventType
 	{
 		//Keyboard
-		KeyPress, KeyRelease, KeyRepeat
+		KeyPress, KeyRelease, KeyRepeat,
 		//Mouse
+		MouseMove, MouseButtonPress, MouseButtonRelease
 	};
 
 	enum EventCategory

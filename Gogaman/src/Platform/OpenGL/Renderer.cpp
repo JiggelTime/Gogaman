@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "Gogaman/Logging/Log.h"
+#include "Gogaman/Events/EventDispatcher.h"
 #include "Gogaman/ResourceManager.h"
 #include "Gogaman/Graphics/JitterSequences.h"
 #include "Gogaman/Graphics/Lights/PointLight.h"
@@ -116,7 +117,8 @@ namespace Gogaman
 		//Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
 		ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
 
-		//ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
+		ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
+		GM_MODEL(sphereModel).Hide();
 
 		//Configure global OpenGL state
 		glEnable(GL_DEPTH_TEST);
@@ -525,7 +527,10 @@ namespace Gogaman
 		GM_SHADER(gbufferShader).SetUniformBool("debug", GM_CONFIG.debug);
 
 		for(auto &i : ResourceManager::models)
-			i.second.Render(GM_SHADER(gbufferShader), true);
+		{
+			if(!i.second.IsHidden())
+				i.second.Render(GM_SHADER(gbufferShader), true);
+		}
 
 		//GM_MODEL(roomModel).Render(GM_SHADER(gbufferShader), true);
 		//GM_MODEL(redModel).Render(GM_SHADER(gbufferShader), true);
@@ -656,8 +661,11 @@ namespace Gogaman
 				//GM_MODEL(blueModel).Render(GM_SHADER(voxelizationShader));
 				for(auto &i : ResourceManager::models)
 				{
-					if(!i.second.IsDynamic())
-						i.second.Render(GM_SHADER(voxelizationShader));
+					if(!i.second.IsHidden())
+					{
+						if(!i.second.IsDynamic())
+							i.second.Render(GM_SHADER(voxelizationShader));
+					}
 				}
 				
 				glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
@@ -1227,11 +1235,11 @@ namespace Gogaman
 		glBindVertexArray(0);
 	}
 
-	bool Renderer::OnEvent(Event &event)
+	void Renderer::OnEvent(Event &event)
 	{
 		EventDispatcher dispatcher(event);
 		//dispatcher.Dispatch(GM_BIND_EVENT_CALLBACK(OnKeyPress));
-		dispatcher.Dispatch(std::bind(&OnKeyPress, this, std::placeholders::_1));
+		dispatcher.Dispatch<KeyPressEvent>(std::bind(&Renderer::OnKeyPress, this, std::placeholders::_1));
 	}
 
 	void Renderer::ProcessInput(GLFWwindow *window)

@@ -101,6 +101,11 @@ namespace Gogaman
 
 		inline bool IsDynamic() const
 		{ return isDynamic; }
+
+		void Hide();
+		void Unhide();
+
+		inline bool IsHidden() const { return m_Hidden; }
 	private:
 		void ProcessNode(aiNode *node, const aiScene *scene);
 		Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
@@ -112,6 +117,8 @@ namespace Gogaman
 		float rotationAngle = 0.0f;
 		//Dynamic or static
 		bool isDynamic = false;
+
+		bool m_Hidden;
 
 		glm::mat4 modelMatrix;
 		glm::mat4 previousModelMatrix;

@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Gogaman\Events\EventListener.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventQueue.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Framebuffer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
@@ -41,14 +42,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="WindowsWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Events\Event.h" />
+    <ClInclude Include="src\Gogaman\Events\EventDispatcher.h" />
     <ClInclude Include="src\Gogaman\Events\EventListener.h" />
     <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
+    <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\Framebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\Renderer.h" />
     <ClInclude Include="src\Platform\OpenGL\Renderbuffer.h" />
@@ -75,6 +79,7 @@
     <ClInclude Include="src\Platform\OpenGL\VertexArrayBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\VertexBuffer.h" />
     <ClInclude Include="vendor\stb_image.h" />
+    <ClInclude Include="WindowsWindow.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

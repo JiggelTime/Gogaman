@@ -5,6 +5,7 @@
 namespace Gogaman
 {
 	Model::Model()
+		: m_Hidden(false)
 	{}
 
 	Model::~Model()
@@ -21,8 +22,11 @@ namespace Gogaman
 		if(setPreviousModelMatrixUniform)
 			shader.SetUniformMat4("previousM", previousModelMatrix);
 
-		for(uint i = 0; i < meshes.size(); i++)
-			meshes[i].Render(shader);
+		for(auto i : meshes)
+		{
+			if(!i.IsHidden())
+				i.Render(shader);
+		}
 	}
 
 	void Model::LoadModel(std::string &filePath)
@@ -232,5 +236,21 @@ namespace Gogaman
 		}
 
 		return textureID;
+	}
+
+	void Model::Hide()
+	{
+		for(auto i : meshes)
+			i.Hide();
+		
+		m_Hidden = true;
+	}
+	
+	void Model::Unhide()
+	{
+		for(auto i : meshes)
+			i.Unhide();
+
+		m_Hidden = false;
 	}
 }

@@ -7,47 +7,25 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API EventDispatcher
-	{
-		template<typename T>
-		using EventCallback = std::function<bool(T &)>;
-	public:
-		EventDispatcher(Event &event)
-			: m_Event(event)
-		{}
-
-		template<typename T>
-		//bool Dispatch(std::function<bool(T &)> &callback)
-		bool Dispatch(EventCallback<T> &callback)
-		{
-			if(m_Event.handled)
-				return false;
-
-			if(m_Event.GetType() == T::GetEventType())
-			{
-				m_Event.handled = callback(m_Event);
-				return true;
-			}
-
-			return false;
-		}
-	private:
-		Event &m_Event;
-	};
+	class EventListener;
 
 	class GOGAMAN_API EventQueue
 	{
 	public:
-		EventQueue();
-		~EventQueue();
+		static void Enqueue(Event &event);
 
-		void ProcessEvents();
+		static void DispatchEvents();
 
-		void AddListener(EventListener &listener, Event &event);
-		void RemoveListenerEvent(EventListener &listener, Event &event);
-		void RemoveListener(EventListener &listener);
+		static void AddListener(EventListener &listener);
+		static void RemoveListenerFromEvent(EventListener &listener, Event &event);
+		static void RemoveListener(EventListener &listener);
+
+		static inline void Clear() { m_PendingEvents = {}; }
+
+		static inline size_t GetNumEventListeners() { return m_EventListeners.size(); }
+		static inline size_t GetNumPendingEvents()  { return m_PendingEvents.size(); }
 	private:
-		std::vector<EventListener> m_EventListeners;
-		std::vector<Event> m_PendingEvents;
+		static std::vector<EventListener *> m_EventListeners;
+		static std::queue<Event *>          m_PendingEvents;
 	};
 }

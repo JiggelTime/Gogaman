@@ -1,29 +1,37 @@
 #include "pch.h"
 #include "EventQueue.h"
+#include "EventListener.h"
+#include "Gogaman/Logging/Log.h"
 
 namespace Gogaman
 {
-	EventQueue::EventQueue()
-	{}
+	std::vector<EventListener *> EventQueue::m_EventListeners;
+	std::queue<Event *>          EventQueue::m_PendingEvents;
 
-	EventQueue::~EventQueue()
-	{}
-
-	void EventQueue::ProcessEvents()
+	void EventQueue::Enqueue(Event &event)
 	{
-		for(auto &i : m_EventListeners)
+		m_PendingEvents.push(std::move(&event));
+	}
+	
+	void EventQueue::DispatchEvents()
+	{
+		while(!m_PendingEvents.empty())
 		{
-			i.OnEvent();
+			for(auto listener : m_EventListeners)
+			{
+				listener->OnEvent(*m_PendingEvents.front());
+			}
+
+			m_PendingEvents.pop();
 		}
 	}
 
-	void EventQueue::AddListener(EventListener &listener, Event &event)
+	void EventQueue::AddListener(EventListener &listener)
 	{
-		m_EventListeners.push_back(listener);
-		m_PendingEvents.push_back(event);
+		m_EventListeners.push_back(&listener);
 	}
 	
-	void EventQueue::RemoveListenerEvent(EventListener &listener, Event &event)
+	void EventQueue::RemoveListenerFromEvent(EventListener &listener, Event &event)
 	{
 
 	}
