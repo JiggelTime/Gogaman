@@ -39,8 +39,7 @@ uniform vec3      voxelGridPos;
 uniform bool debug;
 
 //Inverse square falloff attenuation
-float attenuate(float dist)
-{ return 1.0f / (dist * dist); }
+float attenuate(float dist) { return 1.0f / (dist * dist); }
 bool  isInVoxelVolume(vec3 worldPos);
 vec3  voxelToWorldSpace(ivec3 voxelPos);
 vec4  readVoxel(vec3 worldPos, float mipLevel);

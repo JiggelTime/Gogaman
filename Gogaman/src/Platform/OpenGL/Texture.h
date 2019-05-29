@@ -9,14 +9,6 @@ namespace Gogaman
 	class GOGAMAN_API Texture
 	{
 	public:
-		Texture();
-		Texture(const Texture &) = delete;
-		Texture(Texture &&other) noexcept
-			: m_ID(std::exchange(other.m_ID, 0)), formatInternal(std::exchange(other.formatInternal, 0)), formatImage(std::exchange(other.formatImage, 0)), filterMin(std::exchange(other.filterMin, 0)), filterMag(std::exchange(other.filterMag, 0)), levels(std::exchange(other.levels, 0))
-		{}
-
-		virtual ~Texture() = 0;
-
 		Texture &operator=(const Texture &) = delete;
 		Texture &operator=(Texture &&other) noexcept
 		{
@@ -40,6 +32,14 @@ namespace Gogaman
 		inline GLuint GetID() const { return m_ID; }
 		
 		void RegenerateMipmap() const;
+	protected:
+		Texture();
+		Texture(const Texture &) = delete;
+		Texture(Texture &&other) noexcept
+			: m_ID(std::exchange(other.m_ID, 0)), formatInternal(std::exchange(other.formatInternal, 0)), formatImage(std::exchange(other.formatImage, 0)), filterMin(std::exchange(other.filterMin, 0)), filterMag(std::exchange(other.filterMag, 0)), levels(std::exchange(other.levels, 0))
+		{}
+
+		virtual ~Texture() = 0;
 	public:
 		GLenum formatInternal, formatImage;
 		GLuint filterMin, filterMag;

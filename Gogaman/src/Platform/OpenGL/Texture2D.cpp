@@ -5,7 +5,7 @@
 namespace Gogaman
 {
 	Texture2D::Texture2D()
-		: Texture(), width(0), height(0), wrapS(GL_REPEAT), wrapT(GL_REPEAT)
+		: width(0), height(0), wrapS(GL_REPEAT), wrapT(GL_REPEAT)
 	{}
 
 	Texture2D::~Texture2D()
@@ -13,7 +13,8 @@ namespace Gogaman
 
 	void Texture2D::Generate(const GLsizei width, const GLsizei height, const unsigned char *imageData)
 	{
-		GM_ASSERT(width > 0 && height > 0);
+		GM_ASSERT(width  > 0, "Failed to generate texture2D: invalid width");
+		GM_ASSERT(height > 0, "Failed to generate texture2D: invalid height");
 
 		this->width  = width;
 		this->height = height;

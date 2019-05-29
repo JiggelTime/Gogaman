@@ -13,14 +13,8 @@ namespace Gogaman
 		{}
 
 		template<typename T>
-		using EventCallback = std::function<bool(T &)>;
-
-		template<typename T>
-		bool Dispatch(EventCallback<T> callback)
+		bool Dispatch(std::function<bool(T &)> callback)
 		{
-			if(m_Event.handled)
-				return false;
-
 			if(m_Event.GetType() == T::GetEventType())
 			{
 				m_Event.handled = callback(*(T *)&m_Event);

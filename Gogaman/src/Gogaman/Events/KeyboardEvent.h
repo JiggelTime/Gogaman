@@ -8,37 +8,28 @@ namespace Gogaman
 	class GOGAMAN_API KeyboardEvent : public Event
 	{
 	public:
-		virtual EventCategory GetCategory() const override { return Keyboard; }
+		inline virtual EventCategory GetCategory() const override { return EventCategory::Keyboard; }
+
+		inline int GetKeycode() const { return m_Scancode; }
 	protected:
-		KeyboardEvent(const int keycode)
-			: m_Keycode(keycode)
+		KeyboardEvent(const int scancode)
+			: m_Scancode(scancode)
 		{}
 	protected:
-		int m_Keycode;
+		int m_Scancode;
 	};
 
 	class GOGAMAN_API KeyPressEvent : public KeyboardEvent
 	{
 	public:
-		KeyPressEvent(const int keycode, const int repeatCount)
-			: KeyboardEvent(keycode), m_RepeatCount(repeatCount)
+		KeyPressEvent(const int scancode, const int repeatCount)
+			: KeyboardEvent(scancode), m_RepeatCount(repeatCount)
 		{}
 
-		static  EventType GetEventType() { return KeyPress; }
-		virtual EventType GetType() const override { return GetEventType(); }
-	private:
-		int m_RepeatCount;
-	};
+		inline static  EventType GetEventType() { return KeyPress; }
+		inline virtual EventType GetType() const override { return GetEventType(); }
 
-	class GOGAMAN_API KeyRepeatEvent : public KeyboardEvent
-	{
-	public:
-		KeyRepeatEvent(const int keycode, const int repeatCount)
-			: KeyboardEvent(keycode), m_RepeatCount(repeatCount)
-		{}
-
-		static  EventType GetEventType() { return KeyRepeat; }
-		virtual EventType GetType() const override { return GetEventType(); }
+		inline int GetRepeatCount() const { return m_RepeatCount; }
 	private:
 		int m_RepeatCount;
 	};
@@ -46,12 +37,11 @@ namespace Gogaman
 	class GOGAMAN_API KeyReleaseEvent : public KeyboardEvent
 	{
 	public:
-		KeyReleaseEvent(const int keycode)
-			: KeyboardEvent(keycode)
+		KeyReleaseEvent(const int scancode)
+			: KeyboardEvent(scancode)
 		{}
 
-		static EventType GetEventType() { return KeyRelease; }
-		virtual EventType GetType() const override { return GetEventType(); }
-
+		inline static  EventType GetEventType() { return KeyRelease; }
+		inline virtual EventType GetType() const override { return GetEventType(); }
 	};
 }

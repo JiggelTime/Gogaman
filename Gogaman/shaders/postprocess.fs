@@ -1,11 +1,11 @@
 #version 420 core
 
 #define GAMMA 2.2f
-//Tonemapping operator (UNCHARTED2 / REINHARD / LUMA_REINHARD / FILMIC / ACESFILM)
+//Tonemapping operator (UNCHARTED2 | REINHARD | LUMA_REINHARD | FILMIC | ACESFILM)
 #define ACESFILM
 #define GAMMA_CORRECTION 1
-#define FILM_GRAIN 0
-#define FILM_GRAIN_STRENGTH 3.0f
+#define FILM_GRAIN 1
+#define FILM_GRAIN_STRENGTH 2.0f
 
 layout(location = 0) out vec4 FragColor;
 

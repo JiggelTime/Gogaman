@@ -24,13 +24,13 @@ namespace Gogaman
 
 		//Compile vertex shader
 		vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+		glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
 		glCompileShader(vertexShader);
 		CheckCompileErrors(vertexShader, "vertex shader");
 
 		//Compile fragment shader
 		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+		glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
 		glCompileShader(fragmentShader);
 		CheckCompileErrors(fragmentShader, "fragment shader");
 
@@ -38,7 +38,7 @@ namespace Gogaman
 		if(geometryShaderPresent)
 		{
 			geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-			glShaderSource(geometryShader, 1, &geometryShaderSource, NULL);
+			glShaderSource(geometryShader, 1, &geometryShaderSource, nullptr);
 			glCompileShader(geometryShader);
 			CheckCompileErrors(geometryShader, "geometry shader");
 		}
@@ -65,7 +65,7 @@ namespace Gogaman
 
 		//Compile compute shader
 		computeShader = glCreateShader(GL_COMPUTE_SHADER);
-		glShaderSource(computeShader, 1, &computeShaderSource, NULL);
+		glShaderSource(computeShader, 1, &computeShaderSource, nullptr);
 		glCompileShader(computeShader);
 		CheckCompileErrors(computeShader, "compute shader");
 

@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Gogaman\Events\EventListener.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventQueue.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Mesh.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Framebuffer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Model.cpp" />
@@ -42,7 +42,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="WindowsWindow.cpp" />
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Events\Event.h" />
@@ -51,7 +52,11 @@
     <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
+    <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
+    <ClInclude Include="src\Gogaman\Graphics\GraphicsContext.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
+    <ClInclude Include="src\Gogaman\InputCodes.h" />
+    <ClInclude Include="src\Gogaman\InputDefs.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\Framebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\Renderer.h" />
@@ -79,7 +84,8 @@
     <ClInclude Include="src\Platform\OpenGL\VertexArrayBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\VertexBuffer.h" />
     <ClInclude Include="vendor\stb_image.h" />
-    <ClInclude Include="WindowsWindow.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

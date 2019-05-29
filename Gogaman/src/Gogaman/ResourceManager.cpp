@@ -18,7 +18,7 @@ namespace Gogaman
 
 	void ResourceManager::LoadShader(const std::string &name, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
 	{
-		GM_ASSERT(!name.empty());
+		GM_ASSERT(!name.empty(), "Failed to load shader: shader name is empty");
 
 		if(shaders.find(name) == shaders.end())
 			shaders[name] = std::move(LoadShaderFromFile(vertexShaderPath, fragmentShaderPath, geometryShaderPath));
@@ -26,7 +26,7 @@ namespace Gogaman
 
 	void ResourceManager::LoadShader(const std::string &name, const char *computeShaderPath)
 	{
-		GM_ASSERT(!name.empty());
+		GM_ASSERT(!name.empty(), "Failed to load shader: shader name is empty");
 
 		if(shaders.find(name) == shaders.end())
 			shaders[name] = std::move(LoadShaderFromFile(computeShaderPath));
@@ -34,7 +34,7 @@ namespace Gogaman
 
 	void ResourceManager::LoadTexture2D(const std::string &name, const char *filePath, const GLboolean sRGB)
 	{
-		GM_ASSERT(!name.empty());
+		GM_ASSERT(!name.empty(), "Failed to load texture2D: texture2D name is empty");
 
 		if(texture2Ds.find(name) == texture2Ds.end())
 			texture2Ds[name] = std::move(LoadTexture2DFromFile(filePath, sRGB));
@@ -42,7 +42,7 @@ namespace Gogaman
 
 	void ResourceManager::LoadModel(const std::string &name, const char *filePath)
 	{
-		GM_ASSERT(!name.empty());
+		GM_ASSERT(!name.empty(), "Failed to load model: model name is empty");
 
 		if(models.find(name) == models.end())
 			models[name] = LoadModelFromFile(filePath);
@@ -118,7 +118,7 @@ namespace Gogaman
 
 	Shader ResourceManager::LoadShaderFromFile(const char *computeShaderPath)
 	{
-		std::string data;
+		std::string   data;
 		std::ifstream inputStream;
 
 		inputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -169,10 +169,9 @@ namespace Gogaman
 			}
 		}
 		else
-			GM_LOG_CORE_ERROR("Texture failed to load at location %s", filePath);
+			GM_LOG_CORE_ERROR("Failed to load texture2D at location %s", filePath);
 		
 		texture2D.Generate(width, height, data);
-		GM_LOG_CORE_INFO("Loaded texture at location %s", filePath);
 		stbi_image_free(data);
 		return texture2D;
 	}
@@ -182,7 +181,6 @@ namespace Gogaman
 		std::string filePathString(filePath);
 		Model model;
 		model.LoadModel(filePathString);
-		GM_LOG_CORE_INFO("Loaded model at location %s", filePath);
 		return model;
 	}
 }

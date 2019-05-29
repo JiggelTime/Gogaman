@@ -14,6 +14,10 @@ layout(location = 0) out vec4 FragColor;
 
 in vec2 texCoordsFrag;
 
+uniform vec2 resolutionInput;
+uniform vec2 resolutionOutput;
+uniform vec2 texelSizeInput;
+uniform vec2 texelSizeOutput;
 uniform sampler2D inputTexture;
 //Result from previous frame
 uniform sampler2D previousInputTexture;
@@ -31,30 +35,30 @@ vec3  InverseTonemap(vec3 c) { return c / (1.0f - max(c.r, max(c.g, c.b))); }
 vec2  FetchClosestInverseVelocity(vec2 texCoords);
 void  TightenAABBchroma(inout vec3 aabbAvg, inout vec3 aabbMin, inout vec3 aabbMax, vec3 currentPixelValue);
 vec4  ClipAABB(vec3 neighborhoodMin, vec3 neighborhoodMax, vec4 currentValue, vec4 previousValue);
-vec4  FetchSampleValue(sampler2D inputTexture, vec2 texCoords);
+vec4  FetchSampleValue(sampler2D imageTexture, vec2 texCoords);
 float UnbiasedLuminanceWeight(float currentLuminance, float previousLuminance, float maxLuminance);
-vec4  TemporalResolve(sampler2D inputTexture, sampler2D previousInputTexture);
+vec4  TemporalResolve(sampler2D image, sampler2D imageHistory);
 
 const mat3 RGBtoYCOCG = mat3(0.25f, 0.5f, -0.25f, 0.5f, 0.0f, 0.5f, 0.25f, -0.5f, -0.25f);
 const mat3 YCOCGtoRGB = mat3(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f, -1.0f);
-
+/*
 vec2 resolutionInput  = textureSize(inputTexture,    0);
 vec2 resolutionOutput = textureSize(velocityTexture, 0);
 //Replace these with uniforms because division is slow
 vec2 texelSizeInput  = 1.0f / resolutionInput;
 vec2 texelSizeOutput = 1.0f / resolutionOutput;
-
+*/
 void main()
 {
 	vec4 result = TemporalResolve(inputTexture, previousInputTexture);
 	result.a    = texture(inputTexture, texCoordsFrag).a;
-
+	
 	FragColor = result;
 }
 
-vec4 FetchSampleValue(sampler2D inputTexture, vec2 texCoords)
+vec4 FetchSampleValue(sampler2D imageTexture, vec2 texCoords)
 {
-	vec4 value = texture(inputTexture, texCoords).rgba;
+	vec4 value = texture(imageTexture, texCoords).rgba;
 	value.xyz  = Tonemap(value.xyz);
 	value.xyz  = RGBtoYCOCG * value.xyz;
 	return value;
@@ -93,7 +97,7 @@ vec3 ClipAABB(vec3 aabbMin, vec3 aabbMax, vec3 point)
 }
 
 //Obtains closest inverse velocity in 3x3 neighborhood
-//NOTE: Using longest velocity instead of closest could be better
+//NOTE: Using largest velocity instead of closest could be better
 vec2 FetchClosestInverseVelocity(vec2 texCoords, vec2 texelSize)
 {
 	float closestDepth     = 1.0f + EPSILON;
@@ -117,7 +121,7 @@ vec2 FetchClosestInverseVelocity(vec2 texCoords, vec2 texelSize)
 	return texture(velocityTexture, closestTexCoords).xy;
 }
 
-vec4 TemporalResolve(sampler2D inputTexture, sampler2D previousInputTexture)
+vec4 TemporalResolve(sampler2D image, sampler2D imageHistory)
 {
 	//Screen space velocity
 	#if USE_CLOSEST_VELOCITY
@@ -128,24 +132,23 @@ vec4 TemporalResolve(sampler2D inputTexture, sampler2D previousInputTexture)
 
 	//Texture coordinate reprojection
 	vec2 previousTexCoords  = texCoordsFrag - velocity;
-	vec4 previousPixelValue = FetchSampleValue(previousInputTexture, previousTexCoords);
+	vec4 previousPixelValue = FetchSampleValue(imageHistory, previousTexCoords);
 
 	vec2 texelSizeInputX = vec2(texelSizeInput.x, 0.0f);
 	vec2 texelSizeInputY = vec2(0.0f, texelSizeInput.y);
 
 	//Sample 3x3 neighborhood around current pixel
 	vec4 nbrSamples[9];
-	nbrSamples[0] = FetchSampleValue(inputTexture, texCoordsFrag - texelSizeInput);
-	nbrSamples[1] = FetchSampleValue(inputTexture, texCoordsFrag - texelSizeInputY);
-	nbrSamples[2] = FetchSampleValue(inputTexture, texCoordsFrag + texelSizeInputX - texelSizeInputY);
-	nbrSamples[3] = FetchSampleValue(inputTexture, texCoordsFrag - texelSizeInputX);
-	nbrSamples[4] = FetchSampleValue(inputTexture, texCoordsFrag);
-	nbrSamples[5] = FetchSampleValue(inputTexture, texCoordsFrag + texelSizeInputX);
-	nbrSamples[6] = FetchSampleValue(inputTexture, texCoordsFrag - texelSizeInputX + texelSizeInputY);
-	nbrSamples[7] = FetchSampleValue(inputTexture, texCoordsFrag + texelSizeInputY);
-	nbrSamples[8] = FetchSampleValue(inputTexture, texCoordsFrag + texelSizeInput);
+	nbrSamples[0] = FetchSampleValue(image, texCoordsFrag - texelSizeInput);
+	nbrSamples[1] = FetchSampleValue(image, texCoordsFrag - texelSizeInputY);
+	nbrSamples[2] = FetchSampleValue(image, texCoordsFrag + texelSizeInputX - texelSizeInputY);
+	nbrSamples[3] = FetchSampleValue(image, texCoordsFrag - texelSizeInputX);
+	nbrSamples[4] = FetchSampleValue(image, texCoordsFrag);
+	nbrSamples[5] = FetchSampleValue(image, texCoordsFrag + texelSizeInputX);
+	nbrSamples[6] = FetchSampleValue(image, texCoordsFrag - texelSizeInputX + texelSizeInputY);
+	nbrSamples[7] = FetchSampleValue(image, texCoordsFrag + texelSizeInputY);
+	nbrSamples[8] = FetchSampleValue(image, texCoordsFrag + texelSizeInput);
 
-	//Value of current pixel
 	vec4 currentPixelValue = nbrSamples[4];
 
 	vec4 neighborhoodAvg = nbrSamples[0];
@@ -177,19 +180,20 @@ vec4 TemporalResolve(sampler2D inputTexture, sampler2D previousInputTexture)
 	#endif
 
 	float blendWeight = UnbiasedLuminanceWeight(currentPixelValue.x, previousPixelValue.x, neighborhoodMax.x);
+	blendWeight = WEIGHT_MAXIMUM;
 
 	//http://advances.realtimerendering.com/s2014/epic/TemporalAA.pptx Slide 23
 	//Guassian fit to Blackman-Harris 3.3 reconstruction filter (support is ~2 pixels wide)
-	//Box filter is not stable under motion
+	//Because box filter is not stable under motion
 	/*
 	float len = length(velocity);
 	float W = exp(-2.29f * len * len);
 	W *= 1.0f - clamp(len2 / maxLen, 0.0f, 1.0f);
 	*/
 	//TODO: Detect disocclusion: minimum depth in a 3x3 pixel neighborhood of the current frame is compared with the maximum depth in a corresponding 
-	//2x2 pixel region in the previous frame. A disocclusion event is detected when the current depth exceeds the previous depth
+	//2x2 pixel region in the previous frame. A disocclusion is detected when the current depth exceeds the previous depth
 
-	//Fallback to current image if reprojected coordinates are outside screen
+	//Fallback to current image if reprojected coordinates are offscreen
 	if(any(greaterThan(previousTexCoords, vec2(1.0f)) || lessThan(previousTexCoords, vec2(0.0f))))
 		blendWeight = 0.0f;
 

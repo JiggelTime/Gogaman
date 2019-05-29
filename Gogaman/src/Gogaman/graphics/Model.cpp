@@ -71,36 +71,34 @@ namespace Gogaman
 		for(uint i = 0; i < mesh->mNumVertices; i++)
 		{
 			Vertex vertex;
-			glm::vec3 vector3;
 
-			//Positions
-			vector3.x = mesh->mVertices[i].x;
-			vector3.y = mesh->mVertices[i].y;
-			vector3.z = mesh->mVertices[i].z;
-			vertex.Position = vector3;
+			glm::vec3 position;
+			position.x = mesh->mVertices[i].x;
+			position.y = mesh->mVertices[i].y;
+			position.z = mesh->mVertices[i].z;
+			vertex.position = position;
 
-			//Normals
-			vector3.x = mesh->mNormals[i].x;
-			vector3.y = mesh->mNormals[i].y;
-			vector3.z = mesh->mNormals[i].z;
-			vertex.Normal = vector3;
+			glm::vec3 normal;
+			normal.x = mesh->mNormals[i].x;
+			normal.y = mesh->mNormals[i].y;
+			normal.z = mesh->mNormals[i].z;
+			vertex.normal = normal;
 
-			//Texture coordinates
 			if(mesh->mTextureCoords[0])
 			{
-				glm::vec2 vector2;
-				vector2.x = mesh->mTextureCoords[0][i].x;
-				vector2.y = mesh->mTextureCoords[0][i].y;
-				vertex.TexCoords = vector2;
+				glm::vec2 texCoords;
+				texCoords.x = mesh->mTextureCoords[0][i].x;
+				texCoords.y = mesh->mTextureCoords[0][i].y;
+				vertex.texCoords = texCoords;
 			}
 			else
-				vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+				vertex.texCoords = glm::vec2(0.0f, 0.0f);
 
-			//Tangents
-			vector3.x = mesh->mTangents[i].x;
-			vector3.y = mesh->mTangents[i].y;
-			vector3.z = mesh->mTangents[i].z;
-			vertex.Tangent = vector3;
+			glm::vec3 tangent;
+			tangent.x = mesh->mTangents[i].x;
+			tangent.y = mesh->mTangents[i].y;
+			tangent.z = mesh->mTangents[i].z;
+			vertex.tangent = tangent;
 
 			vertices.push_back(vertex);
 		}
@@ -109,8 +107,6 @@ namespace Gogaman
 		for(uint i = 0; i < mesh->mNumFaces; i++)
 		{
 			aiFace face = mesh->mFaces[i];
-
-			//Retrieve the face's indices and store them in the indices vector
 			for(uint j = 0; j < face.mNumIndices; j++)
 				indices.push_back(face.mIndices[j]);
 		}

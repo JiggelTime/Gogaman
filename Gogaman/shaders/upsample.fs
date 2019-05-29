@@ -9,7 +9,7 @@
 #define WEIGHT_MINIMUM 0.85f
 #define WEIGHT_MAXIMUM 0.9375f
 //Spatial filter settings
-#define SPATIAL_KERNEL_RADIUS 4
+#define SPATIAL_KERNEL_RADIUS 1
 
 layout(location = 0) out vec4 FragColor;
 

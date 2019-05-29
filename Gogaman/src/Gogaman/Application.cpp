@@ -1,31 +1,48 @@
 #include "pch.h"
 #include "Application.h"
+
+#include "Config.h"
+#include "Window.h"
 #include "Logging/Log.h"
+#include "Input.h"
+#include "InputCodes.h"
+
+#include "Events/KeyboardEvent.h"
+#include "Events/MouseEvent.h"
 
 #include "Platform/OpenGL/Renderer.h"
-#include "Events/KeyboardEvent.h"
 
 namespace Gogaman
 {
+	Application *Application::s_Instance = nullptr;
+
 	Application::Application()
-	{}
+		: m_IsRunning(true)
+	{
+		GM_ASSERT(s_Instance == nullptr, "Failed to construct application: instance already exists");
+
+		s_Instance = this;
+
+		m_Window = std::unique_ptr<Window>(Window::Create("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight));
+	}
 
 	Application::~Application()
 	{}
 
 	void Application::Run()
 	{
-		Renderer gogaRenderer("Gogaman");
-		KeyPressEvent goga(3, 1);
-		EventQueue::Enqueue(goga);
+		//GetWindow().DisableVerticalSync();
 
-		while(true)
+		Renderer gogaRenderer(GetWindow());
+
+		while(m_IsRunning)
 		{
-			gogaRenderer.Render();	
+			gogaRenderer.Render();
 
-			EventQueue::DispatchEvents();
+			GetWindow().Update();
+
+			//GM_LOG_INFO("Num events: %d", EventQueue::GetInstance().GetNumPendingEvents());
+			EventQueue::GetInstance().DispatchEvents();
 		}
-
-		EventQueue::Clear();
 	}
 }

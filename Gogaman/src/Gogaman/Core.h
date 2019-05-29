@@ -14,16 +14,16 @@
 
 //#if GM_DEBUG
 #if 1
-	#define GM_ASSERT_ENABLE 1
+	#define GM_ASSERTIONS_ENABLED 1
 #else
-	#define GM_ASSERT_ENABLE 0
+	#define GM_ASSERTIONS_ENABLED 0
 #endif
 
-#if GM_ASSERT_ENABLE
+#if GM_ASSERTIONS_ENABLED
 	#define GM_ASSERT(x, ...) \
 	if(!(x)) \
 	{ \
-		GM_LOG_CORE_ERROR("Assertion failed at %s: Line: %d Condition: %s", __FILE__, __LINE__, #x); \
+		GM_LOG_CORE_ERROR("Assertion failed at %s | Line: %d | Condition: %s | Reason: %s", __FILE__, __LINE__, #x, __VA_ARGS__); \
 		abort(); \
 	}
 #else

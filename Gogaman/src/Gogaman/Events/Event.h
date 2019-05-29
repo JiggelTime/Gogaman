@@ -1,19 +1,24 @@
 #pragma once
 
 #include "Gogaman/Core.h"
+#include "EventQueue.h"
 
 namespace Gogaman
 {
 	enum EventType
 	{
+		//Window
+		WindowClose, WindowResize, WindowFocus, WindowUnfocus,
 		//Keyboard
-		KeyPress, KeyRelease, KeyRepeat,
+		KeyPress, KeyRelease,
 		//Mouse
-		MouseMove, MouseButtonPress, MouseButtonRelease
+		MouseMove, MouseScroll, MouseButtonPress, MouseButtonRelease
 	};
 
-	enum EventCategory
+	enum class EventCategory
 	{
+		Window,
+		Input,
 		Keyboard,
 		Mouse
 	};

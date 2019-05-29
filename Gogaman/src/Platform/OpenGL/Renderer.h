@@ -2,14 +2,20 @@
 
 #include "Gogaman/Core.h"
 #include "Gogaman/Config.h"
+
+#include "Gogaman/Events/EventListener.h"
+#include "Gogaman/Events/WindowEvent.h"
+#include "Gogaman/Events/KeyboardEvent.h"
+#include "Gogaman/Events/MouseEvent.h"
+
+#include "Gogaman/Window.h"
+#include "Platform/Windows/WindowsWindow.h"
+
 #include "Gogaman/Graphics/Camera.h"
 #include "Texture2D.h"
 #include "Texture3D.h"
 #include "Renderbuffer.h"
 #include "Framebuffer.h"
-
-#include "Gogaman/Events/EventListener.h"
-#include "Gogaman/Events/KeyboardEvent.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -23,7 +29,7 @@ namespace Gogaman
 	class GOGAMAN_API Renderer : public EventListener
 	{
 	public:
-		Renderer(const std::string &name);
+		Renderer(Window &window);
 		~Renderer();
 
 		void Render();
@@ -31,19 +37,16 @@ namespace Gogaman
 
 		virtual void OnEvent(Event &event) override;
 	private:
-		bool OnKeyPress(KeyPressEvent &event)
-		{
-			std::cout << "Key pressed \n";
-			return true;
-		}
-	
 		void InitializeFramebuffers();
-
+		
 		void ProcessInput(GLFWwindow *window);
-		void WindowResizeCallback(GLFWwindow *window, int width, int height);
-		void MouseMovedCallback(GLFWwindow *window, double xPos, double yPos);
-		void MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset);
+
+		bool OnWindowResize(WindowResizeEvent &event);
+		bool OnMouseMove(MouseMoveEvent       &event);
+		bool OnMouseScroll(MouseScrollEvent   &event);
 	private:
+		Window &m_Window;
+
 		TwBar *m_TweakBar;
 
 		//Camera
@@ -57,17 +60,17 @@ namespace Gogaman
 		bool firstIteration = true;
 
 		//Window
-		GLFWwindow *m_Window;
-		const uint renderResWidth       = GM_CONFIG.screenWidth * GM_CONFIG.resScale;
+		//GLFWwindow *m_Window;
+		const uint renderResWidth       = GM_CONFIG.screenWidth  * GM_CONFIG.resScale;
 		const uint renderResHeight      = GM_CONFIG.screenHeight * GM_CONFIG.resScale;
 
-		const uint giRenderResWidth     = GM_CONFIG.screenWidth * GM_CONFIG.giResScale;
+		const uint giRenderResWidth     = GM_CONFIG.screenWidth  * GM_CONFIG.giResScale;
 		const uint giRenderResHeight    = GM_CONFIG.screenHeight * GM_CONFIG.giResScale;
 
-		const uint dofRenderResWidth    = GM_CONFIG.screenWidth * GM_CONFIG.dofResScale;
+		const uint dofRenderResWidth    = GM_CONFIG.screenWidth  * GM_CONFIG.dofResScale;
 		const uint dofRenderResHeight   = GM_CONFIG.screenHeight * GM_CONFIG.dofResScale;
 
-		const uint bloomRenderResWidth  = GM_CONFIG.screenWidth * GM_CONFIG.bloomResScale;
+		const uint bloomRenderResWidth  = GM_CONFIG.screenWidth  * GM_CONFIG.bloomResScale;
 		const uint bloomRenderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.bloomResScale;
 
 		//Timing

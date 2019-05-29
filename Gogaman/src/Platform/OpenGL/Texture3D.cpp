@@ -5,7 +5,7 @@
 namespace Gogaman
 {
 	Texture3D::Texture3D()
-		: Texture(), width(0), height(0), depth(0), wrapS(GL_REPEAT), wrapT(GL_REPEAT), wrapR(GL_REPEAT)
+		: width(0), height(0), depth(0), wrapS(GL_REPEAT), wrapT(GL_REPEAT), wrapR(GL_REPEAT)
 	{}
 
 	Texture3D::~Texture3D()
@@ -13,7 +13,9 @@ namespace Gogaman
 
 	void Texture3D::Generate(const GLsizei width, const GLsizei height, const GLsizei depth, const unsigned char *imageData)
 	{
-		GM_ASSERT(width > 0 && height > 0 && depth > 0);
+		GM_ASSERT(width  > 0, "Failed to generate texture3D: invalid width");
+		GM_ASSERT(height > 0, "Failed to generate texture3D: invalid height");
+		GM_ASSERT(depth  > 0, "Failed to generate texture3D: invalid depth");
 
 		this->width  = width;
 		this->height = height;

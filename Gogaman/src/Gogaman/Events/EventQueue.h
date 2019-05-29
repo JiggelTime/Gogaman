@@ -1,31 +1,37 @@
 #pragma once
 
-#include "pch.h"
 #include "Gogaman/Core.h"
-#include "Event.h"
-#include "EventListener.h"
 
 namespace Gogaman
 {
+	class Event;
 	class EventListener;
 
 	class GOGAMAN_API EventQueue
 	{
 	public:
-		static void Enqueue(Event &event);
+		EventQueue(const EventQueue &)            = delete;
+		EventQueue &operator=(const EventQueue &) = delete;
 
-		static void DispatchEvents();
+		inline void Enqueue(std::unique_ptr<Event> &&event) { m_PendingEvents.push(std::move(event)); }
 
-		static void AddListener(EventListener &listener);
-		static void RemoveListenerFromEvent(EventListener &listener, Event &event);
-		static void RemoveListener(EventListener &listener);
+		void DispatchEvents();
 
-		static inline void Clear() { m_PendingEvents = {}; }
+		inline void AddListener(EventListener *listener) { m_Listeners.push_back(listener); }
 
-		static inline size_t GetNumEventListeners() { return m_EventListeners.size(); }
-		static inline size_t GetNumPendingEvents()  { return m_PendingEvents.size(); }
+		inline void Clear() { m_PendingEvents = {}; }
+
+		inline size_t GetNumListeners()     const { return m_Listeners.size(); }
+		inline size_t GetNumPendingEvents() const { return m_PendingEvents.size();  }
+
+		static EventQueue &GetInstance() { return *s_Instance; }
 	private:
-		static std::vector<EventListener *> m_EventListeners;
-		static std::queue<Event *>          m_PendingEvents;
+		EventQueue();
+		~EventQueue();
+	private:
+		std::vector<EventListener *>       m_Listeners;
+		std::queue<std::unique_ptr<Event>> m_PendingEvents;
+
+		static EventQueue *s_Instance;
 	};
 }

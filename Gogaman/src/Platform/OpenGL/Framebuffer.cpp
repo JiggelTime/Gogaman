@@ -20,9 +20,8 @@ namespace Gogaman
 
 	void Framebuffer::AttachColorBuffer(const Texture &texture, const int level, const int attachmentIndex, bool isRenderTarget)
 	{
-		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0);
-		GM_ASSERT(level >= 1);
-		GM_ASSERT(texture.levels >= level || texture.levels == 0);
+		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach framebuffer color buffer: invalid attachment index");
+		GM_ASSERT(level >= 1 && (texture.levels >= level || texture.levels == 0),   "Failed to attach framebuffer color buffer: invalid level");
 
 		glNamedFramebufferTexture(m_ID, GL_COLOR_ATTACHMENT0 + attachmentIndex, texture.GetID(), level - 1);
 
@@ -39,7 +38,7 @@ namespace Gogaman
 
 	void Framebuffer::AttachColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex)
 	{
-		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0);
+		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach framebuffer color buffer: invalid attachment index");
 
 		glNamedFramebufferRenderbuffer(m_ID, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_RENDERBUFFER, renderbuffer.GetID());
 
@@ -53,14 +52,14 @@ namespace Gogaman
 
 	void Framebuffer::AttachDepthBuffer(const Texture &texture)
 	{
-		GM_ASSERT(texture.formatImage == GL_DEPTH_COMPONENT);
+		GM_ASSERT(texture.formatImage == GL_DEPTH_COMPONENT, "Failed to attach framebuffer depth buffer: invalid texture image format");
 
 		glNamedFramebufferTexture(m_ID, GL_DEPTH_ATTACHMENT, texture.GetID(), 0);
 	}
 
 	void Framebuffer::AttachDepthBuffer(const Renderbuffer &renderbuffer)
 	{
-		GM_ASSERT(renderbuffer.formatInternal == GL_DEPTH_COMPONENT16 || renderbuffer.formatInternal == GL_DEPTH_COMPONENT24 || renderbuffer.formatInternal == GL_DEPTH_COMPONENT32 || renderbuffer.formatInternal == GL_DEPTH_COMPONENT32F);
+		GM_ASSERT(renderbuffer.formatInternal == GL_DEPTH_COMPONENT16 || renderbuffer.formatInternal == GL_DEPTH_COMPONENT24 || renderbuffer.formatInternal == GL_DEPTH_COMPONENT32 || renderbuffer.formatInternal == GL_DEPTH_COMPONENT32F, "Failed to attach framebuffer depth buffer: invalid renderbuffer internal format");
 
 		glNamedFramebufferRenderbuffer(m_ID, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer.GetID());
 	}

@@ -10,7 +10,7 @@
 #define CONE_TRACE_MAX_DISTANCE 2.0f
 //Set higher for better performance but lower quality
 #define CONE_TRACE_STEP_SIZE 0.5f
-//Number of diffuse cones to trace (16 or 32)
+//Number of diffuse cones to trace (16 | 32)
 #define NUM_DIFFUSE_CONES 16
 //Offset origin position of diffuse cones
 #define DIFFUSE_CONE_OFFSET 3.0f
@@ -57,7 +57,6 @@ uniform bool debug;
 //Inverse square falloff attenuation
 float attenuate(float dist)
 { return 1.0f / (dist * dist); }
-vec3  YCoCg2RGB(vec3 color);
 float chrominanceEdgeDirectedReconstructionFilter(vec2 a0, vec2 a1, vec2 a2, vec2 a3, vec2 a4);
 vec3  decodeAlbedo(sampler2D albedoTexture);
 vec2  signNotZero(vec2 v)
@@ -110,13 +109,6 @@ void main()
 		specularColor.rgb = ComputeIndirectSpecular();
 }
 
-vec3 YCoCg2RGB(vec3 color)
-{
-	color.z -= 0.5f;
-	color.y -= 0.5f;
-	return vec3(color.r + color.g - color.b, color.r + color.b, color.r - color.g - color.b);
-}
-
 float chrominanceEdgeDirectedReconstructionFilter(vec2 a0, vec2 a1, vec2 a2, vec2 a3, vec2 a4)
 {
 	const float threshold = 30.0f / 255.0f;
@@ -126,7 +118,7 @@ float chrominanceEdgeDirectedReconstructionFilter(vec2 a0, vec2 a1, vec2 a2, vec
 	float W        = w.x + w.y + w.z + w.w;
 	//float W = dot(W, vec4(1.0f));
 
-	//Special case where all the weights are zero
+	//Special case when all weights are zero
 	w.x = (W == 0.0f) ? 1.0f : w.x;
 	W   = (W == 0.0f) ? 1.0f : W;
 
@@ -178,7 +170,7 @@ vec4 readVoxel(vec3 worldPos, float mipLevel)
 
 vec3 traceCone(vec3 coneDirection, float coneAperture, float offset)
 {
-	vec4 color = vec4(0.0f);
+	vec4 color     = vec4(0.0f);
 	float coneDiameterCoefficient = 2.0f * tan(coneAperture * 0.5f);
 	//Offset cone to prevent self-sampling (square root of 2 is voxel diagonal half-extent)
 	float distance = voxelWorldSize * offset;
@@ -187,9 +179,9 @@ vec3 traceCone(vec3 coneDirection, float coneAperture, float offset)
 
 	while((distance < maxDist) && (color.a < 1.0f))
 	{
-		vec3 samplePosition = startPos + coneDirection * distance;
-		float coneDiameter  = max(coneDiameterCoefficient * distance, voxelWorldSize);
-		float mipLevel      = log2(coneDiameter / voxelWorldSize);
+		vec3  samplePosition = startPos + coneDirection * distance;
+		float coneDiameter   = max(coneDiameterCoefficient * distance, voxelWorldSize);
+		float mipLevel       = log2(coneDiameter / voxelWorldSize);
 		
 		//Ensure cone is within voxel volume and last mip level has not been sampled
 		if((!isInVoxelVolume(samplePosition)) || (mipLevel > textureQueryLevels(voxelTotalRadiance)))
@@ -208,18 +200,18 @@ vec3 traceCone(vec3 coneDirection, float coneAperture, float offset)
 
 vec3 ComputeIndirectDiffuse()
 {
-	vec3 radiance = vec3(0.0f);
+	vec3 Lo = vec3(0.0f);
 	for(int i = 0; i < NUM_DIFFUSE_CONES; i++)
 	{
-		float cosTheta = dot(normal, diffuseConeDirections[i]);
-		if(cosTheta < 0.0f)
+		if(dot(normal, diffuseConeDirections[i]) < 0.0f)
 			continue;
 		
-		radiance += traceCone(diffuseConeDirections[i], DIFFUSE_CONE_APERTURE, DIFFUSE_CONE_OFFSET);
+		Lo += traceCone(diffuseConeDirections[i], DIFFUSE_CONE_APERTURE, DIFFUSE_CONE_OFFSET);
 	}
 	
-	radiance /= NUM_DIFFUSE_CONES * 0.5f;
-	return radiance;
+	Lo /= NUM_DIFFUSE_CONES * 0.5f;
+	//Lo *= 1.0f / (NUM_DIFFUSE_CONES * 0.5f);
+	return Lo;
 }
 
 vec3 ComputeIndirectSpecular()
@@ -227,6 +219,5 @@ vec3 ComputeIndirectSpecular()
 	vec3  coneDirection = normalize(reflect(-viewDir, normal));
 	float coneAperture  = max(tan(0.0003474660443456835f + (roughness * (1.3331290497744692f - (roughness * 0.5040552688878546f)))), MIN_SPECULAR_CONE_APERTURE);
 	coneAperture = 0.001f;
-	vec3 radiance       = traceCone(coneDirection, coneAperture, SPECULAR_CONE_OFFSET);
-	return radiance;
+	return traceCone(coneDirection, coneAperture, SPECULAR_CONE_OFFSET);
 }

@@ -71,19 +71,22 @@
     <ClCompile Include="src\Platform\OpenGL\Texture3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Events\EventQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\VertexBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\VertexArrayBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Events\EventListener.cpp">
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="WindowsWindow.cpp">
+    <ClCompile Include="src\Gogaman\Graphics\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Events\EventQueue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -132,13 +135,18 @@
     <ClInclude Include="src\Gogaman\Events\Event.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
-    <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
     <ClInclude Include="src\Platform\OpenGL\VertexBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\VertexArrayBuffer.h" />
     <ClInclude Include="src\Gogaman\Events\EventDispatcher.h" />
     <ClInclude Include="src\Gogaman\Events\EventListener.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
-    <ClInclude Include="WindowsWindow.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
+    <ClInclude Include="src\Gogaman\Graphics\GraphicsContext.h" />
+    <ClInclude Include="src\Gogaman\InputCodes.h" />
+    <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
+    <ClInclude Include="src\Gogaman\InputDefs.h" />
+    <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

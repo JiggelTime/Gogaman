@@ -126,18 +126,19 @@ vec3 traceCone(vec3 coneDirection, float coneAperture, float offset)
 
 vec3 computeIndirectDiffuse()
 {
-	vec3 radiance = vec3(0.0f);
+	vec3 Lo = vec3(0.0f);
 	for(int i = 0; i < NUM_DIFFUSE_CONES; i++)
 	{
-		float cosTheta = dot(normal, diffuseConeDirections[i]);
-		if(cosTheta < 0.0f)
+		if(dot(normal, diffuseConeDirections[i]) < 0.0f)
 			continue;
 
-		radiance += traceCone(diffuseConeDirections[i], DIFFUSE_CONE_APERTURE, 4.0f);
+		Lo += traceCone(diffuseConeDirections[i], DIFFUSE_CONE_APERTURE, 4.0f);
 	}
 
-	radiance /= NUM_DIFFUSE_CONES * 0.5f;
-	//TODO: Do we normalize for Lambert??? Multiply by albedo?
-	radiance *= INVERSE_PI;
-	return radiance;
+	Lo /= NUM_DIFFUSE_CONES * 0.5f;
+	//Lo *= 1.0f / (NUM_DIFFUSE_CONES * 0.5f);
+
+	//TODO: Normalize for Lambert??? Multiply by albedo?
+	Lo *= INVERSE_PI;
+	return Lo;
 }

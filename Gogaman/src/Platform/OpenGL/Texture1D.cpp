@@ -5,7 +5,7 @@
 namespace Gogaman
 {
 	Texture1D::Texture1D()
-		: Texture(), width(0), wrapS(GL_REPEAT)
+		: width(0), wrapS(GL_REPEAT)
 	{}
 
 	Texture1D::~Texture1D()
@@ -13,7 +13,7 @@ namespace Gogaman
 
 	void Texture1D::Generate(const GLsizei width, const unsigned char *imageData)
 	{
-		GM_ASSERT(width > 0);
+		GM_ASSERT(width > 0, "Failed to generate texture1D: invalid width");
 
 		this->width  = width;
 		if(levels == 0)

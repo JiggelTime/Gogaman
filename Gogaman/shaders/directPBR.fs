@@ -171,7 +171,7 @@ vec3 DecodeAlbedo(sampler2D albedoTexture)
 	vec2 a3 = texture(albedoTexture, texCoords - vec2(0.0f, texelSize.y)).rg;
 	float chrominance = chrominanceEdgeDirectedReconstructionFilter(decodedAlbedo.rg, a0, a1, a2, a3);
 
-	decodedAlbedo.b = chrominance;
+	decodedAlbedo.z = chrominance;
 	decodedAlbedo   = ((ivec2(gl_FragCoord).x & 1) == (ivec2(gl_FragCoord).y & 1)) ? decodedAlbedo.rbg : decodedAlbedo.rgb;
 	decodedAlbedo   = YCOCGtoRGB * decodedAlbedo;
 	return decodedAlbedo;

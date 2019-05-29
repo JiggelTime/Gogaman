@@ -1,43 +1,32 @@
 #include "pch.h"
 #include "EventQueue.h"
-#include "EventListener.h"
+
 #include "Gogaman/Logging/Log.h"
+#include "Event.h"
+#include "EventListener.h"
 
 namespace Gogaman
 {
-	std::vector<EventListener *> EventQueue::m_EventListeners;
-	std::queue<Event *>          EventQueue::m_PendingEvents;
+	EventQueue *EventQueue::s_Instance = new EventQueue();
 
-	void EventQueue::Enqueue(Event &event)
+	EventQueue::EventQueue()
 	{
-		m_PendingEvents.push(std::move(&event));
+		GM_ASSERT(s_Instance == nullptr, "Failed to construct event queue: instance already exists");
 	}
+
+	EventQueue::~EventQueue()
+	{}
 	
 	void EventQueue::DispatchEvents()
 	{
 		while(!m_PendingEvents.empty())
 		{
-			for(auto listener : m_EventListeners)
+			for(auto listener : m_Listeners)
 			{
-				listener->OnEvent(*m_PendingEvents.front());
+				listener->OnEvent(*m_PendingEvents.front().get());
 			}
 
 			m_PendingEvents.pop();
 		}
-	}
-
-	void EventQueue::AddListener(EventListener &listener)
-	{
-		m_EventListeners.push_back(&listener);
-	}
-	
-	void EventQueue::RemoveListenerFromEvent(EventListener &listener, Event &event)
-	{
-
-	}
-
-	void EventQueue::RemoveListener(EventListener &listener)
-	{
-
 	}
 }

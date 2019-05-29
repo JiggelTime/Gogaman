@@ -61,7 +61,7 @@ namespace Gogaman
 			modelMatrixShouldUpdate = true;
 		}
 
-		inline glm::vec3 GetScale() { return scale; }
+		inline glm::vec3 GetScale() const { return scale; }
 
 		void Scale(glm::vec3 scale)
 		{
@@ -88,7 +88,7 @@ namespace Gogaman
 			modelMatrixShouldUpdate = true;
 		}
 
-		glm::vec3 GetPosition() { return position; }
+		glm::vec3 GetPosition() const { return position; }
 
 		void Translate(glm::vec3 translation)
 		{

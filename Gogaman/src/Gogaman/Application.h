@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Core.h"
-#include "Events/EventQueue.h"
-#include "Events/KeyboardEvent.h"
+
+#include "Window.h"
+#include "Events/Event.h"
 
 namespace Gogaman
 {
@@ -13,7 +14,16 @@ namespace Gogaman
 		virtual ~Application();
 
 		void Run();
+
+		inline Window &GetWindow() { return *m_Window; }
+
+		inline static Application &GetInstance() { return *s_Instance; }
 	private:
+		bool m_IsRunning;
+
+		std::unique_ptr<Window> m_Window;
+
+		static Application *s_Instance;
 	};
 
 	Application *CreateApplication();

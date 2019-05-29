@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Renderer.h"
 #include "Gogaman/Logging/Log.h"
+#include "Gogaman/Input.h"
+#include "Gogaman/InputCodes.h"
+
 #include "Gogaman/Events/EventDispatcher.h"
 #include "Gogaman/ResourceManager.h"
 #include "Gogaman/Graphics/JitterSequences.h"
@@ -8,83 +11,57 @@
 
 namespace Gogaman
 {
-	Renderer::Renderer(const std::string &name)
+	Renderer::Renderer(Window &window)
+		: m_Window(window)
 	{
-		//Initialize and configure GLFW
-		glfwInit();
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-		//Create GLFW window
-		m_Window = glfwCreateWindow(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight, name.c_str(), NULL, NULL);
-		if(m_Window == nullptr)
-		{
-			GM_LOG_CORE_ERROR("Failed to create GLFW window");
-			glfwTerminate();
-			return;
-		}
-
-		glfwMakeContextCurrent(m_Window);
-		//Vertical synchronization
-		glfwSwapInterval(GM_CONFIG.vSync ? 1 : 0);
-
 		//Initialize GLAD
-		if(!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-		{
-			GM_LOG_CORE_ERROR("Failed to initialize GLAD");
-			return;
-		}
+		int gladStatus = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+		GM_ASSERT(gladStatus, "Failed to initialize GLAD");
+		GM_LOG_CORE_INFO("Initialized OpenGL | Version: %s | Vendor: %s | Renderer: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR), glGetString(GL_RENDERER));
 
 		//Initialize AntTweakBar
-		TwInit(TW_OPENGL_CORE, NULL);
+		int twStatus = TwInit(TW_OPENGL_CORE, nullptr);
+		GM_ASSERT(twStatus, "Failed to initialize AntTweakBar");
 		TwWindowSize(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight);
 		m_TweakBar = TwNewBar("Debug");
 
-		TwAddVarRO(m_TweakBar, "Cock Nigger", TW_TYPE_FLOAT, &GM_CONFIG.screenWidth, NULL);
-
-		//Set GLFW event callbacks
-		//glfwSetFramebufferSizeCallback(m_Window, WindowResizeCallback);
-		//glfwSetCursorPosCallback(m_Window,       MouseMovedCallback);
-		//glfwSetScrollCallback(m_Window,          MouseScrolledCallback);
-		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		TwAddVarRO(m_TweakBar, "Gort", TW_TYPE_FLOAT, &GM_CONFIG.screenWidth, nullptr);
 
 		//Initialize framebuffers
-		//Framebuffers::Initialize();
 		InitializeFramebuffers();
 
 		//Voxel textures
 		voxelAlbedo.formatInternal = GL_RGBA8;
-		voxelAlbedo.formatImage = GL_RGBA;
-		voxelAlbedo.filterMin = GL_LINEAR_MIPMAP_LINEAR;
-		voxelAlbedo.filterMag = GL_LINEAR;
-		voxelAlbedo.levels = 0;
+		voxelAlbedo.formatImage    = GL_RGBA;
+		voxelAlbedo.filterMin      = GL_LINEAR_MIPMAP_LINEAR;
+		voxelAlbedo.filterMag      = GL_LINEAR;
+		voxelAlbedo.levels         = 0;
 		voxelAlbedo.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelNormal.formatInternal = GL_RGBA8;
-		voxelNormal.formatImage = GL_RGBA;
-		voxelNormal.filterMin = GL_NEAREST;
-		voxelNormal.filterMag = GL_NEAREST;
+		voxelNormal.formatImage    = GL_RGBA;
+		voxelNormal.filterMin      = GL_NEAREST;
+		voxelNormal.filterMag      = GL_NEAREST;
 		voxelNormal.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelDirectRadiance.formatInternal = GL_RGBA8;
-		voxelDirectRadiance.formatImage = GL_RGBA;
-		voxelDirectRadiance.filterMin = GL_LINEAR_MIPMAP_LINEAR;
-		voxelDirectRadiance.filterMag = GL_LINEAR;
-		voxelDirectRadiance.levels = 0;
+		voxelDirectRadiance.formatImage    = GL_RGBA;
+		voxelDirectRadiance.filterMin      = GL_LINEAR_MIPMAP_LINEAR;
+		voxelDirectRadiance.filterMag      = GL_LINEAR;
+		voxelDirectRadiance.levels         = 0;
 		voxelDirectRadiance.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelTotalRadiance.formatInternal = GL_RGBA8;
-		voxelTotalRadiance.formatImage = GL_RGBA;
-		voxelTotalRadiance.filterMin = GL_LINEAR_MIPMAP_LINEAR;
-		voxelTotalRadiance.filterMag = GL_LINEAR;
-		voxelTotalRadiance.levels = 0;
+		voxelTotalRadiance.formatImage    = GL_RGBA;
+		voxelTotalRadiance.filterMin      = GL_LINEAR_MIPMAP_LINEAR;
+		voxelTotalRadiance.filterMag      = GL_LINEAR;
+		voxelTotalRadiance.levels         = 0;
 		voxelTotalRadiance.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		voxelStaticFlag.formatInternal = GL_R8;
-		voxelStaticFlag.formatImage = GL_RED;
-		voxelStaticFlag.filterMin = GL_NEAREST;
-		voxelStaticFlag.filterMag = GL_NEAREST;
+		voxelStaticFlag.formatImage    = GL_RED;
+		voxelStaticFlag.filterMin      = GL_NEAREST;
+		voxelStaticFlag.filterMag      = GL_NEAREST;
 		voxelStaticFlag.Generate(GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution, GM_CONFIG.voxelResolution);
 
 		//Shaders
@@ -112,11 +89,10 @@ namespace Gogaman
 		ResourceManager::LoadShader("postProcessShader", "D:/dev/Gogaman/Gogaman/shaders/postprocess.vs", "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
 
 		//Models
-		ResourceManager::LoadModel("roomModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
-		//Model redModel    = ResourceManager::LoadModel("redModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
-		//Model blueModel   = ResourceManager::LoadModel("blueModel", "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
+		ResourceManager::LoadModel("roomModel",   "D:/ProgrammingStuff/Resources/Models/Test_Scene/Room.obj");
+		//ResourceManager::LoadModel("redModel",    "D:/ProgrammingStuff/Resources/Models/Test_Scene/Red.obj");
+		//ResourceManager::LoadModel("blueModel",   "D:/ProgrammingStuff/Resources/Models/Test_Scene/Blue.obj");
 		ResourceManager::LoadModel("statueModel", "D:/ProgrammingStuff/Resources/Models/Statue/Statue.obj");
-
 		ResourceManager::LoadModel("sphereModel", "D:/ProgrammingStuff/Resources/Models/Sphere.obj");
 		GM_MODEL(sphereModel).Hide();
 
@@ -339,7 +315,6 @@ namespace Gogaman
 		m_Texture2Ds["VCTGI_Specular"].filterMin      = GL_LINEAR;
 		m_Texture2Ds["VCTGI_Specular"].filterMag      = GL_LINEAR;
 		m_Texture2Ds["VCTGI_Specular"].Generate(giRenderResWidth, giRenderResHeight);
-		m_Framebuffers["VCTGI_FB"].AttachColorBuffer(m_Texture2Ds["VCTGI_Specular"]);
 
 		//VCTGI diffuse upsample
 		m_Texture2Ds["VCTGI_DiffuseUpsample"].formatInternal = GL_RGBA16F;
@@ -443,7 +418,7 @@ namespace Gogaman
 		frameCounter++;
 
 		//Input
-		ProcessInput(m_Window);
+		ProcessInput(static_cast<GLFWwindow *>(m_Window.GetNativeWindow()));
 
 		//Update sub-pixel jitter for temporal resolve
 		previousTemporalJitter = temporalJitter;
@@ -466,15 +441,15 @@ namespace Gogaman
 		std::vector<PointLight> pointLights;
 		//Pointlight 0
 			Gogaman::PointLight pointLight0;
-			pointLight0.SetPosition(glm::vec3(0.4f, 1.2f, -0.6f));
+			pointLight0.SetPosition(glm::vec3(0.1f, 1.2f, 0.8f));
 			pointLights.push_back(pointLight0);
 			//Luminous intensity (candela)
-			pointLight0.SetColor(glm::vec3(1.0f, 0.0f, 1.0f));
+			pointLight0.SetColor(glm::vec3(2.0f, 0.2f, 0.2f));
 		//Pointlight 1
 			Gogaman::PointLight pointLight1;
-			pointLight1.SetPosition(glm::vec3(-0.4f, 1.2f, 0.6f));
+			pointLight1.SetPosition(glm::vec3(-0.1f, 1.2f, -0.8f));
 			//Luminous intensity (candela)
-			pointLight1.SetColor(glm::vec3(0.0f, 1.0f, 1.0f));
+			pointLight1.SetColor(glm::vec3(0.2f, 0.2f, 2.0f));
 			pointLights.push_back(pointLight1);
 
 		//Update models
@@ -626,7 +601,7 @@ namespace Gogaman
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			//Voxelize static models
-			if (firstIteration == true)
+			if(firstIteration == true)
 			{
 				GM_SHADER(voxelizationShader).Bind();
 				GM_SHADER(voxelizationShader).SetUniformMat4("VP", voxelViewProjection);
@@ -825,7 +800,7 @@ namespace Gogaman
 			GM_SHADER(upsampleShader).SetUniformFloat("farPlane", cameraFarPlane);
 			GM_SHADER(upsampleShader).SetUniformInt("sampleTextureLod", std::max(floor(log2(1.0f / GM_CONFIG.giResScale)) - 1.0f, 0.0f));
 
-			GM_SHADER(upsampleShader).SetUniformBool("debug", GM_CONFIG.debug);
+			GM_SHADER(upsampleShader).SetUniformBool("debug",  GM_CONFIG.debug);
 			GM_SHADER(upsampleShader).SetUniformBool("debug2", GM_CONFIG.debug2);
 
 			m_Texture2Ds["VCTGI_Diffuse"].BindTexture(0);
@@ -1015,6 +990,9 @@ namespace Gogaman
 		RenderFullscreenQuad();
 		*/
 
+		if(GM_CONFIG.debug2)
+			glDisable(GL_DEPTH_TEST);
+
 		//Begin temporal anti-aliasing timer
 		glBeginQuery(GL_TIME_ELAPSED, query);
 
@@ -1023,8 +1001,13 @@ namespace Gogaman
 		{
 			GM_SHADER(taaShader).Bind();
 
-			GM_SHADER(taaShader).SetUniformBool("debug",  GM_CONFIG.debug);
-			GM_SHADER(taaShader).SetUniformBool("debug2", GM_CONFIG.debug2);
+			GM_SHADER(taaShader).SetUniformVec2("resolutionInput",  glm::vec2(m_Texture2Ds["finalImage"].width, m_Texture2Ds["finalImage"].height));
+			GM_SHADER(taaShader).SetUniformVec2("resolutionOutput", glm::vec2(m_Texture2Ds["gVelocity"].width,  m_Texture2Ds["gVelocity"].height));
+			GM_SHADER(taaShader).SetUniformVec2("texelSizeInput",   1.0f / glm::vec2(m_Texture2Ds["finalImage"].width, m_Texture2Ds["finalImage"].height));
+			GM_SHADER(taaShader).SetUniformVec2("texelSizeOutput",  1.0f / glm::vec2(m_Texture2Ds["gVelocity"].width,  m_Texture2Ds["gVelocity"].height));
+
+			GM_SHADER(taaShader).SetUniformBool("debug",            GM_CONFIG.debug);
+			GM_SHADER(taaShader).SetUniformBool("debug2",           GM_CONFIG.debug2);
 
 			m_Texture2Ds["finalImage"].BindTexture(0);
 			m_Texture2Ds["finalImageHistory"].BindTexture(1);
@@ -1034,7 +1017,12 @@ namespace Gogaman
 			RenderFullscreenQuad();
 
 			//Copy frame to history buffer
-			m_Framebuffers["finalImageHistoryFB"].BlitColorBuffer(m_Framebuffers["finalImageFB"], renderResWidth, renderResHeight, GL_NEAREST);
+			//m_Framebuffers["finalImageHistoryFB"].BlitColorBuffer(m_Framebuffers["finalImageFB"], renderResWidth, renderResHeight, GL_NEAREST);
+
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_Framebuffers["finalImageHistoryFB"].GetID());
+			glClear(GL_COLOR_BUFFER_BIT);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, m_Framebuffers["finalImageFB"].GetID());
+			glBlitFramebuffer(0, 0, renderResWidth, renderResHeight, 0, 0, renderResWidth, renderResHeight, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		}
 
 		//End temporal anti-aliasing timer
@@ -1170,7 +1158,10 @@ namespace Gogaman
 			GM_SHADER(bloomShader).Bind();
 			GM_SHADER(bloomShader).SetUniformFloat("bloomStrength", GM_CONFIG.bloomStrength);
 
-			m_Texture2Ds["finalImage"].BindTexture(0);
+			if(GM_CONFIG.dof)
+				m_Texture2Ds["DOF_BlurVertical"].BindTexture(0);
+			else
+				m_Texture2Ds["finalImage"].BindTexture(0);
 			if(horizontal)
 				m_Texture2Ds["bloomBlurVertical"].BindTexture(1);
 			else
@@ -1202,7 +1193,7 @@ namespace Gogaman
 
 		GM_SHADER(postProcessShader).SetUniformBool("debug", GM_CONFIG.debug);
 
-		if(GM_CONFIG.dof)
+		if(!GM_CONFIG.bloom && GM_CONFIG.dof)
 			m_Texture2Ds["DOF_BlurVertical"].BindTexture(0);
 		else
 			m_Texture2Ds["finalImage"].BindTexture(0);
@@ -1221,11 +1212,7 @@ namespace Gogaman
 			firstIteration = false;
 
 		//Render debug GUI
-		TwDraw();
-
-		//GLFW: Swap buffers and poll IO events
-		glfwSwapBuffers(m_Window);
-		glfwPollEvents();
+		//TwDraw();
 	}
 
 	void Renderer::RenderFullscreenQuad() const
@@ -1238,171 +1225,188 @@ namespace Gogaman
 	void Renderer::OnEvent(Event &event)
 	{
 		EventDispatcher dispatcher(event);
-		//dispatcher.Dispatch(GM_BIND_EVENT_CALLBACK(OnKeyPress));
-		dispatcher.Dispatch<KeyPressEvent>(std::bind(&Renderer::OnKeyPress, this, std::placeholders::_1));
+		dispatcher.Dispatch<WindowResizeEvent>(GM_BIND_EVENT_CALLBACK(Renderer::OnWindowResize));
+
+		dispatcher.Dispatch<MouseMoveEvent>(GM_BIND_EVENT_CALLBACK(Renderer::OnMouseMove));
+		dispatcher.Dispatch<MouseScrollEvent>(GM_BIND_EVENT_CALLBACK(Renderer::OnMouseScroll));
+	}
+
+	bool Renderer::OnWindowResize(WindowResizeEvent &event)
+	{
+		glViewport(0, 0, event.GetWidth(), event.GetHeight());
+		return false;
+	}
+
+	bool Renderer::OnMouseMove(MouseMoveEvent &event)
+	{
+		if(firstMouse)
+		{
+			lastX = event.GetPositionX();
+			lastY = event.GetPositionY();
+			firstMouse = false;
+		}
+
+		float xOffset = event.GetPositionX() - lastX;
+		//Y axis is reversed
+		float yOffset = lastY - event.GetPositionY();
+		camera.ProcessMouseInput(xOffset, yOffset);
+
+		lastX = event.GetPositionX();
+		lastY = event.GetPositionY();
+		return false;
+	}
+
+	//void Renderer::MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset)
+	bool Renderer::OnMouseScroll(MouseScrollEvent &event)
+	{
+		camera.ProcessMouseScrollInput(event.GetOffsetY());
+		return false;
 	}
 
 	void Renderer::ProcessInput(GLFWwindow *window)
 	{
 		//Close window
-		if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_ESCAPE))
 			glfwSetWindowShouldClose(window, true);
 
 		//Movement
-		if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			camera.ProcessKeyboardInput(FORWARD, deltaTime);
-		if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_W))
+			camera.ProcessKeyboardInput(FORWARD,  deltaTime);
+		if(Input::IsKeyPressed(GM_KEY_S))
 			camera.ProcessKeyboardInput(BACKWARD, deltaTime);
-		if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			camera.ProcessKeyboardInput(LEFT, deltaTime);
-		if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			camera.ProcessKeyboardInput(RIGHT, deltaTime);
+		if(Input::IsKeyPressed(GM_KEY_A))
+			camera.ProcessKeyboardInput(LEFT,     deltaTime);
+		if(Input::IsKeyPressed(GM_KEY_D))
+			camera.ProcessKeyboardInput(RIGHT,    deltaTime);
 		
 		//Toggle depth of field
-		if(glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS && !GM_CONFIG.dof)
+		if(Input::IsKeyPressed(GM_KEY_U) && !GM_CONFIG.dof)
 		{
 			GM_CONFIG.dof = !GM_CONFIG.dof;
 			GM_CONFIG.dofKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_U) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_U) == GLFW_RELEASE)
 		{
 			GM_CONFIG.dofKeyPressed = false;
 		}
+
 		//Enable/disable bloom
-		if(glfwGetKey(window, GLFW_KEY_B) == GLFW_PRESS && !GM_CONFIG.bloomKeyPressed)
+		if(Input::IsKeyPressed(GM_KEY_B) && !GM_CONFIG.bloomKeyPressed)
 		{
 			GM_CONFIG.bloom = !GM_CONFIG.bloom;
 			GM_CONFIG.bloomKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_B) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_B) == GLFW_RELEASE)
 		{
 			GM_CONFIG.bloomKeyPressed = false;
 		}
+
 		//Enable/disable debug mode
-		if(glfwGetKey(window, GLFW_KEY_G) == GLFW_PRESS && !GM_CONFIG.debugKeyPressed)
+		if(Input::IsKeyPressed(GM_KEY_G) && !GM_CONFIG.debugKeyPressed)
 		{
 			GM_CONFIG.debug = !GM_CONFIG.debug;
 			GM_CONFIG.debugKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_G) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_G) == GLFW_RELEASE)
 		{
 			GM_CONFIG.debugKeyPressed = false;
 		}
+
 		//Enable/disable debug mode 2
-		if(glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !GM_CONFIG.debug2KeyPressed)
+		if(glfwGetKey(window, GM_KEY_H) == GLFW_PRESS && !GM_CONFIG.debug2KeyPressed)
 		{
 			GM_CONFIG.debug2 = !GM_CONFIG.debug2;
 			GM_CONFIG.debug2KeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_H) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_H) == GLFW_RELEASE)
 		{
 			GM_CONFIG.debug2KeyPressed = false;
 		}
+
 		//Toggle spatio-temporal indirect lighting upscaling
-		if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS && !GM_CONFIG.giUpscalingKeyPressed)
+		if(glfwGetKey(window, GM_KEY_Y) == GLFW_PRESS && !GM_CONFIG.giUpscalingKeyPressed)
 		{
 			GM_CONFIG.giUpscaling = !GM_CONFIG.giUpscaling;
 			GM_CONFIG.giUpscalingKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_Y) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_Y) == GLFW_RELEASE)
 		{
 			GM_CONFIG.giUpscalingKeyPressed = false;
 		}
+
 		//Toggle automatic revoxelization
-		if(glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !GM_CONFIG.autoVoxelizeKeyPressed)
+		if(glfwGetKey(window, GM_KEY_R) == GLFW_PRESS && !GM_CONFIG.autoVoxelizeKeyPressed)
 		{
 			GM_CONFIG.autoVoxelize = !GM_CONFIG.autoVoxelize;
 			GM_CONFIG.autoVoxelizeKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_R) == GLFW_RELEASE)
 		{
 			GM_CONFIG.autoVoxelizeKeyPressed = false;
 		}
+
 		//Enable/disable normal mapping
-		if(glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS && !GM_CONFIG.normalMappingKeyPressed)
+		if(glfwGetKey(window, GM_KEY_N) == GLFW_PRESS && !GM_CONFIG.normalMappingKeyPressed)
 		{
 			GM_CONFIG.normalMapping = !GM_CONFIG.normalMapping;
 			GM_CONFIG.normalMappingKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_N) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_N) == GLFW_RELEASE)
 		{
 			GM_CONFIG.normalMappingKeyPressed = false;
 		}
+
 		//Adjust exposure
-		if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+		if(glfwGetKey(window, GM_KEY_Q) == GLFW_PRESS)
 		{
-			if(exposure > 0.011f)
-				exposure -= 0.012f;
+			if(exposure > 0.01f)
+				exposure -= 0.01f;
 			else
 				exposure = 0.0f;
 		}
-		else if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+		else if(glfwGetKey(window, GM_KEY_E) == GLFW_PRESS)
 		{
-			exposure += 0.012f;
+			exposure += 0.01f;
 		}
+
 		//Enable/disable wireframe rendering
-		if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS && !GM_CONFIG.wireframeKeyPressed)
+		if(glfwGetKey(window, GM_KEY_Z) == GLFW_PRESS && !GM_CONFIG.wireframeKeyPressed)
 		{
 			GM_CONFIG.wireframe = !GM_CONFIG.wireframe;
 			GM_CONFIG.wireframeKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_Z) == GLFW_RELEASE)
 			GM_CONFIG.wireframeKeyPressed = false;
+
 		//Enable/disable temporal anti-aliasing
-		if(glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS && !GM_CONFIG.taaKeyPressed)
+		if(glfwGetKey(window, GM_KEY_T) == GLFW_PRESS && !GM_CONFIG.taaKeyPressed)
 		{
 			GM_CONFIG.taa = !GM_CONFIG.taa;
 			GM_CONFIG.taaKeyPressed = true;
 		}
-		if(glfwGetKey(window, GLFW_KEY_T) == GLFW_RELEASE)
+		if(glfwGetKey(window, GM_KEY_T) == GLFW_RELEASE)
 		{
 			GM_CONFIG.taaKeyPressed = false;
 		}
+
 		//Set render mode
-		if(glfwGetKey(window, GLFW_KEY_0) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_0))
 			GM_CONFIG.renderMode = 0;
-		if(glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_1))
 			GM_CONFIG.renderMode = 1;
-		if(glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_2))
 			GM_CONFIG.renderMode = 2;
-		if(glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_3))
 			GM_CONFIG.renderMode = 3;
-		if(glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_4))
 			GM_CONFIG.renderMode = 4;
-		if(glfwGetKey(window, GLFW_KEY_5) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_5))
 			GM_CONFIG.renderMode = 5;
-		if(glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_6))
 			GM_CONFIG.renderMode = 6;
-		if(glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_7))
 			GM_CONFIG.renderMode = 7;
-		if(glfwGetKey(window, GLFW_KEY_8) == GLFW_PRESS)
+		if(Input::IsKeyPressed(GM_KEY_8))
 			GM_CONFIG.renderMode = 8;
-	}
-
-	void Renderer::WindowResizeCallback(GLFWwindow *window, int width, int height)
-	{
-		glViewport(0, 0, width, height);
-	}
-
-	void Renderer::MouseMovedCallback(GLFWwindow *window, double xPos, double yPos)
-	{
-		if(firstMouse)
-		{
-			lastX = xPos;
-			lastY = yPos;
-			firstMouse = false;
-		}
-
-		float xOffset = xPos - lastX;
-		//Reversed because y-coordinates go from bottom to top
-		float yOffset = lastY - yPos;
-		lastX = xPos;
-		lastY = yPos;
-		camera.ProcessMouseInput(xOffset, yOffset);
-	}
-
-	void Renderer::MouseScrolledCallback(GLFWwindow *window, double xOffset, double yOffset)
-	{
-		camera.ProcessMouseScrollInput(yOffset);
 	}
 }
