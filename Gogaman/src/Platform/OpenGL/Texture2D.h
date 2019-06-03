@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Texture.h"
 
 #include <glad.h>
 
 namespace Gogaman
 {
-	class GOGAMAN_API Texture2D : public Texture
+	class Texture2D : public Texture
 	{
 	public:
 		Texture2D();

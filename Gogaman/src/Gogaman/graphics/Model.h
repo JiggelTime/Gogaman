@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Mesh.h"
 #include "Platform/OpenGL/Shader.h"
 
@@ -8,13 +8,13 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <stb_image.h>
-#include <Importer.hpp>
-#include <scene.h>
-#include <postprocess.h>
+//#include <assimp/Importer.hpp>
+//#include <assimp/scene.h>
+//#include <assimp/postprocess.h>
 
 namespace Gogaman
 {
-	class GOGAMAN_API Model
+	class Model
 	{
 	public:
 		//Model data
@@ -28,7 +28,7 @@ namespace Gogaman
 		//Loads model from file and stores resulting meshes in the meshes vector
 		void LoadModel(std::string &filePath);
 
-		void Render(Shader &shader, bool setPreviousModelMatrixUniform = false);
+		//void Render(Shader &shader, bool setPreviousModelMatrixUniform = false);
 
 		void UpdateModelMatrix()
 		{
@@ -102,15 +102,15 @@ namespace Gogaman
 		inline bool IsDynamic() const
 		{ return isDynamic; }
 
-		void Hide();
-		void Unhide();
+		//void Hide();
+		//void Unhide();
 
 		inline bool IsHidden() const { return m_Hidden; }
 	private:
-		void ProcessNode(aiNode *node, const aiScene *scene);
-		Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
-		std::vector<ModelTexture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
-		uint LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
+		//void ProcessNode(aiNode *node, const aiScene *scene);
+		//Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
+		//std::vector<ModelTexture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
+		//uint LoadTextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 	private:
 		//Model properties
 		glm::vec3 scale = glm::vec3(1.0f), rotation, position;

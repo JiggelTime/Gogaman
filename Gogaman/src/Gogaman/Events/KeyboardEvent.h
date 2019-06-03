@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Event.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API KeyboardEvent : public Event
+	class KeyboardEvent : public Event
 	{
 	public:
 		inline virtual EventCategory GetCategory() const override { return EventCategory::Keyboard; }
@@ -19,7 +19,7 @@ namespace Gogaman
 		int m_Scancode;
 	};
 
-	class GOGAMAN_API KeyPressEvent : public KeyboardEvent
+	class KeyPressEvent : public KeyboardEvent
 	{
 	public:
 		KeyPressEvent(const int scancode, const int repeatCount)
@@ -34,7 +34,7 @@ namespace Gogaman
 		int m_RepeatCount;
 	};
 
-	class GOGAMAN_API KeyReleaseEvent : public KeyboardEvent
+	class KeyReleaseEvent : public KeyboardEvent
 	{
 	public:
 		KeyReleaseEvent(const int scancode)

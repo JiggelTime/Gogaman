@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Platform/OpenGL/Shader.h"
 #include <glad.h>
 #include <glm.hpp>
@@ -23,7 +23,7 @@ namespace Gogaman
 		std::string path;
 	};
 
-	class GOGAMAN_API Mesh
+	class Mesh
 	{
 	public:
 		Mesh(std::vector<Vertex> &vertices, std::vector<uint> &indices, std::vector<ModelTexture> &textures);

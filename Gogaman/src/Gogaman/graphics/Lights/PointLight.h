@@ -1,11 +1,11 @@
 #pragma once
 
 #include <glm.hpp>
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API PointLight
+	class PointLight
 	{
 	public:
 		PointLight(const glm::vec3 &position = glm::vec3(0.0f), const glm::vec3 &color = glm::vec3(1.0f), const float coneAperture = 0.001f);

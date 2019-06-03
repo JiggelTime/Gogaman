@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "EventQueue.h"
 
 namespace Gogaman
@@ -23,7 +23,7 @@ namespace Gogaman
 		Mouse
 	};
 
-	class GOGAMAN_API Event
+	class Event
 	{
 	public:
 		virtual EventType     GetType()     const = 0;

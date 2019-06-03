@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 
 #include <glad.h>
 
 namespace Gogaman
 {
-	class GOGAMAN_API Texture
+	class Texture
 	{
 	public:
 		Texture &operator=(const Texture &) = delete;

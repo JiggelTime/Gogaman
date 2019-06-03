@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Event.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API MouseEvent : public Event
+	class MouseEvent : public Event
 	{
 	public:
 		inline virtual EventCategory GetCategory() const override { return EventCategory::Mouse; }
@@ -14,7 +14,7 @@ namespace Gogaman
 		{}
 	};
 
-	class GOGAMAN_API MouseMoveEvent : public MouseEvent
+	class MouseMoveEvent : public MouseEvent
 	{
 	public:
 		MouseMoveEvent(float positionX, float positionY)
@@ -31,7 +31,7 @@ namespace Gogaman
 		float m_PositionY;
 	};
 
-	class GOGAMAN_API MouseScrollEvent : public MouseEvent
+	class MouseScrollEvent : public MouseEvent
 	{
 	public:
 		MouseScrollEvent(float offsetX, float offsetY)
@@ -48,7 +48,7 @@ namespace Gogaman
 		float m_OffsetY;
 	};
 
-	class GOGAMAN_API MouseButtonPressEvent : public MouseEvent
+	class MouseButtonPressEvent : public MouseEvent
 	{
 	public:
 		MouseButtonPressEvent(const int scancode)
@@ -63,7 +63,7 @@ namespace Gogaman
 		int m_Scancode;
 	};
 
-	class GOGAMAN_API MouseButtonReleaseEvent : public MouseEvent
+	class MouseButtonReleaseEvent : public MouseEvent
 	{
 	public:
 		MouseButtonReleaseEvent(const int scancode)

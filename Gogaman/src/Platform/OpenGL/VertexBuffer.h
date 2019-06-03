@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 
 #include <glad.h>
 
 namespace Gogaman
 {
-	class GOGAMAN_API VertexBuffer
+	class VertexBuffer
 	{
 	public:
 		VertexBuffer();
 		~VertexBuffer();
 
-		inline void UploadData(const size_t dataSize, const void *data, GLenum usage) { glNamedBufferData(m_ID, dataSize, data, usage);  }
+		inline void UploadData(const size_t size, const void *data, GLenum usage) const { glNamedBufferData(m_ID, size, data, usage);  }
 
 		inline GLuint GetID() const { return m_ID; }
 	private:

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 
 namespace Gogaman
 {
 	class Event;
 	class EventListener;
 
-	class GOGAMAN_API EventQueue
+	class EventQueue
 	{
 	public:
 		EventQueue(const EventQueue &)            = delete;

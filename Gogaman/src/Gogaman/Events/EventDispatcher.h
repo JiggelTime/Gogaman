@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Event.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API EventDispatcher
+	class EventDispatcher
 	{
 	public:
 		EventDispatcher(Event &event)

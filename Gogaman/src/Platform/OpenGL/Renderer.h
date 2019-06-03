@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Gogaman/Config.h"
 
 #include "Gogaman/Events/EventListener.h"
@@ -20,34 +20,35 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include <AntTweakBar.h>
+//#include <AntTweakBar.h>
 #include <glad.h>
-#include <GLFW\glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Gogaman
 {
-	class GOGAMAN_API Renderer : public EventListener
+	class Renderer : public EventListener
 	{
 	public:
 		Renderer(Window &window);
 		~Renderer();
 
 		void Render();
-		void RenderFullscreenQuad() const;
 
 		virtual void OnEvent(Event &event) override;
 	private:
-		void InitializeFramebuffers();
+		void RenderFullscreenQuad() const;
 		
-		void ProcessInput(GLFWwindow *window);
+		void InitializeFramebuffers();
 
 		bool OnWindowResize(WindowResizeEvent &event);
 		bool OnMouseMove(MouseMoveEvent       &event);
 		bool OnMouseScroll(MouseScrollEvent   &event);
+		
+		void PollInput(GLFWwindow *window);
 	private:
 		Window &m_Window;
 
-		TwBar *m_TweakBar;
+		//TwBar *m_TweakBar;
 
 		//Camera
 		Camera camera = Camera(glm::vec3(0.0f, 0.5f, 0.0f));
@@ -102,14 +103,14 @@ namespace Gogaman
 		glm::vec2 coneTraceJitter;
 		uint coneTraceJitterIterator = 0;
 
-		//Initialize camera matrices
+		//Camera matrices
 		glm::mat4 projectionMatrix;
 		glm::mat4 viewMatrix;
 		glm::mat4 viewProjectionMatrix;
 		//Camera matrix from previous frame
 		glm::mat4 previousViewProjectionMatrix;
 
-		//Initialize OpenGL query timers
+		//OpenGL query timers
 		//Time in ms
 		float timeVCTGI = 0.0f, timeGeometryPass = 0.0f, timeSSR = 0.0f, timeDirectPBR = 0.0f, timeTAA = 0.0f, timeBloom = 0.0f, timeDOF = 0.0f;
 		float previousTimeVCTGI = 0.0f, previousTimeGeometryPass = 0.0f, previousTimeSSR = 0.0f, previousTimeDirectPBR = 0.0f, previousTimeTAA = 0.0f, previousTimeBloom = 0.0f, previousTimeDOF = 0.0f;

@@ -97,7 +97,6 @@
     <ClInclude Include="src\Gogaman\Config.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Gogaman\Core.h" />
     <ClInclude Include="src\Gogaman\Application.h" />
     <ClInclude Include="src\Gogaman.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
@@ -143,10 +142,10 @@
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Gogaman\Graphics\GraphicsContext.h" />
-    <ClInclude Include="src\Gogaman\InputCodes.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
-    <ClInclude Include="src\Gogaman\InputDefs.h" />
     <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
+    <ClInclude Include="src\Gogaman\InputDefines.h" />
+    <ClInclude Include="src\Gogaman\Base.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

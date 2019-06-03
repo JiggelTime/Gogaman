@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Texture.h"
 #include "Renderbuffer.h"
 
@@ -8,7 +8,7 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API Framebuffer
+	class Framebuffer
 	{
 	public:
 		Framebuffer();

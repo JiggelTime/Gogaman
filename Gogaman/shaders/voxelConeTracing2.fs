@@ -102,11 +102,8 @@ void main()
 	if(dot(albedo, vec3(1.0f)) < EPSILON)
 		discard;
 	
-	diffuseColor = vec4(ComputeIndirectDiffuse(), 1.0f);
-
-	specularColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-	if(roughness < (1.0f - EPSILON))
-		specularColor.rgb = ComputeIndirectSpecular();
+	diffuseColor  = vec4(ComputeIndirectDiffuse(),  1.0f);
+	specularColor = vec4(ComputeIndirectSpecular(), 1.0f);
 }
 
 float chrominanceEdgeDirectedReconstructionFilter(vec2 a0, vec2 a1, vec2 a2, vec2 a3, vec2 a4)
@@ -218,6 +215,6 @@ vec3 ComputeIndirectSpecular()
 {
 	vec3  coneDirection = normalize(reflect(-viewDir, normal));
 	float coneAperture  = max(tan(0.0003474660443456835f + (roughness * (1.3331290497744692f - (roughness * 0.5040552688878546f)))), MIN_SPECULAR_CONE_APERTURE);
-	coneAperture = 0.001f;
+	coneAperture = 0.002f;
 	return traceCone(coneDirection, coneAperture, SPECULAR_CONE_OFFSET);
 }

@@ -1,14 +1,14 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Gogaman/Window.h"
 
 #include <glad.h>
-#include <GLFW\glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Gogaman
 {
-	class GOGAMAN_API WindowsWindow : public Window
+	class WindowsWindow : public Window
 	{
 	public:
 		WindowsWindow(const char *title, const int width, const int height);

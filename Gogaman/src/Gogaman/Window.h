@@ -1,11 +1,11 @@
 #pragma once
 
 #include "pch.h"
-#include "Core.h"
+#include "Base.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API Window
+	class Window
 	{
 	public:
 		Window(const char *title, const int width, const int height)

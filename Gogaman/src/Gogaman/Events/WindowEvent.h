@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Event.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API WindowEvent : public Event
+	class WindowEvent : public Event
 	{
 	public:
 		inline virtual EventCategory GetCategory() const override { return EventCategory::Window; }
@@ -14,7 +14,7 @@ namespace Gogaman
 		{}
 	};
 
-	class GOGAMAN_API WindowCloseEvent : public WindowEvent
+	class WindowCloseEvent : public WindowEvent
 	{
 	public:
 		WindowCloseEvent()
@@ -24,7 +24,7 @@ namespace Gogaman
 		inline virtual EventType GetType() const override { return GetEventType(); }
 	};
 
-	class GOGAMAN_API WindowResizeEvent : public WindowEvent
+	class WindowResizeEvent : public WindowEvent
 	{
 	public:
 		WindowResizeEvent(const int width, const int height)
@@ -40,7 +40,7 @@ namespace Gogaman
 		int m_Width, m_Height;
 	};
 
-	class GOGAMAN_API WindowFocusEvent : public WindowEvent
+	class WindowFocusEvent : public WindowEvent
 	{
 	public:
 		WindowFocusEvent()
@@ -50,7 +50,7 @@ namespace Gogaman
 		inline virtual EventType GetType() const override { return GetEventType(); }
 	};
 
-	class GOGAMAN_API WindowUnfocusEvent : public WindowEvent
+	class WindowUnfocusEvent : public WindowEvent
 	{
 	public:
 		WindowUnfocusEvent()

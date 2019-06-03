@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Logger.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API Log
+	class Log
 	{
 	public:
 		static void Initialize();

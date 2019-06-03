@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Core.h"
+#include "Base.h"
 
 #include "Window.h"
 #include "Events/Event.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API Application
+	class Application
 	{
 	public:
 		Application();

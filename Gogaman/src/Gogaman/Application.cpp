@@ -4,8 +4,6 @@
 #include "Config.h"
 #include "Window.h"
 #include "Logging/Log.h"
-#include "Input.h"
-#include "InputCodes.h"
 
 #include "Events/KeyboardEvent.h"
 #include "Events/MouseEvent.h"
@@ -31,7 +29,7 @@ namespace Gogaman
 
 	void Application::Run()
 	{
-		//GetWindow().DisableVerticalSync();
+		GetWindow().DisableVerticalSync();
 
 		Renderer gogaRenderer(GetWindow());
 
@@ -41,7 +39,6 @@ namespace Gogaman
 
 			GetWindow().Update();
 
-			//GM_LOG_INFO("Num events: %d", EventQueue::GetInstance().GetNumPendingEvents());
 			EventQueue::GetInstance().DispatchEvents();
 		}
 	}

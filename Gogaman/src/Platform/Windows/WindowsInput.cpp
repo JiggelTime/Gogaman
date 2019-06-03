@@ -4,7 +4,7 @@
 #include "Gogaman/Application.h"
 
 #include <glad.h>
-#include <GLFW\glfw3.h>
+#include <GLFW/glfw3.h>
 
 namespace Gogaman
 {
@@ -16,21 +16,21 @@ namespace Gogaman
 	WindowsInput::~WindowsInput()
 	{}
 
-	bool WindowsInput::IsKeyPressedImplementation(const int scancode)
+	bool WindowsInput::IsKeyPressedImplementation(const int scancode) const
 	{
 		auto window = static_cast<GLFWwindow *>(Application::GetInstance().GetWindow().GetNativeWindow());
 		auto keyState = glfwGetKey(window, scancode);
 		return keyState == GLFW_PRESS || keyState == GLFW_REPEAT;
 	}
 
-	bool WindowsInput::IsMouseButtonPressedImplementation(const int scancode)
+	bool WindowsInput::IsMouseButtonPressedImplementation(const int scancode) const
 	{
 		auto window = static_cast<GLFWwindow *>(Application::GetInstance().GetWindow().GetNativeWindow());
 		auto buttonState = glfwGetMouseButton(window, scancode);
 		return buttonState == GLFW_PRESS;
 	}
 
-	glm::vec2 WindowsInput::GetMousePositionImplementation()
+	glm::vec2 WindowsInput::GetMousePositionImplementation() const
 	{
 		auto window = static_cast<GLFWwindow *>(Application::GetInstance().GetWindow().GetNativeWindow());
 		glm::dvec2 mousePosition;

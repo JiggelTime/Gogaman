@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "WindowsWindow.h"
+
 #include "Gogaman/Logging/Log.h"
+
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
@@ -29,7 +31,7 @@ namespace Gogaman
 		}
 		
 		//Create GLFW window
-		m_Window = glfwCreateWindow(m_Width, m_Height, m_Title, nullptr, nullptr);
+		m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, nullptr, nullptr);
 		GM_ASSERT(m_Window, "Failed to create GLFW window");
 
 		glfwMakeContextCurrent(m_Window);
@@ -59,8 +61,8 @@ namespace Gogaman
 				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<KeyReleaseEvent>(key)));
 		});
 		//Mouse
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos) { EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseMoveEvent>(xpos, ypos))); });
-		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseScrollEvent>(xoffset, yoffset))); });
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos) { EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos))); });
+		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseScrollEvent>((float)xoffset, (float)yoffset))); });
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow *window, int button, int action, int mods)
 		{
 			if(action == GLFW_PRESS)

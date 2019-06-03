@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include "Base.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -8,7 +8,7 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API Config
+	class Config
 	{
 	public:
 		static Config &GetConfig()

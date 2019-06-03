@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Core.h"
+#include "Base.h"
 #include "Platform/OpenGL/Shader.h"
 #include "Platform/OpenGL/Texture2D.h"
 #include "Graphics/Model.h"
@@ -9,7 +9,7 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API ResourceManager
+	class ResourceManager
 	{
 	public:
 		static void LoadShader(const std::string &name, const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath = nullptr);

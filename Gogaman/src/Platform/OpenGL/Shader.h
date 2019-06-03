@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 
 #include <glad.h>
 #include <glm.hpp>
@@ -9,7 +9,7 @@
 
 namespace Gogaman
 {
-	class GOGAMAN_API Shader
+	class Shader
 	{
 	public:
 		Shader();

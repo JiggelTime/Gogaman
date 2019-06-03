@@ -55,8 +55,7 @@
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Graphics\GraphicsContext.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
-    <ClInclude Include="src\Gogaman\InputCodes.h" />
-    <ClInclude Include="src\Gogaman\InputDefs.h" />
+    <ClInclude Include="src\Gogaman\InputDefines.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\Framebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\Renderer.h" />
@@ -71,7 +70,7 @@
     <ClInclude Include="src\Gogaman.h" />
     <ClInclude Include="src\Gogaman\Application.h" />
     <ClInclude Include="src\Gogaman\Config.h" />
-    <ClInclude Include="src\Gogaman\Core.h" />
+    <ClInclude Include="src\Gogaman\Base.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
     <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
     <ClInclude Include="src\Gogaman\Graphics\Lights\PointLight.h" />
@@ -137,13 +136,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -162,18 +161,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\AntTweakBar\include;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib;$(SolutionDir)Dependencies\AntTweakBar\lib;$(SolutionDir)Dependencies\GLFW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\debug;$(SolutionDir)Dependencies\GLFW\lib\debug;$(LibraryPath)</LibraryPath>
     <SourcePath>src\vendor;$(SourcePath)</SourcePath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\AntTweakBar\include;$(SolutionDir)Dependencies\assimp\include;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\assimp\lib;$(SolutionDir)Dependencies\AntTweakBar\lib;$(SolutionDir)Dependencies\GLFW\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)Dependencies\GLFW\lib\release;$(LibraryPath)</LibraryPath>
     <SourcePath>src\vendor;$(SourcePath)</SourcePath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -194,14 +195,16 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <PreprocessorDefinitions>GM_DEBUG=1;GM_PLATFORM_WINDOWS;GM_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OmitFramePointers>false</OmitFramePointers>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;AntTweakBar64.lib;libfbxsdk-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)Gogaman.dll $(SolutionDir)bin\$(Configuration)-$(Platform)\Sandbox\ /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -220,16 +223,18 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <PreprocessorDefinitions>GM_PLATFORM_WINDOWS;GM_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;AntTweakBar64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;AntTweakBar64.lib;libfbxsdk-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>
       </IgnoreSpecificDefaultLibraries>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy $(OutDir)Gogaman.dll $(SolutionDir)bin\$(Configuration)-$(Platform)\Sandbox\ /y</Command>
+      <Command>
+      </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

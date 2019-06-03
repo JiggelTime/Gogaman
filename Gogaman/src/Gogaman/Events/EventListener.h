@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 #include "Event.h"
 #include "EventQueue.h"
 
 namespace Gogaman
 {
-	class GOGAMAN_API EventListener
+	class EventListener
 	{
 	public:
 		virtual void OnEvent(Event &event) = 0;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Gogaman/Core.h"
+#include "Gogaman/Base.h"
 
 namespace Gogaman
 {
@@ -10,7 +10,7 @@ namespace Gogaman
 		Trace, Info, Warning, Error
 	};
 
-	class GOGAMAN_API Logger
+	class Logger
 	{
 	public:
 		Logger(std::string name);

@@ -155,7 +155,7 @@ vec3 computePointLight(PointLight light)
 vec3 computeDirectRadiance()
 {
 	vec3 Lo = vec3(0.0f);
-	for(int i = 0; i < min(numLights, maxPointLights); ++i)
+	for(int i = 0; i < min(numLights, maxPointLights); i++)
 		Lo += computePointLight(pointLights[i]);
 
 	Lo *= albedo.rgb;

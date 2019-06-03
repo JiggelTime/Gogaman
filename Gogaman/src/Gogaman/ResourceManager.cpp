@@ -180,7 +180,7 @@ namespace Gogaman
 	{
 		std::string filePathString(filePath);
 		Model model;
-		model.LoadModel(filePathString);
+		//model.LoadModel(filePathString);
 		return model;
 	}
 }

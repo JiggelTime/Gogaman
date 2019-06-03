@@ -10,7 +10,7 @@ namespace Gogaman
 
 	Model::~Model()
 	{}
-
+	/*
 	void Model::Render(Shader &shader, bool setPreviousModelMatrixUniform)
 	{
 		if(modelMatrixShouldUpdate)
@@ -28,7 +28,7 @@ namespace Gogaman
 				i.Render(shader);
 		}
 	}
-
+	
 	void Model::LoadModel(std::string &filePath)
 	{
 		Assimp::Importer importer;
@@ -179,7 +179,7 @@ namespace Gogaman
 				textures_loaded.push_back(texture);
 			}
 		}
-
+		
 		return textures;
 	}
 
@@ -191,7 +191,7 @@ namespace Gogaman
 		glGenTextures(1, &textureID);
 
 		int width, height, channels;
-
+		
 		unsigned char *data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
 		if(data)
 		{
@@ -230,7 +230,7 @@ namespace Gogaman
 			std::cout << "Texture failed to load at: " << path << std::endl;
 			stbi_image_free(data);
 		}
-
+		
 		return textureID;
 	}
 
@@ -249,4 +249,6 @@ namespace Gogaman
 
 		m_Hidden = false;
 	}
+
+	*/
 }
