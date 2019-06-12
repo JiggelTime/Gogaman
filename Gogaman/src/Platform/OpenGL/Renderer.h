@@ -8,9 +8,6 @@
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 
-#include "Gogaman/Window.h"
-#include "Platform/Windows/WindowsWindow.h"
-
 #include "Gogaman/Graphics/Camera.h"
 #include "Texture2D.h"
 #include "Texture3D.h"
@@ -29,7 +26,7 @@ namespace Gogaman
 	class Renderer : public EventListener
 	{
 	public:
-		Renderer(Window &window);
+		Renderer();
 		~Renderer();
 
 		void Render();
@@ -46,8 +43,6 @@ namespace Gogaman
 		
 		void PollInput(GLFWwindow *window);
 	private:
-		Window &m_Window;
-
 		//TwBar *m_TweakBar;
 
 		//Camera
@@ -100,8 +95,6 @@ namespace Gogaman
 		glm::vec2 previousTemporalJitter = temporalJitter;
 		uint temporalOffsetIterator = 0;
 		glm::vec2 screenTexelSize = 1.0f / (glm::vec2(GM_CONFIG.screenWidth, GM_CONFIG.screenHeight) * GM_CONFIG.resScale);
-		glm::vec2 coneTraceJitter;
-		uint coneTraceJitterIterator = 0;
 
 		//Camera matrices
 		glm::mat4 projectionMatrix;

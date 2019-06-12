@@ -17,7 +17,7 @@ namespace Gogaman
 		if(level >= m_LogLevel)
 		{
 			char *message = nullptr;
-			uint messageLength = 0;
+			unsigned int messageLength = 0;
 			va_list args;
 			va_start(args, format);
 			messageLength = _vscprintf(format, args) + 1;

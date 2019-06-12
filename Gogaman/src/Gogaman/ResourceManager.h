@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Base.h"
-#include "Platform/OpenGL/Shader.h"
+#include "Graphics/Shader.h"
 #include "Platform/OpenGL/Texture2D.h"
 #include "Graphics/Model.h"
 

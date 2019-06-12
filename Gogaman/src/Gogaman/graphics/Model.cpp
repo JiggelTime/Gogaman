@@ -10,7 +10,7 @@ namespace Gogaman
 
 	Model::~Model()
 	{}
-	/*
+
 	void Model::Render(Shader &shader, bool setPreviousModelMatrixUniform)
 	{
 		if(modelMatrixShouldUpdate)
@@ -249,6 +249,4 @@ namespace Gogaman
 
 		m_Hidden = false;
 	}
-
-	*/
 }

@@ -17,15 +17,15 @@ namespace Gogaman
 			return instance;
 		}
 	private:
-		Config() {}
+		Config()  {}
 		~Config() {}
 	public:
 		//Window
 			//Rendering resolution scale
 			const float resScale = 1.0f;
 			//Window resolution
-			const uint screenWidth  = 1920;
-			const uint screenHeight = 1080;
+			const int screenWidth  = 1920;
+			const int screenHeight = 1080;
 			//Vertical synchronization toggle
 			const bool vSync = true;
 
@@ -75,16 +75,16 @@ namespace Gogaman
 			bool autoVoxelize = true;
 			bool autoVoxelizeKeyPressed = false;
 			//Width, length, and height of voxel volume
-			const uint voxelResolution = 64;
+			const int voxelResolution = 64;
 			//Number of voxel GI compute shader work groups
-			const uint voxelComputeWorkGroups = glm::ceil(voxelResolution / 8.0f);
+			const int voxelComputeWorkGroups = static_cast<const int>(glm::ceil(voxelResolution / 8.0f));
 			float voxelGridSize = 1.7f;
 			glm::vec3 voxelGridPos = glm::vec3(0.0f, 0.0f, 0.0f);
 			//Frequency of re-voxelization (every N frames)
-			const uint voxelizationFrequency = 1;
+			const int voxelizationFrequency = 1;
 
 		//Debug
-			uint renderMode = 0;
+			int renderMode = 0;
 			bool debug = false;
 			bool debugKeyPressed = false;
 			bool debug2 = false;

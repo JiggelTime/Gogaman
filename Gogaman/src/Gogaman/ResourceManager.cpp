@@ -77,13 +77,13 @@ namespace Gogaman
 			fragmentInputStream.open(fragmentShaderPath);
 			std::stringstream vertexShaderStringStream, fragmentShaderStringStream;
 			//Read buffer contents into streams
-			vertexShaderStringStream << vertexInputStream.rdbuf();
+			vertexShaderStringStream   << vertexInputStream.rdbuf();
 			fragmentShaderStringStream << fragmentInputStream.rdbuf();
 			//Close file handlers
 			vertexInputStream.close();
 			fragmentInputStream.close();
 
-			vertexData = vertexShaderStringStream.str();
+			vertexData   = vertexShaderStringStream.str();
 			fragmentData = fragmentShaderStringStream.str();
 
 			//Load geometry shader if present
@@ -111,9 +111,9 @@ namespace Gogaman
 		const char *fragmentShaderSource = fragmentData.c_str();
 		const char *geometryShaderSource = geometryData.c_str();
 
-		Shader shader;
-		shader.Compile(vertexShaderSource, fragmentShaderSource, geometryShaderPresent ? geometryShaderSource : nullptr);
-		return shader;
+		//Shader *shader;
+		//shader->Compile(vertexShaderSource, fragmentShaderSource, geometryShaderPresent ? geometryShaderSource : nullptr);
+		//return shader;
 	}
 
 	Shader ResourceManager::LoadShaderFromFile(const char *computeShaderPath)

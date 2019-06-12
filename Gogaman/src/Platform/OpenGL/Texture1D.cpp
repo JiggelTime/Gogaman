@@ -16,15 +16,16 @@ namespace Gogaman
 		GM_ASSERT(width > 0, "Failed to generate texture1D: invalid width");
 
 		this->width  = width;
+
 		if(levels == 0)
-			levels = floor(log2(width)) + 1;
+			levels = static_cast<GLsizei>(floor(log2(width)) + 1);
 
 		glCreateTextures(GL_TEXTURE_1D, 1, &m_ID);
 		glTextureStorage1D(m_ID, levels, formatInternal, width);
 		if(imageData != nullptr)
 			glTextureSubImage1D(m_ID, 0, 0, width, formatImage, GL_UNSIGNED_BYTE, imageData);
 
-		//Set texture properties
+		//Set properties
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, wrapS);
 		glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, filterMin);
 		glTextureParameteri(m_ID, GL_TEXTURE_MAG_FILTER, filterMag);

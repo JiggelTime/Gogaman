@@ -3,7 +3,7 @@
 
 namespace Gogaman
 {
-	Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<uint> &indices, std::vector<ModelTexture> &textures)
+	Mesh::Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices, std::vector<ModelTexture> &textures)
 			: m_Hidden(false), m_VBO(0), m_EBO(0), m_VAO(0), m_Vertices(vertices), m_Indices(indices), m_Textures(textures)
 	{
 		//Configure VBO, VAO, and EBO
@@ -16,7 +16,7 @@ namespace Gogaman
 		glBufferData(GL_ARRAY_BUFFER, m_Vertices.size() * sizeof(Vertex), &m_Vertices[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(uint), &m_Indices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, m_Indices.size() * sizeof(unsigned int), &m_Indices[0], GL_STATIC_DRAW);
 
 		//Vertex positions
 		glEnableVertexAttribArray(0);
@@ -45,14 +45,14 @@ namespace Gogaman
 		//glDeleteVertexArrays(1, &m_VAO);
 	}
 
-	void Mesh::Render(Shader &shader)
+	void Mesh::Render(OpenGL_Shader &shader)
 	{
-		uint diffuseNr    = 1;
-		uint roughnessNr  = 1;
-		uint normalNr     = 1;
-		uint heightNr     = 1;
-		uint metalnessNr  = 1;
-		uint emissivityNr = 1;
+		int diffuseNr    = 1;
+		int roughnessNr  = 1;
+		int normalNr     = 1;
+		int heightNr     = 1;
+		int metalnessNr  = 1;
+		int emissivityNr = 1;
 
 		//Bind texture(s) before rendering
 		for(int i = 0; i < m_Textures.size(); i++)
@@ -88,7 +88,7 @@ namespace Gogaman
 		glActiveTexture(GL_TEXTURE0);
 
 		glBindVertexArray(m_VAO);
-		glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_Indices.size()), GL_UNSIGNED_INT, 0);
 
 		//Unbind VAO
 		glBindVertexArray(0);

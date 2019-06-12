@@ -41,22 +41,10 @@
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\ResourceManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\Framebuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\Renderbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\Texture.cpp">
@@ -71,12 +59,6 @@
     <ClCompile Include="src\Platform\OpenGL\Texture3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\VertexBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\VertexArrayBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -87,6 +69,33 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Gogaman\Events\EventQueue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\ECS\System.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\ECS\World.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\ECS\RenderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\ShaderLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\ShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -115,17 +124,8 @@
     <ClInclude Include="src\Gogaman\Graphics\Mesh.h">
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
-    <ClInclude Include="src\Gogaman\Graphics\Model.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\ResourceManager.h" />
-    <ClInclude Include="src\Gogaman\TypeDefs.h" />
     <ClInclude Include="src\Platform\OpenGL\Framebuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\Renderbuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\Renderer.h" />
-    <ClInclude Include="src\Platform\OpenGL\Shader.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\Texture.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture1D.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture2D.h" />
@@ -134,8 +134,6 @@
     <ClInclude Include="src\Gogaman\Events\Event.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
-    <ClInclude Include="src\Platform\OpenGL\VertexBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\VertexArrayBuffer.h" />
     <ClInclude Include="src\Gogaman\Events\EventDispatcher.h" />
     <ClInclude Include="src\Gogaman\Events\EventListener.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
@@ -146,6 +144,34 @@
     <ClInclude Include="src\Gogaman\Events\EventQueue.h" />
     <ClInclude Include="src\Gogaman\InputDefines.h" />
     <ClInclude Include="src\Gogaman\Base.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ShaderUniform.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_Shader.h">
+      <Filter>Source Files\graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Graphics\Shader.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_ShaderUniform.h" />
+    <ClInclude Include="src\Gogaman\Graphics\SimpleMaterial.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Material.h" />
+    <ClInclude Include="src\Gogaman\ECS\Component.h" />
+    <ClInclude Include="src\Gogaman\ECS\ComponentManager.h" />
+    <ClInclude Include="src\Gogaman\ECS\Entity.h" />
+    <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
+    <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
+    <ClInclude Include="src\Gogaman\ECS\System.h" />
+    <ClInclude Include="src\Gogaman\ECS\World.h" />
+    <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
+    <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
+    <ClInclude Include="src\Gogaman\ECS\RenderableComponent.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.h" />
+    <ClInclude Include="src\Gogaman\ECS\RenderSystem.h" />
+    <ClInclude Include="src\Gogaman\Graphics\IndexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\VertexArrayBuffer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\VertexBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
+    <ClInclude Include="src\Gogaman\ResourceCache.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ShaderLoader.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ShaderManager.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

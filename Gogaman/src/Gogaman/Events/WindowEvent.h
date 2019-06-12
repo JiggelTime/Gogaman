@@ -20,8 +20,8 @@ namespace Gogaman
 		WindowCloseEvent()
 		{}
 
-		inline static  EventType GetEventType() { return WindowClose; }
-		inline virtual EventType GetType() const override { return GetEventType(); }
+		static inline  EventType GetTypeStatic() { return WindowClose; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 	};
 
 	class WindowResizeEvent : public WindowEvent
@@ -31,8 +31,8 @@ namespace Gogaman
 			: m_Width(width), m_Height(height)
 		{}
 
-		inline static  EventType GetEventType() { return WindowResize; }
-		inline virtual EventType GetType() const override { return GetEventType(); }
+		static inline  EventType GetTypeStatic() { return WindowResize; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 
 		inline int GetWidth()  const { return m_Width; }
 		inline int GetHeight() const { return m_Height; }
@@ -46,8 +46,8 @@ namespace Gogaman
 		WindowFocusEvent()
 		{}
 
-		inline static  EventType GetEventType() { return WindowFocus; }
-		inline virtual EventType GetType() const override { return GetEventType(); }
+		static inline  EventType GetTypeStatic() { return WindowFocus; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 	};
 
 	class WindowUnfocusEvent : public WindowEvent
@@ -56,7 +56,7 @@ namespace Gogaman
 		WindowUnfocusEvent()
 		{}
 
-		inline static  EventType GetEventType() { return WindowUnfocus; }
-		inline virtual EventType GetType() const override { return GetEventType(); }
+		static inline  EventType GetTypeStatic() { return WindowUnfocus; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 	};
 }

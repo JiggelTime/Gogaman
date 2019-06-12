@@ -1,0 +1,30 @@
+FlexHeaderData
+{
+	UINT8[4] signature
+	UINT8    version
+}
+
+FlexVertexData
+{
+	FLOAT[3] position
+	FLOAT[2] uv
+	FLOAT[3] normal
+	FLOAT[3] tangent
+}
+
+FlexMeshData
+{
+	UINT32           vertexBufferDataSize
+	FlexVertexData[] vertexBufferData
+    UINT32           indexBufferDataSize
+	UINT16[]         indexBufferData
+}
+
+FlexData
+{
+	FlexHeaderData header
+
+	UINT16         numMeshes
+	UINT32         meshDataSize
+	FlexMeshData[] meshes
+}

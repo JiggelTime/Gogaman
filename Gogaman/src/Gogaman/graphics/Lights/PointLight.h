@@ -20,11 +20,12 @@ namespace Gogaman
 		inline void SetConeAperture(const float coneAperture) { m_ConeAperture = coneAperture; }
 		inline float GetConeAperture() const { return m_ConeAperture; }
 
-		inline static uint GetTotalPointLights() { return m_TotalPointLights; }
+		static inline int GetNumPointLights() { return m_NumPointLights; }
 	private:
-		glm::vec3 m_Position;
-		glm::vec3 m_Color;
-		float     m_ConeAperture;
-		static uint m_TotalPointLights;
+		glm::vec3  m_Position;
+		glm::vec3  m_Color;
+		float      m_ConeAperture;
+
+		static int m_NumPointLights;
 	};
 }

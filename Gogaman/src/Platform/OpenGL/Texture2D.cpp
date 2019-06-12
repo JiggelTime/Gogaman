@@ -18,15 +18,16 @@ namespace Gogaman
 
 		this->width  = width;
 		this->height = height;
+
 		if(levels == 0)
-			levels = floor(log2(max(width, height))) + 1;
+			levels = static_cast<GLsizei>(floor(log2(max(width, height))) + 1);
 
 		glCreateTextures(GL_TEXTURE_2D, 1, &m_ID);
 		glTextureStorage2D(m_ID, levels, formatInternal, width, height);
 		if(imageData != nullptr)
 			glTextureSubImage2D(m_ID, 0, 0, 0, width, height, formatImage, GL_UNSIGNED_BYTE, imageData);
 
-		//Set texture properties
+		//Set properties
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_S, wrapS);
 		glTextureParameteri(m_ID, GL_TEXTURE_WRAP_T, wrapT);
 		glTextureParameteri(m_ID, GL_TEXTURE_MIN_FILTER, filterMin);

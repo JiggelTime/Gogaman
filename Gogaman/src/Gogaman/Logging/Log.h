@@ -10,15 +10,14 @@ namespace Gogaman
 	public:
 		static void Initialize();
 
-		inline static std::shared_ptr<Logger> &GetCoreLogger()   { return s_CoreLogger; }
-		inline static std::shared_ptr<Logger> &GetClientLogger() { return s_ClientLogger; }
+		static inline std::shared_ptr<Logger> &GetCoreLogger()   { return s_CoreLogger; }
+		static inline std::shared_ptr<Logger> &GetClientLogger() { return s_ClientLogger; }
 	private:
 		static std::shared_ptr<Logger> s_CoreLogger;
 		static std::shared_ptr<Logger> s_ClientLogger;
 	};
 }
 
-//Macros
 #define GM_LOG_CORE_SET_LEVEL(x) Gogaman::Log::GetCoreLogger()->SetLogLevel(Gogaman::LogLevel::x)
 #define GM_LOG_CORE_GET_LEVEL    Gogaman::Log::GetCoreLogger()->GetLogLevel()
 

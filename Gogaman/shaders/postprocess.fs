@@ -5,7 +5,7 @@
 #define ACESFILM
 #define GAMMA_CORRECTION 1
 #define FILM_GRAIN 1
-#define FILM_GRAIN_STRENGTH 2.0f
+#define FILM_GRAIN_STRENGTH 1.0f
 
 layout(location = 0) out vec4 FragColor;
 

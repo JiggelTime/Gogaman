@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Gogaman/Base.h"
-#include "Platform/OpenGL/Shader.h"
+#include "Platform/OpenGL/OpenGL_Shader.h"
+
 #include <glad.h>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -18,7 +19,7 @@ namespace Gogaman
 
 	struct ModelTexture
 	{
-		uint id;
+		unsigned int id;
 		std::string type;
 		std::string path;
 	};
@@ -26,10 +27,10 @@ namespace Gogaman
 	class Mesh
 	{
 	public:
-		Mesh(std::vector<Vertex> &vertices, std::vector<uint> &indices, std::vector<ModelTexture> &textures);
+		Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices, std::vector<ModelTexture> &textures);
 		~Mesh();
 
-		void Render(Shader &shader);
+		void Render(OpenGL_Shader &shader);
 
 		inline void Hide()   { m_Hidden = true; }
 		inline void Unhide() { m_Hidden = false; }
@@ -38,10 +39,10 @@ namespace Gogaman
 	private:
 		bool m_Hidden;
 
-		uint m_VBO, m_EBO, m_VAO;
+		unsigned int m_VBO, m_EBO, m_VAO;
 
 		std::vector<Vertex>       m_Vertices;
-		std::vector<uint>         m_Indices;
+		std::vector<unsigned int>         m_Indices;
 		std::vector<ModelTexture> m_Textures;
 	};
 }

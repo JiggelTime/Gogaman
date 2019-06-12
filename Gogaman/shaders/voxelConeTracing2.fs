@@ -43,8 +43,6 @@ uniform float      voxelWorldSize;
 uniform vec3       voxelGridPos;
 //World space camera position
 uniform vec3       cameraPos;
-//Texture coordinate offset for temporal resolve
-uniform vec2       coordJitter;
 //G-buffer textures
 uniform sampler2D gPositionMetalness;
 uniform sampler2D gNormal;
@@ -82,13 +80,13 @@ const mat3 YCOCGtoRGB = mat3(1.0f, 1.0f, 1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 1.0f, -
 #endif
 
 //Unpack world space position and metalness
-vec4 positionMetalness = texture(gPositionMetalness, texCoordsFrag + coordJitter);
+vec4 positionMetalness = texture(gPositionMetalness, texCoordsFrag);
 vec3 position          = positionMetalness.xyz;
 float metalness        = positionMetalness.a;
 //Unpack normal
-vec3 normal            = decodeSignedOctahedronNormal(texture(gNormal, texCoordsFrag + coordJitter).xy);
+vec3 normal            = decodeSignedOctahedronNormal(texture(gNormal, texCoordsFrag).xy);
 //Unpack albedo, emissivity, and roughness
-vec4 albedoEmissivityRoughness = texture(gAlbedoEmissivityRoughness, texCoordsFrag + coordJitter);
+vec4 albedoEmissivityRoughness = texture(gAlbedoEmissivityRoughness, texCoordsFrag);
 vec3 albedo            = decodeAlbedo(gAlbedoEmissivityRoughness);
 float emissivity       = albedoEmissivityRoughness.b;
 float roughness        = albedoEmissivityRoughness.a;

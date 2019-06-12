@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Gogaman/Base.h"
+#include "Event.h"
 
 namespace Gogaman
 {
-	class Event;
 	class EventListener;
 
 	class EventQueue
@@ -13,7 +13,7 @@ namespace Gogaman
 		EventQueue(const EventQueue &)            = delete;
 		EventQueue &operator=(const EventQueue &) = delete;
 
-		inline void Enqueue(std::unique_ptr<Event> &&event) { m_PendingEvents.push(std::move(event)); }
+		inline void Enqueue(std::unique_ptr<Event> &&event) { m_PendingEvents.emplace(std::move(event)); }
 
 		void DispatchEvents();
 

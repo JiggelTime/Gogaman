@@ -45,13 +45,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\FBX_SDK\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\FBX_SDK\include;$(SolutionDir)Dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\FBX_SDK\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\FBX_SDK\include;$(SolutionDir)Dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -87,7 +87,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AssetImporter.cpp" />
+    <ClCompile Include="FBX_Importer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="FBX_Importer.h" />
+    <ClInclude Include="FlexData.h" />
+    <ClInclude Include="Importer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

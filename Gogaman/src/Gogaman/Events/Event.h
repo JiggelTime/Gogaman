@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Gogaman/Base.h"
-#include "EventQueue.h"
 
 namespace Gogaman
 {

@@ -1,11 +1,13 @@
 #include "pch.h"
 #include "WindowsWindow.h"
 
+#include "Gogaman/Base.h"
 #include "Gogaman/Logging/Log.h"
 
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
+#include "Gogaman/Events/EventQueue.h"
 
 namespace Gogaman
 {

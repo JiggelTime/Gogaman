@@ -2,7 +2,7 @@
 
 #include "Gogaman/Base.h"
 #include "Mesh.h"
-#include "Platform/OpenGL/Shader.h"
+//#include "Platform/OpenGL/Shader.h"
 
 #include <glad.h>
 #include <glm.hpp>

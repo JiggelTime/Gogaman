@@ -1,9 +1,10 @@
 #include "pch.h"
 #include "Renderer.h"
+
+#include "Gogaman/Application.h"
 #include "Gogaman/Logging/Log.h"
 #include "Gogaman/Input.h"
 #include "Gogaman/InputDefines.h"
-
 #include "Gogaman/Events/EventDispatcher.h"
 #include "Gogaman/ResourceManager.h"
 #include "Gogaman/Graphics/JitterSequences.h"
@@ -11,15 +12,14 @@
 
 namespace Gogaman
 {
-	Renderer::Renderer(Window &window)
-		: m_Window(window)
+	Renderer::Renderer()
 	{
 		//Initialize GLAD
 		int gladStatus = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		GM_ASSERT(gladStatus, "Failed to initialize GLAD");
 		GM_LOG_CORE_INFO("Initialized OpenGL");
-		GM_LOG_CORE_INFO("Version:  %s", glGetString(GL_VERSION));
 		GM_LOG_CORE_INFO("Vendor:   %s", glGetString(GL_VENDOR));
+		GM_LOG_CORE_INFO("Version:  %s", glGetString(GL_VERSION));
 		GM_LOG_CORE_INFO("Renderer: %s", glGetString(GL_RENDERER));
 		/*
 		//Initialize AntTweakBar
@@ -404,7 +404,7 @@ namespace Gogaman
 		frameCounter++;
 
 		//Input
-		PollInput(static_cast<GLFWwindow *>(m_Window.GetNativeWindow()));
+		PollInput(static_cast<GLFWwindow *>(Application::GetInstance().GetWindow().GetNativeWindow()));
 
 		//Update sub-pixel jitter for temporal resolve
 		previousTemporalJitter = temporalJitter;

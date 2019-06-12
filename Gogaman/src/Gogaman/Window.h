@@ -24,7 +24,7 @@ namespace Gogaman
 
 		virtual void EnableVerticalSync()  = 0;
 		virtual void DisableVerticalSync() = 0;
-		inline bool  IsVerticalSynchronizationEnabled() const { return m_VerticalSynchronization; }
+		inline  bool IsVerticalSynchronizationEnabled() const { return m_VerticalSynchronization; }
 
 		inline const char *GetTitle() const { return m_Title; }
 

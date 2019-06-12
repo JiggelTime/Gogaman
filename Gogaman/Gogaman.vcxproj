@@ -11,17 +11,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Gogaman\ECS\RenderSystem.cpp" />
+    <ClCompile Include="src\Gogaman\ECS\System.cpp" />
+    <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventQueue.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Mesh.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\ShaderLoader.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\ShaderManager.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Framebuffer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\Model.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\Renderer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Renderbuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Texture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Texture1D.cpp" />
-    <ClCompile Include="src\Gogaman\ResourceManager.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\Shader.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Texture2D.cpp" />
     <ClCompile Include="src\Platform\OpenGL\Texture3D.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
@@ -32,8 +35,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\VertexArrayBuffer.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\VertexBuffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexBuffer.cpp" />
     <ClCompile Include="vendor\stb_image.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -46,6 +49,16 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Gogaman\ECS\Component.h" />
+    <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
+    <ClInclude Include="src\Gogaman\ECS\ComponentManager.h" />
+    <ClInclude Include="src\Gogaman\ECS\Entity.h" />
+    <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
+    <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
+    <ClInclude Include="src\Gogaman\ECS\RenderableComponent.h" />
+    <ClInclude Include="src\Gogaman\ECS\RenderSystem.h" />
+    <ClInclude Include="src\Gogaman\ECS\System.h" />
+    <ClInclude Include="src\Gogaman\ECS\World.h" />
     <ClInclude Include="src\Gogaman\Events\Event.h" />
     <ClInclude Include="src\Gogaman\Events\EventDispatcher.h" />
     <ClInclude Include="src\Gogaman\Events\EventListener.h" />
@@ -54,15 +67,26 @@
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Graphics\GraphicsContext.h" />
+    <ClInclude Include="src\Gogaman\Graphics\IndexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Material.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Shader.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ShaderLoader.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ShaderManager.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ShaderUniform.h" />
+    <ClInclude Include="src\Gogaman\Graphics\SimpleMaterial.h" />
+    <ClInclude Include="src\Gogaman\Graphics\VertexArrayBuffer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\VertexBuffer.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
     <ClInclude Include="src\Gogaman\InputDefines.h" />
+    <ClInclude Include="src\Gogaman\ResourceCache.h" />
+    <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\Framebuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\Renderer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_ShaderUniform.h" />
     <ClInclude Include="src\Platform\OpenGL\Renderbuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture1D.h" />
-    <ClInclude Include="src\Gogaman\ResourceManager.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture2D.h" />
     <ClInclude Include="src\Platform\OpenGL\Texture3D.h" />
     <ClInclude Include="src\Gogaman\Logging\Log.h" />
@@ -76,12 +100,10 @@
     <ClInclude Include="src\Gogaman\Graphics\Lights\PointLight.h" />
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\Gogaman\Graphics\Mesh.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Model.h" />
-    <ClInclude Include="src\Gogaman\TypeDefs.h" />
     <ClInclude Include="src\pch.h" />
-    <ClInclude Include="src\Platform\OpenGL\Shader.h" />
-    <ClInclude Include="src\Platform\OpenGL\VertexArrayBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\VertexBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_Shader.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexBuffer.h" />
     <ClInclude Include="vendor\stb_image.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
@@ -161,7 +183,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\FlexData\include;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\debug;$(SolutionDir)Dependencies\GLFW\lib\debug;$(LibraryPath)</LibraryPath>
     <SourcePath>src\vendor;$(SourcePath)</SourcePath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
@@ -169,7 +191,7 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\FlexData\include;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\GLFW\lib\release;$(LibraryPath)</LibraryPath>
     <SourcePath>src\vendor;$(SourcePath)</SourcePath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>

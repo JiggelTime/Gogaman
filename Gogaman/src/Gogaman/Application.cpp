@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "Application.h"
 
+#include "Base.h"
 #include "Config.h"
-#include "Window.h"
+#include "Events/EventQueue.h"
 #include "Logging/Log.h"
 
-#include "Events/KeyboardEvent.h"
-#include "Events/MouseEvent.h"
+#include "ECS/RenderableComponent.h"
+#include "ECS/RenderSystem.h"
 
-#include "Platform/OpenGL/Renderer.h"
+#include <FlexData.h>
 
 namespace Gogaman
 {
@@ -29,17 +30,32 @@ namespace Gogaman
 
 	void Application::Run()
 	{
+		std::unique_ptr<System> testSystem = std::make_unique<RenderSystem>();
+		GetWorld().AddSystem(std::move(testSystem));
+
+		GetWorld().Initialize();
+
 		GetWindow().DisableVerticalSync();
 
-		Renderer gogaRenderer(GetWindow());
+		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/test.flex"));
+		for(auto &i : data.meshes)
+		{
+			Entity gogaEntity = GetWorld().CreateEntity();
+			RenderableComponent testComp;
+			testComp.data = i;
+			GetWorld().AddComponent(gogaEntity.identifier, std::move(testComp));
+		}
 
 		while(m_IsRunning)
 		{
-			gogaRenderer.Render();
-
 			GetWindow().Update();
+			GetWorld().Update();
+
+			GetWorld().Render();
 
 			EventQueue::GetInstance().DispatchEvents();
 		}
+
+		GetWorld().Shutdown();
 	}
 }

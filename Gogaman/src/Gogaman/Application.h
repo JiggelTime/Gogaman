@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Base.h"
-
 #include "Window.h"
-#include "Events/Event.h"
+#include "ECS/World.h"
 
 namespace Gogaman
 {
@@ -16,12 +14,14 @@ namespace Gogaman
 		void Run();
 
 		inline Window &GetWindow() { return *m_Window; }
+		inline World  &GetWorld()  { return  m_World;  }
 
-		inline static Application &GetInstance() { return *s_Instance; }
+		static inline Application &GetInstance() { return *s_Instance; }
 	private:
 		bool m_IsRunning;
 
 		std::unique_ptr<Window> m_Window;
+		World                   m_World;
 
 		static Application *s_Instance;
 	};
