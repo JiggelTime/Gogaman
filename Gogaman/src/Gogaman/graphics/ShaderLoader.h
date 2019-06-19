@@ -10,7 +10,7 @@ namespace Gogaman
 		ShaderLoader();
 		~ShaderLoader();
 
-		std::unique_ptr<Shader> Load(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath = nullptr);
-		std::unique_ptr<Shader> Load(const char *computeShaderPath);
+		std::unique_ptr<Shader> Load(const char *vertexShaderFilepath, const char *fragmentShaderFilepath, const char *geometryShaderFilepath = nullptr);
+		std::unique_ptr<Shader> Load(const char *computeShaderFilepath);
 	};
 }

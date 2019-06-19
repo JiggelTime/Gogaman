@@ -2,7 +2,7 @@
 
 #include "Gogaman/Base.h"
 #include "Event.h"
-#include "EventQueue.h"
+#include "EventManager.h"
 
 namespace Gogaman
 {
@@ -13,7 +13,7 @@ namespace Gogaman
 	protected:
 		EventListener()
 		{
-			EventQueue::GetInstance().AddListener(this);
+			EventManager::GetInstance().AddListener(this);
 		}
 	};
 }

@@ -11,9 +11,9 @@ namespace Gogaman
 	ShaderLoader::~ShaderLoader()
 	{}
 
-	std::unique_ptr<Shader> ShaderLoader::Load(const char *vertexShaderPath, const char *fragmentShaderPath, const char *geometryShaderPath)
+	std::unique_ptr<Shader> ShaderLoader::Load(const char *vertexShaderFilepath, const char *fragmentShaderFilepath, const char *geometryShaderFilepath)
 	{
-		bool geometryShaderPresent = (geometryShaderPath == nullptr) ? false : true;
+		bool geometryShaderPresent = (geometryShaderFilepath == nullptr) ? false : true;
 
 		std::string vertexShaderSource;
 		std::string fragmentShaderSource;
@@ -21,13 +21,13 @@ namespace Gogaman
 		std::ifstream vertexInputStream;
 		std::ifstream fragmentInputStream;
 		std::ifstream geometryInputStream;
-		vertexInputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+		vertexInputStream.exceptions(std::ifstream::failbit   | std::ifstream::badbit);
 		fragmentInputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 		geometryInputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 		try
 		{
-			vertexInputStream.open(vertexShaderPath);
-			fragmentInputStream.open(fragmentShaderPath);
+			vertexInputStream.open(vertexShaderFilepath);
+			fragmentInputStream.open(fragmentShaderFilepath);
 
 			std::stringstream vertexShaderStringStream, fragmentShaderStringStream;
 			vertexShaderStringStream   << vertexInputStream.rdbuf();
@@ -42,7 +42,7 @@ namespace Gogaman
 			//Load geometry shader if present
 			if(geometryShaderPresent)
 			{
-				geometryInputStream.open(geometryShaderPath);
+				geometryInputStream.open(geometryShaderFilepath);
 
 				std::stringstream geometryShaderStringStream;
 				geometryShaderStringStream << geometryInputStream.rdbuf();
@@ -54,21 +54,21 @@ namespace Gogaman
 		}
 		catch(std::ifstream::failure e)
 		{
-			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", vertexShaderPath);
-			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", fragmentShaderPath);
+			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", vertexShaderFilepath);
+			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", fragmentShaderFilepath);
 			if(geometryShaderPresent)
-				GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", geometryShaderPath);
+				GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", geometryShaderFilepath);
 		}
 
-		std::unique_ptr<Shader> shader = std::unique_ptr<Shader>(Shader::Create());
+		std::unique_ptr<Shader> shader = std::make_unique<Shader>();
 		if(geometryShaderPresent)
 			shader->Compile(vertexShaderSource, fragmentShaderSource, geometryShaderSource);
 		else
-			shader->Compile(vertexShaderSource, fragmentShaderSource);
+			shader->Compile(vertexShaderSource, fragmentShaderSource, "");
 		return shader;
 	}
 
-	std::unique_ptr<Shader> ShaderLoader::Load(const char *computeShaderPath)
+	std::unique_ptr<Shader> ShaderLoader::Load(const char *computeShaderFilepath)
 	{
 		std::string   computeShaderSource;
 		std::ifstream inputStream;
@@ -76,7 +76,7 @@ namespace Gogaman
 		inputStream.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 		try
 		{
-			inputStream.open(computeShaderPath);
+			inputStream.open(computeShaderFilepath);
 
 			std::stringstream stringstream;
 			stringstream << inputStream.rdbuf();
@@ -87,10 +87,10 @@ namespace Gogaman
 		}
 		catch(std::ifstream::failure e)
 		{
-			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", computeShaderPath);
+			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", computeShaderFilepath);
 		}
 
-		std::unique_ptr<Shader> shader = std::unique_ptr<Shader>(Shader::Create());
+		std::unique_ptr<Shader> shader = std::make_unique<Shader>();
 		shader->Compile(computeShaderSource);
 		return shader;
 	}

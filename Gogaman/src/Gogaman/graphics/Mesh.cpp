@@ -45,7 +45,7 @@ namespace Gogaman
 		//glDeleteVertexArrays(1, &m_VAO);
 	}
 
-	void Mesh::Render(OpenGL_Shader &shader)
+	void Mesh::Render(Shader &shader)
 	{
 		int diffuseNr    = 1;
 		int roughnessNr  = 1;

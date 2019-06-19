@@ -147,7 +147,7 @@ namespace Gogaman
 							exit(1);
 						}
 						
-						uint16_t index = meshData.vertexBufferData.size();
+						uint16_t index = static_cast<uint16_t>(meshData.vertexBufferData.size());
 						meshData.vertexBufferData.emplace_back(std::move(vertex));
 						meshData.indexBufferData.emplace_back(index);
 						vertexIndices[vertex] = index;
@@ -212,8 +212,8 @@ int main(int argc, char *argv[])
 
 	//const char *importFilepath = argv[1];
 	//const char *exportFilepath = argv[2];
-	const char *importFilepath = "D:/dev/test.fbx";
-	const char *exportFilepath = "D:/dev/test.flex";
+	const char *importFilepath = "D:/dev/testScene.fbx";
+	const char *exportFilepath = "D:/dev/testScene.flex";
 
 	FlexData::FlexData testFlexData;
 	//Import FBX file

@@ -8,20 +8,20 @@
 
 namespace Gogaman
 {
-	class IComponentManager
+	class AbstractComponentManager
 	{
 	public:
-		IComponentManager()                                     = default;
-		~IComponentManager()                                    = default;
-		IComponentManager(const IComponentManager &)            = delete;
-		IComponentManager(IComponentManager &&)                 = default;
+		AbstractComponentManager()                                            = default;
+		~AbstractComponentManager()                                           = default;
+		AbstractComponentManager(const AbstractComponentManager &)            = delete;
+		AbstractComponentManager(AbstractComponentManager &&)                 = default;
 		
-		IComponentManager &operator=(const IComponentManager &) = delete;
-		IComponentManager &operator=(IComponentManager &&)      = default;
+		AbstractComponentManager &operator=(const AbstractComponentManager &) = delete;
+		AbstractComponentManager &operator=(AbstractComponentManager &&)      = default;
 	};
 
 	template<typename ComponentType>
-	class ComponentManager : public IComponentManager
+	class ComponentManager : public AbstractComponentManager
 	{
 	public:
 		inline void AddComponent(const EntityID entity, ComponentType &&component)

@@ -1,10 +1,12 @@
 #pragma once
 
+#include "pch.h"
+
 namespace Gogaman
 {
 	class World;
 
-	using EntityID = uint64_t;
+	using EntityID = uint32_t;
 
 	struct Entity
 	{
@@ -28,7 +30,7 @@ namespace Gogaman
 			return world->RemoveComponent(*this);
         }*/
 		
-		World *world;
-		EntityID identifier;
+		World    *world;
+		EntityID  identifier;
 	};
 }

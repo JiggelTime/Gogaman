@@ -7,7 +7,7 @@
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
-#include "Gogaman/Events/EventQueue.h"
+#include "Gogaman/Events/EventManager.h"
 
 namespace Gogaman
 {
@@ -16,10 +16,9 @@ namespace Gogaman
 	WindowsWindow::WindowsWindow(const char *title, const int width, const int height)
 		: Window(title, width, height)
 	{
-		GM_LOG_CORE_INFO("Creating window \"%s\" | Width: %d | Height: %d", m_Title, m_Width, m_Height);
-
 		if(!s_GLFW_Initialized)
 		{
+			//Initialize GLFW
 			glfwSetErrorCallback(GLFW_ErrorCallback);
 
 			bool glfwSuccess = glfwInit();
@@ -36,7 +35,8 @@ namespace Gogaman
 		m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, nullptr, nullptr);
 		GM_ASSERT(m_Window, "Failed to create GLFW window");
 
-		glfwMakeContextCurrent(m_Window);
+		m_RenderDeviceContext = std::make_unique<RenderDeviceContext>(this);
+		m_RenderDeviceContext->Initialize();
 
 		EnableVerticalSync();
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -48,29 +48,29 @@ namespace Gogaman
 		glfwSetCursorEnterCallback(m_Window, [](GLFWwindow *window, int entered)
 		{
 			if(entered)
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<WindowFocusEvent>()));
+				EventManager::GetInstance().Send(std::move(std::make_unique<WindowFocusEvent>()));
 			else
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<WindowUnfocusEvent>()));
+				EventManager::GetInstance().Send(std::move(std::make_unique<WindowUnfocusEvent>()));
 		});
 		//Keyboard
 		glfwSetKeyCallback(m_Window, [](GLFWwindow *window, int key, int scancode, int action, int mods)
 		{
 			if(action == GLFW_PRESS)
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<KeyPressEvent>(key, 0)));
+				EventManager::GetInstance().Send(std::move(std::make_unique<KeyPressEvent>(key, 0)));
 			else if(action == GLFW_REPEAT)
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<KeyPressEvent>(key, 1)));
+				EventManager::GetInstance().Send(std::move(std::make_unique<KeyPressEvent>(key, 1)));
 			else
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<KeyReleaseEvent>(key)));
+				EventManager::GetInstance().Send(std::move(std::make_unique<KeyReleaseEvent>(key)));
 		});
 		//Mouse
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos) { EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos))); });
-		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseScrollEvent>((float)xoffset, (float)yoffset))); });
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos)    { EventManager::GetInstance().Send(std::move(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos)));         });
+		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventManager::GetInstance().Send(std::move(std::make_unique<MouseScrollEvent>((float)xoffset, (float)yoffset))); });
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow *window, int button, int action, int mods)
 		{
 			if(action == GLFW_PRESS)
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseButtonPressEvent>(button)));
+				EventManager::GetInstance().Send(std::move(std::make_unique<MouseButtonPressEvent>(button)));
 			else
-				EventQueue::GetInstance().Enqueue(std::move(std::make_unique<MouseButtonReleaseEvent>(button)));
+				EventManager::GetInstance().Send(std::move(std::make_unique<MouseButtonReleaseEvent>(button)));
 		});
 	}
 
@@ -93,7 +93,7 @@ namespace Gogaman
 	void WindowsWindow::Update()
 	{
 		glfwPollEvents();
-		glfwSwapBuffers(m_Window);
+		m_RenderDeviceContext->SwapBuffers();
 	}
 
 	void Window::Shutdown()

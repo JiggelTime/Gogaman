@@ -8,8 +8,6 @@ namespace Gogaman
 
 	void World::Initialize()
 	{
-		std::cout << "[World] Initializing..." << std::endl;
-
 		for(auto &i : m_Systems)
 			i->Initialize();
 	}

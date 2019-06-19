@@ -45,13 +45,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Gogaman\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Gogaman\src;$(SolutionDir)Gogaman\vendor;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\GLFW\lib\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Gogaman\src;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\GLFW\include;$(SolutionDir)Gogaman\src;$(SolutionDir)Gogaman\vendor;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\GLFW\lib\release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

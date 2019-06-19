@@ -1,10 +1,12 @@
 #include "pch.h"
 #include "Log.h"
 
+#include "ConsoleLogger.h"
+
 namespace Gogaman
 {
-	std::shared_ptr<Logger> Log::s_CoreLogger(new Logger("GOGAMAN"));
-	std::shared_ptr<Logger> Log::s_ClientLogger(new Logger("APPLICATION"));
+	std::shared_ptr<AbstractLogger> Log::s_CoreLogger(new   ConsoleLogger("GOGAMAN"));
+	std::shared_ptr<AbstractLogger> Log::s_ClientLogger(new ConsoleLogger("APPLICATION"));
 
 	void Log::Initialize()
 	{

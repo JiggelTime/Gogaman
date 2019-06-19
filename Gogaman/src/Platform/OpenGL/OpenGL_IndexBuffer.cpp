@@ -1,20 +1,19 @@
 #include "pch.h"
 #include "OpenGL_IndexBuffer.h"
 
+#include "Gogaman/Logging/Log.h"
+
 namespace Gogaman
 {
-	OpenGL_IndexBuffer::OpenGL_IndexBuffer()
+	IndexBuffer::IndexBuffer()
+		: m_RendererID(0)
 	{
-		glCreateBuffers(1, &m_ID);
+		glCreateBuffers(1, &m_RendererID);
+		GM_LOG_CORE_TRACE("Created index buffer with ID: %d", m_RendererID);
 	}
 
-	OpenGL_IndexBuffer::~OpenGL_IndexBuffer()
+	IndexBuffer::~IndexBuffer()
 	{
-		glDeleteBuffers(1, &m_ID);
-	}
-
-	IndexBuffer *IndexBuffer::Create()
-	{
-		return new OpenGL_IndexBuffer;
+		glDeleteBuffers(1, &m_RendererID);
 	}
 }

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Gogaman/Base.h"
-
 namespace Gogaman
 {
-	enum EventType
+	enum EventType : uint8_t
 	{
+		None = 0,
 		//Window
 		WindowClose, WindowResize, WindowFocus, WindowUnfocus,
 		//Keyboard
@@ -16,10 +15,11 @@ namespace Gogaman
 
 	enum class EventCategory
 	{
-		Window,
-		Input,
-		Keyboard,
-		Mouse
+		None     = 0,
+		Window   = 1,
+		Input    = 1 << 1,
+		Keyboard = 1 << 2,
+		Mouse    = 1 << 3
 	};
 
 	class Event

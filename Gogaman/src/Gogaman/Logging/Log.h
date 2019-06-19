@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Base.h"
-#include "Logger.h"
+#include "AbstractLogger.h"
 
 namespace Gogaman
 {
@@ -10,11 +10,11 @@ namespace Gogaman
 	public:
 		static void Initialize();
 
-		static inline std::shared_ptr<Logger> &GetCoreLogger()   { return s_CoreLogger; }
-		static inline std::shared_ptr<Logger> &GetClientLogger() { return s_ClientLogger; }
+		static inline std::shared_ptr<AbstractLogger> &GetCoreLogger()   { return s_CoreLogger; }
+		static inline std::shared_ptr<AbstractLogger> &GetClientLogger() { return s_ClientLogger; }
 	private:
-		static std::shared_ptr<Logger> s_CoreLogger;
-		static std::shared_ptr<Logger> s_ClientLogger;
+		static std::shared_ptr<AbstractLogger> s_CoreLogger;
+		static std::shared_ptr<AbstractLogger> s_ClientLogger;
 	};
 }
 

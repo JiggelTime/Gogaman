@@ -1,20 +1,19 @@
 #include "pch.h"
 #include "OpenGL_VertexBuffer.h"
 
+#include "Gogaman/Logging/Log.h"
+
 namespace Gogaman
 {
-	OpenGL_VertexBuffer::OpenGL_VertexBuffer()
+	VertexBuffer::VertexBuffer()
+		: m_RendererID(0)
 	{
-		glCreateBuffers(1, &m_ID);
+		glCreateBuffers(1, &m_RendererID);
+		GM_LOG_CORE_TRACE("Created vertex buffer with ID: %d", m_RendererID);
 	}
 
-	OpenGL_VertexBuffer::~OpenGL_VertexBuffer()
+	VertexBuffer::~VertexBuffer()
 	{
-		glDeleteBuffers(1, &m_ID);
-	}
-
-	VertexBuffer *VertexBuffer::Create()
-	{
-		return new OpenGL_VertexBuffer;
+		glDeleteBuffers(1, &m_RendererID);
 	}
 }

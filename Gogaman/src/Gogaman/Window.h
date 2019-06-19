@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Base.h"
+#include "Gogaman/Graphics/RenderDeviceContext.h"
 
 namespace Gogaman
 {
@@ -28,14 +28,16 @@ namespace Gogaman
 
 		inline const char *GetTitle() const { return m_Title; }
 
-		inline size_t GetWidth()  const { return m_Width; }
-		inline size_t GetHeight() const { return m_Height; }
+		inline int GetWidth()  const { return m_Width;  }
+		inline int GetHeight() const { return m_Height; }
 	protected:
 		const char *m_Title;
 
-		size_t m_Width;
-		size_t m_Height;
+		int  m_Width;
+		int  m_Height;
 
 		bool m_VerticalSynchronization;
+
+		std::unique_ptr<RenderDeviceContext> m_RenderDeviceContext;
 	};
 }

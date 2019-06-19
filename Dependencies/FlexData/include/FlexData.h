@@ -172,18 +172,18 @@ namespace FlexData
 
 	static void ExportFlexData(const char *filepath, const FlexData &data)
 	{
+		FlexDataFormat dataPayload;
 		if(data.meshes.size() > UINT16_MAX)
 		{
 			std::cerr << "Failed to export FlexData: number of meshes exceeds " << UINT16_MAX << std::endl;
 			exit(1);
 		}
+		dataPayload.numMeshes = static_cast<uint16_t>(data.meshes.size());
 
-		FlexDataFormat dataPayload;
-		dataPayload.numMeshes = data.meshes.size();
-		uint16_t meshDataSize = 0;
-		meshDataSize += data.meshes.size() * sizeof(uint32_t) * 2;
+		uint32_t meshDataSize = 0;
+		meshDataSize += static_cast<uint32_t>(data.meshes.size() * sizeof(uint32_t) * 2);
 		for(auto i : data.meshes)
-			meshDataSize += (i.vertexBufferData.size() * FLEX_VERTEX_DATA_SIZE) + (i.indexBufferData.size() * sizeof(uint16_t));
+			meshDataSize += static_cast<uint32_t>((i.vertexBufferData.size() * FLEX_VERTEX_DATA_SIZE) + (i.indexBufferData.size() * sizeof(uint16_t)));
 		dataPayload.meshDataSize = meshDataSize;
 
 		FILE *file = fopen(filepath, "wb");

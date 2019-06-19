@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Base.h"
-#include "Platform/OpenGL/OpenGL_Shader.h"
+#include "Gogaman/Graphics/Shader.h"
 
 #include <glad.h>
 #include <glm.hpp>
@@ -30,7 +30,7 @@ namespace Gogaman
 		Mesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices, std::vector<ModelTexture> &textures);
 		~Mesh();
 
-		void Render(OpenGL_Shader &shader);
+		void Render(Shader &shader);
 
 		inline void Hide()   { m_Hidden = true; }
 		inline void Unhide() { m_Hidden = false; }

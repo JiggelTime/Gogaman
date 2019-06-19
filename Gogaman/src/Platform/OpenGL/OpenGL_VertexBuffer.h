@@ -1,17 +1,33 @@
 #pragma once
 
-#include "Gogaman/Graphics/VertexBuffer.h"
+#include "Gogaman/Graphics/AbstractVertexBuffer.h"
 
 #include <glad.h>
 
 namespace Gogaman
 {
-	class OpenGL_VertexBuffer : public VertexBuffer
+	class VertexBuffer : public AbstractVertexBuffer<VertexBuffer>
 	{
 	public:
-		OpenGL_VertexBuffer();
-		~OpenGL_VertexBuffer();
+		VertexBuffer();
+		VertexBuffer(const VertexBuffer &) = delete;
+		VertexBuffer(VertexBuffer &&other) noexcept
+			: m_RendererID(std::exchange(other.m_RendererID, 0))
+		{}
 
-		inline virtual void UploadData(const size_t size, const void *data) const override { glNamedBufferData(m_ID, size, data, GL_STATIC_DRAW);  }
+		~VertexBuffer();
+
+		VertexBuffer &operator=(const VertexBuffer &) = delete;
+		VertexBuffer &operator=(VertexBuffer &&other) noexcept
+		{
+			std::swap(m_RendererID, other.m_RendererID);
+			return *this;
+		}
+
+		inline void UploadData(const uint32_t size, const void *vertices) const { glNamedBufferData(m_RendererID, size, vertices, GL_STATIC_DRAW);  }
+
+		inline uint32_t GetRendererID() const { return m_RendererID; }
+	private:
+		uint32_t m_RendererID;
 	};
 }

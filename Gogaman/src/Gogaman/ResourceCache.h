@@ -2,23 +2,13 @@
 
 namespace Gogaman
 {
-	template<typename ResourceType>
+	template<typename ResourceType, typename ResourceIdentifierType>
 	class ResourceCache
 	{
 	public:
-		ResourceCache()
-		{}
-
-		~ResourceCache()
-		{}
-
-		void Add(std::string &name, ResourceType &&resource) { m_Resources[name] = resource; }
-
-		//Change to: ResourceType &Get(std::string &name) const { return m_Resources[name]; }
-		ResourceType &Get(std::string &name) { return m_Resources[name]; }
-
-		void Remove(std::string &name) {}
+		inline void          Set(const ResourceIdentifierType resourceID, std::unique_ptr<ResourceType> resource) { m_CachedResources[resourceID] = std::move(resource); }
+		inline ResourceType &Get(const ResourceIdentifierType resourceID) { return *m_CachedResources[resourceID].get(); }
 	private:
-		std::unordered_map<std::string, ResourceType> m_Resources;
+		std::array<std::unique_ptr<ResourceType>, std::numeric_limits<ResourceIdentifierType>::max()> m_CachedResources;
 	};
 }

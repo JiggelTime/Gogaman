@@ -3,7 +3,7 @@
 
 #include "Base.h"
 #include "Config.h"
-#include "Events/EventQueue.h"
+#include "Events/EventManager.h"
 #include "Logging/Log.h"
 
 #include "ECS/RenderableComponent.h"
@@ -19,7 +19,6 @@ namespace Gogaman
 		: m_IsRunning(true)
 	{
 		GM_ASSERT(s_Instance == nullptr, "Failed to construct application: instance already exists");
-
 		s_Instance = this;
 
 		m_Window = std::unique_ptr<Window>(Window::Create("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight));
@@ -27,35 +26,44 @@ namespace Gogaman
 
 	Application::~Application()
 	{}
-
+	
 	void Application::Run()
 	{
-		std::unique_ptr<System> testSystem = std::make_unique<RenderSystem>();
-		GetWorld().AddSystem(std::move(testSystem));
-
+		GetWorld().AddSystem(std::make_unique<RenderSystem>());
 		GetWorld().Initialize();
 
 		GetWindow().DisableVerticalSync();
-
-		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/test.flex"));
+		/*
+		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/testScene.flex"));
 		for(auto &i : data.meshes)
 		{
 			Entity gogaEntity = GetWorld().CreateEntity();
-			RenderableComponent testComp;
-			testComp.data = i;
-			GetWorld().AddComponent(gogaEntity.identifier, std::move(testComp));
-		}
 
+			SpatialComponent testSpatialComponent;
+			testSpatialComponent.position      = glm::vec3(0.0f);
+			testSpatialComponent.scale         = glm::vec3(1.0f);
+			testSpatialComponent.rotation      = glm::vec3(0.0f);
+			testSpatialComponent.rotationAngle = 0.0f;
+			GetWorld().AddComponent(gogaEntity.identifier, std::move(testSpatialComponent));
+
+			RenderableComponent testRenderableComponent;
+			testRenderableComponent.data = i;
+			testRenderableComponent.material.albedo = glm::vec3(0.0f, 0.9f, 0.1f);
+			testRenderableComponent.material.roughness = 0.2f;
+			GetWorld().AddComponent(gogaEntity.identifier, std::move(testRenderableComponent));
+		}
+		*/
 		while(m_IsRunning)
 		{
-			GetWindow().Update();
 			GetWorld().Update();
-
 			GetWorld().Render();
+			
+			GetWindow().Update();
 
-			EventQueue::GetInstance().DispatchEvents();
+			EventManager::GetInstance().DispatchEvents();
 		}
 
 		GetWorld().Shutdown();
+		Window::Shutdown();
 	}
 }

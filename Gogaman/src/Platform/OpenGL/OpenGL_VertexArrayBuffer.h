@@ -1,15 +1,31 @@
 #pragma once
 
-#include "Gogaman/Graphics/VertexArrayBuffer.h"
+#include "Gogaman/Graphics/AbstractVertexArrayBuffer.h"
 
 #include <glad.h>
 
 namespace Gogaman
 {
-	class OpenGL_VertexArrayBuffer : public VertexArrayBuffer
+	class VertexArrayBuffer : public AbstractVertexArrayBuffer<VertexArrayBuffer>
 	{
 	public:
-		OpenGL_VertexArrayBuffer();
-		~OpenGL_VertexArrayBuffer();
+		VertexArrayBuffer();
+		VertexArrayBuffer(const VertexArrayBuffer &) = delete;
+		VertexArrayBuffer(VertexArrayBuffer &&other) noexcept
+			: m_RendererID(std::exchange(other.m_RendererID, 0))
+		{}
+
+		~VertexArrayBuffer();
+
+		VertexArrayBuffer &operator=(const VertexArrayBuffer &) = delete;
+		VertexArrayBuffer &operator=(VertexArrayBuffer &&other) noexcept
+		{
+			std::swap(m_RendererID, other.m_RendererID);
+			return *this;
+		}
+
+		inline uint32_t GetRendererID() const { return m_RendererID; }
+	private:
+		uint32_t m_RendererID;
 	};
 }

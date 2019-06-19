@@ -87,9 +87,9 @@ namespace Gogaman
 			return static_cast<ComponentManager<ComponentType> *>(m_ComponentManagers[componentTypeID].get());
 		}
 	private:
-		EntityManager                                   m_EntityManager;
-		std::vector<std::unique_ptr<IComponentManager>> m_ComponentManagers;
-		std::map<EntityID, ComponentFlags>              m_EntityComponentFlags;
-		std::vector<std::unique_ptr<System>>            m_Systems;
+		EntityManager                                          m_EntityManager;
+		std::vector<std::unique_ptr<AbstractComponentManager>> m_ComponentManagers;
+		std::map<EntityID, ComponentFlags>                     m_EntityComponentFlags;
+		std::vector<std::unique_ptr<System>>                   m_Systems;
 	};
 }

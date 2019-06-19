@@ -9,12 +9,14 @@
 #include <fstream>
 #include <string>
 #include <memory>
+#include <stdint.h>
 #include <utility>
 #include <algorithm>
 #include <functional>
+#include <random>
+#include <limits>
 //Used only for printing debug timings to console, can be removed
 #include <iomanip>
-#include <random>
 
 #include <bitset>
 #include <array>

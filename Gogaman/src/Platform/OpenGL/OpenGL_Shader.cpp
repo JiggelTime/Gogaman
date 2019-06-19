@@ -5,20 +5,18 @@
 
 namespace Gogaman
 {
-	OpenGL_Shader::OpenGL_Shader()
-	{}
-
-	OpenGL_Shader::~OpenGL_Shader()
+	Shader::Shader()
 	{
-		glDeleteProgram(m_ID);
+		m_RendererID = glCreateProgram();
+		GM_LOG_CORE_TRACE("Created shader with ID: %d", m_RendererID);
 	}
 
-	Shader *Shader::Create()
+	Shader::~Shader()
 	{
-		return new OpenGL_Shader;
+		glDeleteProgram(m_RendererID);
 	}
 
-	void OpenGL_Shader::Compile(const std::string &vertexShaderSource, const std::string &fragmentShaderSource, const std::string &geometryShaderSource)
+	void Shader::Compile(const std::string &vertexShaderSource, const std::string &fragmentShaderSource, const std::string &geometryShaderSource)
 	{
 		bool geometryShaderPresent = (geometryShaderSource.empty()) ? false : true;
 
@@ -29,14 +27,14 @@ namespace Gogaman
 		const char *vertexShaderSourceData = vertexShaderSource.c_str();
 		glShaderSource(vertexShader, 1, &vertexShaderSourceData, nullptr);
 		glCompileShader(vertexShader);
-		CheckCompileErrors(vertexShader, "vertex shader");
+		ValidateShader(vertexShader, "vertex shader");
 
 		//Compile fragment shader
 		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 		const char *fragmentShaderSourceData = fragmentShaderSource.c_str();
 		glShaderSource(fragmentShader, 1, &fragmentShaderSourceData, nullptr);
 		glCompileShader(fragmentShader);
-		CheckCompileErrors(fragmentShader, "fragment shader");
+		ValidateShader(fragmentShader, "fragment shader");
 
 		//Compile geometry shader if present
 		if(geometryShaderPresent)
@@ -45,31 +43,30 @@ namespace Gogaman
 			const char *geometryShaderSourceData = geometryShaderSource.c_str();
 			glShaderSource(geometryShader, 1, &geometryShaderSourceData, nullptr);
 			glCompileShader(geometryShader);
-			CheckCompileErrors(geometryShader, "geometry shader");
+			ValidateShader(geometryShader, "geometry shader");
 		}
 		
 		//Compile shader program
-		m_ID = glCreateProgram();
-		glAttachShader(m_ID, vertexShader);
-		glAttachShader(m_ID, fragmentShader);
+		glAttachShader(m_RendererID, vertexShader);
+		glAttachShader(m_RendererID, fragmentShader);
 		if(geometryShaderPresent)
-			glAttachShader(m_ID, geometryShader);
-		glLinkProgram(m_ID);
-		CheckCompileErrors(m_ID, "shader program");
+			glAttachShader(m_RendererID, geometryShader);
+		glLinkProgram(m_RendererID);
+		ValidateShader(m_RendererID, "shader program");
 
-		glDetachShader(m_ID, vertexShader);
-		glDetachShader(m_ID, fragmentShader);
+		glDetachShader(m_RendererID, vertexShader);
+		glDetachShader(m_RendererID, fragmentShader);
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
 		
 		if(geometryShaderPresent)
 		{
-			glDetachShader(m_ID, geometryShader);
+			glDetachShader(m_RendererID, geometryShader);
 			glDeleteShader(geometryShader);
 		}
 	}
 
-	void OpenGL_Shader::Compile(const std::string &computeShaderSource)
+	void Shader::Compile(const std::string &computeShaderSource)
 	{
 		GLuint computeShader;
 
@@ -78,19 +75,20 @@ namespace Gogaman
 		const char *computeShaderSourceData = computeShaderSource.c_str();
 		glShaderSource(computeShader, 1, &computeShaderSourceData, nullptr);
 		glCompileShader(computeShader);
-		CheckCompileErrors(computeShader, "compute shader");
+		ValidateShader(computeShader, "compute shader");
 
 		//Compile shader program
-		m_ID = glCreateProgram();
-		glAttachShader(m_ID, computeShader);
-		glLinkProgram(m_ID);
-		CheckCompileErrors(m_ID, "shader program");
+		m_RendererID = glCreateProgram();
+		glAttachShader(m_RendererID, computeShader);
+		glLinkProgram(m_RendererID);
+		ValidateShader(m_RendererID, "shader program");
 
-		glDetachShader(m_ID, computeShader);
+		glDetachShader(m_RendererID, computeShader);
 		glDeleteShader(computeShader);
 	}
 
-	void OpenGL_Shader::CheckCompileErrors(const GLuint object, const std::string &type)
+	//TODO: call this function in assertions (GM_ASSERT) to avoid checking errors in release
+	void Shader::ValidateShader(const uint32_t object, const std::string &type)
 	{
 		int success;
 		if(type != "shader program")
@@ -100,10 +98,9 @@ namespace Gogaman
 			{
 				GLint logSize = 0;
 				glGetShaderiv(object, GL_INFO_LOG_LENGTH, &logSize);
-				GLchar* infoLog = new GLchar[logSize];
+				GLchar *infoLog = new GLchar[logSize];
 				glGetShaderInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Failed to compile %s", type);
-				GM_LOG_CORE_ERROR("%s", infoLog);
+				GM_LOG_CORE_ERROR("Failed to compile %s | Error: %s", type, infoLog);
 			}
 		}
 		else
@@ -113,10 +110,9 @@ namespace Gogaman
 			{
 				GLint logSize = 0;
 				glGetProgramiv(object, GL_INFO_LOG_LENGTH, &logSize);
-				GLchar* infoLog = new GLchar[logSize];
+				GLchar *infoLog = new GLchar[logSize];
 				glGetProgramInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Failed to link %s", type);
-				GM_LOG_CORE_ERROR("%s", infoLog);
+				GM_LOG_CORE_ERROR("Failed to link %s | Error: %s", type, infoLog);
 			}
 		}
 	}

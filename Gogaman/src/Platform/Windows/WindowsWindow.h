@@ -13,12 +13,12 @@ namespace Gogaman
 		WindowsWindow(const char *title, const int width, const int height);
 		~WindowsWindow();
 
-		virtual void Update() override;
+		virtual void  Update() override;
 
 		virtual void *GetNativeWindow() const override { return m_Window; }
 
-		virtual void EnableVerticalSync()  override;
-		virtual void DisableVerticalSync() override;
+		virtual void  EnableVerticalSync()  override;
+		virtual void  DisableVerticalSync() override;
 	private:
 		static void GLFW_ErrorCallback(const int error, const char *description);
 	private:

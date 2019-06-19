@@ -26,8 +26,8 @@ namespace Gogaman
 			: KeyboardEvent(scancode), m_RepeatCount(repeatCount)
 		{}
 
-		static inline  EventType GetTypeStatic() { return KeyPress; }
-		inline virtual EventType GetType() const override { return GetTypeStatic(); }
+		static constexpr EventType GetTypeStatic() { return KeyPress; }
+		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
 		inline int GetRepeatCount() const { return m_RepeatCount; }
 	private:
@@ -41,7 +41,7 @@ namespace Gogaman
 			: KeyboardEvent(scancode)
 		{}
 
-		static inline  EventType GetTypeStatic() { return KeyRelease; }
-		inline virtual EventType GetType() const override { return GetTypeStatic(); }
+		static constexpr EventType GetTypeStatic() { return KeyRelease; }
+		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 	};
 }

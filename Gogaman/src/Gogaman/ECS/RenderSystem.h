@@ -1,20 +1,24 @@
 #pragma once
 
 #include "System.h"
+#include "SpatialComponent.h"
 #include "RenderableComponent.h"
 
-//OLD RENDERER INCLUDES
 #include "Gogaman/Base.h"
 #include "Gogaman/Config.h"
 //#include "Gogaman/Events/EventListener.h"
 //#include "Gogaman/Events/WindowEvent.h"
 //#include "Gogaman/Events/KeyboardEvent.h"
 //#include "Gogaman/Events/MouseEvent.h"
+
 #include "Gogaman/Graphics/Camera.h"
-#include "Platform/OpenGL/Texture2D.h"
-#include "Platform/OpenGL/Texture3D.h"
-#include "Platform/OpenGL/Renderbuffer.h"
-#include "Platform/OpenGL/Framebuffer.h"
+#include "Gogaman/Graphics/Shader.h"
+#include "Gogaman/Graphics/ShaderManager.h"
+#include "Gogaman/Graphics/Texture2D.h"
+#include "Platform/OpenGL/OpenGL_Renderbuffer.h"
+#include "Gogaman/Graphics/RenderSurface.h"
+
+#include "Gogaman/Graphics/TestCube.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -33,14 +37,34 @@ namespace Gogaman
 		RenderSystem();
 
 		virtual void Initialize() override;
-
-		//virtual void Update()     override;
+		virtual void Update()     override;
 		virtual void Render()     override;
+		virtual void Shutdown()   override;
 
-		GM_SET_SYSTEM_COMPONENTS(RenderableComponent)
+		static inline ComponentFlags GetComponentFlagsStatic()
+		{
+			ComponentFlags componentFlags;
+			GM_SET_SYSTEM_COMPONENT_FLAG(SpatialComponent)
+			GM_SET_SYSTEM_COMPONENT_FLAG(RenderableComponent)
+			return componentFlags;
+		}
+
+		inline virtual ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
 	private:
-		void InitializeFramebuffers();
+		void InitializeRenderSurfaces();
+
 		void RenderFullscreenQuad() const;
+	private:
+		std::unique_ptr<ShaderManager> m_ShaderManager;
+		ShaderID m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
+
+		std::unique_ptr<RenderSurface> m_BRDF_Buffer;
+		std::unique_ptr<Texture2D>     m_BRDF_LUT;
+		std::unique_ptr<Renderbuffer>  m_BRDF_Depth;
+		std::unique_ptr<RenderSurface> m_G_Buffer;
+		std::unique_ptr<RenderSurface> m_FinalBuffer;
+
+		std::unique_ptr<TestCube>      m_TestCube;
 	private:
 		//OLD RENDERER PRIVATE VARIABLES
 		//Camera
@@ -55,16 +79,15 @@ namespace Gogaman
 
 		//Window
 		//GLFWwindow *m_Window;
-		const unsigned int renderResWidth  = GM_CONFIG.screenWidth  * GM_CONFIG.resScale;
-		const unsigned int renderResHeight = GM_CONFIG.screenHeight * GM_CONFIG.resScale;
+		int m_RenderResolutionWidth;
+		int m_RenderResolutionHeight;
 
 		//Timing
 		float deltaTime = 0.0f, lastFrame = 0.0f;
-		unsigned int frameCounter = 0;
+		uint32_t frameCounter = 0;
 
 		std::unordered_map<std::string, Texture2D>    m_Texture2Ds;
 		std::unordered_map<std::string, Renderbuffer> m_Renderbuffers;
-		std::unordered_map<std::string, Framebuffer>  m_Framebuffers;
 
 		//Fullscreen quad
 		float quadVertices[20]{ -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f };

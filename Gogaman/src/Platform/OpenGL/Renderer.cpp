@@ -825,16 +825,16 @@ namespace Gogaman
 		//GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
 		//GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
 		//GM_SHADER(directPBRShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
-		GM_SHADER(directPBRShader).SetUniformInt("numLights", pointLights.size());
-		GM_SHADER(directPBRShader).SetUniformVec3("cameraPos", camera.Position);
-		GM_SHADER(directPBRShader).SetUniformFloat("voxelGridSize", GM_CONFIG.voxelGridSize);
+		GM_SHADER(directPBRShader).SetUniformInt("numLights",              pointLights.size());
+		GM_SHADER(directPBRShader).SetUniformVec3("cameraPos",             camera.Position);
+		GM_SHADER(directPBRShader).SetUniformFloat("voxelGridSize",        GM_CONFIG.voxelGridSize);
 		GM_SHADER(directPBRShader).SetUniformFloat("voxelGridSizeInverse", 1.0f / GM_CONFIG.voxelGridSize);
-		GM_SHADER(directPBRShader).SetUniformFloat("voxelWorldSize", GM_CONFIG.voxelGridSize / GM_CONFIG.voxelResolution);
-		GM_SHADER(directPBRShader).SetUniformVec3("voxelGridPos", GM_CONFIG.voxelGridPos);
+		GM_SHADER(directPBRShader).SetUniformFloat("voxelWorldSize",       GM_CONFIG.voxelGridSize / GM_CONFIG.voxelResolution);
+		GM_SHADER(directPBRShader).SetUniformVec3("voxelGridPos",          GM_CONFIG.voxelGridPos);
 
-		GM_SHADER(directPBRShader).SetUniformInt("renderMode", GM_CONFIG.renderMode);
-		GM_SHADER(directPBRShader).SetUniformBool("debug", GM_CONFIG.debug);
-		GM_SHADER(directPBRShader).SetUniformBool("debug2", GM_CONFIG.debug2);
+		GM_SHADER(directPBRShader).SetUniformInt("renderMode",             GM_CONFIG.renderMode);
+		GM_SHADER(directPBRShader).SetUniformBool("debug",                 GM_CONFIG.debug);
+		GM_SHADER(directPBRShader).SetUniformBool("debug2",                GM_CONFIG.debug2);
 
 		m_Texture2Ds["gPositionMetalness"].BindTexture(0);
 		m_Texture2Ds["gNormal"].BindTexture(1);
@@ -1211,148 +1211,6 @@ namespace Gogaman
 
 	void Renderer::PollInput(GLFWwindow *window)
 	{
-		//Close window
-		if(Input::IsKeyPressed(GM_KEY_ESCAPE))
-			glfwSetWindowShouldClose(window, true);
-
-		//Movement
-		if(Input::IsKeyPressed(GM_KEY_W))
-			camera.ProcessKeyboardInput(FORWARD,  deltaTime);
-		if(Input::IsKeyPressed(GM_KEY_S))
-			camera.ProcessKeyboardInput(BACKWARD, deltaTime);
-		if(Input::IsKeyPressed(GM_KEY_A))
-			camera.ProcessKeyboardInput(LEFT,     deltaTime);
-		if(Input::IsKeyPressed(GM_KEY_D))
-			camera.ProcessKeyboardInput(RIGHT,    deltaTime);
 		
-		//Toggle depth of field
-		if(Input::IsKeyPressed(GM_KEY_U) && !GM_CONFIG.dof)
-		{
-			GM_CONFIG.dof = !GM_CONFIG.dof;
-			GM_CONFIG.dofKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_U) == GLFW_RELEASE)
-		{
-			GM_CONFIG.dofKeyPressed = false;
-		}
-
-		//Enable/disable bloom
-		if(Input::IsKeyPressed(GM_KEY_B) && !GM_CONFIG.bloomKeyPressed)
-		{
-			GM_CONFIG.bloom = !GM_CONFIG.bloom;
-			GM_CONFIG.bloomKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_B) == GLFW_RELEASE)
-		{
-			GM_CONFIG.bloomKeyPressed = false;
-		}
-
-		//Enable/disable debug mode
-		if(Input::IsKeyPressed(GM_KEY_G) && !GM_CONFIG.debugKeyPressed)
-		{
-			GM_CONFIG.debug = !GM_CONFIG.debug;
-			GM_CONFIG.debugKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_G) == GLFW_RELEASE)
-		{
-			GM_CONFIG.debugKeyPressed = false;
-		}
-
-		//Enable/disable debug mode 2
-		if(glfwGetKey(window, GM_KEY_H) == GLFW_PRESS && !GM_CONFIG.debug2KeyPressed)
-		{
-			GM_CONFIG.debug2 = !GM_CONFIG.debug2;
-			GM_CONFIG.debug2KeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_H) == GLFW_RELEASE)
-		{
-			GM_CONFIG.debug2KeyPressed = false;
-		}
-
-		//Toggle spatio-temporal indirect lighting upscaling
-		if(glfwGetKey(window, GM_KEY_Y) == GLFW_PRESS && !GM_CONFIG.giUpscalingKeyPressed)
-		{
-			GM_CONFIG.giUpscaling = !GM_CONFIG.giUpscaling;
-			GM_CONFIG.giUpscalingKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_Y) == GLFW_RELEASE)
-		{
-			GM_CONFIG.giUpscalingKeyPressed = false;
-		}
-
-		//Toggle automatic revoxelization
-		if(glfwGetKey(window, GM_KEY_R) == GLFW_PRESS && !GM_CONFIG.autoVoxelizeKeyPressed)
-		{
-			GM_CONFIG.autoVoxelize = !GM_CONFIG.autoVoxelize;
-			GM_CONFIG.autoVoxelizeKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_R) == GLFW_RELEASE)
-		{
-			GM_CONFIG.autoVoxelizeKeyPressed = false;
-		}
-
-		//Enable/disable normal mapping
-		if(glfwGetKey(window, GM_KEY_N) == GLFW_PRESS && !GM_CONFIG.normalMappingKeyPressed)
-		{
-			GM_CONFIG.normalMapping = !GM_CONFIG.normalMapping;
-			GM_CONFIG.normalMappingKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_N) == GLFW_RELEASE)
-		{
-			GM_CONFIG.normalMappingKeyPressed = false;
-		}
-
-		//Adjust exposure
-		if(glfwGetKey(window, GM_KEY_Q) == GLFW_PRESS)
-		{
-			if(exposure > 0.01f)
-				exposure -= 0.01f;
-			else
-				exposure = 0.0f;
-		}
-		else if(glfwGetKey(window, GM_KEY_E) == GLFW_PRESS)
-		{
-			exposure += 0.01f;
-		}
-
-		//Enable/disable wireframe rendering
-		if(glfwGetKey(window, GM_KEY_Z) == GLFW_PRESS && !GM_CONFIG.wireframeKeyPressed)
-		{
-			GM_CONFIG.wireframe = !GM_CONFIG.wireframe;
-			GM_CONFIG.wireframeKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_Z) == GLFW_RELEASE)
-			GM_CONFIG.wireframeKeyPressed = false;
-
-		//Enable/disable temporal anti-aliasing
-		if(glfwGetKey(window, GM_KEY_T) == GLFW_PRESS && !GM_CONFIG.taaKeyPressed)
-		{
-			GM_CONFIG.taa = !GM_CONFIG.taa;
-			GM_CONFIG.taaKeyPressed = true;
-		}
-		if(glfwGetKey(window, GM_KEY_T) == GLFW_RELEASE)
-		{
-			GM_CONFIG.taaKeyPressed = false;
-		}
-
-		//Set render mode
-		if(Input::IsKeyPressed(GM_KEY_0))
-			GM_CONFIG.renderMode = 0;
-		if(Input::IsKeyPressed(GM_KEY_1))
-			GM_CONFIG.renderMode = 1;
-		if(Input::IsKeyPressed(GM_KEY_2))
-			GM_CONFIG.renderMode = 2;
-		if(Input::IsKeyPressed(GM_KEY_3))
-			GM_CONFIG.renderMode = 3;
-		if(Input::IsKeyPressed(GM_KEY_4))
-			GM_CONFIG.renderMode = 4;
-		if(Input::IsKeyPressed(GM_KEY_5))
-			GM_CONFIG.renderMode = 5;
-		if(Input::IsKeyPressed(GM_KEY_6))
-			GM_CONFIG.renderMode = 6;
-		if(Input::IsKeyPressed(GM_KEY_7))
-			GM_CONFIG.renderMode = 7;
-		if(Input::IsKeyPressed(GM_KEY_8))
-			GM_CONFIG.renderMode = 8;
 	}
 }
