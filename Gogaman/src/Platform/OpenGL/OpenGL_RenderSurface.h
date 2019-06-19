@@ -52,7 +52,7 @@ namespace Gogaman
 		
 		static inline void BindBackBuffer() { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
-		static inline void ClearBackBuffer();
+		static void ClearBackBuffer();
 	private:
 		void ValidateRenderSurface() const;
 	private:

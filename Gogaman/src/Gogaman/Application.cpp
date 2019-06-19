@@ -32,27 +32,28 @@ namespace Gogaman
 		GetWorld().AddSystem(std::make_unique<RenderSystem>());
 		GetWorld().Initialize();
 
-		GetWindow().DisableVerticalSync();
-		/*
-		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/testScene.flex"));
+		GetWindow().EnableVerticalSync();
+		//GetWindow().DisableVerticalSync();
+		
+		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/cube.flex"));
 		for(auto &i : data.meshes)
 		{
-			Entity gogaEntity = GetWorld().CreateEntity();
+			Entity testEntity = GetWorld().CreateEntity();
 
 			SpatialComponent testSpatialComponent;
 			testSpatialComponent.position      = glm::vec3(0.0f);
 			testSpatialComponent.scale         = glm::vec3(1.0f);
 			testSpatialComponent.rotation      = glm::vec3(0.0f);
 			testSpatialComponent.rotationAngle = 0.0f;
-			GetWorld().AddComponent(gogaEntity.identifier, std::move(testSpatialComponent));
+			GetWorld().AddComponent(testEntity.identifier, std::move(testSpatialComponent));
 
 			RenderableComponent testRenderableComponent;
 			testRenderableComponent.data = i;
 			testRenderableComponent.material.albedo = glm::vec3(0.0f, 0.9f, 0.1f);
 			testRenderableComponent.material.roughness = 0.2f;
-			GetWorld().AddComponent(gogaEntity.identifier, std::move(testRenderableComponent));
+			GetWorld().AddComponent(testEntity.identifier, std::move(testRenderableComponent));
 		}
-		*/
+		
 		while(m_IsRunning)
 		{
 			GetWorld().Update();

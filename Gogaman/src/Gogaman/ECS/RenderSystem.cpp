@@ -6,6 +6,8 @@
 #include "Gogaman/Application.h"
 #include "Gogaman/Input.h"
 
+#include "Gogaman/Graphics/VertexBuffer.h"
+#include "Gogaman/Graphics/IndexBuffer.h"
 #include "Gogaman/Graphics/Lights/Pointlight.h"
 
 namespace Gogaman
@@ -37,6 +39,7 @@ namespace Gogaman
 		glEnable(GL_TEXTURE_3D);
 		glDisable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glDisable(GL_CULL_FACE);
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 
@@ -80,19 +83,15 @@ namespace Gogaman
 		//Precomputed BRDF
 		m_BRDF_Buffer = std::make_unique<RenderSurface>();
 
-		m_BRDF_LUT = std::make_unique<Texture2D>();
-		m_BRDF_LUT->internalFormat    = TextureInternalFormat::XY16F;
-		m_BRDF_LUT->format            = TextureFormat::XY;
-		//m_BRDF_LUT->internalFormat = TextureInternalFormat::XYZW16F;
-		//m_BRDF_LUT->format = TextureFormat::XYZW;
-		m_BRDF_LUT->interpolationMode = TextureInterpolationMode::Bilinear;
-		m_BRDF_LUT->Generate(512, 512);
-		m_BRDF_Buffer->AttachColorBuffer(*m_BRDF_LUT.get());
+		m_BRDF_LUT.internalFormat    = TextureInternalFormat::XY16F;
+		m_BRDF_LUT.format            = TextureFormat::XY;
+		m_BRDF_LUT.interpolationMode = TextureInterpolationMode::Bilinear;
+		m_BRDF_LUT.Generate(m_BRDF_LUT_Width, m_BRDF_LUT_Height);
+		m_BRDF_Buffer->AttachColorBuffer(m_BRDF_LUT);
 
-		m_BRDF_Depth = std::make_unique<Renderbuffer>();
-		m_BRDF_Depth->internalFormat = TextureInternalFormat::Depth16;
-		m_BRDF_Depth->Generate(512, 512);
-		m_BRDF_Buffer->AttachDepthBuffer(*m_BRDF_Depth.get());
+		m_BRDF_Depth.internalFormat = TextureInternalFormat::Depth16;
+		m_BRDF_Depth.Generate(m_BRDF_LUT_Width, m_BRDF_LUT_Height);
+		m_BRDF_Buffer->AttachDepthBuffer(m_BRDF_Depth);
 		
 		//G-Buffer
 		m_G_Buffer = std::make_unique<RenderSurface>();
@@ -310,10 +309,10 @@ namespace Gogaman
 		std::vector<PointLight> pointLights;
 			//Pointlight 0
 			Gogaman::PointLight pointLight0;
-			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()), 1.2f, cos(glfwGetTime())));
-			pointLights.push_back(pointLight0);
+			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()), 3.2f, cos(glfwGetTime())));
 			//Luminous intensity (candela)
-			pointLight0.SetColor(glm::vec3(2.0f, 2.0f, 2.0f));
+			pointLight0.SetColor(glm::vec3(5.0f, 5.0f, 5.0f));
+			pointLights.push_back(pointLight0);
 
 		//Update camera matrices
 		previousViewProjectionMatrix = viewProjectionMatrix;
@@ -332,8 +331,7 @@ namespace Gogaman
 		//glEnable(GL_DEPTH_TEST);
 		glViewport(0, 0, m_RenderResolutionWidth, m_RenderResolutionHeight);
 		m_G_Buffer->Bind();
-		//m_G_Buffer->Clear();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_G_Buffer->Clear();
 
 		m_ShaderManager->Get(m_GBufferShader).Bind();
 		m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("VP",                     viewProjectionMatrix);
@@ -341,18 +339,15 @@ namespace Gogaman
 		m_ShaderManager->Get(m_GBufferShader).SetUniformVec2("temporalJitter",         glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).SetUniformVec2("previousTemporalJitter", glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).SetUniformBool("normalMapping",          GM_CONFIG.normalMapping);
-		/*
+
 		for(auto i : m_Entities)
 		{
 			SpatialComponent    *spatialComponent    = m_World->GetComponent<SpatialComponent>(i);
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
 			glm::mat4 modelMatrix;
-			//Translation
 			//modelMatrix = glm::translate(modelMatrix, spatialComponent->position);
-			//Rotation
 			//modelMatrix = glm::rotate(modelMatrix, spatialComponent->rotationAngle, spatialComponent->rotation);
-			//Scale
 			//modelMatrix = glm::scale(modelMatrix, spatialComponent->scale);
 
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         modelMatrix);
@@ -361,39 +356,30 @@ namespace Gogaman
 
 			renderableComponent->material.SetShaderUniforms(m_ShaderManager->Get(m_GBufferShader));
 
-			GLuint VBO, EBO, VAO;
-			glGenVertexArrays(1, &VAO);
-			glGenBuffers(1, &VBO);
-			glGenBuffers(1, &EBO);
+			GLuint       entityVAO;
+			VertexBuffer entityVBO;
+			IndexBuffer  entityIBO;
+			glGenVertexArrays(1, &entityVAO);
+			glBindVertexArray(entityVAO);
 
-			glBindVertexArray(VAO);
-			glBindBuffer(GL_ARRAY_BUFFER, VBO);
-			glBufferData(GL_ARRAY_BUFFER, renderableComponent->data.vertexBufferData.size() * sizeof(FlexData::FlexVertexData), &renderableComponent->data.vertexBufferData[0], GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, entityVBO.GetRendererID());
+			entityVBO.UploadData(sizeof(float) * renderableComponent->data.vertexBufferData.size(), renderableComponent->data.vertexBufferData.data());
 
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-			glBufferData(GL_ELEMENT_ARRAY_BUFFER, renderableComponent->data.indexBufferData.size() * sizeof(uint16_t), &renderableComponent->data.indexBufferData[0], GL_STATIC_DRAW);
-			//Vertex position
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, entityIBO.GetRendererID());
+			entityIBO.UploadData(sizeof(uint16_t) * renderableComponent->data.indexBufferData.size(), renderableComponent->data.indexBufferData.data());
+
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(FlexData::FlexVertexData), (void *)0);
-			//Vertex UV
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(FlexData::FlexVertexData), (void *)offsetof(FlexData::FlexVertexData, uv));
-			//Vertex normal
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(FlexData::FlexVertexData), (void *)offsetof(FlexData::FlexVertexData, normal));
-			//Vertex tangent
-			glEnableVertexAttribArray(3);
-			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(FlexData::FlexVertexData), (void *)offsetof(FlexData::FlexVertexData, tangent));
 
-			glDrawElements(GL_TRIANGLES, renderableComponent->data.indexBufferData.size(), GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, renderableComponent->data.indexBufferData.size(), GL_UNSIGNED_SHORT, 0);
 
-			glDeleteBuffers(1,      &VBO);
-			glDeleteBuffers(1,      &EBO);
-			glDeleteVertexArrays(1, &VAO);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindVertexArray(0);
+
+			glDeleteVertexArrays(1, &entityVAO);
 
 			//GM_LOG_CORE_INFO("[RenderSystem] Rendering %d vertices and %d indices", renderableComponent->data.vertexBufferData.size(), renderableComponent->data.indexBufferData.size());
 		}
-		*/
 		
 		glDisable(GL_DEPTH_TEST);
 
@@ -405,8 +391,7 @@ namespace Gogaman
 
 	//Deferred shading
 		m_FinalBuffer->Bind();
-		//m_FinalBuffer->Clear();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		m_FinalBuffer->Clear();
 
 		m_ShaderManager->Get(m_DeferredLightingShader).Bind();
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].position",      pointLight0.GetPosition());
@@ -428,14 +413,15 @@ namespace Gogaman
 		m_Texture2Ds["gPositionMetalness"].Bind(0);
 		m_Texture2Ds["gNormal"].Bind(1);
 		m_Texture2Ds["gAlbedoEmissivityRoughness"].Bind(2);
-		m_Texture2Ds["BRDF_LUT"].Bind(3);
+		m_BRDF_LUT.Bind(3);
 
 		RenderFullscreenQuad();
-		
-		//Copy gBuffer depth to HDR FBO
-		m_FinalBuffer->BlitDepthBuffer(*m_G_Buffer.get(), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
-		m_FinalBuffer->Bind();
 		/*
+		//Copy gBuffer depth to HDR FBO
+		//m_FinalBuffer->BlitDepthBuffer(*m_G_Buffer.get(), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
+		//m_FinalBuffer->Bind();
+
+		
 		//Forward rendering
 		//glEnable(GL_DEPTH_TEST);
 
@@ -469,8 +455,7 @@ namespace Gogaman
 		//Post-process (tonemapping, exposure, film grain, gamma correction)
 		glViewport(0, 0, GM_CONFIG.screenWidth, GM_CONFIG.screenHeight);
 		RenderSurface::BindBackBuffer();
-		//RenderSurface::ClearBackBuffer();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		RenderSurface::ClearBackBuffer();
 
 		m_ShaderManager->Get(m_PostprocessShader).Bind();
 		m_ShaderManager->Get(m_PostprocessShader).SetUniformFloat("exposureBias", exposure);
@@ -480,16 +465,6 @@ namespace Gogaman
 
 		RenderFullscreenQuad();
 
-		if(GM_CONFIG.debug)
-		{
-			m_ShaderManager->Get(m_LightShader).Bind();
-			m_ShaderManager->Get(m_LightShader).SetUniformMat4("projection", projectionMatrix);
-			m_ShaderManager->Get(m_LightShader).SetUniformMat4("view",       viewMatrix);
-			m_ShaderManager->Get(m_LightShader).SetUniformMat4("M",          glm::mat4());
-			m_ShaderManager->Get(m_LightShader).SetUniformVec3("lightColor", glm::vec3(0.0f, 0.1f, 0.8f));
-			m_TestCube->Render();
-		}
-
 		if(firstIteration == true)
 			firstIteration = false;
 	}
@@ -498,7 +473,6 @@ namespace Gogaman
 	{
 		glBindVertexArray(quadVAO);
 		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
 	}
 
 	void RenderSystem::Shutdown()

@@ -63,7 +63,7 @@ namespace Gogaman
 
 	void RenderSurface::Bind() const
 	{
-		//ValidateRenderSurface();
+		ValidateRenderSurface();
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 	}
 
@@ -102,7 +102,6 @@ namespace Gogaman
 
 	void RenderSurface::ValidateRenderSurface() const
 	{
-		GLuint status = glCheckNamedFramebufferStatus(m_RendererID, GL_FRAMEBUFFER);
-		GM_ASSERT(status == GL_FRAMEBUFFER_COMPLETE, "Incomplete render surface | Render surface status: %d", status)
+		GM_ASSERT(glCheckNamedFramebufferStatus(m_RendererID, GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE, "Incomplete render surface | Render surface status: %d", glCheckNamedFramebufferStatus(m_RendererID, GL_FRAMEBUFFER))
 	}
 }

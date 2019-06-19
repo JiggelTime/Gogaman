@@ -9,7 +9,10 @@
 namespace Gogaman
 {
 	Texture3D::Texture3D()
-	{}
+	{
+		glCreateTextures(GL_TEXTURE_3D, 1, &m_RendererID);
+		GM_LOG_CORE_TRACE("Created texture with ID: %d", m_RendererID);
+	}
 
 	Texture3D::~Texture3D()
 	{}

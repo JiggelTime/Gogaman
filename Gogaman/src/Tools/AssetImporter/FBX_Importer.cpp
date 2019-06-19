@@ -212,8 +212,8 @@ int main(int argc, char *argv[])
 
 	//const char *importFilepath = argv[1];
 	//const char *exportFilepath = argv[2];
-	const char *importFilepath = "D:/dev/testScene.fbx";
-	const char *exportFilepath = "D:/dev/testScene.flex";
+	const char *importFilepath = "D:/dev/cube.fbx";
+	const char *exportFilepath = "D:/dev/cube.flex";
 
 	FlexData::FlexData testFlexData;
 	//Import FBX file
@@ -234,7 +234,7 @@ int main(int argc, char *argv[])
 	FlexData::ExportFlexData(exportFilepath, testFlexData);
 
 	//Import FlexData
-	/*
+	
 	testFlexData = FlexData::ImportFlexData(exportFilepath);
 	std::cout << "[FlexData Importer] Number of meshes: " << testFlexData.meshes.size() << std::endl;
 	for(auto i : testFlexData.meshes)
@@ -261,6 +261,6 @@ int main(int argc, char *argv[])
 		for(auto j : i.indexBufferData)
 			std::cout << "Index: " << j << std::endl;
 	}
-	*/
+	
 	return 0;
 }

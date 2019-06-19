@@ -24,7 +24,7 @@ namespace Gogaman
 			return *this;
 		}
 
-		inline void UploadData(const uint32_t size, const void *vertices) const { glNamedBufferData(m_RendererID, size, vertices, GL_STATIC_DRAW);  }
+		inline void UploadData(const uint32_t size, const void *vertices) const { glNamedBufferData(m_RendererID, size, vertices, GL_STATIC_DRAW); }
 
 		inline uint32_t GetRendererID() const { return m_RendererID; }
 	private:

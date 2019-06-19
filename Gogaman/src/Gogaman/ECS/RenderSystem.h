@@ -59,9 +59,11 @@ namespace Gogaman
 		ShaderID m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
 
 		std::unique_ptr<RenderSurface> m_BRDF_Buffer;
-		std::unique_ptr<Texture2D>     m_BRDF_LUT;
-		std::unique_ptr<Renderbuffer>  m_BRDF_Depth;
+		Texture2D                      m_BRDF_LUT;
+		Renderbuffer                   m_BRDF_Depth;
+
 		std::unique_ptr<RenderSurface> m_G_Buffer;
+
 		std::unique_ptr<RenderSurface> m_FinalBuffer;
 
 		std::unique_ptr<TestCube>      m_TestCube;
@@ -81,6 +83,8 @@ namespace Gogaman
 		//GLFWwindow *m_Window;
 		int m_RenderResolutionWidth;
 		int m_RenderResolutionHeight;
+		const int m_BRDF_LUT_Width  = 512;
+		const int m_BRDF_LUT_Height = 512;
 
 		//Timing
 		float deltaTime = 0.0f, lastFrame = 0.0f;

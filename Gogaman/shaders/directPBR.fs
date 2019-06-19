@@ -217,6 +217,7 @@ vec3 ComputePointLight(PointLight light)
 	#endif
 
 	float Vis = TraceShadowCone(Wi, light.coneAperture, Ld);
+	Vis = 1.0f;
 
 	//Ensure energy conservation (Fr is already multiplied by F)
 	vec3 Kd = (1.0f - F) * (1.0f - metalness);
