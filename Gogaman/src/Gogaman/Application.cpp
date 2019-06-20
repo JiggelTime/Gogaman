@@ -35,7 +35,7 @@ namespace Gogaman
 		GetWindow().EnableVerticalSync();
 		//GetWindow().DisableVerticalSync();
 		
-		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/cube.flex"));
+		FlexData::FlexData data = std::move(FlexData::ImportFlexData("D:/dev/testScene.flex"));
 		for(auto &i : data.meshes)
 		{
 			Entity testEntity = GetWorld().CreateEntity();
@@ -49,8 +49,8 @@ namespace Gogaman
 
 			RenderableComponent testRenderableComponent;
 			testRenderableComponent.data = i;
-			testRenderableComponent.material.albedo = glm::vec3(0.0f, 0.9f, 0.1f);
-			testRenderableComponent.material.roughness = 0.2f;
+			testRenderableComponent.material.albedo = glm::vec3(0.8f, 0.8f, 0.8f);
+			testRenderableComponent.material.roughness = 0.8f;
 			GetWorld().AddComponent(testEntity.identifier, std::move(testRenderableComponent));
 		}
 		

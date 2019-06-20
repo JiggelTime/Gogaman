@@ -55,6 +55,10 @@ namespace Gogaman
 			if(scene->GetGlobalSettings().GetSystemUnit() != FbxSystemUnit::m)
 				FbxSystemUnit::m.ConvertScene(scene);
 			
+			//Convert scene axis system to MayaYUp
+			if(scene->GetGlobalSettings().GetAxisSystem() != FbxAxisSystem::MayaYUp)
+				FbxAxisSystem::MayaYUp.ConvertScene(scene);
+
 			//Triangulate scene geometry
 			FbxGeometryConverter geometryConverter(m_SDK_Manager);
 			geometryConverter.Triangulate(scene, true);
@@ -212,8 +216,8 @@ int main(int argc, char *argv[])
 
 	//const char *importFilepath = argv[1];
 	//const char *exportFilepath = argv[2];
-	const char *importFilepath = "D:/dev/cube.fbx";
-	const char *exportFilepath = "D:/dev/cube.flex";
+	const char *importFilepath = "D:/dev/testScene.fbx";
+	const char *exportFilepath = "D:/dev/testScene.flex";
 
 	FlexData::FlexData testFlexData;
 	//Import FBX file
@@ -232,7 +236,7 @@ int main(int argc, char *argv[])
 
 	//Export FlexData
 	FlexData::ExportFlexData(exportFilepath, testFlexData);
-
+	/*
 	//Import FlexData
 	
 	testFlexData = FlexData::ImportFlexData(exportFilepath);
@@ -260,7 +264,7 @@ int main(int argc, char *argv[])
 
 		for(auto j : i.indexBufferData)
 			std::cout << "Index: " << j << std::endl;
-	}
+	}*/
 	
 	return 0;
 }

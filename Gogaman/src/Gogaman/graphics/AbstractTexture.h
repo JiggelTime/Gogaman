@@ -2,6 +2,9 @@
 
 #include "Gogaman/CRTP.h"
 
+#include "Gogaman/Base.h"
+#include "Gogaman/Logging/Log.h"
+
 namespace Gogaman
 {
 	enum class TextureAccessMode : uint8_t
@@ -16,10 +19,15 @@ namespace Gogaman
 	enum class TextureInternalFormat : uint8_t
 	{
 		None = 0,
+		//Depth
 		              Depth16,          Depth24, Depth32,         Depth32F,
+		//Depth channel and stencil channel
 		                                         Depth24Stencil8,
+		//One channel
 		X8,           X16,     X16F,                              X32F,
+		//Two channels
 		XY8,          XY16,    XY16F,                             XY32F,
+		//Four channels
 		XYZW8, RGBW8, XYZW16,  XYZW16F,                           XYZW32F
 	};
 
@@ -77,6 +85,60 @@ namespace Gogaman
 		inline void BindImage(const int unit, const int level)                                                                                 const { this->GetImplementation().BindImage(unit, level);                             }
 		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode)                                             const { this->GetImplementation().BindImage(unit, level, accessMode);                 }
 		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode, const TextureInternalFormat internalFormat) const { this->GetImplementation().BindImage(unit, level, accessMode, internalFormat); }
+	
+		static constexpr uint8_t GetNumTextureInternalFormatComponents(TextureInternalFormat internalFormat)
+		{
+			switch(internalFormat)
+			{
+				//Depth
+			case TextureFormat::Depth16:
+			case TextureFormat::Depth24:
+			case TextureFormat::Depth32:
+			case TextureFormat::Depth32F:
+				return 1;
+				//Depth channel and stencil channel
+			case TextureFormat::Depth24Stencil8:
+				return 2;
+				//One channel
+			case TextureFormat::X8:
+			case TextureFormat::X16:
+			case TextureFormat::X16F:
+			case TextureFormat::X32F:
+				return 1;
+				//Two channels
+			case TextureFormat::XY8:
+			case TextureFormat::XY16:
+			case TextureFormat::XY16F:
+			case TextureFormat::XY32F:
+				return 2;
+				//Four channels
+			case TextureFormat::XYZW8:
+			case TextureFormat::RGBW8:
+			case TextureFormat::XYZW16:
+			case TextureFormat::XYZW16F:
+			case TextureFormat::XYZW32F:
+				return 4;
+			}
+
+			GM_ASSERT(false, "Failed to get number of texture internal format components: invalid internal format")
+			return 0;
+		}
+
+		static constexpr uint8_t GetNumTextureFormatComponents(TextureFormat format)
+		{
+			switch(format)
+			{
+			case TextureFormat::X:
+				return 1;
+			case TextureFormat::XY:
+				return 2;
+			case TextureFormat::XYZW:
+				return 4;
+			}
+
+			GM_ASSERT(false, "Failed to get number of texture format components: invalid format")
+			return 0;
+		}
 	protected:
 		AbstractTexture()
 			: internalFormat(TextureInternalFormat::XYZW8), format(TextureFormat::XYZW), interpolationMode(TextureInterpolationMode::Point), levels(1)

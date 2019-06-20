@@ -6,10 +6,10 @@
 
 #include "Gogaman/Base.h"
 #include "Gogaman/Config.h"
-//#include "Gogaman/Events/EventListener.h"
-//#include "Gogaman/Events/WindowEvent.h"
-//#include "Gogaman/Events/KeyboardEvent.h"
-//#include "Gogaman/Events/MouseEvent.h"
+#include "Gogaman/Events/EventListener.h"
+#include "Gogaman/Events/WindowEvent.h"
+#include "Gogaman/Events/KeyboardEvent.h"
+#include "Gogaman/Events/MouseEvent.h"
 
 #include "Gogaman/Graphics/Camera.h"
 #include "Gogaman/Graphics/Shader.h"
@@ -31,7 +31,7 @@ namespace Gogaman
 {
 	class World;
 
-	class RenderSystem : public System
+	class RenderSystem : public System, public EventListener
 	{
 	public:
 		RenderSystem();
@@ -40,6 +40,8 @@ namespace Gogaman
 		virtual void Update()     override;
 		virtual void Render()     override;
 		virtual void Shutdown()   override;
+
+		virtual void OnEvent(Event &event) override;
 
 		static inline ComponentFlags GetComponentFlagsStatic()
 		{
@@ -54,6 +56,10 @@ namespace Gogaman
 		void InitializeRenderSurfaces();
 
 		void RenderFullscreenQuad() const;
+
+		bool OnWindowResize(WindowResizeEvent &event);
+		bool OnMouseMove(MouseMoveEvent       &event);
+		bool OnMouseScroll(MouseScrollEvent   &event);
 	private:
 		std::unique_ptr<ShaderManager> m_ShaderManager;
 		ShaderID m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;

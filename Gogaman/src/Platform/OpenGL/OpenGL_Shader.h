@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Gogaman/Graphics/AbstractShader.h"
+
 #include "Gogaman/Config.h"
 
 #include <glad.h>

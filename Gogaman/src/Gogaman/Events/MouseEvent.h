@@ -21,7 +21,7 @@ namespace Gogaman
 			: m_PositionX(positionX), m_PositionY(positionY)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return MouseMove; }
+		static constexpr EventType GetTypeStatic() { return EventType::MouseMove; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
 		inline float GetPositionX() const { return m_PositionX; }
@@ -38,7 +38,7 @@ namespace Gogaman
 			: m_OffsetX(offsetX), m_OffsetY(offsetY)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return MouseScroll; }
+		static constexpr EventType GetTypeStatic() { return EventType::MouseScroll; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
 		inline float GetOffsetX() const { return m_OffsetX; }
@@ -55,7 +55,7 @@ namespace Gogaman
 			: m_Scancode(scancode)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return MouseButtonPress; }
+		static constexpr EventType GetTypeStatic() { return EventType::MouseButtonPress; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
 		inline int GetButton() const { return m_Scancode; }
@@ -70,7 +70,7 @@ namespace Gogaman
 			: m_Scancode(scancode)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return MouseButtonRelease; }
+		static constexpr EventType GetTypeStatic() { return EventType::MouseButtonRelease; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
 		inline int GetButton() const { return m_Scancode; }

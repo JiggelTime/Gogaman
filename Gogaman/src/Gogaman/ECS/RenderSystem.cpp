@@ -6,6 +6,8 @@
 #include "Gogaman/Application.h"
 #include "Gogaman/Input.h"
 
+#include "Gogaman/Events/EventDispatcher.h"
+
 #include "Gogaman/Graphics/VertexBuffer.h"
 #include "Gogaman/Graphics/IndexBuffer.h"
 #include "Gogaman/Graphics/Lights/Pointlight.h"
@@ -33,15 +35,13 @@ namespace Gogaman
 		m_TestCube = std::make_unique<TestCube>();
 
 		//Configure global OpenGL state
-		//Uncomment everything when it works
-		//glEnable(GL_DEPTH_TEST);
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glEnable(GL_TEXTURE_3D);
+		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glDisable(GL_CULL_FACE);
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_BACK);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_BACK);
 
 		//Configure fullscreen quad
 		glGenVertexArrays(1, &quadVAO);
@@ -87,11 +87,7 @@ namespace Gogaman
 		m_BRDF_LUT.format            = TextureFormat::XY;
 		m_BRDF_LUT.interpolationMode = TextureInterpolationMode::Bilinear;
 		m_BRDF_LUT.Generate(m_BRDF_LUT_Width, m_BRDF_LUT_Height);
-		m_BRDF_Buffer->AttachColorBuffer(m_BRDF_LUT);
-
-		m_BRDF_Depth.internalFormat = TextureInternalFormat::Depth16;
-		m_BRDF_Depth.Generate(m_BRDF_LUT_Width, m_BRDF_LUT_Height);
-		m_BRDF_Buffer->AttachDepthBuffer(m_BRDF_Depth);
+		m_BRDF_Buffer->AddColorBuffer(m_BRDF_LUT);
 		
 		//G-Buffer
 		m_G_Buffer = std::make_unique<RenderSurface>();
@@ -100,31 +96,31 @@ namespace Gogaman
 		m_Texture2Ds["gPositionMetalness"].format            = TextureFormat::XYZW;
 		m_Texture2Ds["gPositionMetalness"].interpolationMode = TextureInterpolationMode::Point;
 		m_Texture2Ds["gPositionMetalness"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_G_Buffer->AttachColorBuffer(m_Texture2Ds["gPositionMetalness"]);
+		m_G_Buffer->AddColorBuffer(m_Texture2Ds["gPositionMetalness"]);
 
 		m_Texture2Ds["gNormal"].internalFormat    = TextureInternalFormat::XY16F;
 		m_Texture2Ds["gNormal"].format            = TextureFormat::XY;
 		m_Texture2Ds["gNormal"].interpolationMode = TextureInterpolationMode::Point;
 		m_Texture2Ds["gNormal"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_G_Buffer->AttachColorBuffer(m_Texture2Ds["gNormal"]);
+		m_G_Buffer->AddColorBuffer(m_Texture2Ds["gNormal"]);
 
 		m_Texture2Ds["gAlbedoEmissivityRoughness"].internalFormat    = TextureInternalFormat::XYZW8;
 		m_Texture2Ds["gAlbedoEmissivityRoughness"].format            = TextureFormat::XYZW;
 		m_Texture2Ds["gAlbedoEmissivityRoughness"].interpolationMode = TextureInterpolationMode::Bilinear;
 		m_Texture2Ds["gAlbedoEmissivityRoughness"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_G_Buffer->AttachColorBuffer(m_Texture2Ds["gAlbedoEmissivityRoughness"]);
+		m_G_Buffer->AddColorBuffer(m_Texture2Ds["gAlbedoEmissivityRoughness"]);
 
 		m_Texture2Ds["gVelocity"].internalFormat    = TextureInternalFormat::XY16F;
 		m_Texture2Ds["gVelocity"].format            = TextureFormat::XY;
 		m_Texture2Ds["gVelocity"].interpolationMode = TextureInterpolationMode::Point;
 		m_Texture2Ds["gVelocity"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_G_Buffer->AttachColorBuffer(m_Texture2Ds["gVelocity"]);
+		m_G_Buffer->AddColorBuffer(m_Texture2Ds["gVelocity"]);
 
 		m_Texture2Ds["gDepth"].internalFormat    = TextureInternalFormat::Depth32;
 		m_Texture2Ds["gDepth"].format            = TextureFormat::X;
 		m_Texture2Ds["gDepth"].interpolationMode = TextureInterpolationMode::Point;
 		m_Texture2Ds["gDepth"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_G_Buffer->AttachDepthBuffer(m_Texture2Ds["gDepth"]);
+		m_G_Buffer->AddDepthBuffer(m_Texture2Ds["gDepth"]);
 
 		//Final image
 		m_FinalBuffer = std::make_unique<RenderSurface>();
@@ -133,11 +129,11 @@ namespace Gogaman
 		m_Texture2Ds["finalImage"].format            = TextureFormat::XYZW;
 		m_Texture2Ds["finalImage"].interpolationMode = TextureInterpolationMode::Bilinear;
 		m_Texture2Ds["finalImage"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_FinalBuffer->AttachColorBuffer(m_Texture2Ds["finalImage"]);
+		m_FinalBuffer->AddColorBuffer(m_Texture2Ds["finalImage"]);
 
 		m_Renderbuffers["finalImageDepth"].internalFormat = TextureInternalFormat::Depth32;
 		m_Renderbuffers["finalImageDepth"].Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
-		m_FinalBuffer->AttachDepthBuffer(m_Renderbuffers["finalImageDepth"]);
+		m_FinalBuffer->AddDepthBuffer(m_Renderbuffers["finalImageDepth"]);
 	}
 
 	void RenderSystem::Update()
@@ -309,10 +305,16 @@ namespace Gogaman
 		std::vector<PointLight> pointLights;
 			//Pointlight 0
 			Gogaman::PointLight pointLight0;
-			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()), 3.2f, cos(glfwGetTime())));
+			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()) + 5.0f, 8.2f, cos(glfwGetTime()) + 4.0f));
 			//Luminous intensity (candela)
-			pointLight0.SetColor(glm::vec3(5.0f, 5.0f, 5.0f));
+			pointLight0.SetColor(glm::vec3(4.0f, 7.0f, 5.0f));
 			pointLights.push_back(pointLight0);
+			//Pointlight 1
+			Gogaman::PointLight pointLight1;
+			pointLight1.SetPosition(glm::vec3(sin(glfwGetTime()) + 10.0f, 15.2f, cos(glfwGetTime()) + 9.0f));
+			//Luminous intensity (candela)
+			pointLight1.SetColor(glm::vec3(6.0f, 6.0f, 4.0f));
+			pointLights.push_back(pointLight1);
 
 		//Update camera matrices
 		previousViewProjectionMatrix = viewProjectionMatrix;
@@ -321,7 +323,6 @@ namespace Gogaman
 		viewProjectionMatrix         = projectionMatrix * viewMatrix;
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-		const GLfloat clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 		//Set render mode to wireframe if enabled
 		if(GM_CONFIG.wireframe)
@@ -363,22 +364,29 @@ namespace Gogaman
 			glBindVertexArray(entityVAO);
 
 			glBindBuffer(GL_ARRAY_BUFFER, entityVBO.GetRendererID());
-			entityVBO.UploadData(sizeof(float) * renderableComponent->data.vertexBufferData.size(), renderableComponent->data.vertexBufferData.data());
+			entityVBO.UploadData(FLEX_VERTEX_DATA_SIZE * renderableComponent->data.vertexBufferData.size(), renderableComponent->data.vertexBufferData.data());
 
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, entityIBO.GetRendererID());
 			entityIBO.UploadData(sizeof(uint16_t) * renderableComponent->data.indexBufferData.size(), renderableComponent->data.indexBufferData.data());
 
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+			//Position
 			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, nullptr);
+			//UV
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, (const void *)offsetof(FlexData::FlexVertexData, uv));
+			//Normal
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, (const void *)offsetof(FlexData::FlexVertexData, normal));
+			//Tangent
+			glEnableVertexAttribArray(3);
+			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, (const void *)offsetof(FlexData::FlexVertexData, tangent));
 
 			glDrawElements(GL_TRIANGLES, renderableComponent->data.indexBufferData.size(), GL_UNSIGNED_SHORT, 0);
 
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-
 			glDeleteVertexArrays(1, &entityVAO);
 
-			//GM_LOG_CORE_INFO("[RenderSystem] Rendering %d vertices and %d indices", renderableComponent->data.vertexBufferData.size(), renderableComponent->data.indexBufferData.size());
+			GM_LOG_CORE_TRACE("[RenderSystem] Rendering %d vertices and %d indices", renderableComponent->data.vertexBufferData.size(), renderableComponent->data.indexBufferData.size());
 		}
 		
 		glDisable(GL_DEPTH_TEST);
@@ -397,9 +405,11 @@ namespace Gogaman
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].position",      pointLight0.GetPosition());
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].color",         pointLight0.GetColor());
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.GetConeAperture());
-		//GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].position", pointLight1.GetPosition());
-		//GM_SHADER(directPBRShader).SetUniformVec3("pointLights[1].color", pointLight1.GetColor());
-		//GM_SHADER(directPBRShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
+
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[1].position",      pointLight1.GetPosition());
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[1].color",         pointLight1.GetColor());
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
+
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("numLights",                     pointLights.size());
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("cameraPos",                    camera.Position);
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("voxelGridSize",               GM_CONFIG.voxelGridSize);
@@ -416,12 +426,12 @@ namespace Gogaman
 		m_BRDF_LUT.Bind(3);
 
 		RenderFullscreenQuad();
-		/*
-		//Copy gBuffer depth to HDR FBO
-		//m_FinalBuffer->BlitDepthBuffer(*m_G_Buffer.get(), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
-		//m_FinalBuffer->Bind();
-
 		
+		//Copy gBuffer depth to HDR FBO
+		m_FinalBuffer->BlitDepthBuffer(*m_G_Buffer.get(), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
+		m_FinalBuffer->Bind();
+
+		/*
 		//Forward rendering
 		//glEnable(GL_DEPTH_TEST);
 
@@ -477,5 +487,45 @@ namespace Gogaman
 
 	void RenderSystem::Shutdown()
 	{
+	}
+
+	void RenderSystem::OnEvent(Event &event)
+	{
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<WindowResizeEvent>(GM_BIND_EVENT_CALLBACK(RenderSystem::OnWindowResize));
+
+		dispatcher.Dispatch<MouseMoveEvent>(GM_BIND_EVENT_CALLBACK(RenderSystem::OnMouseMove));
+		dispatcher.Dispatch<MouseScrollEvent>(GM_BIND_EVENT_CALLBACK(RenderSystem::OnMouseScroll));
+	}
+
+	bool RenderSystem::OnWindowResize(WindowResizeEvent &event)
+	{
+		glViewport(0, 0, event.GetWidth(), event.GetHeight());
+		return true;
+	}
+
+	bool RenderSystem::OnMouseMove(MouseMoveEvent &event)
+	{
+		if(firstMouse)
+		{
+			lastX = event.GetPositionX();
+			lastY = event.GetPositionY();
+			firstMouse = false;
+		}
+
+		float xOffset = event.GetPositionX() - lastX;
+		//Y axis is reversed
+		float yOffset = lastY - event.GetPositionY();
+		camera.ProcessMouseInput(xOffset, yOffset);
+
+		lastX = event.GetPositionX();
+		lastY = event.GetPositionY();
+		return true;
+	}
+
+	bool RenderSystem::OnMouseScroll(MouseScrollEvent &event)
+	{
+		camera.ProcessMouseScrollInput(event.GetOffsetY());
+		return true;
 	}
 }

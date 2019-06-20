@@ -100,9 +100,10 @@ namespace Gogaman
 				return GL_RGBA16F;
 			case TextureInternalFormat::XYZW32F:
 				return GL_RGBA32F;
-			default:
-				GM_ASSERT(false, "Failed to get native texture internal format: invalid internal format")
 			}
+			
+			GM_ASSERT(false, "Failed to get native texture internal format: invalid internal format")
+			return 0;
 		}
 
 		static constexpr GLenum GetNativeTextureFormat(const TextureFormat format)
@@ -115,9 +116,10 @@ namespace Gogaman
 				return GL_RG;
 			case TextureFormat::XYZW:
 				return GL_RGBA;
-			default:
-				GM_ASSERT(false, "Failed to get native texture format: invalid format")
 			}
+			
+			GM_ASSERT(false, "Failed to get native texture format: invalid format")
+			return 0;
 		}
 
 		static constexpr GLint GetNativeTextureInterpolationMinMode(const TextureInterpolationMode interpolationMode)
@@ -130,9 +132,10 @@ namespace Gogaman
 				return GL_LINEAR;
 			case TextureInterpolationMode::Trilinear:
 				return GL_LINEAR_MIPMAP_LINEAR;
-			default:
-				GM_ASSERT(false, "Failed to get native texture interpolation min mode: invalid interpolation mode")
 			}
+			
+			GM_ASSERT(false, "Failed to get native texture interpolation min mode: invalid interpolation mode")
+			return 0;
 		}
 
 		static constexpr GLint GetNativeTextureInterpolationMagMode(const TextureInterpolationMode interpolationMode)
@@ -145,9 +148,10 @@ namespace Gogaman
 				return GL_LINEAR;
 			case TextureInterpolationMode::Trilinear:
 				return GL_LINEAR;
-			default:
-				GM_ASSERT(false, "Failed to get native texture interpolation mag mode: invalid interpolation mode")
 			}
+			
+			GM_ASSERT(false, "Failed to get native texture interpolation mag mode: invalid interpolation mode")
+			return 0;
 		}
 
 		static constexpr GLint GetNativeTextureWrapMode(const TextureWrapMode wrapMode)
@@ -160,9 +164,10 @@ namespace Gogaman
 				return GL_CLAMP_TO_EDGE;
 			case TextureWrapMode::Mirror:
 				return GL_MIRRORED_REPEAT;
-			default:
-				GM_ASSERT(false, "Failed to get native texture wrap mode: invalid wrap mode")
 			}
+			
+			GM_ASSERT(false, "Failed to get native texture wrap mode: invalid wrap mode")
+			return 0;
 		}
 	protected:
 		Texture();

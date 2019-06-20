@@ -14,16 +14,16 @@ namespace Gogaman
 	public:
 		inline void UploadData(const uint32_t size, const uint16_t *indices) const { this->GetImplementation().UploadData(size, indices); }
 
-		inline void AttachColorBuffer(const Texture &texture)                                                                  { this->GetImplementation().AttachColorBuffer(texture);                                         }
-		inline void AttachColorBuffer(const Texture &texture, bool isRenderTarget)                                             { this->GetImplementation().AttachColorBuffer(texture, isRenderTarget);                         }
-		inline void AttachColorBuffer(const Texture &texture, const int level, bool isRenderTarget)                            { this->GetImplementation().AttachColorBuffer(texture, level, isRenderTarget);                  }
-		inline void AttachColorBuffer(const Texture &texture, const int level, const int attachmentIndex, bool isRenderTarget) { this->GetImplementation().AttachColorBuffer(texture, level, attachmentIndex, isRenderTarget); }
+		inline void AddColorBuffer(const Texture &texture)                                                                        { this->GetImplementation().AddColorBuffer(texture);                                         }
+		inline void AddColorBuffer(const Texture &texture, const bool isRenderTarget)                                             { this->GetImplementation().AddColorBuffer(texture, isRenderTarget);                         }
+		inline void AddColorBuffer(const Texture &texture, const int level, const bool isRenderTarget)                            { this->GetImplementation().AddColorBuffer(texture, level, isRenderTarget);                  }
+		inline void AddColorBuffer(const Texture &texture, const int level, const int attachmentIndex, const bool isRenderTarget) { this->GetImplementation().AddColorBuffer(texture, level, attachmentIndex, isRenderTarget); }
 
-		inline void AttachColorBuffer(const Renderbuffer &renderbuffer)                            { this->GetImplementation().AttachColorBuffer(renderbuffer);                  }
-		inline void AttachColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex) { this->GetImplementation().AttachColorBuffer(renderbuffer, attachmentIndex); }
+		inline void AddColorBuffer(const Renderbuffer &renderbuffer)                            { this->GetImplementation().AddColorBuffer(renderbuffer);                  }
+		inline void AddColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex) { this->GetImplementation().AddColorBuffer(renderbuffer, attachmentIndex); }
 		
-		inline void AttachDepthBuffer(const Texture      &texture)      { this->GetImplementation().AttachDepthBuffer(texture);      }
-		inline void AttachDepthBuffer(const Renderbuffer &renderbuffer) { this->GetImplementation().AttachDepthBuffer(renderbuffer); }
+		inline void AddDepthBuffer(const Texture      &texture)      { this->GetImplementation().AddDepthBuffer(texture);      }
+		inline void AddDepthBuffer(const Renderbuffer &renderbuffer) { this->GetImplementation().AddDepthBuffer(renderbuffer); }
 
 		inline void Bind()   const { this->GetImplementation().Bind();   }
 		inline void Unbind() const { this->GetImplementation().Unbind(); }

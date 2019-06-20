@@ -18,7 +18,7 @@ namespace Gogaman
 		glDeleteFramebuffers(1, &m_RendererID);
 	}
 
-	void RenderSurface::AttachColorBuffer(const Texture &texture, const int level, const int attachmentIndex, bool isRenderTarget)
+	void RenderSurface::AddColorBuffer(const Texture &texture, const int level, const int attachmentIndex, const bool isRenderTarget)
 	{
 		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach color buffer to render surface: invalid attachment index");
 		GM_ASSERT(level >= 1 && (texture.levels >= level || texture.levels == 0),   "Failed to attach color buffer to render surface: invalid level");
@@ -36,7 +36,7 @@ namespace Gogaman
 		}
 	}
 
-	void RenderSurface::AttachColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex)
+	void RenderSurface::AddColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex)
 	{
 		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach color buffer to render surface: invalid attachment index");
 		glNamedFramebufferRenderbuffer(m_RendererID, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_RENDERBUFFER, renderbuffer.GetRendererID());
@@ -49,13 +49,13 @@ namespace Gogaman
 		}
 	}
 
-	void RenderSurface::AttachDepthBuffer(const Texture &texture)
+	void RenderSurface::AddDepthBuffer(const Texture &texture)
 	{
 		GM_ASSERT((texture.internalFormat == TextureInternalFormat::Depth16) || (texture.internalFormat == TextureInternalFormat::Depth24) || (texture.internalFormat == TextureInternalFormat::Depth32) || (texture.internalFormat == TextureInternalFormat::Depth32F), "Failed to attach depth buffer to render surface: invalid texture internal format");
 		glNamedFramebufferTexture(m_RendererID, GL_DEPTH_ATTACHMENT, texture.GetRendererID(), 0);
 	}
 
-	void RenderSurface::AttachDepthBuffer(const Renderbuffer &renderbuffer)
+	void RenderSurface::AddDepthBuffer(const Renderbuffer &renderbuffer)
 	{
 		GM_ASSERT((renderbuffer.internalFormat == TextureInternalFormat::Depth16) || (renderbuffer.internalFormat == TextureInternalFormat::Depth24) || (renderbuffer.internalFormat == TextureInternalFormat::Depth32) || (renderbuffer.internalFormat == TextureInternalFormat::Depth32F), "Failed to attach depth buffer to render surface: invalid render buffer internal format");
 		glNamedFramebufferRenderbuffer(m_RendererID, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer.GetRendererID());

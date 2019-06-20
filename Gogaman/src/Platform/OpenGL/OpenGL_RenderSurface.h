@@ -26,16 +26,16 @@ namespace Gogaman
 			return *this;
 		}
 
-		void AttachColorBuffer(const Texture &texture) { AttachColorBuffer(texture, true); }
-		void AttachColorBuffer(const Texture &texture, bool isRenderTarget) { AttachColorBuffer(texture, 1, isRenderTarget); }
-		void AttachColorBuffer(const Texture &texture, const int level, bool isRenderTarget) { AttachColorBuffer(texture, level, m_NumColorAttachments, isRenderTarget); }
-		void AttachColorBuffer(const Texture &texture, const int level, const int attachmentIndex, bool isRenderTarget);
+		void AddColorBuffer(const Texture &texture)                                             { AddColorBuffer(texture, true); }
+		void AddColorBuffer(const Texture &texture, const bool isRenderTarget)                  { AddColorBuffer(texture, 1, isRenderTarget); }
+		void AddColorBuffer(const Texture &texture, const int level, const bool isRenderTarget) { AddColorBuffer(texture, level, m_NumColorAttachments, isRenderTarget); }
+		void AddColorBuffer(const Texture &texture, const int level, const int attachmentIndex, const bool isRenderTarget);
 
-		void AttachColorBuffer(const Renderbuffer &renderbuffer) { AttachColorBuffer(renderbuffer, m_NumColorAttachments); }
-		void AttachColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex);
+		void AddColorBuffer(const Renderbuffer &renderbuffer) { AddColorBuffer(renderbuffer, m_NumColorAttachments); }
+		void AddColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex);
 		
-		void AttachDepthBuffer(const Texture      &texture);
-		void AttachDepthBuffer(const Renderbuffer &renderbuffer);
+		void AddDepthBuffer(const Texture      &texture);
+		void AddDepthBuffer(const Renderbuffer &renderbuffer);
 
 		void Bind() const;
 		

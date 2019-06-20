@@ -26,7 +26,7 @@ namespace Gogaman
 			: KeyboardEvent(scancode), m_RepeatCount(repeatCount)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return KeyPress; }
+		static constexpr EventType GetTypeStatic() { return EventType::KeyPress; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
 		inline int GetRepeatCount() const { return m_RepeatCount; }
@@ -41,7 +41,7 @@ namespace Gogaman
 			: KeyboardEvent(scancode)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return KeyRelease; }
+		static constexpr EventType GetTypeStatic() { return EventType::KeyRelease; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 	};
 }

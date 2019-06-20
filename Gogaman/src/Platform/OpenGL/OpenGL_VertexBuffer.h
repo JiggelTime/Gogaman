@@ -2,10 +2,28 @@
 
 #include "Gogaman/Graphics/AbstractVertexBuffer.h"
 
+#include "Gogaman/Graphics/Shader.h"
+
 #include <glad.h>
 
 namespace Gogaman
 {
+	struct VertexAttribute
+	{
+		VertexAttribute()
+		{}
+
+		VertexAttribute(const ShaderDataType dataType, bool normalized = false)
+			: dataType(dataType), size(Shader::GetShaderDataTypeSize(dataType)), offset(0), normalized(normalized)
+		{}
+
+		ShaderDataType dataType;
+		uint8_t        size;
+		//Should offset be 16 bit?
+		uint16_t       offset;
+		bool           normalized;
+	};
+
 	class VertexBuffer : public AbstractVertexBuffer<VertexBuffer>
 	{
 	public:

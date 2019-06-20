@@ -2,7 +2,7 @@
 
 namespace Gogaman
 {
-	enum EventType : uint8_t
+	enum class EventType : uint8_t
 	{
 		None = 0,
 		//Window
@@ -13,7 +13,7 @@ namespace Gogaman
 		MouseMove, MouseScroll, MouseButtonPress, MouseButtonRelease
 	};
 
-	enum class EventCategory
+	enum class EventCategory : uint8_t
 	{
 		None     = 0,
 		Window   = 1,
