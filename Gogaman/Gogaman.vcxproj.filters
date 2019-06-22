@@ -83,9 +83,6 @@
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderDeviceContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,10 +173,6 @@
     <ClInclude Include="src\Gogaman\Graphics\VertexArrayBuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\IndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Events\EventManager.h" />
-    <ClInclude Include="src\Gogaman\Graphics\TestCube.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderDeviceContext.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderDeviceContext.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderDeviceContext.h" />
     <ClInclude Include="src\Gogaman\CRTP.h" />
     <ClInclude Include="src\Gogaman\ResourceCache.h" />
     <ClInclude Include="src\Gogaman\Graphics\VertexBufferManager.h" />
@@ -197,6 +193,13 @@
     <ClInclude Include="src\Gogaman\Graphics\Texture1D.h" />
     <ClInclude Include="src\Gogaman\Graphics\Texture2D.h" />
     <ClInclude Include="src\Gogaman\Graphics\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\VertexBufferLayout.h" />
+    <ClInclude Include="src\Gogaman\Graphics\VertexAttribute.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderingContext.h" />
+    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderingContext.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderingContext.h" />
+    <ClInclude Include="src\Gogaman\Resource.h" />
+    <ClInclude Include="src\Gogaman\Graphics\UnitQuad.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">

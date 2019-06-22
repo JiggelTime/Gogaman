@@ -18,11 +18,12 @@ namespace Gogaman
 		~VertexArrayBuffer();
 
 		VertexArrayBuffer &operator=(const VertexArrayBuffer &) = delete;
-		VertexArrayBuffer &operator=(VertexArrayBuffer &&other) noexcept
-		{
-			std::swap(m_RendererID, other.m_RendererID);
-			return *this;
-		}
+		VertexArrayBuffer &operator=(VertexArrayBuffer &&)      = default;
+
+		void AddVertexBuffer(const VertexBuffer &vertexBuffer);
+		void SetIndexBuffer(const  IndexBuffer  &indexBuffer);
+
+		inline void Bind() const { glBindVertexArray(m_RendererID); }
 
 		inline uint32_t GetRendererID() const { return m_RendererID; }
 	private:

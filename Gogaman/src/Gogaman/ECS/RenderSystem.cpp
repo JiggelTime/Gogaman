@@ -8,8 +8,6 @@
 
 #include "Gogaman/Events/EventDispatcher.h"
 
-#include "Gogaman/Graphics/VertexBuffer.h"
-#include "Gogaman/Graphics/IndexBuffer.h"
 #include "Gogaman/Graphics/Lights/Pointlight.h"
 
 namespace Gogaman
@@ -25,57 +23,25 @@ namespace Gogaman
 		InitializeRenderSurfaces();
 
 		m_ShaderManager = std::make_unique<ShaderManager>();
-		m_PrecomputeBRDFShader   = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.vs", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.fs");
-		m_GBufferShader          = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/gbuffershader.vs",  "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.fs");
-		m_DeferredLightingShader = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/directPBR.vs",      "D:/dev/Gogaman/Gogaman/shaders/directPBR.fs");
-		m_SkyboxShader           = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/skyboxshader.vs",   "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.fs");
-		m_LightShader            = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/lampshader.vs",     "D:/dev/Gogaman/Gogaman/shaders/lampshader.fs");
-		m_PostprocessShader      = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/postprocess.vs",    "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
-
-		m_TestCube = std::make_unique<TestCube>();
+		InitializeShaders();
 
 		//Configure global OpenGL state
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glEnable(GL_TEXTURE_3D);
 		glDisable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LESS);
 		glDisable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		//Configure fullscreen quad
-		glGenVertexArrays(1, &quadVAO);
-		glGenBuffers(1, &quadVBO);
-		glBindVertexArray(quadVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-		//glBindVertexArray(0);
+		m_UnitQuad = std::make_unique<UnitQuad>();
 
 		//Generate BRDF LUT for split-sum approximation
 		glViewport(0, 0, 512, 512);
 		m_BRDF_Buffer->Bind();
 		m_ShaderManager->Get(m_PrecomputeBRDFShader).Bind();
-		RenderFullscreenQuad();
-
-		//Set shader uniforms
-		m_ShaderManager->Get(m_DeferredLightingShader).Bind();
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gPositionMetalness",         0);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gNormal",                    1);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gAlbedoEmissivityRoughness", 2);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("BRDF_LUT",                   3);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedDiffuse",          4);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedSpecular",         5);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("voxelTexture",               6);
-
-		m_ShaderManager->Get(m_SkyboxShader).Bind();
-		m_ShaderManager->Get(m_SkyboxShader).SetUniformInt("skybox", 0);
-
-		m_ShaderManager->Get(m_PostprocessShader).Bind();
-		m_ShaderManager->Get(m_PostprocessShader).SetUniformInt("hdrTexture", 0);
+		RenderFullscreenWindow();
 	}
 
 	void RenderSystem::InitializeRenderSurfaces()
@@ -136,6 +102,32 @@ namespace Gogaman
 		m_FinalBuffer->AddDepthBuffer(m_Renderbuffers["finalImageDepth"]);
 	}
 
+	void RenderSystem::InitializeShaders()
+	{
+		m_PrecomputeBRDFShader   = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.vs", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.fs");
+		m_GBufferShader          = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/gbuffershader.vs",  "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.fs");
+		m_DeferredLightingShader = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/directPBR.vs",      "D:/dev/Gogaman/Gogaman/shaders/directPBR.fs");
+		m_SkyboxShader           = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/skyboxshader.vs",   "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.fs");
+		m_LightShader            = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/lampshader.vs",     "D:/dev/Gogaman/Gogaman/shaders/lampshader.fs");
+		m_PostprocessShader      = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/postprocess.vs",    "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
+
+		//Upload uniform data
+		m_ShaderManager->Get(m_DeferredLightingShader).Bind();
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gPositionMetalness",         0);
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gNormal",                    1);
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gAlbedoEmissivityRoughness", 2);
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("BRDF_LUT",                   3);
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedDiffuse",          4);
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedSpecular",         5);
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("voxelTexture",               6);
+
+		m_ShaderManager->Get(m_SkyboxShader).Bind();
+		m_ShaderManager->Get(m_SkyboxShader).SetUniformInt("skybox", 0);
+
+		m_ShaderManager->Get(m_PostprocessShader).Bind();
+		m_ShaderManager->Get(m_PostprocessShader).SetUniformInt("hdrTexture", 0);
+	}
+
 	void RenderSystem::Update()
 	{
 		//Timing
@@ -156,7 +148,10 @@ namespace Gogaman
 
 		//Reload shaders
 		if(Input::IsKeyPressed(GM_KEY_R))
+		{
 			m_ShaderManager->ReloadAll();
+			InitializeShaders();
+		}
 
 		//Movement
 		if(Input::IsKeyPressed(GM_KEY_W))
@@ -305,15 +300,15 @@ namespace Gogaman
 		std::vector<PointLight> pointLights;
 			//Pointlight 0
 			Gogaman::PointLight pointLight0;
-			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()) + 5.0f, 8.2f, cos(glfwGetTime()) + 4.0f));
+			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()) * 2.0f + 5.0f, 8.2f, 6.0f));
 			//Luminous intensity (candela)
-			pointLight0.SetColor(glm::vec3(4.0f, 7.0f, 5.0f));
+			pointLight0.SetColor(glm::vec3(3.0f, 8.0f, 11.0f));
 			pointLights.push_back(pointLight0);
 			//Pointlight 1
 			Gogaman::PointLight pointLight1;
-			pointLight1.SetPosition(glm::vec3(sin(glfwGetTime()) + 10.0f, 15.2f, cos(glfwGetTime()) + 9.0f));
+			pointLight1.SetPosition(glm::vec3(10.0f, 14.2f, cos(glfwGetTime()) * 2.0f + 7.0f));
 			//Luminous intensity (candela)
-			pointLight1.SetColor(glm::vec3(6.0f, 6.0f, 4.0f));
+			pointLight1.SetColor(glm::vec3(11.0f, 8.0f, 4.0f));
 			pointLights.push_back(pointLight1);
 
 		//Update camera matrices
@@ -347,9 +342,9 @@ namespace Gogaman
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
 			glm::mat4 modelMatrix;
-			//modelMatrix = glm::translate(modelMatrix, spatialComponent->position);
-			//modelMatrix = glm::rotate(modelMatrix, spatialComponent->rotationAngle, spatialComponent->rotation);
-			//modelMatrix = glm::scale(modelMatrix, spatialComponent->scale);
+			modelMatrix = glm::translate(modelMatrix, spatialComponent->position);
+			modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);
+			modelMatrix = glm::scale(modelMatrix,     spatialComponent->scale);
 
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         modelMatrix);
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("previousM", renderableComponent->modelMatrixHistory);
@@ -357,36 +352,8 @@ namespace Gogaman
 
 			renderableComponent->material.SetShaderUniforms(m_ShaderManager->Get(m_GBufferShader));
 
-			GLuint       entityVAO;
-			VertexBuffer entityVBO;
-			IndexBuffer  entityIBO;
-			glGenVertexArrays(1, &entityVAO);
-			glBindVertexArray(entityVAO);
-
-			glBindBuffer(GL_ARRAY_BUFFER, entityVBO.GetRendererID());
-			entityVBO.UploadData(FLEX_VERTEX_DATA_SIZE * renderableComponent->data.vertexBufferData.size(), renderableComponent->data.vertexBufferData.data());
-
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, entityIBO.GetRendererID());
-			entityIBO.UploadData(sizeof(uint16_t) * renderableComponent->data.indexBufferData.size(), renderableComponent->data.indexBufferData.data());
-
-			//Position
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, nullptr);
-			//UV
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, (const void *)offsetof(FlexData::FlexVertexData, uv));
-			//Normal
-			glEnableVertexAttribArray(2);
-			glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, (const void *)offsetof(FlexData::FlexVertexData, normal));
-			//Tangent
-			glEnableVertexAttribArray(3);
-			glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, FLEX_VERTEX_DATA_SIZE, (const void *)offsetof(FlexData::FlexVertexData, tangent));
-
-			glDrawElements(GL_TRIANGLES, renderableComponent->data.indexBufferData.size(), GL_UNSIGNED_SHORT, 0);
-
-			glDeleteVertexArrays(1, &entityVAO);
-
-			GM_LOG_CORE_TRACE("[RenderSystem] Rendering %d vertices and %d indices", renderableComponent->data.vertexBufferData.size(), renderableComponent->data.indexBufferData.size());
+			renderableComponent->vertexArrayBuffer->Bind();
+			glDrawElements(GL_TRIANGLES, renderableComponent->indexBuffer->GetNumIndices(), GL_UNSIGNED_SHORT, 0);
 		}
 		
 		glDisable(GL_DEPTH_TEST);
@@ -425,7 +392,7 @@ namespace Gogaman
 		m_Texture2Ds["gAlbedoEmissivityRoughness"].Bind(2);
 		m_BRDF_LUT.Bind(3);
 
-		RenderFullscreenQuad();
+		RenderFullscreenWindow();
 		
 		//Copy gBuffer depth to HDR FBO
 		m_FinalBuffer->BlitDepthBuffer(*m_G_Buffer.get(), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
@@ -463,7 +430,7 @@ namespace Gogaman
 		*/
 
 		//Post-process (tonemapping, exposure, film grain, gamma correction)
-		glViewport(0, 0, GM_CONFIG.screenWidth, GM_CONFIG.screenHeight);
+		glViewport(0, 0, Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight());
 		RenderSurface::BindBackBuffer();
 		RenderSurface::ClearBackBuffer();
 
@@ -473,21 +440,14 @@ namespace Gogaman
 
 		m_Texture2Ds["finalImage"].Bind(0);
 
-		RenderFullscreenQuad();
+		RenderFullscreenWindow();
 
 		if(firstIteration == true)
 			firstIteration = false;
 	}
 
-	void RenderSystem::RenderFullscreenQuad() const
-	{
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-	}
-
 	void RenderSystem::Shutdown()
-	{
-	}
+	{}
 
 	void RenderSystem::OnEvent(Event &event)
 	{

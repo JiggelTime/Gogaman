@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Gogaman/Graphics/RenderDeviceContext.h"
+#include "Gogaman/Graphics/RenderingContext.h"
 
 namespace Gogaman
 {
@@ -38,6 +38,6 @@ namespace Gogaman
 
 		bool m_VerticalSynchronization;
 
-		std::unique_ptr<RenderDeviceContext> m_RenderDeviceContext;
+		std::unique_ptr<RenderingContext> m_RenderingContext;
 	};
 }

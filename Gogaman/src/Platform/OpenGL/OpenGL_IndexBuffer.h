@@ -11,20 +11,16 @@ namespace Gogaman
 	public:
 		IndexBuffer();
 		IndexBuffer(const IndexBuffer &) = delete;
-		IndexBuffer(IndexBuffer &&other) noexcept
-			: m_RendererID(std::exchange(other.m_RendererID, 0))
-		{}
+		IndexBuffer(IndexBuffer &&)      = default;
 
 		~IndexBuffer();
 
 		IndexBuffer &operator=(const IndexBuffer &) = delete;
-		IndexBuffer &operator=(IndexBuffer &&other) noexcept
-		{
-			std::swap(m_RendererID, other.m_RendererID);
-			return *this;
-		}
+		IndexBuffer &operator=(IndexBuffer &&)      = default;
 
-		inline void UploadData(const uint32_t size, const uint16_t *indices) const { glNamedBufferData(m_RendererID, size, indices, GL_STATIC_DRAW);  }
+		void UploadData(const uint32_t numIndices, const uint16_t *indices);
+
+		inline void Bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID); }
 
 		inline uint32_t GetRendererID() const { return m_RendererID; }
 	private:

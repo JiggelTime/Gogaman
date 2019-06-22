@@ -1,19 +1,19 @@
 #include "pch.h"
-#include "OpenGL_RenderDeviceContext.h"
+#include "OpenGL_RenderingContext.h"
 
 #include "Gogaman/Application.h"
 #include "Gogaman/Window.h"
 
 namespace Gogaman
 {
-	RenderDeviceContext::RenderDeviceContext(Window *window)
+	RenderingContext::RenderingContext(Window *window)
 		: m_GLFW_Window(static_cast<GLFWwindow *>(window->GetNativeWindow()))
 	{}
 
-	RenderDeviceContext::~RenderDeviceContext()
+	RenderingContext::~RenderingContext()
 	{}
 
-	void RenderDeviceContext::Initialize()
+	void RenderingContext::Initialize()
 	{
 		glfwMakeContextCurrent(m_GLFW_Window);
 

@@ -4,8 +4,8 @@
 
 namespace Gogaman
 {
-	template<typename RenderDeviceContextType>
-	class AbstractRenderDeviceContext : public CRTP<RenderDeviceContextType, AbstractRenderDeviceContext>
+	template<typename RenderingContextType>
+	class AbstractRenderingContext : public CRTP<RenderingContextType, AbstractRenderingContext>
 	{
 	public:
 		void Initialize()
@@ -18,6 +18,6 @@ namespace Gogaman
 			this->GetImplementation().SwapBuffers();
 		}
 	protected:
-		~AbstractRenderDeviceContext() = default;
+		~AbstractRenderingContext() = default;
 	};
 }

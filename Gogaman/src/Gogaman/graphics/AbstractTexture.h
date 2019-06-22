@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Gogaman/CRTP.h"
+#include "Gogaman/Resource.h"
 
 #include "Gogaman/Base.h"
 #include "Gogaman/Logging/Log.h"
@@ -44,7 +45,11 @@ namespace Gogaman
 		None = 0,
 		Point,
 		Bilinear,
-		Trilinear
+		Trilinear,
+		Anisotropic2x,
+		Anisotropic4x,
+		Anisotropic8x,
+		Anisotropic16x
 	};
 
 	enum class TextureWrapMode : uint8_t
@@ -58,22 +63,22 @@ namespace Gogaman
 	using TextureID = uint16_t;
 
 	template<typename TextureType>
-	class AbstractTexture : public CRTP<TextureType, AbstractTexture>
+	class AbstractTexture : public CRTP<TextureType, AbstractTexture>, public Resource<TextureID>
 	{
 	public:
 		AbstractTexture(const AbstractTexture &) = delete;
 		AbstractTexture(AbstractTexture &&other) noexcept
-			: internalFormat(std::exchange(other.internalFormat, TextureInternalFormat::None)), format(std::exchange(other.format, TextureFormat::None)), interpolationMode(std::exchange(other.interpolationMode, TextureInterpolationMode::None)), levels(std::exchange(other.levels, 0)), identifier(std::exchange(other.identifier, 0))
+			: identifier(std::exchange(other.identifier, 0), internalFormat(std::exchange(other.internalFormat, TextureInternalFormat::None)), format(std::exchange(other.format, TextureFormat::None)), interpolationMode(std::exchange(other.interpolationMode, TextureInterpolationMode::None)), levels(std::exchange(other.levels, 0)))
 		{}
 
 		AbstractTexture &operator=(const AbstractTexture &) = delete;
 		AbstractTexture &operator=(AbstractTexture &&other) noexcept
 		{
+			std::swap(identifier,        other.identifier);
 			std::swap(internalFormat,    other.internalFormat);
 			std::swap(format,            other.format);
 			std::swap(interpolationMode, other.interpolationMode);
 			std::swap(levels,            other.levels);
-			std::swap(identifier,        other.identifier);
 			return *this;
 		}
 
@@ -150,6 +155,5 @@ namespace Gogaman
 		TextureFormat            format;
 		TextureInterpolationMode interpolationMode;
 		int                      levels;
-		TextureID                identifier;
 	};
 }

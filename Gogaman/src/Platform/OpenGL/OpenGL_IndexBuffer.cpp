@@ -16,4 +16,10 @@ namespace Gogaman
 	{
 		glDeleteBuffers(1, &m_RendererID);
 	}
+
+	void IndexBuffer::UploadData(const uint32_t numIndices, const uint16_t *indices)
+	{
+		m_NumIndices = numIndices;
+		glNamedBufferData(m_RendererID, sizeof(uint16_t) * numIndices, indices, GL_STATIC_DRAW);
+	}
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/AbstractRenderDeviceContext.h"
+#include "Gogaman/Graphics/AbstractRenderingContext.h"
 
 #include <glad.h>
 #include <GLFW/glfw3.h>
@@ -9,11 +9,11 @@ namespace Gogaman
 {
 	class Window;
 
-	class RenderDeviceContext : public AbstractRenderDeviceContext<RenderDeviceContext>
+	class RenderingContext : public AbstractRenderingContext<RenderingContext>
 	{
 	public:
-		RenderDeviceContext(Window *window);
-		~RenderDeviceContext();
+		RenderingContext(Window *window);
+		~RenderingContext();
 
 		void Initialize();
 

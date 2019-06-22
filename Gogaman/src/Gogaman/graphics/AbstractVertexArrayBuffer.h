@@ -1,29 +1,31 @@
 #pragma once
 
 #include "Gogaman/CRTP.h"
-#include "Gogaman/Graphics/VertexBuffer.h"
-#include "Gogaman/Graphics/IndexBuffer.h"
+#include "Gogaman/Resource.h"
 
 namespace Gogaman
 {
-	using VertexArrayBufferID = uint8_t;
+	class VertexBuffer;
+	class IndexBuffer;
+
+	using VertexArrayBufferID = uint16_t;
 
 	template<typename VertexArrayBufferType>
-	class AbstractVertexArrayBuffer : public CRTP<VertexArrayBufferType, AbstractVertexArrayBuffer>
+	class AbstractVertexArrayBuffer : public CRTP<VertexArrayBufferType, AbstractVertexArrayBuffer>, public Resource<VertexArrayBufferID>
 	{
 	public:
-		inline void AddVertexBuffer(VertexBufferID vertexBufferID)
-		{
-			this->GetImplementation().AddVertexBuffer(vertexBufferID);
-		}
+		AbstractVertexArrayBuffer(const AbstractVertexArrayBuffer &) = delete;
+		AbstractVertexArrayBuffer(AbstractVertexArrayBuffer &&other) = default;
 
-		inline void Bind() const
-		{
-			this->GetImplementation().Bind();
-		}
+		AbstractVertexArrayBuffer &operator=(const AbstractVertexArrayBuffer &) = delete;
+		AbstractVertexArrayBuffer &operator=(AbstractVertexArrayBuffer &&other) = default;
+
+		inline void AddVertexBuffer(const VertexBuffer &vertexBuffer) { this->GetImplementation().AddVertexBuffer(vertexBuffer); }
+		inline void SetIndexBuffer(const  IndexBuffer  &indexBuffer)  { this->GetImplementation().SetIndexBuffer(indexBuffer);   }
+
+		inline void Bind() const { this->GetImplementation().Bind(); }
 	protected:
+		AbstractVertexArrayBuffer()  = default;
 		~AbstractVertexArrayBuffer() = default;
-	public:
-		VertexArrayBufferID identifier;
 	};
 }

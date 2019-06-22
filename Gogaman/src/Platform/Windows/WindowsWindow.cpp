@@ -35,8 +35,8 @@ namespace Gogaman
 		m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, nullptr, nullptr);
 		GM_ASSERT(m_Window, "Failed to create GLFW window");
 
-		m_RenderDeviceContext = std::make_unique<RenderDeviceContext>(this);
-		m_RenderDeviceContext->Initialize();
+		m_RenderingContext = std::make_unique<RenderingContext>(this);
+		m_RenderingContext->Initialize();
 
 		EnableVerticalSync();
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -93,7 +93,7 @@ namespace Gogaman
 	void WindowsWindow::Update()
 	{
 		glfwPollEvents();
-		m_RenderDeviceContext->SwapBuffers();
+		m_RenderingContext->SwapBuffers();
 	}
 
 	void Window::Shutdown()

@@ -4,7 +4,8 @@
 #include "Gogaman/Logging/Log.h"
 #include "Entity.h"
 
-#define GM_MAX_COMPONENTS 1024
+#define GM_MAX_COMPONENTS 65536
+//#define GM_MAX_COMPONENTS 1024
 
 namespace Gogaman
 {
@@ -28,8 +29,7 @@ namespace Gogaman
 		{
 			GM_ASSERT(m_NumComponents < GM_MAX_COMPONENTS, "Failed to add entity component: maximum number of components (%d) reached", GM_MAX_COMPONENTS);
 			//Write component at next free index
-			m_Components[m_NumComponents] = component;
-			//Add entry to hash table
+			m_Components[m_NumComponents] = std::move(component);
 			m_EntityComponentIndices[entity] = m_NumComponents++;
 		}
 
@@ -58,9 +58,9 @@ namespace Gogaman
 			m_NumComponents--;
 		}
 	private:
-		std::array<EntityID, GM_MAX_COMPONENTS>      m_ComponentIndexEntities;
+		std::array<EntityID,      GM_MAX_COMPONENTS> m_ComponentIndexEntities;
 		std::unordered_map<EntityID, int>            m_EntityComponentIndices;
-		int                                          m_NumComponents;
 		std::array<ComponentType, GM_MAX_COMPONENTS> m_Components;
+		int                                          m_NumComponents;
 	};
 }

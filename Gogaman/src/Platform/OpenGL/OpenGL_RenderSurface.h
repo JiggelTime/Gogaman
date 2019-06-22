@@ -11,20 +11,12 @@ namespace Gogaman
 	public:
 		RenderSurface();
 		RenderSurface(const RenderSurface &) = delete;
-		RenderSurface(RenderSurface &&other) noexcept
-			: m_RendererID(std::exchange(other.m_RendererID, 0)), m_NumColorAttachments(std::exchange(other.m_NumColorAttachments, 0)), m_RenderTargets(std::move(other.m_RenderTargets))
-		{}
+		RenderSurface(RenderSurface &&)      = default;
 
 		~RenderSurface();
 
 		RenderSurface &operator=(const RenderSurface &) = delete;
-		RenderSurface &operator=(RenderSurface &&other) noexcept
-		{
-			std::swap(m_RendererID,          other.m_RendererID);
-			std::swap(m_NumColorAttachments, other.m_NumColorAttachments);
-			std::swap(m_RenderTargets,       other.m_RenderTargets);
-			return *this;
-		}
+		RenderSurface &operator=(RenderSurface &&)      = default;
 
 		void AddColorBuffer(const Texture &texture)                                             { AddColorBuffer(texture, true); }
 		void AddColorBuffer(const Texture &texture, const bool isRenderTarget)                  { AddColorBuffer(texture, 1, isRenderTarget); }

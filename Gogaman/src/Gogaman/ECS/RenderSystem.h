@@ -1,6 +1,7 @@
 #pragma once
 
 #include "System.h"
+
 #include "SpatialComponent.h"
 #include "RenderableComponent.h"
 
@@ -17,8 +18,7 @@
 #include "Gogaman/Graphics/Texture2D.h"
 #include "Platform/OpenGL/OpenGL_Renderbuffer.h"
 #include "Gogaman/Graphics/RenderSurface.h"
-
-#include "Gogaman/Graphics/TestCube.h"
+#include "Gogaman/Graphics/UnitQuad.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -54,8 +54,9 @@ namespace Gogaman
 		inline virtual ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
 	private:
 		void InitializeRenderSurfaces();
+		void InitializeShaders();
 
-		void RenderFullscreenQuad() const;
+		void RenderFullscreenWindow() const { m_UnitQuad->Render(); }
 
 		bool OnWindowResize(WindowResizeEvent &event);
 		bool OnMouseMove(MouseMoveEvent       &event);
@@ -72,7 +73,7 @@ namespace Gogaman
 
 		std::unique_ptr<RenderSurface> m_FinalBuffer;
 
-		std::unique_ptr<TestCube>      m_TestCube;
+		std::unique_ptr<UnitQuad>      m_UnitQuad;
 	private:
 		//OLD RENDERER PRIVATE VARIABLES
 		//Camera
@@ -100,8 +101,8 @@ namespace Gogaman
 		std::unordered_map<std::string, Renderbuffer> m_Renderbuffers;
 
 		//Fullscreen quad
-		float quadVertices[20]{ -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f };
-		unsigned int quadVAO = 0, quadVBO;
+		//float quadVertices[20]{ -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f };
+		//unsigned int quadVAO = 0, quadVBO;
 
 		//Camera matrices
 		glm::mat4 projectionMatrix;

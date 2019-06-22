@@ -13,16 +13,10 @@ namespace Gogaman
 	{
 	public:
 		Texture(const Texture &) = delete;
-		Texture(Texture &&other) noexcept
-			: m_RendererID(std::exchange(other.m_RendererID, 0))
-		{}
+		Texture(Texture &&)      = default;
 
 		Texture &operator=(const Texture &) = delete;
-		Texture &operator=(Texture &&other) noexcept
-		{
-			std::swap(m_RendererID, other.m_RendererID);
-			return *this;
-		}
+		Texture &operator=(Texture &&)      = default;
 
 		void RegenerateMipmap() const;
 		
