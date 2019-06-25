@@ -1,8 +1,7 @@
 #pragma once
 
-#include "System.h"
+#include "Gogaman/ECS/System.h"
 
-#include "SpatialComponent.h"
 #include "RenderableComponent.h"
 
 #include "Gogaman/Base.h"
@@ -12,13 +11,13 @@
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 
-#include "Gogaman/Graphics/Camera.h"
-#include "Gogaman/Graphics/Shader.h"
-#include "Gogaman/Graphics/ShaderManager.h"
-#include "Gogaman/Graphics/Texture2D.h"
+#include "Camera.h"
+#include "Shader.h"
+#include "ShaderManager.h"
+#include "Texture2D.h"
 #include "Platform/OpenGL/OpenGL_Renderbuffer.h"
-#include "Gogaman/Graphics/RenderSurface.h"
-#include "Gogaman/Graphics/UnitQuad.h"
+#include "RenderSurface.h"
+#include "FullscreenTriangle.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
@@ -31,10 +30,10 @@ namespace Gogaman
 {
 	class World;
 
-	class RenderSystem : public System, public EventListener
+	class RenderingSystem : public System, public EventListener
 	{
 	public:
-		RenderSystem();
+		RenderingSystem();
 
 		virtual void Initialize() override;
 		virtual void Update()     override;
@@ -43,20 +42,19 @@ namespace Gogaman
 
 		virtual void OnEvent(Event &event) override;
 
-		static inline ComponentFlags GetComponentFlagsStatic()
+		static inline const ComponentFlags GetComponentFlagsStatic()
 		{
 			ComponentFlags componentFlags;
-			GM_SET_SYSTEM_COMPONENT_FLAG(SpatialComponent)
 			GM_SET_SYSTEM_COMPONENT_FLAG(RenderableComponent)
 			return componentFlags;
 		}
 
-		inline virtual ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
+		inline virtual const ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
 	private:
 		void InitializeRenderSurfaces();
 		void InitializeShaders();
 
-		void RenderFullscreenWindow() const { m_UnitQuad->Render(); }
+		void RenderFullscreenWindow() const { m_FullscreenTriangle->Render(); }
 
 		bool OnWindowResize(WindowResizeEvent &event);
 		bool OnMouseMove(MouseMoveEvent       &event);
@@ -73,7 +71,7 @@ namespace Gogaman
 
 		std::unique_ptr<RenderSurface> m_FinalBuffer;
 
-		std::unique_ptr<UnitQuad>      m_UnitQuad;
+		std::unique_ptr<FullscreenTriangle> m_FullscreenTriangle;
 	private:
 		//OLD RENDERER PRIVATE VARIABLES
 		//Camera

@@ -32,7 +32,7 @@ namespace Gogaman
 		void AddEntity(EntityID entity);
 		void RemoveEntity(EntityID entity);
 
-		virtual ComponentFlags GetComponentFlags() const = 0;
+		virtual const ComponentFlags GetComponentFlags() const = 0;
 	protected:
 		World                 *m_World;
 		std::vector<EntityID>  m_Entities;
@@ -40,12 +40,13 @@ namespace Gogaman
 }
 
 #define GM_SET_SYSTEM_COMPONENT_FLAG(x) componentFlags.set(GetComponentTypeID<x>());
+
 #define GM_SET_SYSTEM_COMPONENTS(...)\
-static inline ComponentFlags GetComponentFlagsStatic()\
+static inline const ComponentFlags GetComponentFlagsStatic()\
 {\
 	ComponentFlags componentFlags;\
 	GM_FOR_EACH(GM_SET_SYSTEM_COMPONENT_FLAG, __VA_ARGS__)\
 	return componentFlags;\
 }\
 \
-inline virtual ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
+inline virtual const ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }

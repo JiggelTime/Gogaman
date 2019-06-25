@@ -26,8 +26,9 @@ namespace Gogaman
 		}
 
 		std::vector<VertexAttribute>::iterator       begin()       { return m_VertexAttributes.begin(); }
-		std::vector<VertexAttribute>::iterator       end()         { return m_VertexAttributes.end();   }
 		std::vector<VertexAttribute>::const_iterator begin() const { return m_VertexAttributes.begin(); }
+		
+		std::vector<VertexAttribute>::iterator       end()         { return m_VertexAttributes.end();   }
 		std::vector<VertexAttribute>::const_iterator end()   const { return m_VertexAttributes.end();   }
 
 		inline const uint8_t                       GetStride()           const { return m_Stride;           }

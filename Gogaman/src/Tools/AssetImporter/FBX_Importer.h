@@ -27,14 +27,14 @@ namespace Gogaman
 			virtual FlexData::FlexData Import(const char *filepath) override;
 		private:
 			template<typename GeometryElement, typename Value>
-			Value GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue);
-			void  ProcessMesh(FbxMesh *mesh);
-			void  ProcessTexture(FbxFileTexture *fileTexture, bool sRGB);
-			void  ProcessMaterial(FbxSurfaceMaterial *material);
-			void  ProcessNodeRecursive(FbxNode *node);
+			Value                     GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue);
+			void                      ProcessMesh(FbxMesh *mesh);
+			FlexData::FlexTextureData ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture);
+			void                      ProcessMaterial(const FbxSurfaceMaterial *material);
+			void                      ProcessNodeRecursive(FbxNode *node);
 		private:
 			FbxManager *m_SDK_Manager;
-			std::unordered_map<std::string, uint32_t> m_Textures;
+			std::unordered_map<std::string, FlexData::FlexTextureData> m_Textures;
 		};
 	}
 }

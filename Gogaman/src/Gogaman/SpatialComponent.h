@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Component.h"
+#include "Gogaman/ECS/Component.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

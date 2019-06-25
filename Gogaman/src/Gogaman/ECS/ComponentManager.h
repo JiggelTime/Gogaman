@@ -4,8 +4,8 @@
 #include "Gogaman/Logging/Log.h"
 #include "Entity.h"
 
-#define GM_MAX_COMPONENTS 65536
-//#define GM_MAX_COMPONENTS 1024
+//#define GM_MAX_COMPONENTS 65536
+#define GM_MAX_COMPONENTS 1024
 
 namespace Gogaman
 {
@@ -13,9 +13,10 @@ namespace Gogaman
 	{
 	public:
 		AbstractComponentManager()                                            = default;
-		~AbstractComponentManager()                                           = default;
 		AbstractComponentManager(const AbstractComponentManager &)            = delete;
 		AbstractComponentManager(AbstractComponentManager &&)                 = default;
+		
+		~AbstractComponentManager()                                           = default;
 		
 		AbstractComponentManager &operator=(const AbstractComponentManager &) = delete;
 		AbstractComponentManager &operator=(AbstractComponentManager &&)      = default;

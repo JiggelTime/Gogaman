@@ -45,13 +45,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\FBX_SDK\include;$(SolutionDir)Dependencies\glm\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\FBX_SDK\include;$(SolutionDir)Dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>
-    <IncludePath>$(SolutionDir)Dependencies\FBX_SDK\include;$(SolutionDir)Dependencies\glm\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Dependencies\stb_image\include;$(SolutionDir)Dependencies\FBX_SDK\include;$(SolutionDir)Dependencies\glm\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\release;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

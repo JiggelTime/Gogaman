@@ -27,16 +27,11 @@ in vec3 normalFrag;
 in mat3 TBNFrag;
 
 //Material textures
-//uniform sampler2D texture_diffuse1;
-//uniform sampler2D texture_roughness1;
-//uniform sampler2D texture_normal1;
-//uniform sampler2D texture_metalness1;
-//uniform sampler2D texture_emissivity1;
-uniform vec3  materialAlbedo     = vec3(0.5f);
-uniform vec3  materialNormal     = vec3(0.0f, 1.0f, 0.0f);
-uniform float materialRoughness  = 1.0f;
-uniform float materialMetalness  = 0.0f;
-uniform float materialEmissivity = 0.0f;
+uniform sampler2D materialAlbedo;
+uniform sampler2D materialNormal;
+uniform sampler2D materialRoughness;
+uniform sampler2D materialMetalness;
+uniform sampler2D materialEmissivity;
 
 uniform vec2 temporalJitter;
 uniform vec2 previousTemporalJitter;
@@ -54,14 +49,13 @@ void main()
 {
 	//Calculate normal
 		vec3 normal = normalFrag;
-		/*
 		if(normalMapping)
 		{
-			normal = texture(texture_normal1, texCoordsFrag).xyz;
+			normal = texture(materialNormal, texCoordsFrag).xyz;
 			normal = (normal.xyz * 2.0f) - 1.0f;
 			normal = normalize(TBNFrag * normal.xyz);
 			normal = mix(normal.xyz, normalFrag, 1.0f - NORMAL_MAP_STRENGTH);
-		}*/
+		}
 		normal.xy = EncodeSignedOctahedronNormal(normal);
 
 	//Calculate Velocity
@@ -74,18 +68,18 @@ void main()
 		gPositionMetalness.rgb        = worldPositionFrag;
 		//Metalness
 		//gPositionMetalness.a          = texture(texture_metalness1, texCoordsFrag).r;
-		gPositionMetalness.a          = materialMetalness;
+		gPositionMetalness.a          = texture(materialMetalness, texCoordsFrag).x;
 		//Normal
 		gNormal                       = normal.xy;
 		//Albedo
 		//gAlbedoEmissivityRoughness.rg = EncodeAlbedo(texture(texture_diffuse1, texCoordsFrag).rgb);
-		gAlbedoEmissivityRoughness.rg = EncodeAlbedo(materialAlbedo);
+		gAlbedoEmissivityRoughness.rg = EncodeAlbedo(texture(materialAlbedo, texCoordsFrag).rgb);
 		//Emissivity
 		//gAlbedoEmissivityRoughness.b  = emissive ? texture(texture_emissivity1, texCoordsFrag).r : 0.0f;
-		gAlbedoEmissivityRoughness.b  = materialEmissivity;
+		gAlbedoEmissivityRoughness.b  = texture(materialEmissivity, texCoordsFrag).x;
 		//Roughness
 		//gAlbedoEmissivityRoughness.a  = max(texture(texture_roughness1,  texCoordsFrag).r, ROUGHNESS_MINIMUM);
-		gAlbedoEmissivityRoughness.a  = max(materialRoughness, ROUGHNESS_MINIMUM);
+		gAlbedoEmissivityRoughness.a  = max(texture(materialRoughness, texCoordsFrag).x, ROUGHNESS_MINIMUM);
 		//Velocity
 		gVelocity                     = velocity;
 		//Depth

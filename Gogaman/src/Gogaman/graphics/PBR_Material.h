@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Texture2D.h"
+
 #include "Shader.h"
 
 #include <glm.hpp>
@@ -10,20 +12,19 @@ namespace Gogaman
 {
 	struct PBR_Material
 	{
-		inline void SetShaderUniforms(Shader &shader) const
+		inline void BindTextures() const
 		{
-			//Set uniforms here...
-			shader.SetUniformVec3("materialAlbedo",      albedo);
-			shader.SetUniformVec3("materialNormal",      normal);
-			shader.SetUniformFloat("materialRoughness",  roughness);
-			shader.SetUniformFloat("materialMetalness",  metalness);
-			shader.SetUniformFloat("materialEmissivity", emissivity);
+			albedo->Bind(0);
+			normal->Bind(1);
+			roughness->Bind(2);
+			metalness->Bind(3);
+			emissivity->Bind(4);
 		}
 
-		glm::vec3 albedo;
-		glm::vec3 normal;
-		float     roughness;
-		float     metalness;
-		float     emissivity;
+		std::unique_ptr<Texture2D> albedo;
+		std::unique_ptr<Texture2D> normal;
+		std::unique_ptr<Texture2D> roughness;
+		std::unique_ptr<Texture2D> metalness;
+		std::unique_ptr<Texture2D> emissivity;
 	};
 }

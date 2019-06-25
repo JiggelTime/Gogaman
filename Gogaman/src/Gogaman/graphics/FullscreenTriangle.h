@@ -6,10 +6,10 @@
 
 namespace Gogaman
 {
-	class UnitQuad
+	class FullscreenTriangle
 	{
 	public:
-		UnitQuad()
+		FullscreenTriangle()
 		{
 			m_VertexArrayBuffer = std::make_unique<VertexArrayBuffer>();
 			m_VertexBuffer      = std::make_unique<VertexBuffer>();

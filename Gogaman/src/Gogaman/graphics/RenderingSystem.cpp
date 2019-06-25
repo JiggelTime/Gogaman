@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "RenderSystem.h"
+#include "RenderingSystem.h"
 
-#include "World.h"
+#include "Gogaman/ECS/World.h"
 
 #include "Gogaman/Application.h"
 #include "Gogaman/Input.h"
@@ -12,10 +12,10 @@
 
 namespace Gogaman
 {
-	RenderSystem::RenderSystem()
+	RenderingSystem::RenderingSystem()
 	{}
 
-	void RenderSystem::Initialize()
+	void RenderingSystem::Initialize()
 	{
 		m_RenderResolutionWidth  = static_cast<int>(Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale);
 		m_RenderResolutionHeight = static_cast<int>(Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale);
@@ -29,13 +29,13 @@ namespace Gogaman
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 		glEnable(GL_TEXTURE_3D);
 		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LEQUAL);
 		glDisable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 
-		m_UnitQuad = std::make_unique<UnitQuad>();
+		m_FullscreenTriangle = std::make_unique<FullscreenTriangle>();
 
 		//Generate BRDF LUT for split-sum approximation
 		glViewport(0, 0, 512, 512);
@@ -44,7 +44,7 @@ namespace Gogaman
 		RenderFullscreenWindow();
 	}
 
-	void RenderSystem::InitializeRenderSurfaces()
+	void RenderingSystem::InitializeRenderSurfaces()
 	{
 		//Precomputed BRDF
 		m_BRDF_Buffer = std::make_unique<RenderSurface>();
@@ -102,7 +102,7 @@ namespace Gogaman
 		m_FinalBuffer->AddDepthBuffer(m_Renderbuffers["finalImageDepth"]);
 	}
 
-	void RenderSystem::InitializeShaders()
+	void RenderingSystem::InitializeShaders()
 	{
 		m_PrecomputeBRDFShader   = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.vs", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.fs");
 		m_GBufferShader          = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/gbuffershader.vs",  "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.fs");
@@ -112,7 +112,12 @@ namespace Gogaman
 		m_PostprocessShader      = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/postprocess.vs",    "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
 
 		//Upload uniform data
-		m_ShaderManager->Get(m_DeferredLightingShader).Bind();
+		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialAlbedo",     0);
+		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialNormal",     1);
+		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialRoughness",  2);
+		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialMetalness",  3);
+		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialEmissivity", 4);
+
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gPositionMetalness",         0);
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gNormal",                    1);
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gAlbedoEmissivityRoughness", 2);
@@ -121,14 +126,12 @@ namespace Gogaman
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedSpecular",         5);
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("voxelTexture",               6);
 
-		m_ShaderManager->Get(m_SkyboxShader).Bind();
 		m_ShaderManager->Get(m_SkyboxShader).SetUniformInt("skybox", 0);
 
-		m_ShaderManager->Get(m_PostprocessShader).Bind();
 		m_ShaderManager->Get(m_PostprocessShader).SetUniformInt("hdrTexture", 0);
 	}
 
-	void RenderSystem::Update()
+	void RenderingSystem::Update()
 	{
 		//Timing
 		float currentFrame = glfwGetTime();
@@ -294,19 +297,19 @@ namespace Gogaman
 			GM_CONFIG.renderMode = 8;
 	}
 
-	void RenderSystem::Render()
+	void RenderingSystem::Render()
 	{
 		//Light(s)
 		std::vector<PointLight> pointLights;
 			//Pointlight 0
 			Gogaman::PointLight pointLight0;
-			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()) * 2.0f + 5.0f, 8.2f, 6.0f));
+			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()) * 1.0f - 1.0f, 2.2f, -2.0f));
 			//Luminous intensity (candela)
 			pointLight0.SetColor(glm::vec3(3.0f, 8.0f, 11.0f));
 			pointLights.push_back(pointLight0);
 			//Pointlight 1
 			Gogaman::PointLight pointLight1;
-			pointLight1.SetPosition(glm::vec3(10.0f, 14.2f, cos(glfwGetTime()) * 2.0f + 7.0f));
+			pointLight1.SetPosition(glm::vec3(-2.0f, 1.2f, cos(glfwGetTime()) * 1.0f + 1.0f));
 			//Luminous intensity (candela)
 			pointLight1.SetColor(glm::vec3(11.0f, 8.0f, 4.0f));
 			pointLights.push_back(pointLight1);
@@ -324,10 +327,11 @@ namespace Gogaman
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Geometry pass
-		//glEnable(GL_DEPTH_TEST);
 		glViewport(0, 0, m_RenderResolutionWidth, m_RenderResolutionHeight);
+		glEnable(GL_DEPTH_TEST);
 		m_G_Buffer->Bind();
 		m_G_Buffer->Clear();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_ShaderManager->Get(m_GBufferShader).Bind();
 		m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("VP",                     viewProjectionMatrix);
@@ -338,19 +342,12 @@ namespace Gogaman
 
 		for(auto i : m_Entities)
 		{
-			SpatialComponent    *spatialComponent    = m_World->GetComponent<SpatialComponent>(i);
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
-			glm::mat4 modelMatrix;
-			modelMatrix = glm::translate(modelMatrix, spatialComponent->position);
-			modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);
-			modelMatrix = glm::scale(modelMatrix,     spatialComponent->scale);
-
-			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         modelMatrix);
+			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         renderableComponent->modelMatrix);
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("previousM", renderableComponent->modelMatrixHistory);
-			renderableComponent->modelMatrixHistory = modelMatrix;
-
-			renderableComponent->material.SetShaderUniforms(m_ShaderManager->Get(m_GBufferShader));
+			
+			renderableComponent->material.BindTextures();
 
 			renderableComponent->vertexArrayBuffer->Bind();
 			glDrawElements(GL_TRIANGLES, renderableComponent->indexBuffer->GetNumIndices(), GL_UNSIGNED_SHORT, 0);
@@ -446,25 +443,25 @@ namespace Gogaman
 			firstIteration = false;
 	}
 
-	void RenderSystem::Shutdown()
+	void RenderingSystem::Shutdown()
 	{}
 
-	void RenderSystem::OnEvent(Event &event)
+	void RenderingSystem::OnEvent(Event &event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowResizeEvent>(GM_BIND_EVENT_CALLBACK(RenderSystem::OnWindowResize));
+		dispatcher.Dispatch<WindowResizeEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnWindowResize));
 
-		dispatcher.Dispatch<MouseMoveEvent>(GM_BIND_EVENT_CALLBACK(RenderSystem::OnMouseMove));
-		dispatcher.Dispatch<MouseScrollEvent>(GM_BIND_EVENT_CALLBACK(RenderSystem::OnMouseScroll));
+		dispatcher.Dispatch<MouseMoveEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnMouseMove));
+		dispatcher.Dispatch<MouseScrollEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnMouseScroll));
 	}
 
-	bool RenderSystem::OnWindowResize(WindowResizeEvent &event)
+	bool RenderingSystem::OnWindowResize(WindowResizeEvent &event)
 	{
 		glViewport(0, 0, event.GetWidth(), event.GetHeight());
 		return true;
 	}
 
-	bool RenderSystem::OnMouseMove(MouseMoveEvent &event)
+	bool RenderingSystem::OnMouseMove(MouseMoveEvent &event)
 	{
 		if(firstMouse)
 		{
@@ -483,7 +480,7 @@ namespace Gogaman
 		return true;
 	}
 
-	bool RenderSystem::OnMouseScroll(MouseScrollEvent &event)
+	bool RenderingSystem::OnMouseScroll(MouseScrollEvent &event)
 	{
 		camera.ProcessMouseScrollInput(event.GetOffsetY());
 		return true;

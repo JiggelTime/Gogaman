@@ -23,9 +23,6 @@
     <ClCompile Include="vendor\glad.c">
       <Filter>Source Files\vendor</Filter>
     </ClCompile>
-    <ClCompile Include="vendor\stb_image.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Gogaman\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,9 +36,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
@@ -60,9 +54,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\ECS\RenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp">
@@ -104,6 +95,9 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Gogaman\Graphics\RenderingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vendor\stb_image.h">
@@ -126,9 +120,6 @@
       <Filter>Source Files\graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Mesh.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
     <ClInclude Include="src\Gogaman\Input.h" />
     <ClInclude Include="src\Gogaman\Events\Event.h" />
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
@@ -153,16 +144,13 @@
     <ClInclude Include="src\Gogaman\ECS\World.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
-    <ClInclude Include="src\Gogaman\ECS\RenderableComponent.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.h" />
-    <ClInclude Include="src\Gogaman\ECS\RenderSystem.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\ShaderLoader.h" />
     <ClInclude Include="src\Gogaman\Graphics\ShaderManager.h" />
     <ClInclude Include="src\Gogaman\Graphics\Shader.h" />
     <ClInclude Include="src\Gogaman\Graphics\ShaderCache.h" />
-    <ClInclude Include="src\Gogaman\ECS\SpatialComponent.h" />
     <ClInclude Include="src\Gogaman\Logging\ConsoleLogger.h" />
     <ClInclude Include="src\Gogaman\Logging\AbstractLogger.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractShader.h" />
@@ -200,6 +188,13 @@
     <ClInclude Include="src\Gogaman\Graphics\RenderingContext.h" />
     <ClInclude Include="src\Gogaman\Resource.h" />
     <ClInclude Include="src\Gogaman\Graphics\UnitQuad.h" />
+    <ClInclude Include="src\Gogaman\Graphics\FullscreenTriangle.h" />
+    <ClInclude Include="src\Gogaman\Graphics\ModelMatrixSystem.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
+    <ClInclude Include="src\Gogaman\SpatialComponent.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
+    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs">
