@@ -26,9 +26,11 @@ namespace Gogaman
 
 			virtual FlexData::FlexData Import(const char *filepath) override;
 		private:
+			FbxAMatrix                GetNodeTransform(FbxNode *node) const;
 			template<typename GeometryElement, typename Value>
-			Value                     GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue);
+			Value                     GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue) const;
 			void                      ProcessMesh(FbxMesh *mesh);
+			void                      ProcessLight(const FbxLight *light);
 			FlexData::FlexTextureData ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture);
 			void                      ProcessMaterial(const FbxSurfaceMaterial *material);
 			void                      ProcessNodeRecursive(FbxNode *node);

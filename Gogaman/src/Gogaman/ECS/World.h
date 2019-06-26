@@ -36,13 +36,16 @@ namespace Gogaman
 
 			for(auto &i : m_Systems)
 			{
-				ComponentFlags systemComponentFlags = i->GetComponentFlags();
-				//New match
-				if(((systemComponentFlags & newFlags) == systemComponentFlags) && !((systemComponentFlags & currentFlags) == systemComponentFlags))
-					i->AddEntity(entity);
-				//No longer matched
-				else if(((systemComponentFlags & currentFlags) == systemComponentFlags) && !((systemComponentFlags & newFlags) == systemComponentFlags))
-					i->RemoveEntity(entity);
+				for(uint8_t j = 0; j < i->GetNumEntityGroups(); j++)
+				{
+					const ComponentFlags entityGroupFlags = i->GetEntityGroupComponentFlags(j);
+					//New match
+					if(((entityGroupFlags & newFlags) == entityGroupFlags) && ((entityGroupFlags & currentFlags) != entityGroupFlags))
+						i->AddEntity(entity, j);
+					//No longer matched
+					else if(((entityGroupFlags & currentFlags) == entityGroupFlags) && !((entityGroupFlags & newFlags) == entityGroupFlags))
+						i->RemoveEntity(entity, j);
+				}
 			}
 		}
 
@@ -89,7 +92,7 @@ namespace Gogaman
 	private:
 		EntityManager                                          m_EntityManager;
 		std::vector<std::unique_ptr<AbstractComponentManager>> m_ComponentManagers;
-		std::map<EntityID, ComponentFlags>                     m_EntityComponentFlags;
+		std::unordered_map<EntityID, ComponentFlags>           m_EntityComponentFlags;
 		std::vector<std::unique_ptr<System>>                   m_Systems;
 	};
 }

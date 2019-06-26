@@ -4,7 +4,7 @@
 #define SQRT2   1.41421356237f
 #define EPSILON 0.000001f
 
-#define MAX_POINT_LIGHTS 3
+#define MAX_POINT_LIGHTS 32
 //DISNEY or LAMBERT, Disney is higher quality but slower
 #define DIFFUSE_BRDF DISNEY
 //Lower quality but faster
@@ -21,7 +21,7 @@ in vec2 texCoordsFrag;
 struct PointLight 
 {
 	vec3  position;
-	vec3  color;
+	vec3  radiance;
 	float coneAperture;
 };
 
@@ -188,7 +188,7 @@ vec3 ComputePointLight(PointLight light)
 	vec3  Wi    = light.position - position;
 	float Ld    = length(Wi);
 	Wi          = normalize(Wi);
-	vec3  Li    = light.color * Attenuation(Ld);
+	vec3  Li    = light.radiance * Attenuation(Ld);
 	vec3  H     = normalize(viewDir + Wi);
 	float NdotV = abs(dot(normal, viewDir)) + EPSILON;
 	float LdotH = clamp(dot(Wi, H), 0.0f, 1.0f);

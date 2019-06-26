@@ -51,8 +51,10 @@
     <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentManager.h" />
     <ClInclude Include="src\Gogaman\ECS\Entity.h" />
+    <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
+    <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />

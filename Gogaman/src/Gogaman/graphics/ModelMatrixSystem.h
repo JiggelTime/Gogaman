@@ -17,32 +17,31 @@ namespace Gogaman
 	class ModelMatrixSystem : public System
 	{
 	public:
+		ModelMatrixSystem()
+		{
+			//m_NumEntityGroups = 1;
+
+			EntityGroup group;
+			group.componentFlags.set(GetComponentTypeID<SpatialComponent>());
+			group.componentFlags.set(GetComponentTypeID<RenderableComponent>());
+			AddEntityGroup(std::move(group));
+		}
+
 		virtual void Update() override
 		{
-			for(auto i : m_Entities)
+			for(auto i : m_EntityGroups[0].entities)
 			{
 				SpatialComponent    *spatialComponent    = m_World->GetComponent<SpatialComponent>(i);
 				RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
 				glm::mat4 modelMatrix;
 				modelMatrix = glm::translate(modelMatrix, spatialComponent->position);
-				modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);
+				//modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);
 				modelMatrix = glm::scale(modelMatrix,     spatialComponent->scale);
 
 				renderableComponent->modelMatrixHistory = renderableComponent ->modelMatrix;
-				//renderableComponent->modelMatrix        = modelMatrix;
-				renderableComponent->modelMatrix = glm::mat4();
+				renderableComponent->modelMatrix        = modelMatrix;
 			}
 		}
-
-		static inline ComponentFlags GetComponentFlagsStatic()
-		{
-			ComponentFlags componentFlags;
-			GM_SET_SYSTEM_COMPONENT_FLAG(SpatialComponent)
-			GM_SET_SYSTEM_COMPONENT_FLAG(RenderableComponent)
-			return componentFlags;
-		}
-
-		inline virtual const ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
 	};
 }

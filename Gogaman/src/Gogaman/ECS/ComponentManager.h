@@ -61,7 +61,7 @@ namespace Gogaman
 	private:
 		std::array<EntityID,      GM_MAX_COMPONENTS> m_ComponentIndexEntities;
 		std::unordered_map<EntityID, int>            m_EntityComponentIndices;
-		std::array<ComponentType, GM_MAX_COMPONENTS> m_Components;
 		int                                          m_NumComponents;
+		std::array<ComponentType, GM_MAX_COMPONENTS> m_Components;
 	};
 }

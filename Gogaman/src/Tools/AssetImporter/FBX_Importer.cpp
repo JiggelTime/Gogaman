@@ -73,8 +73,27 @@ namespace Gogaman
 			return m_FlexData;
 		}
 
+		FbxAMatrix FBX_Importer::GetNodeTransform(FbxNode *node) const
+		{
+			FbxAMatrix geometryTransform;
+			geometryTransform.SetIdentity();
+			if(node->GetNodeAttribute())
+			{
+				FbxVector4 geometryTranslation = node->GetGeometricTranslation(FbxNode::eSourcePivot);
+				FbxVector4 geometryRotation    = node->GetGeometricRotation(FbxNode::eSourcePivot);
+				FbxVector4 geometryScale       = node->GetGeometricScaling(FbxNode::eSourcePivot);
+
+				geometryTransform.SetT(geometryTranslation);
+				geometryTransform.SetR(geometryRotation);
+				geometryTransform.SetS(geometryScale);
+			}
+
+			FbxAMatrix globalTransform = node->EvaluateGlobalTransform();
+			return globalTransform * geometryTransform;
+		}
+
 		template<typename GeometryElement, typename Value>
-		Value FBX_Importer::GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue)
+		Value FBX_Importer::GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue) const
 		{
 			int index = 0;
 			if(!element)
@@ -106,12 +125,12 @@ namespace Gogaman
 			if(!mesh->GetElementNormal(0))
 				mesh->GenerateNormals();
 
-			FlexData::FlexMeshData meshData;
+			FlexData::FlexMeshData meshDataPayload;
 			std::unordered_map<FlexData::FlexVertexData, uint16_t, FlexData::FlexVertexDataHashFunction> vertexIndices;
 
 			uint32_t numTriangles = mesh->GetPolygonCount();
-			meshData.vertexBufferData.reserve(3 * numTriangles);
-			meshData.indexBufferData.reserve(3 * numTriangles);
+			meshDataPayload.vertexBufferData.reserve(3 * numTriangles);
+			meshDataPayload.indexBufferData.reserve(3  * numTriangles);
 
 			for(uint32_t i = 0; i < numTriangles; i++)
 			{
@@ -135,37 +154,98 @@ namespace Gogaman
 					#endif
 					//Normal
 					FbxVector4 normal  = GetVertexElement(mesh->GetElementNormal(0), controlPointIndex, i, j, FbxVector4(0.0f, 0.0f, 0.0f, 0.0f));
-					vertex.normal[0]   = static_cast<float>(normal[0]);
-					vertex.normal[1]   = static_cast<float>(normal[1]);
-					vertex.normal[2]   = static_cast<float>(normal[2]);
+					vertex.normal[0]   = (float)normal[0];
+					vertex.normal[1]   = (float)normal[1];
+					vertex.normal[2]   = (float)normal[2];
 					//Tangent
 					FbxVector4 tangent = GetVertexElement(mesh->GetElementTangent(0), controlPointIndex, i, j, FbxVector4(0.0f, 0.0f, 0.0f, 0.0f));
-					vertex.tangent[0]  = static_cast<float>(tangent[0]);
-					vertex.tangent[1]  = static_cast<float>(tangent[1]);
-					vertex.tangent[2]  = static_cast<float>(tangent[2]);
+					vertex.tangent[0]  = (float)tangent[0];
+					vertex.tangent[1]  = (float)tangent[1];
+					vertex.tangent[2]  = (float)tangent[2];
 
 					auto iterator = vertexIndices.find(vertex);
 					//Vertex is not in index map (new vertex)
 					if(iterator == vertexIndices.end())
 					{
-						if(meshData.vertexBufferData.size() >= UINT16_MAX)
+						if(meshDataPayload.vertexBufferData.size() >= UINT16_MAX)
 						{
 							std::cout << "Failed to import FBX mesh: number of vertices exceeds " << UINT16_MAX << std::endl;
 							exit(1);
 						}
 						
-						uint16_t index = static_cast<uint16_t>(meshData.vertexBufferData.size());
-						meshData.vertexBufferData.emplace_back(std::move(vertex));
-						meshData.indexBufferData.emplace_back(index);
+						uint16_t index = static_cast<uint16_t>(meshDataPayload.vertexBufferData.size());
+						meshDataPayload.vertexBufferData.emplace_back(std::move(vertex));
+						meshDataPayload.indexBufferData.emplace_back(index);
 						vertexIndices[vertex] = index;
 					}
 					//Vertex is already in index map (duplicate vertex)
 					else
-						meshData.indexBufferData.emplace_back(iterator->second);
+						meshDataPayload.indexBufferData.emplace_back(iterator->second);
 				}
 			}
 
-			m_FlexData.meshes.emplace_back(std::move(meshData));
+			FbxAMatrix meshTransform = GetNodeTransform(mesh->GetNode());
+			//Position
+			FbxVector4 meshPosition = meshTransform.GetT();
+			meshDataPayload.transform.position[0] = (float)meshPosition[0];
+			meshDataPayload.transform.position[1] = (float)meshPosition[1];
+			meshDataPayload.transform.position[2] = (float)meshPosition[2];
+			//Rotation
+			FbxVector4 meshRotation = meshTransform.GetR();
+			meshDataPayload.transform.rotation[0] = (float)meshRotation[0];
+			meshDataPayload.transform.rotation[1] = (float)meshRotation[1];
+			meshDataPayload.transform.rotation[2] = (float)meshRotation[2];
+			meshDataPayload.transform.rotation[3] = (float)meshRotation[3];
+			//SEE IF THIS WORKS ^
+			meshDataPayload.transform.rotation[3] = 0.0f;
+			//Scale
+			FbxVector4 meshScale = meshTransform.GetS();
+			meshDataPayload.transform.scale[0] = (float)meshScale[0];
+			meshDataPayload.transform.scale[1] = (float)meshScale[1];
+			meshDataPayload.transform.scale[2] = (float)meshScale[2];
+
+			m_FlexData.meshes.emplace_back(std::move(meshDataPayload));
+		}
+
+		void FBX_Importer::ProcessLight(const FbxLight *light)
+		{
+
+			FbxAMatrix lightTransform = light->GetNode()->EvaluateGlobalTransform();
+
+			if(light->LightType.Get() == FbxLight::ePoint)
+			{
+				FlexData::FlexPointLightData pointLightDataPayload;
+				//Position
+				FbxVector4 position = lightTransform.GetT();
+				pointLightDataPayload.position[0] = (float)position[0];
+				pointLightDataPayload.position[1] = (float)position[1];
+				pointLightDataPayload.position[2] = (float)position[2];
+				//Radiance
+				FbxDouble3 color     = light->Color.Get();
+				float      intensity = float(light->Intensity.Get() * 0.01f);
+				pointLightDataPayload.radiance[0] = (float)color[0] * intensity;
+				pointLightDataPayload.radiance[1] = (float)color[1] * intensity;
+				pointLightDataPayload.radiance[2] = (float)color[2] * intensity;
+
+				m_FlexData.pointLights.emplace_back(std::move(pointLightDataPayload));
+			}
+			else if(light->LightType.Get() == FbxLight::eDirectional)
+			{
+				FlexData::FlexDirectionalLightData directionalLightDataPayload;
+				//Direction
+				FbxVector4 direction = lightTransform.GetR();
+				directionalLightDataPayload.direction[0] = (float)direction[0];
+				directionalLightDataPayload.direction[1] = (float)direction[1];
+				directionalLightDataPayload.direction[2] = (float)direction[2];
+				//Radiance
+				FbxDouble3 color     = light->Color.Get();
+				float      intensity = float(light->Intensity.Get() * 0.01f);
+				directionalLightDataPayload.radiance[0] = (float)color[0] * intensity;
+				directionalLightDataPayload.radiance[1] = (float)color[1] * intensity;
+				directionalLightDataPayload.radiance[2] = (float)color[2] * intensity;
+				
+				m_FlexData.directionalLights.emplace_back(std::move(directionalLightDataPayload));
+			}
 		}
 
 		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture)
@@ -292,6 +372,7 @@ namespace Gogaman
 					ProcessMesh(node->GetMesh());
 					break;
 				case FbxNodeAttribute::eLight:
+					ProcessLight(node->GetLight());
 					break;
 				}
 
@@ -315,23 +396,27 @@ int main(int argc, char *argv[])
 
 	//const char *importFilepath = argv[1];
 	//const char *exportFilepath = argv[2];
-	const char *importFilepath = "D:/dev/monkey.fbx";
-	const char *exportFilepath = "D:/dev/monkey.flex";
+	const char *importFilepath = "D:/dev/testScene/testScene.fbx";
+	const char *exportFilepath = "D:/dev/testScene/testScene.flex";
 
 	FlexData::FlexData testFlexData;
+
 	//Import FBX file
 	Gogaman::Tools::FBX_Importer importer;
 	testFlexData = importer.Import(importFilepath);
 
-	FlexData::PrintFlexData(testFlexData);
+	while(testFlexData.materials.size() > 1)
+		testFlexData.materials.pop_back();
 
 	//Export FlexData
 	FlexData::ExportFlexData(exportFilepath, testFlexData);
-	
+
 	//Import FlexData
 	testFlexData = FlexData::ImportFlexData(exportFilepath);
-
+	
 	FlexData::PrintFlexData(testFlexData);
+
+	//FlexData::PrintFlexData(testFlexData);
 	/*
 	for(auto i : testFlexData.meshes)
 	{

@@ -2,9 +2,6 @@
 
 #include "Gogaman/ECS/System.h"
 
-#include "RenderableComponent.h"
-
-#include "Gogaman/Base.h"
 #include "Gogaman/Config.h"
 #include "Gogaman/Events/EventListener.h"
 #include "Gogaman/Events/WindowEvent.h"
@@ -41,15 +38,6 @@ namespace Gogaman
 		virtual void Shutdown()   override;
 
 		virtual void OnEvent(Event &event) override;
-
-		static inline const ComponentFlags GetComponentFlagsStatic()
-		{
-			ComponentFlags componentFlags;
-			GM_SET_SYSTEM_COMPONENT_FLAG(RenderableComponent)
-			return componentFlags;
-		}
-
-		inline virtual const ComponentFlags GetComponentFlags() const override { return GetComponentFlagsStatic(); }
 	private:
 		void InitializeRenderSurfaces();
 		void InitializeShaders();

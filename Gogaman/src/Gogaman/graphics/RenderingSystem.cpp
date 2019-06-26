@@ -1,19 +1,41 @@
 #include "pch.h"
 #include "RenderingSystem.h"
 
+#include "Gogaman/Base.h"
+
 #include "Gogaman/ECS/World.h"
+#include "RenderableComponent.h"
+#include "LightComponent.h"
 
 #include "Gogaman/Application.h"
 #include "Gogaman/Input.h"
 
 #include "Gogaman/Events/EventDispatcher.h"
 
-#include "Gogaman/Graphics/Lights/Pointlight.h"
+//#include "Gogaman/Graphics/Lights/Pointlight.h"
+
+#define GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX        0
+#define GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX       1
+#define GM_RENDERING_SYSTEM_DIRECTIONAL_LIGHT_GROUP_INDEX 2
 
 namespace Gogaman
 {
 	RenderingSystem::RenderingSystem()
-	{}
+	{
+		//m_NumEntityGroups = 3;
+
+		EntityGroup renderableGroup;
+		renderableGroup.componentFlags.set(GetComponentTypeID<RenderableComponent>());
+		AddEntityGroup(std::move(renderableGroup));
+
+		EntityGroup pointLightGroup;
+		pointLightGroup.componentFlags.set(GetComponentTypeID<PointLightComponent>());
+		AddEntityGroup(std::move(pointLightGroup));
+
+		EntityGroup directionalLightGroup;
+		directionalLightGroup.componentFlags.set(GetComponentTypeID<DirectionalLightComponent>());
+		AddEntityGroup(std::move(directionalLightGroup));
+	}
 
 	void RenderingSystem::Initialize()
 	{
@@ -299,6 +321,7 @@ namespace Gogaman
 
 	void RenderingSystem::Render()
 	{
+		/*
 		//Light(s)
 		std::vector<PointLight> pointLights;
 			//Pointlight 0
@@ -313,7 +336,8 @@ namespace Gogaman
 			//Luminous intensity (candela)
 			pointLight1.SetColor(glm::vec3(11.0f, 8.0f, 4.0f));
 			pointLights.push_back(pointLight1);
-
+		*/
+		
 		//Update camera matrices
 		previousViewProjectionMatrix = viewProjectionMatrix;
 		projectionMatrix             = glm::perspective(glm::radians(camera.Zoom), aspectRatio, cameraNearPlane, cameraFarPlane);
@@ -340,7 +364,7 @@ namespace Gogaman
 		m_ShaderManager->Get(m_GBufferShader).SetUniformVec2("previousTemporalJitter", glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).SetUniformBool("normalMapping",          GM_CONFIG.normalMapping);
 
-		for(auto i : m_Entities)
+		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
@@ -366,15 +390,26 @@ namespace Gogaman
 		m_FinalBuffer->Clear();
 
 		m_ShaderManager->Get(m_DeferredLightingShader).Bind();
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].position",      pointLight0.GetPosition());
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].color",         pointLight0.GetColor());
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.GetConeAperture());
 
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[1].position",      pointLight1.GetPosition());
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[1].color",         pointLight1.GetColor());
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[1].coneAperture", pointLight1.GetConeAperture());
+		uint32_t pointLightIndex = 0;
+		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities)
+		{
+			PointLightComponent *pointLightComponent = m_World->GetComponent<PointLightComponent>(i);
 
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("numLights",                     pointLights.size());
+			std::string positionUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].position";
+			std::string radianceUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].radiance";
+
+			m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3(positionUniformName, pointLightComponent->position);
+			m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3(radianceUniformName, pointLightComponent->radiance);
+			m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[0].coneAperture", 0.0f);
+			pointLightIndex++;
+		}
+
+		//m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].position",      pointLight0.GetPosition());
+		//m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].color",         pointLight0.GetColor());
+		//m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.GetConeAperture());
+
+		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("numLights",                     m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities.size());
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("cameraPos",                    camera.Position);
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("voxelGridSize",               GM_CONFIG.voxelGridSize);
 		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("voxelGridSizeInverse",        1.0f / GM_CONFIG.voxelGridSize);
