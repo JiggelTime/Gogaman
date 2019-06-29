@@ -8,12 +8,18 @@
 #include <vector>
 
 #define FLEX_HEADER_DATA_SIGNATURE 70, 108, 101, 120
-#define FLEX_HEADER_DATA_VERSION   3
+#define FLEX_HEADER_DATA_VERSION   4
 
 #define FLEX_MESH_TRANSFORM_DATA_SIZE    (sizeof(float) * (3 + 4 + 3))
 #define FLEX_VERTEX_DATA_SIZE            (sizeof(float) * (3 + 2 + 3 + 3))
 #define FLEX_POINT_LIGHT_DATA_SIZE       (sizeof(float) * (3 + 3))
 #define FLEX_DIRECTIONAL_LIGHT_DATA_SIZE (sizeof(float) * (3 + 3))
+
+#define FLEX_DEFAULT_ALBEDO_TEXTURE_VALUE     UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX
+#define FLEX_DEFAULT_NORMAL_TEXTURE_VALUE     0,         0,         0,         UINT8_MAX
+#define FLEX_DEFAULT_ROUGHNESS_TEXTURE_VALUE  UINT8_MAX
+#define FLEX_DEFAULT_METALNESS_TEXTURE_VALUE  0
+#define FLEX_DEFAULT_EMISSIVITY_TEXTURE_VALUE 0
 
 namespace FlexData
 {
@@ -88,13 +94,12 @@ namespace FlexData
 	{
 		uint16_t  width;
 		uint16_t  height;
-		uint8_t   bytesPerPixel;
 		uint8_t  *data;
 	};
 
 	struct FlexMaterialData
 	{
-		//XYZW8
+		//RGBW8
 		FlexTextureData albedo;
 		//XYZW8
 		FlexTextureData normal;
@@ -173,16 +178,16 @@ namespace FlexData
 				//Read transform data
 				fread(&meshDataPayload.transform, FLEX_MESH_TRANSFORM_DATA_SIZE, 1, file);
 				//Read vertex buffer data size
-				uint32_t vertexBufferDataSize;
-				fread(&vertexBufferDataSize, sizeof(uint32_t), 1, file);
+				uint64_t vertexBufferDataSize;
+				fread(&vertexBufferDataSize, sizeof(uint64_t), 1, file);
 				meshDataPayload.vertexBufferData.reserve(vertexBufferDataSize / FLEX_VERTEX_DATA_SIZE);
 				//Read vertex buffer data
 				std::vector<FlexVertexData> vertexBufferData(vertexBufferDataSize / FLEX_VERTEX_DATA_SIZE);
 				meshDataPayload.vertexBufferData = std::move(vertexBufferData);
 				fread(&meshDataPayload.vertexBufferData[0], 1, vertexBufferDataSize, file);
 				//Read index buffer data size
-				uint32_t indexBufferDataSize;
-				fread(&indexBufferDataSize, sizeof(uint32_t), 1, file);
+				uint64_t indexBufferDataSize;
+				fread(&indexBufferDataSize, sizeof(uint64_t), 1, file);
 				meshDataPayload.indexBufferData.reserve(indexBufferDataSize / sizeof(uint16_t));
 				//Read index buffer data
 				std::vector<uint16_t> indexBufferData(indexBufferDataSize / sizeof(uint16_t));
@@ -202,7 +207,7 @@ namespace FlexData
 			//Read point light data
 			std::vector<FlexPointLightData> pointLightData(numPointLights);
 			dataPayload.pointLights = std::move(pointLightData);
-			uint32_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * numPointLights;
+			uint64_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * numPointLights;
 			fread(&dataPayload.pointLights[0], 1, pointLightDataSize, file);
 
 			//Directional light data
@@ -214,7 +219,7 @@ namespace FlexData
 			//Read point light data
 			std::vector<FlexDirectionalLightData> directionalLightData(numDirectionalLights);
 			dataPayload.directionalLights = std::move(directionalLightData);
-			uint32_t directionalLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * numDirectionalLights;
+			uint64_t directionalLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * numDirectionalLights;
 			fread(&dataPayload.directionalLights[0], 1, directionalLightDataSize, file);
 			
 			//Material data
@@ -225,27 +230,25 @@ namespace FlexData
 			dataPayload.materials.reserve(numMaterials);
 			for(uint32_t i = 0; i < numMaterials; i++)
 			{
-				auto ReadTexture = [](FILE *file, FlexTextureData &texturePayload)
+				auto ReadTexture = [](FILE *file, FlexTextureData &texturePayload, const uint8_t bytesPerPixel)
 				{
 					//Read width
 					fread(&texturePayload.width, sizeof(texturePayload.width), 1, file);
 					//Read height
 					fread(&texturePayload.height, sizeof(texturePayload.height), 1, file);
-					//Read bytes per pixel
-					fread(&texturePayload.bytesPerPixel, sizeof(texturePayload.bytesPerPixel), 1, file);
 					//Read texture data
-					uint32_t  textureDataSize = texturePayload.width * texturePayload.height * texturePayload.bytesPerPixel;
+					uint64_t  textureDataSize = texturePayload.width * texturePayload.height * bytesPerPixel;
 					uint8_t  *textureData = new uint8_t[textureDataSize];
 					fread(textureData, 1, textureDataSize, file);
 					texturePayload.data = textureData;
 				};
 
 				FlexMaterialData materialDataPayload;
-				ReadTexture(file, materialDataPayload.albedo);
-				ReadTexture(file, materialDataPayload.normal);
-				ReadTexture(file, materialDataPayload.roughness);
-				ReadTexture(file, materialDataPayload.metalness);
-				ReadTexture(file, materialDataPayload.emissivity);
+				ReadTexture(file, materialDataPayload.albedo,     4);
+				ReadTexture(file, materialDataPayload.normal,     4);
+				ReadTexture(file, materialDataPayload.roughness,  1);
+				ReadTexture(file, materialDataPayload.metalness,  1);
+				ReadTexture(file, materialDataPayload.emissivity, 1);
 
 				dataPayload.materials.emplace_back(std::move(materialDataPayload));
 			}
@@ -296,13 +299,13 @@ namespace FlexData
 				//Write transform data
 				fwrite(&i.transform, FLEX_MESH_TRANSFORM_DATA_SIZE, 1, file);
 				//Write vertex buffer data size
-				uint32_t vertexBufferDataSize = FLEX_VERTEX_DATA_SIZE * i.vertexBufferData.size();
+				uint64_t vertexBufferDataSize = FLEX_VERTEX_DATA_SIZE * i.vertexBufferData.size();
 				fwrite(&vertexBufferDataSize, sizeof(vertexBufferDataSize), 1, file);
 				//Write vertex buffer data
 				//TODO: try using std::vector data()
 				fwrite(&i.vertexBufferData[0], 1, vertexBufferDataSize, file);
 				//Write index buffer data size
-				uint32_t indexBufferDataSize = sizeof(uint16_t) * i.indexBufferData.size();
+				uint64_t indexBufferDataSize = sizeof(uint16_t) * i.indexBufferData.size();
 				fwrite(&indexBufferDataSize, sizeof(indexBufferDataSize), 1, file);
 				//Write index buffer data
 				fwrite(&i.indexBufferData[0], 1, indexBufferDataSize, file);
@@ -313,7 +316,7 @@ namespace FlexData
 			dataPayload.numPointLights = data.pointLights.size();
 			fwrite(&dataPayload.numPointLights, sizeof(dataPayload.numPointLights), 1, file);
 			//Write point light data
-			uint32_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * data.pointLights.size();
+			uint64_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * data.pointLights.size();
 			fwrite(&data.pointLights[0], 1, pointLightDataSize, file);
 
 			//Directional light data
@@ -321,7 +324,7 @@ namespace FlexData
 			dataPayload.numDirectionalLights = data.directionalLights.size();
 			fwrite(&dataPayload.numDirectionalLights, sizeof(dataPayload.numDirectionalLights), 1, file);
 			//Write directional light data
-			uint32_t directionalLightDataSize = FLEX_DIRECTIONAL_LIGHT_DATA_SIZE * data.directionalLights.size();
+			uint64_t directionalLightDataSize = FLEX_DIRECTIONAL_LIGHT_DATA_SIZE * data.directionalLights.size();
 			fwrite(&data.directionalLights[0], 1, directionalLightDataSize, file);
 
 			//Material data
@@ -330,24 +333,22 @@ namespace FlexData
 			fwrite(&dataPayload.numMaterials, sizeof(dataPayload.numMaterials), 1, file);
 			for(const auto &i : data.materials)
 			{
-				auto WriteTexture = [](const FlexTextureData &texture, FILE *file)
+				auto WriteTexture = [](FILE *file, const FlexTextureData &texture, const uint8_t bytesPerPixel)
 				{
 					//Write width
 					fwrite(&texture.width,         sizeof(texture.width),         1, file);
 					//Write height
 					fwrite(&texture.height,        sizeof(texture.height),        1, file);
-					//Write bytes per pixel
-					fwrite(&texture.bytesPerPixel, sizeof(texture.bytesPerPixel), 1, file);
 					//Write texture data
-					fwrite(texture.data, 1, texture.width * texture.height * texture.bytesPerPixel, file);
+					fwrite(texture.data, 1, texture.width * texture.height * bytesPerPixel, file);
 				};
 
 				//Write textures
-				WriteTexture(i.albedo,     file);
-				WriteTexture(i.normal,     file);
-				WriteTexture(i.roughness,  file);
-				WriteTexture(i.metalness,  file);
-				WriteTexture(i.emissivity, file);
+				WriteTexture(file, i.albedo,     4);
+				WriteTexture(file, i.normal,     4);
+				WriteTexture(file, i.roughness,  1);
+				WriteTexture(file, i.metalness,  1);
+				WriteTexture(file, i.emissivity, 1);
 			}
 
 			fclose(file);
@@ -375,8 +376,7 @@ namespace FlexData
 		}
 		std::cout << std::endl;
 
-		std::cout << "[FlexData] Meshes: " << data.meshes.size() << std::endl;
-
+		std::cout << "[FlexData] Point lights: " << data.pointLights.size() << std::endl;
 		for(const auto &i : data.pointLights)
 		{
 			std::cout << std::endl;
@@ -386,6 +386,7 @@ namespace FlexData
 		}
 		std::cout << std::endl;
 
+		std::cout << "[FlexData] Directional lights: " << data.directionalLights.size() << std::endl;
 		for(const auto &i : data.directionalLights)
 		{
 			std::cout << std::endl;
@@ -400,11 +401,11 @@ namespace FlexData
 		{
 			std::cout << std::endl;
 			std::cout << "[FlexData] Material:" << std::endl;
-			std::cout << "[FlexData]	-Albedo texture     | Width: " << i.albedo.width     << " | Height: " << i.albedo.height     << " | BPP: " << +i.albedo.bytesPerPixel     << " | First pixel (XYZW): " << +i.albedo.data[0]     << ", " << +i.albedo.data[1] << ", " << +i.albedo.data[2] << ", " << +i.albedo.data[3] << std::endl;
-			std::cout << "[FlexData]	-Normal texture     | Width: " << i.normal.width     << " | Height: " << i.normal.height     << " | BPP: " << +i.normal.bytesPerPixel     << " | First pixel (XYZW): " << +i.normal.data[0]     << ", " << +i.normal.data[1] << ", " << +i.normal.data[2] << ", " << +i.normal.data[3] << std::endl;
-			std::cout << "[FlexData]	-Roughness texture  | Width: " << i.roughness.width  << " | Height: " << i.roughness.height  << " | BPP: " << +i.roughness.bytesPerPixel  << " | First pixel (X): "    << +i.roughness.data[0]  << std::endl;
-			std::cout << "[FlexData]	-Metalness texture  | Width: " << i.metalness.width  << " | Height: " << i.metalness.height  << " | BPP: " << +i.metalness.bytesPerPixel  << " | First pixel (X): "    << +i.metalness.data[0]  << std::endl;
-			std::cout << "[FlexData]	-Emissivity texture | Width: " << i.emissivity.width << " | Height: " << i.emissivity.height << " | BPP: " << +i.emissivity.bytesPerPixel << " | First pixel (X): "    << +i.emissivity.data[0] << std::endl;
+			std::cout << "[FlexData]	-Albedo texture     | Width: " << i.albedo.width     << " | Height: " << i.albedo.height     << " | First pixel (XYZW): " << +i.albedo.data[0]     << ", " << +i.albedo.data[1] << ", " << +i.albedo.data[2] << ", " << +i.albedo.data[3] << std::endl;
+			std::cout << "[FlexData]	-Normal texture     | Width: " << i.normal.width     << " | Height: " << i.normal.height     << " | First pixel (XYZW): " << +i.normal.data[0]     << ", " << +i.normal.data[1] << ", " << +i.normal.data[2] << ", " << +i.normal.data[3] << std::endl;
+			std::cout << "[FlexData]	-Roughness texture  | Width: " << i.roughness.width  << " | Height: " << i.roughness.height  << " | First pixel (X): "    << +i.roughness.data[0]  << std::endl;
+			std::cout << "[FlexData]	-Metalness texture  | Width: " << i.metalness.width  << " | Height: " << i.metalness.height  << " | First pixel (X): "    << +i.metalness.data[0]  << std::endl;
+			std::cout << "[FlexData]	-Emissivity texture | Width: " << i.emissivity.width << " | Height: " << i.emissivity.height << " | First pixel (X): "    << +i.emissivity.data[0] << std::endl;
 		}
 		std::cout << std::endl;
 	}

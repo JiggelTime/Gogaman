@@ -2,6 +2,7 @@
 #include "RenderingSystem.h"
 
 #include "Gogaman/Base.h"
+#include "Gogaman/Logging/Log.h"
 
 #include "Gogaman/ECS/World.h"
 #include "RenderableComponent.h"
@@ -12,18 +13,16 @@
 
 #include "Gogaman/Events/EventDispatcher.h"
 
-//#include "Gogaman/Graphics/Lights/Pointlight.h"
-
 #define GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX        0
 #define GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX       1
 #define GM_RENDERING_SYSTEM_DIRECTIONAL_LIGHT_GROUP_INDEX 2
+
+#define GM_SHADER_FILE_PATH_ROOT std::string("../Gogaman/src/Shaders/")
 
 namespace Gogaman
 {
 	RenderingSystem::RenderingSystem()
 	{
-		//m_NumEntityGroups = 3;
-
 		EntityGroup renderableGroup;
 		renderableGroup.componentFlags.set(GetComponentTypeID<RenderableComponent>());
 		AddEntityGroup(std::move(renderableGroup));
@@ -56,6 +55,10 @@ namespace Gogaman
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
+		//Debug
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam){ GM_ASSERT(false, "OpenGL error | Type: 0x%x | Severity: 0x%x | Message: %s", type, severity, message) }, 0);
+		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
 
 		m_FullscreenTriangle = std::make_unique<FullscreenTriangle>();
 
@@ -126,12 +129,12 @@ namespace Gogaman
 
 	void RenderingSystem::InitializeShaders()
 	{
-		m_PrecomputeBRDFShader   = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.vs", "D:/dev/Gogaman/Gogaman/shaders/precomputeBRDF.fs");
-		m_GBufferShader          = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/gbuffershader.vs",  "D:/dev/Gogaman/Gogaman/shaders/gbuffershader.fs");
-		m_DeferredLightingShader = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/directPBR.vs",      "D:/dev/Gogaman/Gogaman/shaders/directPBR.fs");
-		m_SkyboxShader           = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/skyboxshader.vs",   "D:/dev/Gogaman/Gogaman/shaders/skyboxshader.fs");
-		m_LightShader            = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/lampshader.vs",     "D:/dev/Gogaman/Gogaman/shaders/lampshader.fs");
-		m_PostprocessShader      = m_ShaderManager->Create("D:/dev/Gogaman/Gogaman/shaders/postprocess.vs",    "D:/dev/Gogaman/Gogaman/shaders/postprocess.fs");
+		m_PrecomputeBRDFShader   = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("precomputeBRDF.vs"), GM_SHADER_FILE_PATH_ROOT.append("precomputeBRDF.fs"));
+		m_GBufferShader          = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("gbuffershader.vs"),  GM_SHADER_FILE_PATH_ROOT.append("gbuffershader.fs"));
+		m_DeferredLightingShader = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("directPBR.vs"),      GM_SHADER_FILE_PATH_ROOT.append("directPBR.fs"));
+		m_SkyboxShader           = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("skyboxshader.vs"),   GM_SHADER_FILE_PATH_ROOT.append("skyboxshader.fs"));
+		m_LightShader            = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("lampshader.vs"),     GM_SHADER_FILE_PATH_ROOT.append("lampshader.fs"));
+		m_PostprocessShader      = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("postprocess.vs"),    GM_SHADER_FILE_PATH_ROOT.append("postprocess.fs"));
 
 		//Upload uniform data
 		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialAlbedo",     0);
@@ -321,23 +324,6 @@ namespace Gogaman
 
 	void RenderingSystem::Render()
 	{
-		/*
-		//Light(s)
-		std::vector<PointLight> pointLights;
-			//Pointlight 0
-			Gogaman::PointLight pointLight0;
-			pointLight0.SetPosition(glm::vec3(sin(glfwGetTime()) * 1.0f - 1.0f, 2.2f, -2.0f));
-			//Luminous intensity (candela)
-			pointLight0.SetColor(glm::vec3(3.0f, 8.0f, 11.0f));
-			pointLights.push_back(pointLight0);
-			//Pointlight 1
-			Gogaman::PointLight pointLight1;
-			pointLight1.SetPosition(glm::vec3(-2.0f, 1.2f, cos(glfwGetTime()) * 1.0f + 1.0f));
-			//Luminous intensity (candela)
-			pointLight1.SetColor(glm::vec3(11.0f, 8.0f, 4.0f));
-			pointLights.push_back(pointLight1);
-		*/
-		
 		//Update camera matrices
 		previousViewProjectionMatrix = viewProjectionMatrix;
 		projectionMatrix             = glm::perspective(glm::radians(camera.Zoom), aspectRatio, cameraNearPlane, cameraFarPlane);
@@ -351,6 +337,7 @@ namespace Gogaman
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Geometry pass
+		//TODO: G-Buffer and post processing should be done in low level renderer
 		glViewport(0, 0, m_RenderResolutionWidth, m_RenderResolutionHeight);
 		glEnable(GL_DEPTH_TEST);
 		m_G_Buffer->Bind();
@@ -364,9 +351,16 @@ namespace Gogaman
 		m_ShaderManager->Get(m_GBufferShader).SetUniformVec2("previousTemporalJitter", glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).SetUniformBool("normalMapping",          GM_CONFIG.normalMapping);
 
+		//Generate render data from renderable entities
+		//TODO: Store distance to camera for each mesh for depth sorting
 		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
+			//Is the entire renderable component needed to be loaded into cache here?
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
+
+			//Frustrum cull...
+			
+			//Generate render batches...
 
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         renderableComponent->modelMatrix);
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("previousM", renderableComponent->modelMatrixHistory);
@@ -376,7 +370,11 @@ namespace Gogaman
 			renderableComponent->vertexArrayBuffer->Bind();
 			glDrawElements(GL_TRIANGLES, renderableComponent->indexBuffer->GetNumIndices(), GL_UNSIGNED_SHORT, 0);
 		}
+
+		//Sort render batches (using flags)...
 		
+		//Render the command queue...
+
 		glDisable(GL_DEPTH_TEST);
 
 		//Reset render mode back to fill

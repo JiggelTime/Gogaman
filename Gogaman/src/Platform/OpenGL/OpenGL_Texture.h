@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/AbstractTexture.h"
+#include "Gogaman/Graphics/Texture/AbstractTexture.h"
 
 #include "Gogaman/Base.h"
 #include "Gogaman/Logging/Log.h"

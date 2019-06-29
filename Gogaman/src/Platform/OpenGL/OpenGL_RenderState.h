@@ -2,6 +2,8 @@
 
 #include "Gogaman/Graphics/AbstractRenderState.h"
 
+#include <glad.h>
+
 namespace Gogaman
 {
 	class RenderState : public AbstractRenderState<RenderState>

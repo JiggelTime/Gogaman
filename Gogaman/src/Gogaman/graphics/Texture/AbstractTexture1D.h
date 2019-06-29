@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/CRTP.h"
-#include "Gogaman/Graphics/Texture.h"
+#include "Gogaman/Graphics/Texture/Texture.h"
 
 namespace Gogaman
 {

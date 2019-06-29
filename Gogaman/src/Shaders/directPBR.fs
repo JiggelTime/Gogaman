@@ -4,9 +4,9 @@
 #define SQRT2   1.41421356237f
 #define EPSILON 0.000001f
 
-#define MAX_POINT_LIGHTS 32
-//DISNEY or LAMBERT, Disney is higher quality but slower
-#define DIFFUSE_BRDF DISNEY
+#define MAX_POINT_LIGHTS 64
+//DISNEY / LAMBERT | Disney is higher quality but slower
+#define DIFFUSE_BRDF_DISNEY
 //Lower quality but faster
 #define USE_FAST_VISIBILITY_SMITH_GGX 0
 //Multiple of voxel grid size
@@ -208,12 +208,12 @@ vec3 ComputePointLight(PointLight light)
 	vec3 Fr = NDF * V * F;
 
 	//Disney or Lambert diffuse BRDF
-	#if DIFFUSE_BRDF == DISNEY
+	#if defined(DIFFUSE_BRDF_DISNEY)
 		vec3 Fd = albedo * DiffuseBurley(NdotV, NdotL, LdotH, linearRoughness);
-	#elif DIFFUSE_BRDF == LAMBERT
+	#elif defined(DIFFUSE_BRDF_LAMBERT)
 		vec3 Fd = albedo / PI;
 	#else
-		vec3 Fd = vec3(0.0f);
+		#error
 	#endif
 
 	float Vis = TraceShadowCone(Wi, light.coneAperture, Ld);

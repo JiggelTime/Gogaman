@@ -2,10 +2,9 @@
 
 #include "Gogaman/CRTP.h"
 
-#include "Shader.h"
-#include "Texture.h"
-
-#define GM_MAX_CACHED_RENDER_STATES 2
+#include "RenderSurface.h"
+#include "Shader/Shader.h"
+#include "Texture/Texture.h"
 
 namespace Gogaman
 {
@@ -33,7 +32,8 @@ namespace Gogaman
 		AbstractRenderState()  = default;
 		~AbstractRenderState() = default;
 	protected:
-		ShaderID                  m_CurrentShader;
-		std::array<TextureID, 16> m_CurrentTextures;
+		RenderSurfaceID           m_RenderSurface;
+		ShaderID                  m_Shader;
+		std::array<TextureID, 16> m_Textures;
 	};
 }

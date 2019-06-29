@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/AbstractShader.h"
+#include "Gogaman/Graphics/Shader/AbstractShader.h"
 
 #include "Gogaman/Config.h"
 

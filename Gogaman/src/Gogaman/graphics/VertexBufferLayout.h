@@ -2,7 +2,7 @@
 
 #include "VertexAttribute.h"
 
-#include "Shader.h"
+#include "Shader/Shader.h"
 
 namespace Gogaman
 {

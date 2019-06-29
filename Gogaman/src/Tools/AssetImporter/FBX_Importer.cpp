@@ -269,9 +269,8 @@ namespace Gogaman
 					FlexData::FlexTextureData textureDataPayload;
 					textureDataPayload.width         = importWidth;
 					textureDataPayload.height        = importHeight;
-					textureDataPayload.bytesPerPixel = exportChannels;
 
-					uint32_t textureDataSize = importWidth * importHeight * exportChannels;
+					uint64_t textureDataSize = importWidth * importHeight * exportChannels;
 					textureDataPayload.data = new uint8_t[textureDataSize];
 					memcpy((void *)textureDataPayload.data, importData, textureDataSize);
 					STBI_FREE(importData);
@@ -309,52 +308,42 @@ namespace Gogaman
 			FbxProperty *emissivityProperty = &phongMaterial->Emissive;
 
 			//Albedo
-			uint8_t defaultAlbedoTextureData[4] = { 0, UINT8_MAX, UINT8_MAX, UINT8_MAX };
 			FlexData::FlexTextureData defaultAlbedoTexture;
 			defaultAlbedoTexture.width         = 1;
 			defaultAlbedoTexture.height        = 1;
-			defaultAlbedoTexture.bytesPerPixel = 4;
-			defaultAlbedoTexture.data          = defaultAlbedoTextureData;
+			defaultAlbedoTexture.data          = new uint8_t[4]{ FLEX_DEFAULT_ALBEDO_TEXTURE_VALUE };
 
 			materialDataPayload.albedo = ProcessTexture((FbxFileTexture *)albedoProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 4, defaultAlbedoTexture);
 
 			//Normal
-			uint8_t defaultNormalTextureData[4] = { 0, 0, UINT8_MAX, UINT8_MAX };
 			FlexData::FlexTextureData defaultNormalTexture;
 			defaultNormalTexture.width         = 1;
 			defaultNormalTexture.height        = 1;
-			defaultNormalTexture.bytesPerPixel = 4;
-			defaultNormalTexture.data          = defaultNormalTextureData;
+			defaultNormalTexture.data          = new uint8_t[4]{ FLEX_DEFAULT_NORMAL_TEXTURE_VALUE };
 
 			materialDataPayload.normal = ProcessTexture((FbxFileTexture *)normalProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 4, defaultNormalTexture);
 
 			//Roughness
-			uint8_t *defaultRoughnessTextureData = new uint8_t(UINT8_MAX);
 			FlexData::FlexTextureData defaultRoughnessTexture;
 			defaultRoughnessTexture.width         = 1;
 			defaultRoughnessTexture.height        = 1;
-			defaultRoughnessTexture.bytesPerPixel = 1;
-			defaultRoughnessTexture.data          = defaultRoughnessTextureData;
+			defaultRoughnessTexture.data          = new uint8_t(FLEX_DEFAULT_ROUGHNESS_TEXTURE_VALUE);
 
 			materialDataPayload.roughness = ProcessTexture((FbxFileTexture *)roughnessProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, defaultRoughnessTexture);
 
 			//Metalness
-			uint8_t *defaultMetalnessTextureData = new uint8_t(0);
 			FlexData::FlexTextureData defaultMetalnessTexture;
 			defaultMetalnessTexture.width         = 1;
 			defaultMetalnessTexture.height        = 1;
-			defaultMetalnessTexture.bytesPerPixel = 1;
-			defaultMetalnessTexture.data          = defaultMetalnessTextureData;
+			defaultMetalnessTexture.data          = new uint8_t(FLEX_DEFAULT_METALNESS_TEXTURE_VALUE);
 
 			materialDataPayload.metalness = ProcessTexture((FbxFileTexture *)metalnessProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, defaultMetalnessTexture);
 
 			//Emissivity
-			uint8_t *defaultEmissivityTextureData = new uint8_t(0);
 			FlexData::FlexTextureData defaultEmissivityTexture;
 			defaultEmissivityTexture.width         = 1;
 			defaultEmissivityTexture.height        = 1;
-			defaultEmissivityTexture.bytesPerPixel = 1;
-			defaultEmissivityTexture.data          = defaultEmissivityTextureData;
+			defaultEmissivityTexture.data          = new uint8_t(FLEX_DEFAULT_EMISSIVITY_TEXTURE_VALUE);
 
 			materialDataPayload.emissivity = ProcessTexture((FbxFileTexture *)emissivityProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, defaultEmissivityTexture);
 

@@ -9,9 +9,9 @@
 #include "Gogaman/Events/MouseEvent.h"
 
 #include "Camera.h"
-#include "Shader.h"
-#include "ShaderManager.h"
-#include "Texture2D.h"
+#include "Shader/Shader.h"
+#include "Shader/ShaderManager.h"
+#include "Texture/Texture2D.h"
 #include "Platform/OpenGL/OpenGL_Renderbuffer.h"
 #include "RenderSurface.h"
 #include "FullscreenTriangle.h"

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Texture2D.h"
+#include "Texture/Texture2D.h"
 
-#include "Shader.h"
+#include "Shader/Shader.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

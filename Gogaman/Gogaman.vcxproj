@@ -11,14 +11,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp" />
     <ClCompile Include="src\Gogaman\Graphics\RenderingSystem.cpp" />
     <ClCompile Include="src\Gogaman\ECS\System.cpp" />
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\ShaderLoader.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\ShaderManager.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Shader\ShaderLoader.cpp" />
+    <ClCompile Include="src\Gogaman\Graphics\Shader\ShaderManager.cpp" />
     <ClCompile Include="src\Gogaman\Logging\ConsoleLogger.cpp" />
-    <ClCompile Include="src\Gogaman\Graphics\Lights\PointLight.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Renderbuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp" />
@@ -46,6 +46,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
     <ClInclude Include="src\Gogaman\CRTP.h" />
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
@@ -54,8 +55,11 @@
     <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
+    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
     <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderCommand.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
     <ClInclude Include="src\Gogaman\SpatialComponent.h" />
@@ -70,11 +74,11 @@
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderingContext.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderSurface.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractShader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractTexture.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractTexture1D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractTexture2D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractTexture3D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Shader\AbstractShader.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture1D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture2D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture3D.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractVertexArrayBuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractIndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\FullscreenTriangle.h" />
@@ -83,15 +87,14 @@
     <ClInclude Include="src\Gogaman\Graphics\PBR_Material.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderingContext.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderSurface.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Shader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\ShaderCache.h" />
-    <ClInclude Include="src\Gogaman\Graphics\ShaderLoader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\ShaderManager.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Shader\Shader.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Shader\ShaderLoader.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Shader\ShaderManager.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractVertexBuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture1D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture2D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture1D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture2D.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture3D.h" />
     <ClInclude Include="src\Gogaman\Graphics\UnitQuad.h" />
     <ClInclude Include="src\Gogaman\Graphics\VertexArrayBuffer.h" />
     <ClInclude Include="src\Gogaman\Graphics\VertexAttribute.h" />
@@ -107,6 +110,7 @@
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Renderbuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderCommand.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderingContext.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderState.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderSurface.h" />
@@ -122,7 +126,6 @@
     <ClInclude Include="src\Gogaman\Base.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
     <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Lights\PointLight.h" />
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Shader.h" />

@@ -19,8 +19,6 @@ namespace Gogaman
 	public:
 		ModelMatrixSystem()
 		{
-			//m_NumEntityGroups = 1;
-
 			EntityGroup group;
 			group.componentFlags.set(GetComponentTypeID<SpatialComponent>());
 			group.componentFlags.set(GetComponentTypeID<RenderableComponent>());

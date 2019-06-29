@@ -3,7 +3,7 @@
 #include "Gogaman/CRTP.h"
 #include "Gogaman/Resource.h"
 
-#include "Texture.h"
+#include "Texture/Texture.h"
 #include "Platform/OpenGL/OpenGL_Renderbuffer.h"
 
 namespace Gogaman

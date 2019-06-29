@@ -37,10 +37,10 @@ namespace Gogaman
 		GetWorld().AddSystem(std::make_unique<RenderingSystem>());
 		GetWorld().Initialize();
 
-		GetWindow().EnableVerticalSync();
+		GM_CONFIG.vSync ? GetWindow().EnableVerticalSync() : GetWindow().DisableVerticalSync();
 		
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
-		FlexData::PrintFlexData(data);
+		//FlexData::PrintFlexData(data);
 
 		for(int i = 0; i < 1; i++)
 		{
