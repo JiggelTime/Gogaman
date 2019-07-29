@@ -28,14 +28,15 @@ namespace Gogaman
 		private:
 			FbxAMatrix                GetNodeTransform(FbxNode *node) const;
 			template<typename GeometryElement, typename Value>
-			Value                     GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue) const;
-			void                      ProcessMesh(FbxMesh *mesh);
-			void                      ProcessLight(const FbxLight *light);
+			Value                     GetVertexElement(const GeometryElement *element, const int controlPointIndex, const int triangle, const int vertex, const Value defaultValue) const;
 			FlexData::FlexTextureData ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture);
-			void                      ProcessMaterial(const FbxSurfaceMaterial *material);
+			uint32_t                  ProcessMaterial(const FbxNode *node);
+			void                      ProcessMesh(FbxNode *node);
+			void                      ProcessLight(const FbxLight *light);
 			void                      ProcessNodeRecursive(FbxNode *node);
 		private:
-			FbxManager *m_SDK_Manager;
+			FbxManager                                                *m_SDK_Manager;
+
 			std::unordered_map<std::string, FlexData::FlexTextureData> m_Textures;
 		};
 	}

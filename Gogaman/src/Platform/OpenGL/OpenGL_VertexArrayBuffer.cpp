@@ -3,8 +3,8 @@
 
 #include "Gogaman/Logging/Log.h"
 
-#include "Gogaman/Graphics/VertexBuffer.h"
-#include "Gogaman/Graphics/IndexBuffer.h"
+#include "Gogaman/Rendering/VertexBuffer.h"
+#include "Gogaman/Rendering/IndexBuffer.h"
 
 namespace Gogaman
 {

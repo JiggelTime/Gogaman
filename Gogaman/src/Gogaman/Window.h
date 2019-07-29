@@ -1,7 +1,7 @@
 #pragma once
 
 #include "pch.h"
-#include "Gogaman/Graphics/RenderingContext.h"
+#include "Gogaman/Rendering/RenderingContext.h"
 
 namespace Gogaman
 {

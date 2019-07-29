@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/AbstractRenderSurface.h"
+#include "Gogaman/Rendering/AbstractRenderSurface.h"
 
 #include <glad.h>
 

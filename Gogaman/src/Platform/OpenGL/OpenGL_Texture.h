@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/Texture/AbstractTexture.h"
+#include "Gogaman/Rendering/Texture/AbstractTexture.h"
 
 #include "Gogaman/Base.h"
 #include "Gogaman/Logging/Log.h"
@@ -33,6 +33,13 @@ namespace Gogaman
 		inline void Clear() const { glClearTexImage(m_RendererID, 0, GetNativeTextureFormat(format), GL_UNSIGNED_BYTE, nullptr); }
 		
 		inline uint32_t GetRendererID() const { return m_RendererID; }
+
+		static inline float GetMaxAnisotropicInterpolationSamples()
+		{
+			static float maxAnisotropicInterpolationSamples;
+			glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAnisotropicInterpolationSamples);
+			return maxAnisotropicInterpolationSamples;
+		}
 
 		static constexpr GLenum GetNativeTextureAccessMode(const TextureAccessMode accessMode)
 		{

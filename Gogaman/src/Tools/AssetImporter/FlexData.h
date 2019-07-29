@@ -8,7 +8,7 @@
 #include <vector>
 
 #define FLEX_HEADER_DATA_SIGNATURE 70, 108, 101, 120
-#define FLEX_HEADER_DATA_VERSION   4
+#define FLEX_HEADER_DATA_VERSION   5
 
 #define FLEX_MESH_TRANSFORM_DATA_SIZE    (sizeof(float) * (3 + 4 + 3))
 #define FLEX_VERTEX_DATA_SIZE            (sizeof(float) * (3 + 2 + 3 + 3))
@@ -29,7 +29,7 @@ namespace FlexData
 		uint8_t version      = FLEX_HEADER_DATA_VERSION;
 	};
 
-	struct FlexMeshTransformData
+	struct FlexTransformData
 	{
 		float position[3];
 		float rotation[4];
@@ -38,10 +38,7 @@ namespace FlexData
 
 	struct FlexVertexData
 	{
-		bool operator==(const FlexVertexData &other) const
-		{
-			return !memcmp(this, &other, sizeof(*this));
-		}
+		inline bool operator==(const FlexVertexData &other) const { return !memcmp(this, &other, sizeof(*this)); }
 
 		float position[3];
 		float uv[2];
@@ -51,31 +48,35 @@ namespace FlexData
 
 	struct FlexVertexDataHashFunction
 	{
-		uint32_t operator()(const FlexVertexData &other) const
+		inline uint32_t operator()(const FlexVertexData &other) const
 		{
+			auto HashFloat = [](uint32_t &digest, const float value) { digest ^= std::hash<float>()(value) + 0x9e3779b9 + (digest << 6) + (digest >> 2); };
+			
 			uint32_t digest = 0;
-			std::hash<float> floatHashFunction;
-			digest ^= floatHashFunction(other.position[0]) + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.position[1]) + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.position[2]) + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.uv[0])       + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.uv[1])       + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.normal[0])   + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.normal[1])   + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.normal[2])   + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.tangent[0])  + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.tangent[1])  + 0x9e3779b9 + (digest << 6) + (digest >> 2);
-			digest ^= floatHashFunction(other.tangent[2])  + 0x9e3779b9 + (digest << 6) + (digest >> 2);
+			HashFloat(digest, other.position[0]);
+			HashFloat(digest, other.position[1]);
+			HashFloat(digest, other.position[2]);
+			HashFloat(digest, other.uv[0]);
+			HashFloat(digest, other.uv[1]);
+			HashFloat(digest, other.normal[0]);
+			HashFloat(digest, other.normal[1]);
+			HashFloat(digest, other.normal[2]);
+			HashFloat(digest, other.tangent[0]);
+			HashFloat(digest, other.tangent[1]);
+			HashFloat(digest, other.tangent[2]);
 			return digest;
 		}
 	};
 
 	struct FlexMeshData
 	{
-		FlexMeshTransformData       transform;
-		//TODO: rename this to vertexBuffer
-		std::vector<FlexVertexData> vertexBufferData;
-		std::vector<uint16_t>       indexBufferData;
+		//Each instance has its own transform
+		//std::vector<FlexTransformData> transforms;
+		FlexTransformData           transform;
+		//Vertex buffer, index buffer, and material index are shared across all instances
+		std::vector<FlexVertexData> vertexBuffer;
+		std::vector<uint16_t>       indexBuffer;
+		uint32_t                    materialIndex;
 	};
 
 	struct FlexPointLightData
@@ -99,6 +100,26 @@ namespace FlexData
 
 	struct FlexMaterialData
 	{
+		inline bool operator==(const FlexMaterialData &other) const
+		{
+			auto CompareFlexTexture = [](const uint8_t bytesPerPixel, const FlexTextureData &texture, const FlexTextureData &texture2){
+				if((texture.width != texture2.width) || (texture.height != texture2.height))
+					return false;
+				else
+				{
+					for(uint64_t i = 0; i < bytesPerPixel * texture.width * texture.height; i++)
+					{
+						if(texture.data[i] != texture2.data[i])
+							return false;
+					}
+
+					return true;
+				}					
+			};
+
+			return CompareFlexTexture(4, albedo, other.albedo) && CompareFlexTexture(4, normal, other.normal) && CompareFlexTexture(1, roughness, other.roughness) && CompareFlexTexture(1, metalness, other.metalness) && CompareFlexTexture(1, emissivity, other.emissivity);
+		}
+
 		//RGBW8
 		FlexTextureData albedo;
 		//XYZW8
@@ -138,7 +159,7 @@ namespace FlexData
 		std::vector<FlexMaterialData>         materials;
 	};
 
-	static FlexData ImportFlexData(const char *filepath)
+	static inline FlexData ImportFlexData(const char *filepath)
 	{
 		FlexData dataPayload;
 
@@ -158,6 +179,7 @@ namespace FlexData
 			uint8_t headerVersionBuffer[sizeof(uint8_t)];
 			fread(headerVersionBuffer, 1, sizeof(uint8_t), file);
 			uint8_t headerVersion = *(uint8_t *)headerVersionBuffer;
+			//uint8_t headerVersion = *reinterpret_cast<uint8_t *>(headerVersionBuffer);
 			if(headerVersion != dataPayload.header.version)
 			{
 				std::cerr << "Failed to import FlexData: file version " << +headerVersion << " is incompatible with FlexData version " << +dataPayload.header.version << std::endl;
@@ -166,69 +188,72 @@ namespace FlexData
 			dataPayload.header.version = headerVersion;
 
 			//Mesh data
-			//TODO: Try: "using FlexDataNumMeshesType = uint16_t;"
 			//Read number of meshes
-			uint8_t numMeshesData[sizeof(uint32_t)];
-			fread(numMeshesData, 1, sizeof(uint32_t), file);
-			uint32_t numMeshes = *(uint32_t *)numMeshesData;
+			using numMeshesType = uint32_t;
+			uint8_t numMeshesData[sizeof(numMeshesType)];
+			fread(numMeshesData, 1, sizeof(numMeshesType), file);
+			numMeshesType numMeshes = *(numMeshesType *)numMeshesData;
+			//numMeshesType numMeshes = *reinterpret_cast<numMeshesType *>(numMeshesData);
 			dataPayload.meshes.reserve(numMeshes);
-			for(uint32_t i = 0; i < numMeshes; i++)
+			for(numMeshesType i = 0; i < numMeshes; i++)
 			{
 				FlexMeshData meshDataPayload;
 				//Read transform data
 				fread(&meshDataPayload.transform, FLEX_MESH_TRANSFORM_DATA_SIZE, 1, file);
 				//Read vertex buffer data size
 				uint64_t vertexBufferDataSize;
-				fread(&vertexBufferDataSize, sizeof(uint64_t), 1, file);
-				meshDataPayload.vertexBufferData.reserve(vertexBufferDataSize / FLEX_VERTEX_DATA_SIZE);
+				fread(&vertexBufferDataSize, sizeof(vertexBufferDataSize), 1, file);
 				//Read vertex buffer data
-				std::vector<FlexVertexData> vertexBufferData(vertexBufferDataSize / FLEX_VERTEX_DATA_SIZE);
-				meshDataPayload.vertexBufferData = std::move(vertexBufferData);
-				fread(&meshDataPayload.vertexBufferData[0], 1, vertexBufferDataSize, file);
+				meshDataPayload.vertexBuffer = std::vector<FlexVertexData>(vertexBufferDataSize / FLEX_VERTEX_DATA_SIZE);
+				//std::vector<FlexVertexData> vertexBufferData(vertexBufferDataSize / FLEX_VERTEX_DATA_SIZE);
+				//meshDataPayload.vertexBuffer = std::move(vertexBufferData);
+				fread(meshDataPayload.vertexBuffer.data(), 1, vertexBufferDataSize, file);
 				//Read index buffer data size
 				uint64_t indexBufferDataSize;
-				fread(&indexBufferDataSize, sizeof(uint64_t), 1, file);
-				meshDataPayload.indexBufferData.reserve(indexBufferDataSize / sizeof(uint16_t));
+				fread(&indexBufferDataSize, sizeof(vertexBufferDataSize), 1, file);
 				//Read index buffer data
-				std::vector<uint16_t> indexBufferData(indexBufferDataSize / sizeof(uint16_t));
-				meshDataPayload.indexBufferData = std::move(indexBufferData);
-				//TODO: Try using std::vector data()
-				fread(&meshDataPayload.indexBufferData[0], 1, indexBufferDataSize, file);
+				meshDataPayload.indexBuffer = std::vector<uint16_t>(indexBufferDataSize / sizeof(uint16_t));
+				fread(meshDataPayload.indexBuffer.data(), 1, indexBufferDataSize, file);
+				//Read material index data
+				fread(&meshDataPayload.materialIndex, sizeof(uint32_t), 1, file);
 
 				dataPayload.meshes.emplace_back(std::move(meshDataPayload));
 			}
 
 			//Point light data
 			//Read number of point lights
-			uint8_t numPointLightsData[sizeof(uint32_t)];
-			fread(numPointLightsData, 1, sizeof(uint32_t), file);
-			uint32_t numPointLights = *(uint32_t *)numPointLightsData;
+			using numPointLightsType = uint32_t;
+			uint8_t numPointLightsData[sizeof(numPointLightsType)];
+			fread(numPointLightsData, 1, sizeof(numPointLightsType), file);
+			numPointLightsType numPointLights = *(numPointLightsType *)numPointLightsData;
+			//numPointLightsType numPointLights = *reinterpret_cast<numPointLightsType *>(numPointLightsData);
 			dataPayload.pointLights.reserve(numPointLights);
 			//Read point light data
 			std::vector<FlexPointLightData> pointLightData(numPointLights);
 			dataPayload.pointLights = std::move(pointLightData);
-			uint64_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * numPointLights;
-			fread(&dataPayload.pointLights[0], 1, pointLightDataSize, file);
+			fread(dataPayload.pointLights.data(), 1, FLEX_POINT_LIGHT_DATA_SIZE * numPointLights, file);
 
 			//Directional light data
 			//Read number of directional lights
 			uint8_t numDirectionalLightsData[sizeof(uint32_t)];
 			fread(numDirectionalLightsData, 1, sizeof(uint32_t), file);
-			uint32_t numDirectionalLights = *(uint32_t*)numDirectionalLightsData;
+			uint32_t numDirectionalLights = *(uint32_t *)numDirectionalLightsData;
+			//uint32_t numDirectionalLights = *reinterpret_cast<uint32_t *>(numDirectionalLightsData);
 			dataPayload.directionalLights.reserve(numDirectionalLights);
 			//Read point light data
 			std::vector<FlexDirectionalLightData> directionalLightData(numDirectionalLights);
 			dataPayload.directionalLights = std::move(directionalLightData);
-			uint64_t directionalLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * numDirectionalLights;
-			fread(&dataPayload.directionalLights[0], 1, directionalLightDataSize, file);
+			fread(dataPayload.directionalLights.data(), 1, FLEX_POINT_LIGHT_DATA_SIZE * numDirectionalLights, file);
 			
 			//Material data
 			//Read number of materials
-			uint8_t numMaterialsData[sizeof(uint32_t)];
-			fread(numMaterialsData, 1, sizeof(uint32_t), file);
-			uint32_t numMaterials = *(uint32_t *)numMaterialsData;
+			using numMaterialsType = uint32_t;
+			uint8_t numMaterialsData[sizeof(numMaterialsType)];
+			fread(numMaterialsData, 1, sizeof(numMaterialsType), file);
+			numMaterialsType numMaterials = *(numMaterialsType *)numMaterialsData;
+			//reinterpret_cast
 			dataPayload.materials.reserve(numMaterials);
-			for(uint32_t i = 0; i < numMaterials; i++)
+			for(numMaterialsType i = 0; i < numMaterials; i++)
 			{
 				auto ReadTexture = [](FILE *file, FlexTextureData &texturePayload, const uint8_t bytesPerPixel)
 				{
@@ -290,7 +315,7 @@ namespace FlexData
 			fwrite(&dataPayload.numMeshes, sizeof(dataPayload.numMeshes), 1, file);
 			for(const auto &i : data.meshes)
 			{
-				if(i.vertexBufferData.size()  > UINT16_MAX)
+				if(i.vertexBuffer.size() > UINT16_MAX)
 				{
 					std::cerr << "Failed to export FlexData mesh: number of vertices exceeds "  << UINT16_MAX << std::endl;
 					exit(1);
@@ -299,16 +324,17 @@ namespace FlexData
 				//Write transform data
 				fwrite(&i.transform, FLEX_MESH_TRANSFORM_DATA_SIZE, 1, file);
 				//Write vertex buffer data size
-				uint64_t vertexBufferDataSize = FLEX_VERTEX_DATA_SIZE * i.vertexBufferData.size();
+				uint64_t vertexBufferDataSize = FLEX_VERTEX_DATA_SIZE * i.vertexBuffer.size();
 				fwrite(&vertexBufferDataSize, sizeof(vertexBufferDataSize), 1, file);
 				//Write vertex buffer data
-				//TODO: try using std::vector data()
-				fwrite(&i.vertexBufferData[0], 1, vertexBufferDataSize, file);
+				fwrite(i.vertexBuffer.data(), 1, vertexBufferDataSize, file);
 				//Write index buffer data size
-				uint64_t indexBufferDataSize = sizeof(uint16_t) * i.indexBufferData.size();
+				uint64_t indexBufferDataSize = sizeof(uint16_t) * i.indexBuffer.size();
 				fwrite(&indexBufferDataSize, sizeof(indexBufferDataSize), 1, file);
 				//Write index buffer data
-				fwrite(&i.indexBufferData[0], 1, indexBufferDataSize, file);
+				fwrite(i.indexBuffer.data(), 1, indexBufferDataSize, file);
+				//Write material index data
+				fwrite(&i.materialIndex, sizeof(uint32_t), 1, file);
 			}
 
 			//Point light data
@@ -317,7 +343,7 @@ namespace FlexData
 			fwrite(&dataPayload.numPointLights, sizeof(dataPayload.numPointLights), 1, file);
 			//Write point light data
 			uint64_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * data.pointLights.size();
-			fwrite(&data.pointLights[0], 1, pointLightDataSize, file);
+			fwrite(data.pointLights.data(), 1, pointLightDataSize, file);
 
 			//Directional light data
 			//Write number of directional lights
@@ -325,7 +351,7 @@ namespace FlexData
 			fwrite(&dataPayload.numDirectionalLights, sizeof(dataPayload.numDirectionalLights), 1, file);
 			//Write directional light data
 			uint64_t directionalLightDataSize = FLEX_DIRECTIONAL_LIGHT_DATA_SIZE * data.directionalLights.size();
-			fwrite(&data.directionalLights[0], 1, directionalLightDataSize, file);
+			fwrite(data.directionalLights.data(), 1, directionalLightDataSize, file);
 
 			//Material data
 			//Write number of materials
@@ -336,9 +362,9 @@ namespace FlexData
 				auto WriteTexture = [](FILE *file, const FlexTextureData &texture, const uint8_t bytesPerPixel)
 				{
 					//Write width
-					fwrite(&texture.width,         sizeof(texture.width),         1, file);
+					fwrite(&texture.width,  sizeof(texture.width),  1, file);
 					//Write height
-					fwrite(&texture.height,        sizeof(texture.height),        1, file);
+					fwrite(&texture.height, sizeof(texture.height), 1, file);
 					//Write texture data
 					fwrite(texture.data, 1, texture.width * texture.height * bytesPerPixel, file);
 				};
@@ -361,7 +387,63 @@ namespace FlexData
 		}
 	}
 
-	static void PrintFlexData(const FlexData &data)
+	static const FlexTextureData GetDefaultAlbedoTexture()
+	{
+		static FlexTextureData defaultAlbedoTexture;
+		defaultAlbedoTexture.width = 1;
+		defaultAlbedoTexture.height = 1;
+		defaultAlbedoTexture.data = new uint8_t[4]{ FLEX_DEFAULT_ALBEDO_TEXTURE_VALUE };
+		return defaultAlbedoTexture;
+	}
+
+	static const FlexTextureData GetDefaultNormalTexture()
+	{
+		static FlexTextureData defaultNormalTexture;
+		defaultNormalTexture.width = 1;
+		defaultNormalTexture.height = 1;
+		defaultNormalTexture.data = new uint8_t[4]{ FLEX_DEFAULT_NORMAL_TEXTURE_VALUE };
+		return defaultNormalTexture;
+	}
+
+	static const FlexTextureData GetDefaultRoughnessTexture()
+	{
+		static FlexTextureData defaultRoughnessTexture;
+		defaultRoughnessTexture.width = 1;
+		defaultRoughnessTexture.height = 1;
+		defaultRoughnessTexture.data = new uint8_t(FLEX_DEFAULT_ROUGHNESS_TEXTURE_VALUE);
+		return defaultRoughnessTexture;
+	}
+
+	static const FlexTextureData GetDefaultMetalnessTexture()
+	{
+		static FlexTextureData defaultMetalnessTexture;
+		defaultMetalnessTexture.width = 1;
+		defaultMetalnessTexture.height = 1;
+		defaultMetalnessTexture.data = new uint8_t(FLEX_DEFAULT_METALNESS_TEXTURE_VALUE);
+		return defaultMetalnessTexture;
+	}
+
+	static const FlexTextureData GetDefaultEmissivityTexture()
+	{
+		static FlexTextureData defaultEmissivityTexture;
+		defaultEmissivityTexture.width = 1;
+		defaultEmissivityTexture.height = 1;
+		defaultEmissivityTexture.data = new uint8_t(FLEX_DEFAULT_EMISSIVITY_TEXTURE_VALUE);
+		return defaultEmissivityTexture;
+	}
+
+	static const FlexMaterialData GetDefaultMaterial()
+	{
+		static FlexMaterialData defaultMaterial;
+		defaultMaterial.albedo = GetDefaultAlbedoTexture();
+		defaultMaterial.normal = GetDefaultNormalTexture();
+		defaultMaterial.roughness = GetDefaultRoughnessTexture();
+		defaultMaterial.metalness = GetDefaultMetalnessTexture();
+		defaultMaterial.emissivity = GetDefaultEmissivityTexture();
+		return defaultMaterial;
+	}
+
+	static inline void PrintFlexData(const FlexData &data, const bool printVertexData = false)
 	{
 		std::cout << "[FlexData] Meshes: " << data.meshes.size() << std::endl;
 		for(const auto &i : data.meshes)
@@ -371,8 +453,24 @@ namespace FlexData
 			std::cout << "[FlexData]	-Position (XYZ): " << i.transform.position[0] << ", " << i.transform.position[1] << ", " << i.transform.position[2] << std::endl;
 			std::cout << "[FlexData]	-Rotation (XYZ): " << i.transform.rotation[0] << ", " << i.transform.rotation[1] << ", " << i.transform.rotation[2] << std::endl;
 			std::cout << "[FlexData]	-Scale    (XYZ): " << i.transform.scale[0]    << ", " << i.transform.scale[1]    << ", " << i.transform.scale[2]    << std::endl;
-			std::cout << "[FlexData]	-Vertices: " << i.vertexBufferData.size() << std::endl;
-			std::cout << "[FlexData]	-Indices:  " << i.indexBufferData.size()  << std::endl;
+			std::cout << "[FlexData]	-Vertices: "       << i.vertexBuffer.size()   << std::endl;
+			std::cout << "[FlexData]	-Indices:  "       << i.indexBuffer.size()    << std::endl;
+			std::cout << "[FlexData]    -Material index: " << i.materialIndex         << std::endl;
+			if(printVertexData)
+			{
+				for(auto &j : i.vertexBuffer)
+				{
+					std::cout << std::endl;
+					std::cout << "[FlexData] Vertex:" << std::endl;
+					std::cout << "[FlexData] 	-Position (xyz): " << j.position[0] << ", " << j.position[1] << ", " << j.position[2] << std::endl;
+					std::cout << "[FlexData] 	-UV       (xy):  " << j.uv[0] << ", " << j.uv[1] << std::endl;
+					std::cout << "[FlexData] 	-Normal   (xyz): " << j.normal[0] << ", " << j.normal[1] << ", " << j.normal[2] << std::endl;
+					std::cout << "[FlexData] 	-Tangent  (xyz): " << j.tangent[0] << ", " << j.tangent[1] << ", " << j.tangent[2] << std::endl;
+				}
+
+				for(auto &j : i.indexBuffer)
+					std::cout << "[FlexData] Index: " << j << std::endl;
+			}
 		}
 		std::cout << std::endl;
 

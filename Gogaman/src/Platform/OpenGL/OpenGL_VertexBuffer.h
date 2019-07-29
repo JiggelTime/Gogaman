@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/AbstractVertexBuffer.h"
+#include "Gogaman/Rendering/AbstractVertexBuffer.h"
 
 #include <glad.h>
 

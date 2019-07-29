@@ -27,7 +27,7 @@ namespace Gogaman
 	class AbstractRenderState : public CRTP<RenderStateType, AbstractRenderState>
 	{
 	public:
-		void Update() const { GetImplementation().Update(); }
+		inline void Update() const { GetImplementation().Update(); }
 	protected:
 		AbstractRenderState()  = default;
 		~AbstractRenderState() = default;

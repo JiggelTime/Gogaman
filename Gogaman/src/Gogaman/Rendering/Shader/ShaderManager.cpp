@@ -15,8 +15,8 @@ namespace Gogaman
 
 	ShaderID ShaderManager::Create(const std::string &vertexShaderFilepath, const std::string &fragmentShaderFilepath, const std::string &geometryShaderFilepath)
 	{
-		GM_ASSERT(!vertexShaderFilepath.empty(),   "Failed to create shader: invalid vertex shader filepath");
-		GM_ASSERT(!fragmentShaderFilepath.empty(), "Failed to create shader: invalid fragment shader filepath");
+		GM_ASSERT(!vertexShaderFilepath.empty(),                               "Failed to create shader: invalid vertex shader filepath");
+		GM_ASSERT(!fragmentShaderFilepath.empty(),                             "Failed to create shader: invalid fragment shader filepath");
 		GM_ASSERT(m_NextShaderID < (std::numeric_limits<ShaderID>::max() - 1), "Failed to create shader: maximum number of shaders (%d) reached", std::numeric_limits<ShaderID>::max() - 1);
 		
 		auto iterator = m_FilepathShaders.find(vertexShaderFilepath);

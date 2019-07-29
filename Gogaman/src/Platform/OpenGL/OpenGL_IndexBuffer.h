@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/AbstractIndexBuffer.h"
+#include "Gogaman/Rendering/AbstractIndexBuffer.h"
 
 #include <glad.h>
 

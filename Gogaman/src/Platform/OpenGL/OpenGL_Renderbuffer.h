@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/Texture/Texture.h"
+#include "Gogaman/Rendering/Texture/Texture.h"
 
 #include <glad.h>
 

@@ -7,8 +7,8 @@
 #include "Gogaman/InputDefines.h"
 #include "Gogaman/Events/EventDispatcher.h"
 #include "Gogaman/ResourceManager.h"
-#include "Gogaman/Graphics/JitterSequences.h"
-#include "Gogaman/Graphics/Lights/PointLight.h"
+#include "Gogaman/Rendering/JitterSequences.h"
+#include "Gogaman/Rendering/Lights/PointLight.h"
 
 namespace Gogaman
 {

@@ -93,7 +93,7 @@ namespace Gogaman
 		}
 
 		template<typename GeometryElement, typename Value>
-		Value FBX_Importer::GetVertexElement(GeometryElement *element, int controlPointIndex, int triangle, int vertex, Value defaultValue) const
+		Value FBX_Importer::GetVertexElement(const GeometryElement *element, const int controlPointIndex, const int triangle, const int vertex, const Value defaultValue) const
 		{
 			int index = 0;
 			if(!element)
@@ -119,18 +119,131 @@ namespace Gogaman
 
 			return element->GetDirectArray().GetAt(index);
 		}
-
-		void FBX_Importer::ProcessMesh(FbxMesh *mesh)
+		
+		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture)
 		{
-			if(!mesh->GetElementNormal(0))
-				mesh->GenerateNormals();
+			if(!fileTexture)
+				return defaultTexture;
+
+			const char *filepath = fileTexture->GetFileName();
+			auto iterator = m_Textures.find(filepath);
+			//Texture is not in texture map (new texture)
+			if(iterator == m_Textures.end())
+			{
+				stbi_set_flip_vertically_on_load(true);
+				int importWidth, importHeight, importChannels;
+				uint8_t *importData = stbi_load(filepath, &importWidth, &importHeight, &importChannels, exportChannels);
+				if(importData)
+				{
+					if(importChannels != exportChannels)
+						std::cout << "Warning: texture has " << importChannels << " channels, expected " << +exportChannels << " | Location: " << filepath << std::endl;
+
+					FlexData::FlexTextureData textureDataPayload;
+					textureDataPayload.width  = importWidth;
+					textureDataPayload.height = importHeight;
+
+					uint64_t textureDataSize = importWidth * importHeight * exportChannels;
+					textureDataPayload.data = new uint8_t[textureDataSize];
+					memcpy((void *)textureDataPayload.data, importData, textureDataSize);
+					STBI_FREE(importData);
+					
+					m_Textures[filepath] = textureDataPayload;
+					return textureDataPayload;
+				}
+
+				std::cout << "Failed to import texture | Location: " << filepath << std::endl;
+				return defaultTexture;
+			}
+			//Texture is already in texture map (duplicate texture)
+			else
+				return iterator->second;
+		}
+
+		uint32_t FBX_Importer::ProcessMaterial(const FbxNode *node)
+		{
+			FbxSurfaceMaterial *material = node->GetMaterial(0);
+			
+			FlexData::FlexMaterialData materialDataPayload;
+			if(node->GetMaterialCount() <= 0)
+			{
+				std::cout << "Mesh has no material | Assigning default material" << std::endl;
+				materialDataPayload = FlexData::GetDefaultMaterial();
+			}
+			else if(!material)
+			{
+				std::cerr << "Failed to import FBX material: invalid material | Assigning default material" << std::endl;
+				materialDataPayload = FlexData::GetDefaultMaterial();
+			}
+			else if(!material->GetClassId().Is(FbxSurfacePhong::ClassId))
+			{
+				std::cerr << "Failed to import FBX material: invalid shading model | Assigning default material" << std::endl;
+				materialDataPayload = FlexData::GetDefaultMaterial();
+			}
+			else
+			{
+				FbxSurfacePhong *phongMaterial = (FbxSurfacePhong *)material;
+				FbxProperty *albedoProperty     = &phongMaterial->Specular;
+				FbxProperty *normalProperty     = &phongMaterial->NormalMap;
+				FbxProperty *roughnessProperty  = &phongMaterial->SpecularFactor;
+				FbxProperty *metalnessProperty  = &phongMaterial->Shininess;
+				FbxProperty *emissivityProperty = &phongMaterial->Emissive;
+
+				//Albedo
+				materialDataPayload.albedo     = ProcessTexture((FbxFileTexture *)albedoProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)),     4, FlexData::GetDefaultAlbedoTexture());
+				//Normal
+				materialDataPayload.normal     = ProcessTexture((FbxFileTexture *)normalProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)),     4, FlexData::GetDefaultNormalTexture());
+				//Roughness
+				materialDataPayload.roughness  = ProcessTexture((FbxFileTexture *)roughnessProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)),  1, FlexData::GetDefaultRoughnessTexture());
+				//Metalness
+				materialDataPayload.metalness  = ProcessTexture((FbxFileTexture *)metalnessProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)),  1, FlexData::GetDefaultMetalnessTexture());
+				//Emissivity
+				materialDataPayload.emissivity = ProcessTexture((FbxFileTexture *)emissivityProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, FlexData::GetDefaultEmissivityTexture());
+			}
+
+			for(uint32_t i = 0; i < m_FlexData.materials.size(); i++)
+			{
+				std::cout << "Material payload size: " << m_FlexData.materials.size() << std::endl;
+
+				//Material is already in payload (duplicate material)
+				if(m_FlexData.materials[i] == materialDataPayload)
+				{
+					std::cout << "Found duplicate material! Index: " << i << std::endl;
+					return i;
+				}
+			}
+
+			//Material is not in payload (new material)
+			uint32_t materialIndex = m_FlexData.materials.size();
+			m_FlexData.materials.emplace_back(std::move(materialDataPayload));
+			return materialIndex;
+		}
+
+		void FBX_Importer::ProcessMesh(FbxNode *node)
+		{
+			FbxMesh *mesh = node->GetMesh();
+
+			if(!mesh->GenerateNormals())
+			{
+				std::cerr << "Failed to generate mesh normals" << std::endl;
+				exit(1);
+			}
+
+			if(!mesh->GenerateTangentsDataForAllUVSets())
+			{
+				std::cerr << "Failed to generate mesh tangents" << std::endl;
+				exit(1);
+			}
 
 			FlexData::FlexMeshData meshDataPayload;
+			meshDataPayload.materialIndex = ProcessMaterial(node);
+
+			std::cout << meshDataPayload.materialIndex << std::endl;
+
 			std::unordered_map<FlexData::FlexVertexData, uint16_t, FlexData::FlexVertexDataHashFunction> vertexIndices;
 
 			uint32_t numTriangles = mesh->GetPolygonCount();
-			meshDataPayload.vertexBufferData.reserve(3 * numTriangles);
-			meshDataPayload.indexBufferData.reserve(3  * numTriangles);
+			meshDataPayload.vertexBuffer.reserve(3 * numTriangles);
+			meshDataPayload.indexBuffer.reserve(3  * numTriangles);
 
 			for(uint32_t i = 0; i < numTriangles; i++)
 			{
@@ -167,20 +280,20 @@ namespace Gogaman
 					//Vertex is not in index map (new vertex)
 					if(iterator == vertexIndices.end())
 					{
-						if(meshDataPayload.vertexBufferData.size() >= UINT16_MAX)
+						if(meshDataPayload.vertexBuffer.size() >= UINT16_MAX)
 						{
-							std::cout << "Failed to import FBX mesh: number of vertices exceeds " << UINT16_MAX << std::endl;
+							std::cerr << "Failed to import FBX mesh: number of vertices exceeds " << UINT16_MAX << std::endl;
 							exit(1);
 						}
 						
-						uint16_t index = static_cast<uint16_t>(meshDataPayload.vertexBufferData.size());
-						meshDataPayload.vertexBufferData.emplace_back(std::move(vertex));
-						meshDataPayload.indexBufferData.emplace_back(index);
+						uint16_t index = static_cast<uint16_t>(meshDataPayload.vertexBuffer.size());
+						meshDataPayload.vertexBuffer.emplace_back(std::move(vertex));
+						meshDataPayload.indexBuffer.emplace_back(index);
 						vertexIndices[vertex] = index;
 					}
 					//Vertex is already in index map (duplicate vertex)
 					else
-						meshDataPayload.indexBufferData.emplace_back(iterator->second);
+						meshDataPayload.indexBuffer.emplace_back(iterator->second);
 				}
 			}
 
@@ -248,108 +361,6 @@ namespace Gogaman
 			}
 		}
 
-		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture)
-		{
-			if(!fileTexture)
-				return defaultTexture;
-
-			const char *filepath = fileTexture->GetFileName();
-			auto iterator = m_Textures.find(filepath);
-			//Texture is not in texture map (new texture)
-			if(iterator == m_Textures.end())
-			{
-				stbi_set_flip_vertically_on_load(true);
-				int importWidth, importHeight, importChannels;
-				uint8_t *importData = stbi_load(filepath, &importWidth, &importHeight, &importChannels, exportChannels);
-				if(importData)
-				{
-					if(importChannels != exportChannels)
-						std::cout << "Warning: texture has " << importChannels << " channels, expected " << +exportChannels << " | Location: " << filepath << std::endl;
-
-					FlexData::FlexTextureData textureDataPayload;
-					textureDataPayload.width         = importWidth;
-					textureDataPayload.height        = importHeight;
-
-					uint64_t textureDataSize = importWidth * importHeight * exportChannels;
-					textureDataPayload.data = new uint8_t[textureDataSize];
-					memcpy((void *)textureDataPayload.data, importData, textureDataSize);
-					STBI_FREE(importData);
-					
-					m_Textures[filepath] = textureDataPayload;
-					return textureDataPayload;
-				}
-
-				std::cout << "Failed to import texture | Location: " << filepath << std::endl;
-				return defaultTexture;
-			}
-			//Texture is already in texture map (duplicate texture)
-			else
-				return iterator->second;
-		}
-
-		void FBX_Importer::ProcessMaterial(const FbxSurfaceMaterial *material)
-		{
-			if(!material)
-				return;
-
-			if(!material->GetClassId().Is(FbxSurfacePhong::ClassId))
-			{
-				std::cout << "Failed to import FBX material: invalid shading model" << std::endl;
-				return;
-			}
-
-			FlexData::FlexMaterialData materialDataPayload;
-			
-			FbxSurfacePhong *phongMaterial = (FbxSurfacePhong *)material;
-			FbxProperty *albedoProperty     = &phongMaterial->Specular;
-			FbxProperty *normalProperty     = &phongMaterial->NormalMap;
-			FbxProperty *roughnessProperty  = &phongMaterial->SpecularFactor;
-			FbxProperty *metalnessProperty  = &phongMaterial->Shininess;
-			FbxProperty *emissivityProperty = &phongMaterial->Emissive;
-
-			//Albedo
-			FlexData::FlexTextureData defaultAlbedoTexture;
-			defaultAlbedoTexture.width         = 1;
-			defaultAlbedoTexture.height        = 1;
-			defaultAlbedoTexture.data          = new uint8_t[4]{ FLEX_DEFAULT_ALBEDO_TEXTURE_VALUE };
-
-			materialDataPayload.albedo = ProcessTexture((FbxFileTexture *)albedoProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 4, defaultAlbedoTexture);
-
-			//Normal
-			FlexData::FlexTextureData defaultNormalTexture;
-			defaultNormalTexture.width         = 1;
-			defaultNormalTexture.height        = 1;
-			defaultNormalTexture.data          = new uint8_t[4]{ FLEX_DEFAULT_NORMAL_TEXTURE_VALUE };
-
-			materialDataPayload.normal = ProcessTexture((FbxFileTexture *)normalProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 4, defaultNormalTexture);
-
-			//Roughness
-			FlexData::FlexTextureData defaultRoughnessTexture;
-			defaultRoughnessTexture.width         = 1;
-			defaultRoughnessTexture.height        = 1;
-			defaultRoughnessTexture.data          = new uint8_t(FLEX_DEFAULT_ROUGHNESS_TEXTURE_VALUE);
-
-			materialDataPayload.roughness = ProcessTexture((FbxFileTexture *)roughnessProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, defaultRoughnessTexture);
-
-			//Metalness
-			FlexData::FlexTextureData defaultMetalnessTexture;
-			defaultMetalnessTexture.width         = 1;
-			defaultMetalnessTexture.height        = 1;
-			defaultMetalnessTexture.data          = new uint8_t(FLEX_DEFAULT_METALNESS_TEXTURE_VALUE);
-
-			materialDataPayload.metalness = ProcessTexture((FbxFileTexture *)metalnessProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, defaultMetalnessTexture);
-
-			//Emissivity
-			FlexData::FlexTextureData defaultEmissivityTexture;
-			defaultEmissivityTexture.width         = 1;
-			defaultEmissivityTexture.height        = 1;
-			defaultEmissivityTexture.data          = new uint8_t(FLEX_DEFAULT_EMISSIVITY_TEXTURE_VALUE);
-
-			materialDataPayload.emissivity = ProcessTexture((FbxFileTexture *)emissivityProperty->GetSrcObject(FbxCriteria::ObjectType(FbxFileTexture::ClassId)), 1, defaultEmissivityTexture);
-
-			m_FlexData.materials.emplace_back(std::move(materialDataPayload));
-		}
-
 		void FBX_Importer::ProcessNodeRecursive(FbxNode *node)
 		{
 			FbxNodeAttribute *attribute = node->GetNodeAttribute();
@@ -358,70 +369,16 @@ namespace Gogaman
 				switch(attribute->GetAttributeType())
 				{
 				case FbxNodeAttribute::eMesh:
-					ProcessMesh(node->GetMesh());
+					ProcessMesh(node);
 					break;
 				case FbxNodeAttribute::eLight:
 					ProcessLight(node->GetLight());
 					break;
 				}
-
-				for(int i = 0; i < node->GetMaterialCount(); i++)
-					ProcessMaterial(node->GetMaterial(i));
 			}
 
 			for(int i = 0; i < node->GetChildCount(); i++)
 				ProcessNodeRecursive(node->GetChild(i));
 		}
 	}
-}
-
-int main(int argc, char *argv[])
-{
-	if(argc < 2)
-	{
-		//std::cerr << "Failed to run: too few arguments" << std::endl;
-		//return -1;
-	}
-
-	//const char *importFilepath = argv[1];
-	//const char *exportFilepath = argv[2];
-	const char *importFilepath = "D:/dev/testScene/testScene.fbx";
-	const char *exportFilepath = "D:/dev/testScene/testScene.flex";
-
-	FlexData::FlexData testFlexData;
-
-	//Import FBX file
-	Gogaman::Tools::FBX_Importer importer;
-	testFlexData = importer.Import(importFilepath);
-
-	while(testFlexData.materials.size() > 1)
-		testFlexData.materials.pop_back();
-
-	//Export FlexData
-	FlexData::ExportFlexData(exportFilepath, testFlexData);
-
-	//Import FlexData
-	testFlexData = FlexData::ImportFlexData(exportFilepath);
-	
-	FlexData::PrintFlexData(testFlexData);
-
-	//FlexData::PrintFlexData(testFlexData);
-	/*
-	for(auto i : testFlexData.meshes)
-	{
-		for(auto j : i.vertexBufferData)
-		{
-			std::cout << std::endl;
-			std::cout << "Vertex:" << std::endl;
-			std::cout << "	-Position (xyz): " << j.position[0] << ", " << j.position[1] << ", " << j.position[2] << std::endl;
-			std::cout << "	-UV       (xy):  " << j.uv[0]       << ", " << j.uv[1]       << std::endl;
-			std::cout << "	-Normal   (xyz): " << j.normal[0]   << ", " << j.normal[1]   << ", " << j.normal[2]   << std::endl;
-			std::cout << "	-Tangent  (xyz): " << j.tangent[0]  << ", " << j.tangent[1]  << ", " << j.tangent[2]  << std::endl;
-		}
-
-		for(auto j : i.indexBufferData)
-			std::cout << "Index: " << j << std::endl;
-	}*/
-
-	return 0;
 }

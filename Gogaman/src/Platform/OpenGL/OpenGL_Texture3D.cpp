@@ -42,7 +42,11 @@ namespace Gogaman
 		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T,     GetNativeTextureWrapMode(wrapT));
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GetNativeTextureInterpolationMinMode(interpolationMode));
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GetNativeTextureInterpolationMagMode(interpolationMode));
-		
+		if(interpolationMode == TextureInterpolationMode::Anisotropic)
+		{
+			glTextureParameterf(m_RendererID, GL_TEXTURE_MAX_ANISOTROPY_EXT, GetMaxAnisotropicInterpolationSamples());
+		}
+
 		//Generate mipmap
 		if(levels != 1)
 			glGenerateTextureMipmap(m_RendererID);

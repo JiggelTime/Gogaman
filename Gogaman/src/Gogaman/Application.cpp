@@ -7,11 +7,11 @@
 #include "Logging/Log.h"
 
 #include "SpatialComponent.h"
-#include "Graphics/RenderableComponent.h"
-#include "Graphics/LightComponent.h"
+#include "Rendering/RenderableComponent.h"
+#include "Rendering/LightComponent.h"
 
-#include "Graphics/ModelMatrixSystem.h"
-#include "Graphics/RenderingSystem.h"
+#include "Rendering/ModelMatrixSystem.h"
+#include "Rendering/RenderingSystem.h"
 
 #include <FlexData.h>
 
@@ -38,88 +38,84 @@ namespace Gogaman
 		GetWorld().Initialize();
 
 		GM_CONFIG.vSync ? GetWindow().EnableVerticalSync() : GetWindow().DisableVerticalSync();
-		
+
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
-		//FlexData::PrintFlexData(data);
+		FlexData::PrintFlexData(data);
 
-		for(int i = 0; i < 1; i++)
+		for(const auto &j : data.meshes)
 		{
-			for(const auto &j : data.meshes)
-			//auto j = data.meshes[0];
-			{
-				Entity testMeshEntity = GetWorld().CreateEntity();
+			Entity testMeshEntity = GetWorld().CreateEntity();
 
-				//Set spatial component data
-				SpatialComponent testSpatialComponent;
-				testSpatialComponent.position      = glm::vec3(j.transform.position[0], j.transform.position[1], j.transform.position[2]);
-				//testSpatialComponent.position = glm::vec3(0.0f + (float)i, 0.0f, 0.0f);
-				testSpatialComponent.rotation      = glm::vec3(j.transform.rotation[0], j.transform.rotation[1], j.transform.rotation[2]);
-				testSpatialComponent.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
-				testSpatialComponent.rotationAngle = 0.0f;
-				testSpatialComponent.scale         = glm::vec3(j.transform.scale[0], j.transform.scale[1], j.transform.scale[2]);
-				//testSpatialComponent.scale = glm::vec3(1.0f);
-				GetWorld().AddComponent(testMeshEntity.identifier, std::move(testSpatialComponent));
+			//Set spatial component data
+			SpatialComponent testSpatialComponent;
+			testSpatialComponent.position      = glm::vec3(j.transform.position[0], j.transform.position[1], j.transform.position[2]);
+			//testSpatialComponent.position = glm::vec3(0.0f + (float)i, 0.0f, 0.0f);
+			testSpatialComponent.rotation      = glm::vec3(j.transform.rotation[0], j.transform.rotation[1], j.transform.rotation[2]);
+			testSpatialComponent.rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+			testSpatialComponent.rotationAngle = 0.0f;
+			testSpatialComponent.scale         = glm::vec3(j.transform.scale[0], j.transform.scale[1], j.transform.scale[2]);
+			//testSpatialComponent.scale = glm::vec3(1.0f);
+			GetWorld().AddComponent<SpatialComponent>(testMeshEntity.identifier, std::move(testSpatialComponent));
 
-				//Set renderable component data
-				RenderableComponent testRenderableComponent;
-				testRenderableComponent.vertexArrayBuffer = std::make_unique<VertexArrayBuffer>();
-				testRenderableComponent.vertexBuffer      = std::make_unique<VertexBuffer>();
-				testRenderableComponent.indexBuffer       = std::make_unique<IndexBuffer>();
-				
-				testRenderableComponent.vertexBuffer->UploadData(FLEX_VERTEX_DATA_SIZE * j.vertexBufferData.size(), j.vertexBufferData.data());
-				testRenderableComponent.vertexBuffer->SetLayout({
-					//Position
-					{ ShaderDataType::Float3 },
-					//UV
-					{ ShaderDataType::Float2 },
-					//Normal
-					{ ShaderDataType::Float3 },
-					//Tangent
-					{ ShaderDataType::Float3 }
-				});
+			//Set renderable component data
+			RenderableComponent testRenderableComponent;
+			testRenderableComponent.vertexArrayBuffer = std::make_unique<VertexArrayBuffer>();
+			testRenderableComponent.vertexBuffer      = std::make_unique<VertexBuffer>();
+			testRenderableComponent.indexBuffer       = std::make_unique<IndexBuffer>();
+			
+			testRenderableComponent.vertexBuffer->UploadData(FLEX_VERTEX_DATA_SIZE * j.vertexBuffer.size(), j.vertexBuffer.data());
+			testRenderableComponent.vertexBuffer->SetLayout({
+				//Position
+				{ ShaderDataType::Float3 },
+				//UV
+				{ ShaderDataType::Float2 },
+				//Normal
+				{ ShaderDataType::Float3 },
+				//Tangent
+				{ ShaderDataType::Float3 }
+			});
 
-				testRenderableComponent.vertexArrayBuffer->AddVertexBuffer(*testRenderableComponent.vertexBuffer.get());
+			testRenderableComponent.vertexArrayBuffer->AddVertexBuffer(*testRenderableComponent.vertexBuffer.get());
 
-				testRenderableComponent.indexBuffer->UploadData(j.indexBufferData.size(), j.indexBufferData.data());
-				testRenderableComponent.vertexArrayBuffer->SetIndexBuffer(*testRenderableComponent.indexBuffer.get());
+			testRenderableComponent.indexBuffer->UploadData(j.indexBuffer.size(), j.indexBuffer.data());
+			testRenderableComponent.vertexArrayBuffer->SetIndexBuffer(*testRenderableComponent.indexBuffer.get());
 
-				testRenderableComponent.material.albedo = std::make_unique<Texture2D>();
-				testRenderableComponent.material.albedo->internalFormat    = TextureInternalFormat::RGBW8;
-				testRenderableComponent.material.albedo->format            = TextureFormat::XYZW;
-				testRenderableComponent.material.albedo->interpolationMode = TextureInterpolationMode::Trilinear;
-				testRenderableComponent.material.albedo->levels            = 0;
-				testRenderableComponent.material.albedo->Generate(data.materials[0].albedo.width, data.materials[0].albedo.height, data.materials[0].albedo.data);
+			testRenderableComponent.material.albedo = std::make_unique<Texture2D>();
+			testRenderableComponent.material.albedo->internalFormat    = TextureInternalFormat::RGBW8;
+			testRenderableComponent.material.albedo->format            = TextureFormat::XYZW;
+			testRenderableComponent.material.albedo->interpolationMode = TextureInterpolationMode::Trilinear;
+			testRenderableComponent.material.albedo->levels            = 0;
+			testRenderableComponent.material.albedo->Generate(data.materials[0].albedo.width, data.materials[0].albedo.height, data.materials[0].albedo.data);
 
-				testRenderableComponent.material.normal = std::make_unique<Texture2D>();
-				testRenderableComponent.material.normal->internalFormat    = TextureInternalFormat::XYZW8;
-				testRenderableComponent.material.normal->format            = TextureFormat::XYZW;
-				testRenderableComponent.material.normal->interpolationMode = TextureInterpolationMode::Trilinear;
-				testRenderableComponent.material.normal->levels            = 0;
-				testRenderableComponent.material.normal->Generate(data.materials[0].normal.width, data.materials[0].normal.height, data.materials[0].normal.data);
+			testRenderableComponent.material.normal = std::make_unique<Texture2D>();
+			testRenderableComponent.material.normal->internalFormat    = TextureInternalFormat::XYZW8;
+			testRenderableComponent.material.normal->format            = TextureFormat::XYZW;
+			testRenderableComponent.material.normal->interpolationMode = TextureInterpolationMode::Trilinear;
+			testRenderableComponent.material.normal->levels            = 0;
+			testRenderableComponent.material.normal->Generate(data.materials[0].normal.width, data.materials[0].normal.height, data.materials[0].normal.data);
 
-				testRenderableComponent.material.roughness = std::make_unique<Texture2D>();
-				testRenderableComponent.material.roughness->internalFormat    = TextureInternalFormat::X8;
-				testRenderableComponent.material.roughness->format            = TextureFormat::X;
-				testRenderableComponent.material.roughness->interpolationMode = TextureInterpolationMode::Trilinear;
-				testRenderableComponent.material.roughness->levels            = 0;
-				testRenderableComponent.material.roughness->Generate(data.materials[0].roughness.width, data.materials[0].roughness.height, data.materials[0].roughness.data);
+			testRenderableComponent.material.roughness = std::make_unique<Texture2D>();
+			testRenderableComponent.material.roughness->internalFormat    = TextureInternalFormat::X8;
+			testRenderableComponent.material.roughness->format            = TextureFormat::X;
+			testRenderableComponent.material.roughness->interpolationMode = TextureInterpolationMode::Trilinear;
+			testRenderableComponent.material.roughness->levels            = 0;
+			testRenderableComponent.material.roughness->Generate(data.materials[0].roughness.width, data.materials[0].roughness.height, data.materials[0].roughness.data);
 
-				testRenderableComponent.material.metalness = std::make_unique<Texture2D>();
-				testRenderableComponent.material.metalness->internalFormat    = TextureInternalFormat::X8;
-				testRenderableComponent.material.metalness->format            = TextureFormat::X;
-				testRenderableComponent.material.metalness->interpolationMode = TextureInterpolationMode::Trilinear;
-				testRenderableComponent.material.metalness->levels            = 0;
-				testRenderableComponent.material.metalness->Generate(data.materials[0].metalness.width, data.materials[0].metalness.height, data.materials[0].metalness.data);
-				
-				testRenderableComponent.material.emissivity = std::make_unique<Texture2D>();
-				testRenderableComponent.material.emissivity->internalFormat    = TextureInternalFormat::X8;
-				testRenderableComponent.material.emissivity->format            = TextureFormat::X;
-				testRenderableComponent.material.emissivity->interpolationMode = TextureInterpolationMode::Trilinear;
-				testRenderableComponent.material.emissivity->levels            = 0;
-				testRenderableComponent.material.emissivity->Generate(data.materials[0].emissivity.width, data.materials[0].emissivity.height, data.materials[0].emissivity.data);
+			testRenderableComponent.material.metalness = std::make_unique<Texture2D>();
+			testRenderableComponent.material.metalness->internalFormat    = TextureInternalFormat::X8;
+			testRenderableComponent.material.metalness->format            = TextureFormat::X;
+			testRenderableComponent.material.metalness->interpolationMode = TextureInterpolationMode::Trilinear;
+			testRenderableComponent.material.metalness->levels            = 0;
+			testRenderableComponent.material.metalness->Generate(data.materials[0].metalness.width, data.materials[0].metalness.height, data.materials[0].metalness.data);
+			
+			testRenderableComponent.material.emissivity = std::make_unique<Texture2D>();
+			testRenderableComponent.material.emissivity->internalFormat    = TextureInternalFormat::X8;
+			testRenderableComponent.material.emissivity->format            = TextureFormat::X;
+			testRenderableComponent.material.emissivity->interpolationMode = TextureInterpolationMode::Trilinear;
+			testRenderableComponent.material.emissivity->levels            = 0;
+			testRenderableComponent.material.emissivity->Generate(data.materials[0].emissivity.width, data.materials[0].emissivity.height, data.materials[0].emissivity.data);
 
-				GetWorld().AddComponent(testMeshEntity.identifier, std::move(testRenderableComponent));
-			}
+			GetWorld().AddComponent(testMeshEntity.identifier, std::move(testRenderableComponent));
 		}
 
 		for(const auto &i : data.pointLights)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Graphics/Texture/AbstractTexture1D.h"
+#include "Gogaman/Rendering/Texture/AbstractTexture1D.h"
 
 namespace Gogaman
 {

@@ -46,10 +46,7 @@ namespace Gogaman
 		Point,
 		Bilinear,
 		Trilinear,
-		Anisotropic2x,
-		Anisotropic4x,
-		Anisotropic8x,
-		Anisotropic16x
+		Anisotropic
 	};
 
 	enum class TextureWrapMode : uint8_t

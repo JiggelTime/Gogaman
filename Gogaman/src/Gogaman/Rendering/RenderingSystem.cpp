@@ -352,7 +352,7 @@ namespace Gogaman
 		m_ShaderManager->Get(m_GBufferShader).SetUniformBool("normalMapping",          GM_CONFIG.normalMapping);
 
 		//Generate render data from renderable entities
-		//TODO: Store distance to camera for each mesh for depth sorting
+		//TODO: Store distance to camera of each mesh for sorting by depth
 		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
 			//Is the entire renderable component needed to be loaded into cache here?
@@ -360,7 +360,20 @@ namespace Gogaman
 
 			//Frustrum cull...
 			
-			//Generate render batches...
+			//Generate render commands...
+			//If this command's state is different from the previous, generate a state change command
+
+			auto GenerateRenderCommandKey = [](const uint32_t materialIndex, const float depth){
+				const uint32_t materialIndexBitShift = 20;
+
+				//Upper 20 bits = materialIndex
+				//Holds 1048576 unique material indices
+				//Lower 12 bits = depth
+				//Holds 4096 unique depth values
+
+				//IEEE floats keep their relative order when interpreted as integers (assuming sign bit is equal across all values)
+				return ((uint32_t)depth & 0xfff) | ((materialIndex << materialIndexBitShift) & 0xfffff);
+			};
 
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         renderableComponent->modelMatrix);
 			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("previousM", renderableComponent->modelMatrixHistory);

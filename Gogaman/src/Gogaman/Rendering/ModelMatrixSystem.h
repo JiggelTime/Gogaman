@@ -4,7 +4,7 @@
 
 #include "Gogaman/ECS/World.h"
 #include "Gogaman/SpatialComponent.h"
-#include "Gogaman/Graphics/RenderableComponent.h"
+#include "Gogaman/Rendering/RenderableComponent.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

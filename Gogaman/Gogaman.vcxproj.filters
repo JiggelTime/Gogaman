@@ -1,294 +1,162 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="Source Files\vendor">
-      <UniqueIdentifier>{89e67720-a531-4bb7-be67-5c447d6faed9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\shadersOld">
-      <UniqueIdentifier>{6429da76-ec4b-42f3-8ece-6c29a2dd5f9c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\graphics">
-      <UniqueIdentifier>{f3ca0ab0-ace0-4591-b200-7dd1f8805ef9}</UniqueIdentifier>
-    </Filter>
+    <ClCompile Include="src\Gogaman\ECS\System.cpp" />
+    <ClCompile Include="src\Gogaman\ECS\World.cpp" />
+    <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
+    <ClCompile Include="src\Gogaman\Logging\ConsoleLogger.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\Renderer.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderLoader.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderManager.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Renderbuffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderSurface.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture1D.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture2D.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture3D.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp" />
+    <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
+    <ClCompile Include="src\Gogaman\Logging\AbstractLogger.cpp" />
+    <ClCompile Include="src\Gogaman\Application.cpp" />
+    <ClCompile Include="src\pch.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexBuffer.cpp" />
+    <ClCompile Include="vendor\glad.c" />
+    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
+    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="vendor\glad.c">
-      <Filter>Source Files\vendor</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Logging\Log.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\Windows\WindowsInput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\ECS\System.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\ECS\World.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Logging\ConsoleLogger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Logging\AbstractLogger.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Events\EventManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderSurface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture1D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture2D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_Renderbuffer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\RenderingSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Renderer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Shader\ShaderLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Gogaman\Graphics\Shader\ShaderManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="vendor\stb_image.h">
-      <Filter>Source Files\vendor</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\Config.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\Application.h" />
-    <ClInclude Include="src\Gogaman.h" />
-    <ClInclude Include="src\Gogaman\EntryPoint.h" />
-    <ClInclude Include="src\pch.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\Logging\Log.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Camera.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
-    <ClInclude Include="src\Gogaman\Input.h" />
-    <ClInclude Include="src\Gogaman\Events\Event.h" />
-    <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
-    <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
-    <ClInclude Include="src\Gogaman\Events\EventDispatcher.h" />
-    <ClInclude Include="src\Gogaman\Events\EventListener.h" />
-    <ClInclude Include="src\Gogaman\Window.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
-    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
-    <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
-    <ClInclude Include="src\Gogaman\InputDefines.h" />
-    <ClInclude Include="src\Gogaman\Base.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_Shader.h">
-      <Filter>Source Files\graphics</Filter>
-    </ClInclude>
+    <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
+    <ClInclude Include="src\Gogaman\CRTP.h" />
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
+    <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentManager.h" />
     <ClInclude Include="src\Gogaman\ECS\Entity.h" />
+    <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
+    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
+    <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderCommand.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
+    <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
+    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
+    <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\AbstractRenderingContext.h" />
+    <ClInclude Include="src\Gogaman\Rendering\AbstractRenderState.h" />
+    <ClInclude Include="src\Gogaman\Rendering\AbstractRenderSurface.h" />
+    <ClInclude Include="src\Gogaman\Rendering\AbstractVertexArrayBuffer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\AbstractVertexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Camera.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FullscreenTriangle.h" />
+    <ClInclude Include="src\Gogaman\Rendering\IndexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\JitterSequences.h" />
+    <ClInclude Include="src\Gogaman\Rendering\LightComponent.h" />
+    <ClInclude Include="src\Gogaman\Rendering\ModelMatrixSystem.h" />
+    <ClInclude Include="src\Gogaman\Rendering\PBR_Material.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderableComponent.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Renderer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderingContext.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderingSystem.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderState.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderSurface.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Shader\AbstractShader.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Shader\Shader.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Shader\ShaderLoader.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Shader\ShaderManager.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\AbstractTexture.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\AbstractTexture1D.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\AbstractTexture2D.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\AbstractTexture3D.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\Texture.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\Texture1D.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\Texture2D.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Texture\Texture3D.h" />
+    <ClInclude Include="src\Gogaman\Rendering\VertexArrayBuffer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\VertexAttribute.h" />
+    <ClInclude Include="src\Gogaman\Rendering\VertexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\VertexBufferLayout.h" />
+    <ClInclude Include="src\Gogaman\SpatialComponent.h" />
     <ClInclude Include="src\Gogaman\ECS\System.h" />
     <ClInclude Include="src\Gogaman\ECS\World.h" />
-    <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
-    <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
-    <ClInclude Include="src\Gogaman\Logging\ConsoleLogger.h" />
-    <ClInclude Include="src\Gogaman\Logging\AbstractLogger.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractVertexBuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractIndexBuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractVertexArrayBuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\PBR_Material.h" />
-    <ClInclude Include="src\Gogaman\Graphics\VertexArrayBuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\IndexBuffer.h" />
+    <ClInclude Include="src\Gogaman\Events\Event.h" />
+    <ClInclude Include="src\Gogaman\Events\EventDispatcher.h" />
+    <ClInclude Include="src\Gogaman\Events\EventListener.h" />
     <ClInclude Include="src\Gogaman\Events\EventManager.h" />
-    <ClInclude Include="src\Gogaman\CRTP.h" />
+    <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
+    <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
+    <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
+    <ClInclude Include="src\Gogaman\Input.h" />
+    <ClInclude Include="src\Gogaman\InputDefines.h" />
+    <ClInclude Include="src\Gogaman\Logging\ConsoleLogger.h" />
+    <ClInclude Include="src\Gogaman\Resource.h" />
     <ClInclude Include="src\Gogaman\ResourceCache.h" />
-    <ClInclude Include="src\Gogaman\Graphics\VertexBufferManager.h" />
-    <ClInclude Include="src\Gogaman\Graphics\VertexBuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderSurface.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderSurface.h" />
+    <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
+    <ClInclude Include="src\Gogaman\Window.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_Renderbuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderingContext.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderState.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderSurface.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture1D.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture2D.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture3D.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_Renderbuffer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\VertexBufferLayout.h" />
-    <ClInclude Include="src\Gogaman\Graphics\VertexAttribute.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderingContext.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderingContext.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderingContext.h" />
-    <ClInclude Include="src\Gogaman\Resource.h" />
-    <ClInclude Include="src\Gogaman\Graphics\UnitQuad.h" />
-    <ClInclude Include="src\Gogaman\Graphics\FullscreenTriangle.h" />
-    <ClInclude Include="src\Gogaman\Graphics\ModelMatrixSystem.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
-    <ClInclude Include="src\Gogaman\SpatialComponent.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderState.h" />
-    <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
-    <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Shader\AbstractShader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Shader\Shader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Shader\ShaderLoader.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Shader\ShaderManager.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture1D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture2D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\AbstractTexture3D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture1D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture2D.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Texture\Texture3D.h" />
-    <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
-    <ClInclude Include="src\Platform\OpenGL\OpenGL_RenderCommand.h" />
+    <ClInclude Include="src\Gogaman\Logging\Log.h" />
+    <ClInclude Include="src\Gogaman\Logging\AbstractLogger.h" />
+    <ClInclude Include="src\Gogaman.h" />
+    <ClInclude Include="src\Gogaman\Application.h" />
+    <ClInclude Include="src\Gogaman\Config.h" />
+    <ClInclude Include="src\Gogaman\Base.h" />
+    <ClInclude Include="src\Gogaman\EntryPoint.h" />
+    <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
+    <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
+    <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_Shader.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexBuffer.h" />
+    <ClInclude Include="vendor\stb_image.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderingDevice.h" />
+    <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
+    <ClInclude Include="src\Gogaman\Rendering\CameraComponent.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shadersOld\boxblurshader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\boxblurshader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\directPBR.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\directPBR.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\gbuffershader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\gbuffershader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\guassianblurshader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\guassianblurshader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\lampshader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\lampshader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\pbrdeferred.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\pbrdeferred.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\skyboxshader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\skyboxshader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\ssrshader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\ssrshader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\VCTshader.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\VCTshader.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelConeTracing.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelConeTracing2.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelization.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelization.gs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelization.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\test.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\test.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelInjectDirect.compute">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelInjectIndirect.compute">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\voxelClearDynamic.compute">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\postprocess.fs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
-    <None Include="shadersOld\postprocess.vs">
-      <Filter>Source Files\shadersOld</Filter>
-    </None>
+    <None Include="shadersOld\boxblurshader.fs" />
+    <None Include="shadersOld\boxblurshader.vs" />
+    <None Include="shadersOld\directPBR.fs" />
+    <None Include="shadersOld\directPBR.vs" />
+    <None Include="shadersOld\gbuffershader.fs" />
+    <None Include="shadersOld\gbuffershader.vs" />
+    <None Include="shadersOld\guassianblurshader.fs" />
+    <None Include="shadersOld\guassianblurshader.vs" />
+    <None Include="shadersOld\postprocess.fs" />
+    <None Include="shadersOld\postprocess.vs" />
+    <None Include="shadersOld\lampshader.fs" />
+    <None Include="shadersOld\lampshader.vs" />
+    <None Include="shadersOld\pbrdeferred.fs" />
+    <None Include="shadersOld\pbrdeferred.vs" />
+    <None Include="shadersOld\skyboxshader.fs" />
+    <None Include="shadersOld\skyboxshader.vs" />
+    <None Include="shadersOld\ssrshader.fs" />
+    <None Include="shadersOld\ssrshader.vs" />
+    <None Include="shadersOld\test.fs" />
+    <None Include="shadersOld\test.vs" />
+    <None Include="shadersOld\VCTshader.fs" />
+    <None Include="shadersOld\VCTshader.vs" />
+    <None Include="shadersOld\voxelConeTracing.vs" />
+    <None Include="shadersOld\voxelConeTracing2.fs" />
+    <None Include="shadersOld\voxelization.fs" />
+    <None Include="shadersOld\voxelization.gs" />
+    <None Include="shadersOld\voxelization.vs" />
+    <None Include="shadersOld\voxelInjectDirect.compute" />
+    <None Include="shadersOld\voxelInjectIndirect.compute" />
+    <None Include="shadersOld\voxelClearDynamic.compute" />
   </ItemGroup>
 </Project>

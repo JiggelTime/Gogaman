@@ -2,11 +2,11 @@
 
 #include "Gogaman/ECS/Component.h"
 
-#include "Gogaman/Graphics/VertexArrayBuffer.h"
-#include "Gogaman/Graphics/VertexBuffer.h"
-#include "Gogaman/Graphics/IndexBuffer.h"
+#include "Gogaman/Rendering/VertexArrayBuffer.h"
+#include "Gogaman/Rendering/VertexBuffer.h"
+#include "Gogaman/Rendering/IndexBuffer.h"
 
-#include "Gogaman/Graphics/PBR_Material.h"
+#include "Gogaman/Rendering/PBR_Material.h"
 
 namespace Gogaman
 {
