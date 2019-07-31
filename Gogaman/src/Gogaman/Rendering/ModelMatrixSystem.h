@@ -12,8 +12,6 @@
 
 namespace Gogaman
 {
-	class World;
-
 	class ModelMatrixSystem : public System
 	{
 	public:

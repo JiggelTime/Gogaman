@@ -61,7 +61,8 @@ namespace Gogaman
 
 		std::unique_ptr<FullscreenTriangle> m_FullscreenTriangle;
 	private:
-		//OLD RENDERER PRIVATE VARIABLES
+		//OLD RENDERER THINGS
+
 		//Camera
 		Camera camera = Camera(glm::vec3(0.0f, 0.5f, 0.0f));
 		const float cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
@@ -85,10 +86,6 @@ namespace Gogaman
 
 		std::unordered_map<std::string, Texture2D>    m_Texture2Ds;
 		std::unordered_map<std::string, Renderbuffer> m_Renderbuffers;
-
-		//Fullscreen quad
-		//float quadVertices[20]{ -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f };
-		//unsigned int quadVAO = 0, quadVBO;
 
 		//Camera matrices
 		glm::mat4 projectionMatrix;

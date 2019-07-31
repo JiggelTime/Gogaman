@@ -63,6 +63,7 @@
     <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
     <ClInclude Include="src\Gogaman\Rendering\CameraComponent.h" />
+    <ClInclude Include="src\Gogaman\Rendering\CameraSystem.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractRenderingContext.h" />

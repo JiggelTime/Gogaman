@@ -126,6 +126,7 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderingDevice.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\CameraComponent.h" />
+    <ClInclude Include="src\Gogaman\Rendering\CameraSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />
