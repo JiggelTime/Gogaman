@@ -5,6 +5,8 @@
 #include "Logging/Log.h"
 #include "Config.h"
 
+#include "Core/Time.h"
+
 #include "Events/EventManager.h"
 
 #include "SpatialComponent.h"
@@ -27,6 +29,11 @@ namespace Gogaman
 		s_Instance = this;
 
 		m_Window = std::unique_ptr<Window>(Window::Create("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight));
+		GM_CONFIG.vSync ? GetWindow().EnableVerticalSync() : GetWindow().DisableVerticalSync();
+
+		m_World.AddSystem(std::make_unique<ModelMatrixSystem>());
+		m_World.AddSystem(std::make_unique<RenderingSystem>());
+		m_World.Initialize();
 	}
 
 	Application::~Application()
@@ -34,18 +41,12 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
-		GetWorld().AddSystem(std::make_unique<ModelMatrixSystem>());
-		GetWorld().AddSystem(std::make_unique<RenderingSystem>());
-		GetWorld().Initialize();
-
-		GM_CONFIG.vSync ? GetWindow().EnableVerticalSync() : GetWindow().DisableVerticalSync();
-
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
 		FlexData::PrintFlexData(data);
 
 		for(const auto &j : data.meshes)
 		{
-			Entity testMeshEntity = GetWorld().CreateEntity();
+			Entity testMeshEntity = m_World.CreateEntity();
 
 			//Set spatial component data
 			SpatialComponent testSpatialComponent;
@@ -56,7 +57,7 @@ namespace Gogaman
 			testSpatialComponent.rotationAngle = 0.0f;
 			testSpatialComponent.scale         = glm::vec3(j.transform.scale[0], j.transform.scale[1], j.transform.scale[2]);
 			//testSpatialComponent.scale = glm::vec3(1.0f);
-			GetWorld().AddComponent<SpatialComponent>(testMeshEntity.identifier, std::move(testSpatialComponent));
+			m_World.AddComponent<SpatialComponent>(testMeshEntity.identifier, std::move(testSpatialComponent));
 
 			//Set renderable component data
 			RenderableComponent testRenderableComponent;
@@ -116,31 +117,33 @@ namespace Gogaman
 			testRenderableComponent.material.emissivity->levels            = 0;
 			testRenderableComponent.material.emissivity->Generate(data.materials[0].emissivity.width, data.materials[0].emissivity.height, data.materials[0].emissivity.data);
 
-			GetWorld().AddComponent(testMeshEntity.identifier, std::move(testRenderableComponent));
+			m_World.AddComponent(testMeshEntity.identifier, std::move(testRenderableComponent));
 		}
 
 		for(const auto &i : data.pointLights)
 		{
-			Entity testPointLightEntity = GetWorld().CreateEntity();
+			Entity testPointLightEntity = m_World.CreateEntity();
 
 			PointLightComponent testPointLightComponent;
 			testPointLightComponent.position = glm::vec3(i.position[0], i.position[1], i.position[2]);
 			testPointLightComponent.radiance = glm::vec3(i.radiance[0], i.radiance[1], i.radiance[2]);
 
-			GetWorld().AddComponent(testPointLightEntity.identifier, std::move(testPointLightComponent));
+			m_World.AddComponent(testPointLightEntity.identifier, std::move(testPointLightComponent));
 		}
 		
 		while(m_IsRunning)
 		{
-			GetWorld().Update();
-			GetWorld().Render();
+			Time::Update();
+
+			m_World.Update();
+			m_World.Render();
 			
 			GetWindow().Update();
 
 			EventManager::GetInstance().DispatchEvents();
 		}
 
-		GetWorld().Shutdown();
+		m_World.Shutdown();
 		Window::Shutdown();
 	}
 }

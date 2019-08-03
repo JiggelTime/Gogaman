@@ -5,6 +5,8 @@
 #include "Gogaman/Application.h"
 #include "Gogaman/Logging/Log.h"
 
+#include "Gogaman/Core/Time.h"
+
 #include "Gogaman/ECS/World.h"
 #include "RenderableComponent.h"
 #include "LightComponent.h"
@@ -17,7 +19,11 @@
 #define GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX       1
 #define GM_RENDERING_SYSTEM_DIRECTIONAL_LIGHT_GROUP_INDEX 2
 
-#define GM_SHADER_DIRECTORY std::string("../Gogaman/src/Shaders/")
+#if GM_RENDERING_API == GM_RENDERING_API_OPENGL
+	#define GM_SHADERS_DIRECTORY std::string("../Gogaman/src/Platform/OpenGL/Shaders/")
+#else
+	#error
+#endif
 
 #define GM_BRDF_LUT_XY 512
 
@@ -117,12 +123,12 @@ namespace Gogaman
 
 	void RenderingSystem::InitializeShaders()
 	{
-		m_PrecomputeBRDFShader   = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("precomputeBRDF.vs"), GM_SHADER_DIRECTORY.append("precomputeBRDF.fs"));
-		m_GBufferShader          = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("gbuffershader.vs"),  GM_SHADER_DIRECTORY.append("gbuffershader.fs"));
-		m_DeferredLightingShader = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("directPBR.vs"),      GM_SHADER_DIRECTORY.append("directPBR.fs"));
-		m_SkyboxShader           = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("skyboxshader.vs"),   GM_SHADER_DIRECTORY.append("skyboxshader.fs"));
-		m_LightShader            = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("lampshader.vs"),     GM_SHADER_DIRECTORY.append("lampshader.fs"));
-		m_PostprocessShader      = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("postprocess.vs"),    GM_SHADER_DIRECTORY.append("postprocess.fs"));
+		m_PrecomputeBRDFShader   = m_ShaderManager->Create(GM_SHADERS_DIRECTORY.append("precomputeBRDF.vs"), GM_SHADERS_DIRECTORY.append("precomputeBRDF.fs"));
+		m_GBufferShader          = m_ShaderManager->Create(GM_SHADERS_DIRECTORY.append("gbuffershader.vs"),  GM_SHADERS_DIRECTORY.append("gbuffershader.fs"));
+		m_DeferredLightingShader = m_ShaderManager->Create(GM_SHADERS_DIRECTORY.append("directPBR.vs"),      GM_SHADERS_DIRECTORY.append("directPBR.fs"));
+		m_SkyboxShader           = m_ShaderManager->Create(GM_SHADERS_DIRECTORY.append("skyboxshader.vs"),   GM_SHADERS_DIRECTORY.append("skyboxshader.fs"));
+		m_LightShader            = m_ShaderManager->Create(GM_SHADERS_DIRECTORY.append("lampshader.vs"),     GM_SHADERS_DIRECTORY.append("lampshader.fs"));
+		m_PostprocessShader      = m_ShaderManager->Create(GM_SHADERS_DIRECTORY.append("postprocess.vs"),    GM_SHADERS_DIRECTORY.append("postprocess.fs"));
 
 		//Upload uniform data
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("materialAlbedo",     0);
@@ -152,10 +158,6 @@ namespace Gogaman
 
 	void RenderingSystem::Update()
 	{
-		//Timing
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
 		frameCounter++;
 		
 		//Render resolution
@@ -177,13 +179,13 @@ namespace Gogaman
 
 		//Movement
 		if(Input::IsKeyPressed(GM_KEY_W))
-			camera.ProcessKeyboardInput(FORWARD,  deltaTime);
+			camera.ProcessKeyboardInput(FORWARD,  Time::GetDeltaTime());
 		if(Input::IsKeyPressed(GM_KEY_S))
-			camera.ProcessKeyboardInput(BACKWARD, deltaTime);
+			camera.ProcessKeyboardInput(BACKWARD, Time::GetDeltaTime());
 		if(Input::IsKeyPressed(GM_KEY_A))
-			camera.ProcessKeyboardInput(LEFT,     deltaTime);
+			camera.ProcessKeyboardInput(LEFT,     Time::GetDeltaTime());
 		if(Input::IsKeyPressed(GM_KEY_D))
-			camera.ProcessKeyboardInput(RIGHT,    deltaTime);
+			camera.ProcessKeyboardInput(RIGHT,    Time::GetDeltaTime());
 		
 		//Toggle depth of field
 		if(Input::IsKeyPressed(GM_KEY_U) && !GM_CONFIG.dof)
@@ -375,7 +377,7 @@ namespace Gogaman
 			renderableComponent->material.BindTextures();
 
 			renderableComponent->vertexArrayBuffer->Bind();
-			glDrawElements(GL_TRIANGLES, renderableComponent->indexBuffer->GetNumIndices(), GL_UNSIGNED_SHORT, 0);
+			Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(renderableComponent->indexBuffer->GetNumIndices());
 		}
 
 		//Sort render batches (using flags)...

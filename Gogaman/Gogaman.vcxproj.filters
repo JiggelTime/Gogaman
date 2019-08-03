@@ -126,8 +126,10 @@
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderingDevice.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
-    <ClInclude Include="src\Gogaman\Rendering\CameraComponent.h" />
-    <ClInclude Include="src\Gogaman\Rendering\CameraSystem.h" />
+    <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
+    <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
+    <ClInclude Include="src\Gogaman\Core\Time.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

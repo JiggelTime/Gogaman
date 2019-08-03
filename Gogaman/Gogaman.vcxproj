@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
+    <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
+    <ClInclude Include="src\Gogaman\Core\Time.h" />
     <ClInclude Include="src\Gogaman\CRTP.h" />
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
@@ -63,8 +65,7 @@
     <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
-    <ClInclude Include="src\Gogaman\Rendering\CameraComponent.h" />
-    <ClInclude Include="src\Gogaman\Rendering\CameraSystem.h" />
+    <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractRenderingContext.h" />
@@ -142,6 +143,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Shader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_VertexBuffer.h" />
+    <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
     <ClInclude Include="vendor\stb_image.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
@@ -256,6 +258,7 @@
       <PreprocessorDefinitions>GM_DEBUG=1;GM_PLATFORM_WINDOWS;GM_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OmitFramePointers>false</OmitFramePointers>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;AntTweakBar64.lib;libfbxsdk-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
