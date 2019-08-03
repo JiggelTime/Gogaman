@@ -2,13 +2,13 @@
 #include "RenderingSystem.h"
 
 #include "Gogaman/Base.h"
+#include "Gogaman/Application.h"
 #include "Gogaman/Logging/Log.h"
 
 #include "Gogaman/ECS/World.h"
 #include "RenderableComponent.h"
 #include "LightComponent.h"
 
-#include "Gogaman/Application.h"
 #include "Gogaman/Input.h"
 
 #include "Gogaman/Events/EventDispatcher.h"
@@ -17,7 +17,9 @@
 #define GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX       1
 #define GM_RENDERING_SYSTEM_DIRECTIONAL_LIGHT_GROUP_INDEX 2
 
-#define GM_SHADER_FILE_PATH_ROOT std::string("../Gogaman/src/Shaders/")
+#define GM_SHADER_DIRECTORY std::string("../Gogaman/src/Shaders/")
+
+#define GM_BRDF_LUT_XY 512
 
 namespace Gogaman
 {
@@ -46,24 +48,10 @@ namespace Gogaman
 		m_ShaderManager = std::make_unique<ShaderManager>();
 		InitializeShaders();
 
-		//Configure global OpenGL state
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		glEnable(GL_TEXTURE_3D);
-		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		glDisable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_BACK);
-		//Debug
-		glEnable(GL_DEBUG_OUTPUT);
-		glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam){ GM_ASSERT(false, "OpenGL error | Type: 0x%x | Severity: 0x%x | Message: %s", type, severity, message) }, 0);
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, nullptr, GL_FALSE);
-
 		m_FullscreenTriangle = std::make_unique<FullscreenTriangle>();
 
 		//Generate BRDF LUT for split-sum approximation
-		glViewport(0, 0, 512, 512);
+		glViewport(0, 0, GM_BRDF_LUT_XY, GM_BRDF_LUT_XY);
 		m_BRDF_Buffer->Bind();
 		m_ShaderManager->Get(m_PrecomputeBRDFShader).Bind();
 		RenderFullscreenWindow();
@@ -77,7 +65,7 @@ namespace Gogaman
 		m_BRDF_LUT.internalFormat    = TextureInternalFormat::XY16F;
 		m_BRDF_LUT.format            = TextureFormat::XY;
 		m_BRDF_LUT.interpolationMode = TextureInterpolationMode::Bilinear;
-		m_BRDF_LUT.Generate(m_BRDF_LUT_Width, m_BRDF_LUT_Height);
+		m_BRDF_LUT.Generate(GM_BRDF_LUT_XY, GM_BRDF_LUT_XY);
 		m_BRDF_Buffer->AddColorBuffer(m_BRDF_LUT);
 		
 		//G-Buffer
@@ -129,31 +117,37 @@ namespace Gogaman
 
 	void RenderingSystem::InitializeShaders()
 	{
-		m_PrecomputeBRDFShader   = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("precomputeBRDF.vs"), GM_SHADER_FILE_PATH_ROOT.append("precomputeBRDF.fs"));
-		m_GBufferShader          = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("gbuffershader.vs"),  GM_SHADER_FILE_PATH_ROOT.append("gbuffershader.fs"));
-		m_DeferredLightingShader = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("directPBR.vs"),      GM_SHADER_FILE_PATH_ROOT.append("directPBR.fs"));
-		m_SkyboxShader           = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("skyboxshader.vs"),   GM_SHADER_FILE_PATH_ROOT.append("skyboxshader.fs"));
-		m_LightShader            = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("lampshader.vs"),     GM_SHADER_FILE_PATH_ROOT.append("lampshader.fs"));
-		m_PostprocessShader      = m_ShaderManager->Create(GM_SHADER_FILE_PATH_ROOT.append("postprocess.vs"),    GM_SHADER_FILE_PATH_ROOT.append("postprocess.fs"));
+		m_PrecomputeBRDFShader   = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("precomputeBRDF.vs"), GM_SHADER_DIRECTORY.append("precomputeBRDF.fs"));
+		m_GBufferShader          = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("gbuffershader.vs"),  GM_SHADER_DIRECTORY.append("gbuffershader.fs"));
+		m_DeferredLightingShader = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("directPBR.vs"),      GM_SHADER_DIRECTORY.append("directPBR.fs"));
+		m_SkyboxShader           = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("skyboxshader.vs"),   GM_SHADER_DIRECTORY.append("skyboxshader.fs"));
+		m_LightShader            = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("lampshader.vs"),     GM_SHADER_DIRECTORY.append("lampshader.fs"));
+		m_PostprocessShader      = m_ShaderManager->Create(GM_SHADER_DIRECTORY.append("postprocess.vs"),    GM_SHADER_DIRECTORY.append("postprocess.fs"));
 
 		//Upload uniform data
-		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialAlbedo",     0);
-		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialNormal",     1);
-		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialRoughness",  2);
-		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialMetalness",  3);
-		m_ShaderManager->Get(m_GBufferShader).SetUniformInt("materialEmissivity", 4);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("materialAlbedo",     0);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("materialNormal",     1);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("materialRoughness",  2);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("materialMetalness",  3);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("materialEmissivity", 4);
 
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gPositionMetalness",         0);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gNormal",                    1);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("gAlbedoEmissivityRoughness", 2);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("BRDF_LUT",                   3);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedDiffuse",          4);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("coneTracedSpecular",         5);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("voxelTexture",               6);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("gPositionMetalness",         0);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("gNormal",                    1);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("gAlbedoEmissivityRoughness", 2);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("BRDF_LUT",                   3);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("coneTracedDiffuse",          4);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("coneTracedSpecular",         5);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelTexture",               6);
 
-		m_ShaderManager->Get(m_SkyboxShader).SetUniformInt("skybox", 0);
+		m_ShaderManager->Get(m_SkyboxShader).UploadUniform("skybox", 0);
 
-		m_ShaderManager->Get(m_PostprocessShader).SetUniformInt("hdrTexture", 0);
+		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("hdrTexture", 0);
+	}
+
+	void RenderingSystem::RenderFullscreenWindow() const
+	{
+		m_FullscreenTriangle->GetVertexArrayBuffer().Bind();
+		Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(m_FullscreenTriangle->GetIndexBuffer().GetNumIndices());
 	}
 
 	void RenderingSystem::Update()
@@ -345,11 +339,11 @@ namespace Gogaman
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_ShaderManager->Get(m_GBufferShader).Bind();
-		m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("VP",                     viewProjectionMatrix);
-		m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("previousVP",             previousViewProjectionMatrix);
-		m_ShaderManager->Get(m_GBufferShader).SetUniformVec2("temporalJitter",         glm::vec2(0.0f));
-		m_ShaderManager->Get(m_GBufferShader).SetUniformVec2("previousTemporalJitter", glm::vec2(0.0f));
-		m_ShaderManager->Get(m_GBufferShader).SetUniformBool("normalMapping",          GM_CONFIG.normalMapping);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("VP",                     viewProjectionMatrix);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousVP",             previousViewProjectionMatrix);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("temporalJitter",         glm::vec2(0.0f));
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousTemporalJitter", glm::vec2(0.0f));
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("normalMapping",          GM_CONFIG.normalMapping);
 
 		//Generate render data from renderable entities
 		//TODO: Store distance to camera of each mesh for sorting by depth
@@ -375,8 +369,8 @@ namespace Gogaman
 				return ((uint32_t)depth & 0xfff) | ((materialIndex << materialIndexBitShift) & 0xfffff);
 			};
 
-			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("M",         renderableComponent->modelMatrix);
-			m_ShaderManager->Get(m_GBufferShader).SetUniformMat4("previousM", renderableComponent->modelMatrixHistory);
+			m_ShaderManager->Get(m_GBufferShader).UploadUniform("M",         renderableComponent->modelMatrix);
+			m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousM", renderableComponent->modelMatrixHistory);
 			
 			renderableComponent->material.BindTextures();
 
@@ -410,25 +404,21 @@ namespace Gogaman
 			std::string positionUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].position";
 			std::string radianceUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].radiance";
 
-			m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3(positionUniformName, pointLightComponent->position);
-			m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3(radianceUniformName, pointLightComponent->radiance);
-			m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[0].coneAperture", 0.0f);
+			m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform(positionUniformName, pointLightComponent->position);
+			m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform(radianceUniformName, pointLightComponent->radiance);
+			m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("pointLights[0].coneAperture", 0.0f);
 			pointLightIndex++;
 		}
 
-		//m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].position",      pointLight0.GetPosition());
-		//m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("pointLights[0].color",         pointLight0.GetColor());
-		//m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("pointLights[0].coneAperture", pointLight0.GetConeAperture());
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("numLights",            (int)m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities.size());
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("cameraPos",            camera.Position);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelGridSize",        GM_CONFIG.voxelGridSize);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelGridSizeInverse", 1.0f / GM_CONFIG.voxelGridSize);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelWorldSize",       GM_CONFIG.voxelGridSize / GM_CONFIG.voxelResolution);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelGridPos",         GM_CONFIG.voxelGridPos);
 
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("numLights",                     m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities.size());
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("cameraPos",                    camera.Position);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("voxelGridSize",               GM_CONFIG.voxelGridSize);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("voxelGridSizeInverse",        1.0f / GM_CONFIG.voxelGridSize);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformFloat("voxelWorldSize",              GM_CONFIG.voxelGridSize / GM_CONFIG.voxelResolution);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformVec3("voxelGridPos",                 GM_CONFIG.voxelGridPos);
-
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformInt("renderMode",                    GM_CONFIG.renderMode);
-		m_ShaderManager->Get(m_DeferredLightingShader).SetUniformBool("debug2",                       GM_CONFIG.debug2);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("renderMode",           GM_CONFIG.renderMode);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("debug2",               GM_CONFIG.debug2);
 
 		m_Texture2Ds["gPositionMetalness"].Bind(0);
 		m_Texture2Ds["gNormal"].Bind(1);
@@ -447,11 +437,11 @@ namespace Gogaman
 
 		//Lights
 		m_ShaderManager->Get(m_LightShader).Bind();
-		m_ShaderManager->Get(m_LightShader).SetUniformMat4("projection", projectionMatrix);
-		m_ShaderManager->Get(m_LightShader).SetUniformMat4("view",       viewMatrix);
+		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("projection", projectionMatrix);
+		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("view",       viewMatrix);
 		//Light 0
-		m_ShaderManager->Get(m_LightShader).SetUniformMat4("M",          glm::mat4());
-		m_ShaderManager->Get(m_LightShader).SetUniformVec3("lightColor", pointLight0.GetColor());
+		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("M",          glm::mat4());
+		m_ShaderManager->Get(m_LightShader).UploadUniformVec3("lightColor", pointLight0.GetColor());
 		
 		RenderFullscreenQuad();
 		
@@ -459,8 +449,8 @@ namespace Gogaman
 		glDepthFunc(GL_LEQUAL);
 		skyboxShader.Bind();
 		glm::mat4 cubemapView(glm::mat3(camera.GetViewMatrix()));
-		skyboxShader.SetUniformMat4("projection", projectionMatrix);
-		skyboxShader.SetUniformMat4("view", cubemapView);
+		skyboxShader.UploadUniformMat4("projection", projectionMatrix);
+		skyboxShader.UploadUniformMat4("view", cubemapView);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		glBindVertexArray(skyboxVAO);
@@ -478,14 +468,14 @@ namespace Gogaman
 		RenderSurface::ClearBackBuffer();
 
 		m_ShaderManager->Get(m_PostprocessShader).Bind();
-		m_ShaderManager->Get(m_PostprocessShader).SetUniformFloat("exposureBias", exposure);
-		m_ShaderManager->Get(m_PostprocessShader).SetUniformFloat("time",         (float)glfwGetTime());
+		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("exposureBias", exposure);
+		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("time",         (float)glfwGetTime());
 
 		m_Texture2Ds["finalImage"].Bind(0);
 
 		RenderFullscreenWindow();
 
-		if(firstIteration == true)
+		if(firstIteration)
 			firstIteration = false;
 	}
 

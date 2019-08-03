@@ -18,8 +18,7 @@ namespace Gogaman
 		RenderState &operator=(const RenderState &) = delete;
 		RenderState &operator=(RenderState &&)      = default;
 
-		void Update() const
-		{}
+		void Update() const;
 	private:
 		static constexpr GLenum GetNativeBlendState(const BlendState state)
 		{

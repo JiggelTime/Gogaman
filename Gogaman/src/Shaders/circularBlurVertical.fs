@@ -14,7 +14,6 @@ uniform sampler2D imageBlueChannelTexture;
 
 uniform bool debug;
 
-//(Pr + Pi) * (Qr + Qi) = (Pr * Qr + Pr * Qi + Pi * Qr - Pi * Qi)
 vec2 multiplyComplex(vec2 p, vec2 q) { return vec2(p.x * q.x - p.y * q.y, p.x * q.y + p.y * q.x); }
 
 //X real, Y imaginary

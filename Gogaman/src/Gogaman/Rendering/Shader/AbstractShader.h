@@ -6,6 +6,10 @@
 #include "Gogaman/Base.h"
 #include "Gogaman/Logging/Log.h"
 
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
 namespace Gogaman
 {
 	enum class ShaderDataType : uint8_t
@@ -41,6 +45,16 @@ namespace Gogaman
 		inline void Compile(const std::string &computeShaderSource)                                                                                       { this->GetImplementation().Compile(computeShaderSource); }
 
 		inline void Bind() const { this->GetImplementation().Bind(); }
+
+		inline void UploadUniform(const std::string &name, const bool       value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const int        value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const float      value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::vec2 &value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::vec3 &value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::vec4 &value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::mat2 &value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::mat3 &value) const { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::mat4 &value) const { this->GetImplementation().UploadUniform(value); }
 
 		static constexpr uint8_t GetShaderDataTypeSize(const ShaderDataType dataType)
 		{

@@ -22,6 +22,7 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Renderbuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderState.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderSurface.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture1D.cpp" />

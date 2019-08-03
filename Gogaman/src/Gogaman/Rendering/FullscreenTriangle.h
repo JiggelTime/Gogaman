@@ -42,6 +42,10 @@ namespace Gogaman
 			m_VertexArrayBuffer->Bind();
 			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetNumIndices(), GL_UNSIGNED_SHORT, 0);
 		}
+
+		inline const VertexArrayBuffer &GetVertexArrayBuffer() const { return *m_VertexArrayBuffer; }
+		inline const VertexBuffer      &GetVertexBuffer()      const { return *m_VertexBuffer;      }
+		inline const IndexBuffer       &GetIndexBuffer()       const { return *m_IndexBuffer;       }
 	private:
 		std::unique_ptr<VertexArrayBuffer> m_VertexArrayBuffer;
 		std::unique_ptr<VertexBuffer>      m_VertexBuffer;

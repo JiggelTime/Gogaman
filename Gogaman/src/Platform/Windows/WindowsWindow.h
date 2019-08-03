@@ -15,10 +15,10 @@ namespace Gogaman
 
 		virtual void  Update() override;
 
-		virtual void *GetNativeWindow() const override { return m_Window; }
-
 		virtual void  EnableVerticalSync()  override;
 		virtual void  DisableVerticalSync() override;
+
+		virtual void *GetNativeWindow() const override { return m_Window; }
 	private:
 		static void GLFW_ErrorCallback(const int error, const char *description);
 	private:

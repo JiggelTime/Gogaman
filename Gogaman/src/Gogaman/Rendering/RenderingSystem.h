@@ -42,7 +42,7 @@ namespace Gogaman
 		void InitializeRenderSurfaces();
 		void InitializeShaders();
 
-		void RenderFullscreenWindow() const { m_FullscreenTriangle->Render(); }
+		void RenderFullscreenWindow() const;
 
 		bool OnWindowResize(WindowResizeEvent &event);
 		bool OnMouseMove(MouseMoveEvent       &event);
@@ -73,12 +73,8 @@ namespace Gogaman
 		bool firstMouse = true;
 		bool firstIteration = true;
 
-		//Window
-		//GLFWwindow *m_Window;
 		int m_RenderResolutionWidth;
 		int m_RenderResolutionHeight;
-		const int m_BRDF_LUT_Width  = 512;
-		const int m_BRDF_LUT_Height = 512;
 
 		//Timing
 		float deltaTime = 0.0f, lastFrame = 0.0f;

@@ -120,14 +120,14 @@ namespace Gogaman
 			return element->GetDirectArray().GetAt(index);
 		}
 		
-		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture)
+		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture) const
 		{
 			if(!fileTexture)
 				return defaultTexture;
 
 			const char *filepath = fileTexture->GetFileName();
 			auto iterator = m_Textures.find(filepath);
-			//Texture is not in texture map (new texture)
+			//Texture not in texture map (new texture)
 			if(iterator == m_Textures.end())
 			{
 				stbi_set_flip_vertically_on_load(true);
@@ -154,7 +154,7 @@ namespace Gogaman
 				std::cout << "Failed to import texture | Location: " << filepath << std::endl;
 				return defaultTexture;
 			}
-			//Texture is already in texture map (duplicate texture)
+			//Texture already in texture map (duplicate texture)
 			else
 				return iterator->second;
 		}
@@ -204,7 +204,7 @@ namespace Gogaman
 			{
 				std::cout << "Material payload size: " << m_FlexData.materials.size() << std::endl;
 
-				//Material is already in payload (duplicate material)
+				//Material already in payload (duplicate material)
 				if(m_FlexData.materials[i] == materialDataPayload)
 				{
 					std::cout << "Found duplicate material! Index: " << i << std::endl;
@@ -212,7 +212,7 @@ namespace Gogaman
 				}
 			}
 
-			//Material is not in payload (new material)
+			//Material not in payload (new material)
 			uint32_t materialIndex = m_FlexData.materials.size();
 			m_FlexData.materials.emplace_back(std::move(materialDataPayload));
 			return materialIndex;
@@ -277,7 +277,7 @@ namespace Gogaman
 					vertex.tangent[2]  = (float)tangent[2];
 
 					auto iterator = vertexIndices.find(vertex);
-					//Vertex is not in index map (new vertex)
+					//Vertex not in index map (new vertex)
 					if(iterator == vertexIndices.end())
 					{
 						if(meshDataPayload.vertexBuffer.size() >= UINT16_MAX)
@@ -291,7 +291,7 @@ namespace Gogaman
 						meshDataPayload.indexBuffer.emplace_back(index);
 						vertexIndices[vertex] = index;
 					}
-					//Vertex is already in index map (duplicate vertex)
+					//Vertex already in index map (duplicate vertex)
 					else
 						meshDataPayload.indexBuffer.emplace_back(iterator->second);
 				}

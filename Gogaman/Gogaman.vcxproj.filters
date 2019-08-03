@@ -27,6 +27,7 @@
     <ClCompile Include="vendor\glad.c" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Containers\Freelist.h" />

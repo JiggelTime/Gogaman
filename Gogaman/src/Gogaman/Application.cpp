@@ -2,9 +2,10 @@
 #include "Application.h"
 
 #include "Base.h"
-#include "Config.h"
-#include "Events/EventManager.h"
 #include "Logging/Log.h"
+#include "Config.h"
+
+#include "Events/EventManager.h"
 
 #include "SpatialComponent.h"
 #include "Rendering/RenderableComponent.h"

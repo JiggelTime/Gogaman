@@ -87,7 +87,7 @@ namespace Gogaman
 		glDeleteShader(computeShader);
 	}
 
-	//TODO: call this function in assertions (GM_ASSERT) to avoid checking errors in release
+	//Supposed to be no-op for release builds
 	void Shader::ValidateShader(const uint32_t object, const std::string &type)
 	{
 		int success;
@@ -115,5 +115,21 @@ namespace Gogaman
 				GM_LOG_CORE_ERROR("Failed to link %s | Error: %s", type, infoLog);
 			}
 		}
+	}
+
+	GLint Shader::GetUniformLocation(const std::string &name) const
+	{
+		auto iterator = m_UniformLocations.find(name);
+		//Location not in location cache
+		if(iterator == m_UniformLocations.end())
+		{
+			GLint location = glGetUniformLocation(m_RendererID, name.c_str());
+			GM_ASSERT((location != -1) || (name == "debug") || (name == "debug2"), "Failed to get uniform location: invalid name")
+			m_UniformLocations[name] = location;
+			return location;
+		}
+		//Location already in location cache
+		else
+			return iterator->second;
 	}
 }
