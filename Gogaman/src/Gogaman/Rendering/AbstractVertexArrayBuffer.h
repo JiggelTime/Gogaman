@@ -10,8 +10,8 @@ namespace Gogaman
 
 	using VertexArrayBufferID = uint16_t;
 
-	template<typename VertexArrayBufferType>
-	class AbstractVertexArrayBuffer : public CRTP<VertexArrayBufferType, AbstractVertexArrayBuffer>, public Resource<VertexArrayBufferID>
+	template<typename ImplementationType>
+	class AbstractVertexArrayBuffer : public CRTP<ImplementationType, AbstractVertexArrayBuffer>, public Resource<VertexArrayBufferID>
 	{
 	public:
 		AbstractVertexArrayBuffer(const AbstractVertexArrayBuffer &) = delete;

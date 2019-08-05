@@ -4,8 +4,8 @@
 
 namespace Gogaman
 {
-	template<typename RenderingContextType>
-	class AbstractRenderingContext : public CRTP<RenderingContextType, AbstractRenderingContext>
+	template<typename ImplementationType>
+	class AbstractRenderingContext : public CRTP<ImplementationType, AbstractRenderingContext>
 	{
 		//Set pipeline state and generate rendering commands using the resources owned by a device
 	public:

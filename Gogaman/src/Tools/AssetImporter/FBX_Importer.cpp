@@ -120,7 +120,7 @@ namespace Gogaman
 			return element->GetDirectArray().GetAt(index);
 		}
 		
-		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture) const
+		FlexData::FlexTextureData FBX_Importer::ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture)
 		{
 			if(!fileTexture)
 				return defaultTexture;
@@ -202,14 +202,9 @@ namespace Gogaman
 
 			for(uint32_t i = 0; i < m_FlexData.materials.size(); i++)
 			{
-				std::cout << "Material payload size: " << m_FlexData.materials.size() << std::endl;
-
 				//Material already in payload (duplicate material)
 				if(m_FlexData.materials[i] == materialDataPayload)
-				{
-					std::cout << "Found duplicate material! Index: " << i << std::endl;
 					return i;
-				}
 			}
 
 			//Material not in payload (new material)
@@ -335,7 +330,7 @@ namespace Gogaman
 				pointLightDataPayload.position[2] = (float)position[2];
 				//Radiance
 				FbxDouble3 color     = light->Color.Get();
-				float      intensity = float(light->Intensity.Get() * 0.01f);
+				float      intensity = (float)light->Intensity.Get();
 				pointLightDataPayload.radiance[0] = (float)color[0] * intensity;
 				pointLightDataPayload.radiance[1] = (float)color[1] * intensity;
 				pointLightDataPayload.radiance[2] = (float)color[2] * intensity;
@@ -352,7 +347,7 @@ namespace Gogaman
 				directionalLightDataPayload.direction[2] = (float)direction[2];
 				//Radiance
 				FbxDouble3 color     = light->Color.Get();
-				float      intensity = float(light->Intensity.Get() * 0.01f);
+				float      intensity = (float)light->Intensity.Get();
 				directionalLightDataPayload.radiance[0] = (float)color[0] * intensity;
 				directionalLightDataPayload.radiance[1] = (float)color[1] * intensity;
 				directionalLightDataPayload.radiance[2] = (float)color[2] * intensity;

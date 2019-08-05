@@ -28,6 +28,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderState.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
@@ -130,6 +131,7 @@
     <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
     <ClInclude Include="src\Gogaman\Core\Time.h" />
     <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
+    <ClInclude Include="src\Gogaman\Rendering\Frustrum.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

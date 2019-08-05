@@ -18,7 +18,7 @@ namespace Gogaman
 		void Reload(const ShaderID shaderID);
 		void ReloadAll();
 
-		const Shader &Get(const ShaderID shaderID) const;
+		Shader &Get(const ShaderID shaderID) const;
 	private:
 		ShaderID                                                                        m_NextShaderID;
 		ShaderLoader                                                                    m_Loader;

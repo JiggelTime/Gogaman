@@ -14,7 +14,6 @@ namespace Gogaman
 {
 	enum class ShaderDataType : uint8_t
 	{
-		None = 0,
 		Bool,
 		Int,
 		Int2,
@@ -31,8 +30,8 @@ namespace Gogaman
 
 	using ShaderID = uint8_t;
 
-	template<typename ShaderType>
-	class AbstractShader : public CRTP<ShaderType, AbstractShader>, Resource<ShaderID>
+	template<typename ImplementationType>
+	class AbstractShader : public CRTP<ImplementationType, AbstractShader>, Resource<ShaderID>
 	{
 	public:
 		AbstractShader(const AbstractShader &) = delete;
@@ -46,15 +45,16 @@ namespace Gogaman
 
 		inline void Bind() const { this->GetImplementation().Bind(); }
 
-		inline void UploadUniform(const std::string &name, const bool       value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const int        value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const float      value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const glm::vec2 &value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const glm::vec3 &value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const glm::vec4 &value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const glm::mat2 &value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const glm::mat3 &value) const { this->GetImplementation().UploadUniform(value); }
-		inline void UploadUniform(const std::string &name, const glm::mat4 &value) const { this->GetImplementation().UploadUniform(value); }
+		//TODO: Get location of each uniform through shader program introspection. Make UploadUniform() const and be sure to update ShaderManager::Get() to return a const shader reference
+		inline void UploadUniform(const std::string &name, const bool       value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const int        value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const float      value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::vec2 &value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::vec3 &value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::vec4 &value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::mat2 &value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::mat3 &value) { this->GetImplementation().UploadUniform(value); }
+		inline void UploadUniform(const std::string &name, const glm::mat4 &value) { this->GetImplementation().UploadUniform(value); }
 
 		static constexpr uint8_t GetShaderDataTypeSize(const ShaderDataType dataType)
 		{
@@ -112,7 +112,6 @@ namespace Gogaman
 			}
 
 			GM_ASSERT(false, "Failed to get shader data base type: invalid data type")
-			return ShaderDataType::None;
 		}
 
 		static constexpr uint8_t GetNumShaderDataTypeComponents(const ShaderDataType dataType) { return GetShaderDataTypeSize(dataType) / GetShaderDataTypeSize(GetShaderDataBaseType(dataType)); }

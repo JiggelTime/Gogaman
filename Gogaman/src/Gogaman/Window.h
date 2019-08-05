@@ -20,16 +20,16 @@ namespace Gogaman
 		virtual void Update() = 0;
 		static  void Shutdown();
 
-		virtual void EnableVerticalSync()  = 0;
-		virtual void DisableVerticalSync() = 0;
-		inline  bool IsVerticalSynchronizationEnabled() const { return m_VerticalSynchronization; }
+		virtual void EnableVerticalSynchronization()  = 0;
+		virtual void DisableVerticalSynchronization() = 0;
+		inline const bool IsVerticalSynchronizationEnabled() const { return m_VerticalSynchronization; }
 		
 		virtual void *GetNativeWindow() const = 0;
 
 		inline const char *GetTitle() const { return m_Title; }
 
-		inline int GetWidth()  const { return m_Width;  }
-		inline int GetHeight() const { return m_Height; }
+		inline const int GetWidth()  const { return m_Width;  }
+		inline const int GetHeight() const { return m_Height; }
 
 		inline RenderingContext &GetRenderingContext() const { return *m_RenderingContext; }
 	protected:

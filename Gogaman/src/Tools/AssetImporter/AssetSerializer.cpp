@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 	//Import FlexData
 	FlexData::FlexData testFlexData2 = FlexData::ImportFlexData(exportFilepath);
 
-	//FlexData::PrintFlexData(testFlexData2);
+	FlexData::PrintFlexData(testFlexData2);
 
 	return 0;
 }

@@ -27,21 +27,21 @@ namespace Gogaman
 		{
 			glUseProgram(m_RendererID);
 			//Supposed to be a no-op for release builds
-			UploadUniform("debug",  GM_CONFIG.debug);
-			UploadUniform("debug2", GM_CONFIG.debug2);
+			glProgramUniform1i(m_RendererID, glGetUniformLocation(m_RendererID, "debug"),  (int)GM_CONFIG.debug);
+			glProgramUniform1i(m_RendererID, glGetUniformLocation(m_RendererID, "debug2"), (int)GM_CONFIG.debug2);
 		}
 
-		inline void UploadUniform(const std::string &name, const bool       value) const { glProgramUniform1i(m_RendererID,        GetUniformLocation(name.c_str()),                        (int)value);  }
-		inline void UploadUniform(const std::string &name, const int        value) const { glProgramUniform1i(m_RendererID,        GetUniformLocation(name.c_str()),                             value);  }
-		inline void UploadUniform(const std::string &name, const float      value) const { glProgramUniform1f(m_RendererID,        GetUniformLocation(name.c_str()),                             value);  }
-		inline void UploadUniform(const std::string &name, const glm::vec2 &value) const { glProgramUniform2fv(m_RendererID,       GetUniformLocation(name.c_str()), 1,           glm::value_ptr(value)); }
-		inline void UploadUniform(const std::string &name, const glm::vec3 &value) const { glProgramUniform3fv(m_RendererID,       GetUniformLocation(name.c_str()), 1,           glm::value_ptr(value)); }
-		inline void UploadUniform(const std::string &name, const glm::vec4 &value) const { glProgramUniform4fv(m_RendererID,       GetUniformLocation(name.c_str()), 1,           glm::value_ptr(value)); }
-		inline void UploadUniform(const std::string &name, const glm::mat2 &value) const { glProgramUniformMatrix2fv(m_RendererID, GetUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); }
-		inline void UploadUniform(const std::string &name, const glm::mat3 &value) const { glProgramUniformMatrix3fv(m_RendererID, GetUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); }
-		inline void UploadUniform(const std::string &name, const glm::mat4 &value) const { glProgramUniformMatrix4fv(m_RendererID, GetUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); }
+		inline void UploadUniform(const std::string &name, const bool       value) { glProgramUniform1i(m_RendererID,        GetUniformLocation(name.c_str()),                        (int)value);  }
+		inline void UploadUniform(const std::string &name, const int        value) { glProgramUniform1i(m_RendererID,        GetUniformLocation(name.c_str()),                             value);  }
+		inline void UploadUniform(const std::string &name, const float      value) { glProgramUniform1f(m_RendererID,        GetUniformLocation(name.c_str()),                             value);  }
+		inline void UploadUniform(const std::string &name, const glm::vec2 &value) { glProgramUniform2fv(m_RendererID,       GetUniformLocation(name.c_str()), 1,           glm::value_ptr(value)); }
+		inline void UploadUniform(const std::string &name, const glm::vec3 &value) { glProgramUniform3fv(m_RendererID,       GetUniformLocation(name.c_str()), 1,           glm::value_ptr(value)); }
+		inline void UploadUniform(const std::string &name, const glm::vec4 &value) { glProgramUniform4fv(m_RendererID,       GetUniformLocation(name.c_str()), 1,           glm::value_ptr(value)); }
+		inline void UploadUniform(const std::string &name, const glm::mat2 &value) { glProgramUniformMatrix2fv(m_RendererID, GetUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); }
+		inline void UploadUniform(const std::string &name, const glm::mat3 &value) { glProgramUniformMatrix3fv(m_RendererID, GetUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); }
+		inline void UploadUniform(const std::string &name, const glm::mat4 &value) { glProgramUniformMatrix4fv(m_RendererID, GetUniformLocation(name.c_str()), 1, GL_FALSE, glm::value_ptr(value)); }
 	
-		GLint GetUniformLocation(const std::string &name) const;
+		GLint GetUniformLocation(const std::string &name);
 		
 		inline uint32_t GetRendererID() const { return m_RendererID; }
 
@@ -81,7 +81,7 @@ namespace Gogaman
 	private:
 		void ValidateShader(const uint32_t object, const std::string &type);
 	private:
-		mutable std::unordered_map<std::string, GLint> m_UniformLocations;
+		std::unordered_map<std::string, GLint> m_UniformLocations;
 
 		uint32_t m_RendererID;
 	};

@@ -9,8 +9,8 @@ namespace Gogaman
 {
 	using VertexBufferID = uint16_t;
 
-	template<typename VertexBufferType>
-	class AbstractVertexBuffer : public CRTP<VertexBufferType, AbstractVertexBuffer>, public Resource<VertexBufferID>
+	template<typename ImplementationType>
+	class AbstractVertexBuffer : public CRTP<ImplementationType, AbstractVertexBuffer>, public Resource<VertexBufferID>
 	{
 	public:
 		AbstractVertexBuffer(const AbstractVertexBuffer &) = delete;

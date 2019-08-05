@@ -10,8 +10,8 @@ namespace Gogaman
 {
 	using RenderSurfaceID = uint8_t;
 
-	template<typename RenderSurfaceType>
-	class AbstractRenderSurface : public CRTP<RenderSurfaceType, AbstractRenderSurface>, public Resource<RenderSurfaceID>
+	template<typename ImplementationType>
+	class AbstractRenderSurface : public CRTP<ImplementationType, AbstractRenderSurface>, public Resource<RenderSurfaceID>
 	{
 	public:
 		AbstractRenderSurface(const AbstractRenderSurface &) = delete;
@@ -38,16 +38,16 @@ namespace Gogaman
 		
 		inline void Clear()  const { this->GetImplementation().Clear();  }
 
-		inline void BlitColorBuffer(const   RenderSurfaceType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitColorBuffer(source,   width, height, interpolationMode); }
-		inline void BlitDepthBuffer(const   RenderSurfaceType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitDepthBuffer(source,   width, height, interpolationMode); }
-		inline void BlitStencilBuffer(const RenderSurfaceType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitStencilBuffer(source, width, height, interpolationMode); }
+		inline void BlitColorBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitColorBuffer(source,   width, height, interpolationMode); }
+		inline void BlitDepthBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitDepthBuffer(source,   width, height, interpolationMode); }
+		inline void BlitStencilBuffer(const ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitStencilBuffer(source, width, height, interpolationMode); }
 
 		inline int GetNumColorAttachments() const { return this->GetImplementation().GetNumColorAttachments(); }
 		inline int GetNumRenderTargets()    const { return this->GetImplementation().GetNumRenderTargets();    }
 
-		static inline void BindBackBuffer()  { RenderSurfaceType::BindBackBuffer();  }
+		static inline void BindBackBuffer()  { ImplementationType::BindBackBuffer();  }
 
-		static inline void ClearBackBuffer() { RenderSurfaceType::ClearBackBuffer(); }
+		static inline void ClearBackBuffer() { ImplementationType::ClearBackBuffer(); }
 	protected:
 		AbstractRenderSurface()  = default;
 		~AbstractRenderSurface() = default;

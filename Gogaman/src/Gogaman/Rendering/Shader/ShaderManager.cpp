@@ -72,7 +72,7 @@ namespace Gogaman
 		}
 	}
 
-	const Shader &ShaderManager::Get(const ShaderID shaderID) const
+	Shader &ShaderManager::Get(const ShaderID shaderID) const
 	{
 		GM_ASSERT(shaderID < m_NextShaderID, "Failed to get shader: invalid ID");
 		return m_Shaders.Get(shaderID);

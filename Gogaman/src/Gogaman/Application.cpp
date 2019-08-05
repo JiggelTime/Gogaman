@@ -29,7 +29,7 @@ namespace Gogaman
 		s_Instance = this;
 
 		m_Window = std::unique_ptr<Window>(Window::Create("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight));
-		GM_CONFIG.vSync ? GetWindow().EnableVerticalSync() : GetWindow().DisableVerticalSync();
+		GM_CONFIG.vSync ? GetWindow().EnableVerticalSynchronization() : GetWindow().DisableVerticalSynchronization();
 
 		m_World.AddSystem(std::make_unique<ModelMatrixSystem>());
 		m_World.AddSystem(std::make_unique<RenderingSystem>());
@@ -42,7 +42,6 @@ namespace Gogaman
 	void Application::Run()
 	{
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
-		FlexData::PrintFlexData(data);
 
 		for(const auto &j : data.meshes)
 		{

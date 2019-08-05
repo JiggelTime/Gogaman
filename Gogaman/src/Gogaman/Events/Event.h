@@ -4,7 +4,6 @@ namespace Gogaman
 {
 	enum class EventType : uint8_t
 	{
-		None = 0,
 		//Window
 		WindowClose, WindowResize, WindowFocus, WindowUnfocus,
 		//Keyboard
@@ -25,6 +24,8 @@ namespace Gogaman
 	class Event
 	{
 	public:
+		//TODO: Use CRTP ?
+		//constexpr EventType GetType() const { return EventType::GetType(); }
 		virtual EventType     GetType()     const = 0;
 		virtual EventCategory GetCategory() const = 0;
 	public:

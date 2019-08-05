@@ -15,8 +15,8 @@ namespace Gogaman
 
 		virtual void  Update() override;
 
-		virtual void  EnableVerticalSync()  override;
-		virtual void  DisableVerticalSync() override;
+		virtual void  EnableVerticalSynchronization()  override;
+		virtual void  DisableVerticalSynchronization() override;
 
 		virtual void *GetNativeWindow() const override { return m_Window; }
 	private:

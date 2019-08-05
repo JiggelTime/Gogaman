@@ -38,7 +38,6 @@ namespace Gogaman
 		m_RenderingContext = std::make_unique<RenderingContext>(this);
 		m_RenderingContext->Initialize();
 
-		EnableVerticalSync();
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		
 		//Set GLFW event callbacks
@@ -101,13 +100,13 @@ namespace Gogaman
 		glfwTerminate();
 	}
 
-	void WindowsWindow::EnableVerticalSync()
+	void WindowsWindow::EnableVerticalSynchronization()
 	{
 		glfwSwapInterval(1);
 		m_VerticalSynchronization = true;
 	}
 
-	void WindowsWindow::DisableVerticalSync()
+	void WindowsWindow::DisableVerticalSynchronization()
 	{
 		glfwSwapInterval(0);
 		m_VerticalSynchronization = false;

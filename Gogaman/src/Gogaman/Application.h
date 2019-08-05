@@ -13,8 +13,8 @@ namespace Gogaman
 
 		void Run();
 
-		inline Window &GetWindow() { return *m_Window.get(); }
-		inline World  &GetWorld()  { return  m_World;  }
+		inline Window &GetWindow() const { return *m_Window.get(); }
+		inline World  &GetWorld()        { return  m_World;        }
 
 		static inline Application &GetInstance() { return *s_Instance; }
 	private:

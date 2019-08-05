@@ -11,7 +11,7 @@ namespace Gogaman
 	class Renderer
 	{
 	public:
-		void AddRenderCommand(RenderCommand &&command);
+		//void AddRenderCommand(RenderCommand &&command);
 
 		void SortRenderCommands();
 
@@ -19,6 +19,6 @@ namespace Gogaman
 	private:
 		uint32_t                                          m_NumRenderCommands;
 		std::array<uint32_t,      GM_MAX_RENDER_COMMANDS> m_RenderCommandIndices;
-		std::array<RenderCommand, GM_MAX_RENDER_COMMANDS> m_RenderCommands;
+		//std::array<RenderCommand, GM_MAX_RENDER_COMMANDS> m_RenderCommands;
 	};
 }

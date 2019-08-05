@@ -30,7 +30,6 @@ namespace Gogaman
 
 		//Initialize pipeline state
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		glEnable(GL_TEXTURE_3D);
 		glDisable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDisable(GL_BLEND);

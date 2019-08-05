@@ -10,7 +10,6 @@ namespace Gogaman
 {
 	enum class TextureAccessMode : uint8_t
 	{
-		None = 0,
 		Full,
 		ReadOnly,
 		WriteOnly
@@ -19,7 +18,6 @@ namespace Gogaman
 	//RGB channels are automatically converted from sRGB colorspace to linear when sampled in shaders
 	enum class TextureInternalFormat : uint8_t
 	{
-		None = 0,
 		//Depth
 		              Depth16,          Depth24, Depth32,         Depth32F,
 		//Depth channel and stencil channel
@@ -34,7 +32,6 @@ namespace Gogaman
 
 	enum class TextureFormat : uint8_t
 	{
-		None = 0,
 		X,
 		XY,
 		XYZW
@@ -42,7 +39,6 @@ namespace Gogaman
 
 	enum class TextureInterpolationMode : uint8_t
 	{
-		None = 0,
 		Point,
 		Bilinear,
 		Trilinear,
@@ -51,7 +47,6 @@ namespace Gogaman
 
 	enum class TextureWrapMode : uint8_t
 	{
-		None = 0,
 		Repeat,
 		Clamp,
 		Mirror
@@ -59,8 +54,8 @@ namespace Gogaman
 
 	using TextureID = uint16_t;
 
-	template<typename TextureType>
-	class AbstractTexture : public CRTP<TextureType, AbstractTexture>, public Resource<TextureID>
+	template<typename ImplementationType>
+	class AbstractTexture : public CRTP<ImplementationType, AbstractTexture>, public Resource<TextureID>
 	{
 	public:
 		AbstractTexture(const AbstractTexture &) = delete;

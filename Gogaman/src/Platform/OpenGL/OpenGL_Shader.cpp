@@ -117,7 +117,7 @@ namespace Gogaman
 		}
 	}
 
-	GLint Shader::GetUniformLocation(const std::string &name) const
+	GLint Shader::GetUniformLocation(const std::string &name)
 	{
 		auto iterator = m_UniformLocations.find(name);
 		//Location not in location cache

@@ -158,8 +158,8 @@ namespace Gogaman
 
 	void RenderingSystem::Update()
 	{
-		frameCounter++;
-		
+		m_Camera.Update();
+
 		//Render resolution
 		m_RenderResolutionWidth  = static_cast<int>(Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale);
 		m_RenderResolutionHeight = static_cast<int>(Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale);
@@ -264,17 +264,17 @@ namespace Gogaman
 			GM_CONFIG.normalMappingKeyPressed = false;
 		}
 
-		//Adjust exposure
+		//Adjust film speed
 		if(glfwGetKey(window, GM_KEY_Q) == GLFW_PRESS)
 		{
-			if(exposure > 0.01f)
-				exposure -= 0.01f;
+			if(m_Camera.GetFilmSpeed() > 5.0f)
+				m_Camera.SetFilmSpeed(m_Camera.GetFilmSpeed() - 5.0f);
 			else
-				exposure = 0.0f;
+				m_Camera.SetFilmSpeed(0.0f);
 		}
 		else if(glfwGetKey(window, GM_KEY_E) == GLFW_PRESS)
 		{
-			exposure += 0.01f;
+			m_Camera.SetFilmSpeed(m_Camera.GetFilmSpeed() + 5.0f);
 		}
 
 		//Enable/disable wireframe rendering
@@ -357,6 +357,7 @@ namespace Gogaman
 			//Frustrum cull...
 			
 			//Generate render commands...
+			//The generated command might be pushed into different buckets (G-Buffer bucket, shadow map bucket, etc...)
 			//If this command's state is different from the previous, generate a state change command
 
 			auto GenerateRenderCommandKey = [](const uint32_t materialIndex, const float depth){
@@ -470,8 +471,10 @@ namespace Gogaman
 		RenderSurface::ClearBackBuffer();
 
 		m_ShaderManager->Get(m_PostprocessShader).Bind();
-		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("exposureBias", exposure);
-		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("time",         (float)glfwGetTime());
+		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("exposureNormalizationCoeffecient", m_Camera.GetExposureNormalizationCoeffecient());
+		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("time", (float)glfwGetTime());
+
+		GM_LOG_CORE_TRACE("EV: %f | Aperture (f-stops): %f | Shutter speed (seconds): %f | Film speed (saturation-based ISO sensitivity): %f", m_Camera.GetExposureNormalizationCoeffecient(), m_Camera.GetAperture(), m_Camera.GetShutterSpeed(), m_Camera.GetFilmSpeed());
 
 		m_Texture2Ds["finalImage"].Bind(0);
 

@@ -10,7 +10,6 @@ namespace Gogaman
 {
 	enum class BlendState : uint8_t
 	{
-		None = 0,
 		Zero,
 		One,
 		Source,
@@ -23,8 +22,8 @@ namespace Gogaman
 		InverseDestinationAlpha
 	};
 
-	template<typename RenderStateType>
-	class AbstractRenderState : public CRTP<RenderStateType, AbstractRenderState>
+	template<typename ImplementationType>
+	class AbstractRenderState : public CRTP<ImplementationType, AbstractRenderState>
 	{
 	public:
 		inline void Update() const { this->GetImplementation().Update(); }

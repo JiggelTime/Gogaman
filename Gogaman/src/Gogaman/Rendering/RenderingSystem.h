@@ -9,11 +9,15 @@
 #include "Gogaman/Events/MouseEvent.h"
 
 #include "Camera.h"
+#include "PerspectiveCamera.h"
+
 #include "Shader/Shader.h"
 #include "Shader/ShaderManager.h"
+
 #include "Texture/Texture2D.h"
 #include "Platform/OpenGL/OpenGL_Renderbuffer.h"
 #include "RenderSurface.h"
+
 #include "FullscreenTriangle.h"
 
 #include <glm.hpp>
@@ -48,16 +52,18 @@ namespace Gogaman
 		bool OnMouseMove(MouseMoveEvent       &event);
 		bool OnMouseScroll(MouseScrollEvent   &event);
 	private:
-		std::unique_ptr<ShaderManager> m_ShaderManager;
-		ShaderID m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
+		PerspectiveCamera                   m_Camera;
 
-		std::unique_ptr<RenderSurface> m_BRDF_Buffer;
-		Texture2D                      m_BRDF_LUT;
-		Renderbuffer                   m_BRDF_Depth;
+		std::unique_ptr<ShaderManager>      m_ShaderManager;
+		ShaderID                            m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
 
-		std::unique_ptr<RenderSurface> m_G_Buffer;
+		std::unique_ptr<RenderSurface>      m_BRDF_Buffer;
+		Texture2D                           m_BRDF_LUT;
+		Renderbuffer                        m_BRDF_Depth;
 
-		std::unique_ptr<RenderSurface> m_FinalBuffer;
+		std::unique_ptr<RenderSurface>      m_G_Buffer;
+
+		std::unique_ptr<RenderSurface>      m_FinalBuffer;
 
 		std::unique_ptr<FullscreenTriangle> m_FullscreenTriangle;
 	private:

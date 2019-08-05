@@ -6,12 +6,8 @@ namespace Gogaman
 {
 	struct VertexAttribute
 	{
-		VertexAttribute()
-			: dataType(ShaderDataType::None), offset(0), normalized(false)
-		{}
-
-		VertexAttribute(const ShaderDataType dataType, const bool normalized = false)
-			: dataType(dataType), offset(0), normalized(normalized)
+		VertexAttribute(const ShaderDataType shaderDataType, const uint8_t offset = 0, const bool normalized = false)
+			: dataType(shaderDataType), offset(offset), normalized(normalized)
 		{}
 
 		ShaderDataType dataType;

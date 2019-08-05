@@ -5,8 +5,8 @@
 
 namespace Gogaman
 {
-	template<typename Texture3D_Type>
-	class AbstractTexture3D : public CRTP<Texture3D_Type, AbstractTexture3D>, public Texture
+	template<typename ImplementationType>
+	class AbstractTexture3D : public CRTP<ImplementationType, AbstractTexture3D>, public Texture
 	{
 	public:
 		void Generate(const int width, const int height, const int depth, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, height, depth, imageData); }

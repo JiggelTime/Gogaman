@@ -7,8 +7,8 @@ namespace Gogaman
 {
 	using IndexBufferID = uint16_t;
 
-	template<typename IndexBufferType>
-	class AbstractIndexBuffer : public CRTP<IndexBufferType, AbstractIndexBuffer>, public Resource<IndexBufferID>
+	template<typename ImplementationType>
+	class AbstractIndexBuffer : public CRTP<ImplementationType, AbstractIndexBuffer>, public Resource<IndexBufferID>
 	{
 	public:
 		AbstractIndexBuffer(const AbstractIndexBuffer &) = delete;
