@@ -133,6 +133,7 @@ namespace Gogaman
 		while(m_IsRunning)
 		{
 			Time::Update();
+			GM_LOG_CORE_INFO("Frame # %d", Time::GetFrameCount());
 
 			m_World.Update();
 			m_World.Render();
