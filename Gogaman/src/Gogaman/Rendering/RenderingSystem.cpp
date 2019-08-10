@@ -267,14 +267,14 @@ namespace Gogaman
 		//Adjust film speed
 		if(glfwGetKey(window, GM_KEY_Q) == GLFW_PRESS)
 		{
-			if(m_Camera.GetFilmSpeed() > 5.0f)
-				m_Camera.SetFilmSpeed(m_Camera.GetFilmSpeed() - 5.0f);
+			if(m_Camera.GetSensitivity() > 5.0f)
+				m_Camera.SetSensitivity(m_Camera.GetSensitivity() - 5.0f);
 			else
-				m_Camera.SetFilmSpeed(0.0f);
+				m_Camera.SetSensitivity(0.0f);
 		}
 		else if(glfwGetKey(window, GM_KEY_E) == GLFW_PRESS)
 		{
-			m_Camera.SetFilmSpeed(m_Camera.GetFilmSpeed() + 5.0f);
+			m_Camera.SetSensitivity(m_Camera.GetSensitivity() + 5.0f);
 		}
 
 		//Enable/disable wireframe rendering
@@ -373,9 +373,13 @@ namespace Gogaman
 			};
 
 			m_ShaderManager->Get(m_GBufferShader).UploadUniform("M",         renderableComponent->modelMatrix);
-			m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousM", renderableComponent->modelMatrixHistory);
+			m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousM", renderableComponent->previousModelMatrix);
 			
-			renderableComponent->material.BindTextures();
+			renderableComponent->material.albedo->Bind(0);
+			renderableComponent->material.normal->Bind(1);
+			renderableComponent->material.roughness->Bind(2);
+			renderableComponent->material.metalness->Bind(3);
+			renderableComponent->material.emissivity->Bind(4);
 
 			renderableComponent->vertexArrayBuffer->Bind();
 			Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(renderableComponent->indexBuffer->GetNumIndices());
@@ -471,10 +475,10 @@ namespace Gogaman
 		RenderSurface::ClearBackBuffer();
 
 		m_ShaderManager->Get(m_PostprocessShader).Bind();
-		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("exposureNormalizationCoeffecient", m_Camera.GetExposureNormalizationCoeffecient());
+		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("exposureNormalizationCoeffecient", m_Camera.GetExposure());
 		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("time", (float)glfwGetTime());
 
-		GM_LOG_CORE_TRACE("EV: %f | Aperture (f-stops): %f | Shutter speed (seconds): %f | Film speed (saturation-based ISO sensitivity): %f", m_Camera.GetExposureNormalizationCoeffecient(), m_Camera.GetAperture(), m_Camera.GetShutterSpeed(), m_Camera.GetFilmSpeed());
+		GM_LOG_CORE_TRACE("Exposure: %f | Aperture (f-stops): %f | Shutter speed (seconds): %f | Sensitivity (ISO): %f", m_Camera.GetExposure(), m_Camera.GetAperture(), m_Camera.GetShutterSpeed(), m_Camera.GetSensitivity());
 
 		m_Texture2Ds["finalImage"].Bind(0);
 

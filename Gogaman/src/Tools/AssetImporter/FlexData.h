@@ -68,6 +68,12 @@ namespace FlexData
 		}
 	};
 
+	struct FlexBoundingBox3D_Data
+	{
+		float minimum[3];
+		float maximum[3];
+	};
+
 	struct FlexMeshData
 	{
 		//Each instance has its own transform
@@ -77,6 +83,7 @@ namespace FlexData
 		std::vector<FlexVertexData> vertexBuffer;
 		std::vector<uint16_t>       indexBuffer;
 		uint32_t                    materialIndex;
+		//FlexBoundingBox3D_Data      axisAlignedBoundingBox;
 	};
 
 	struct FlexPointLightData

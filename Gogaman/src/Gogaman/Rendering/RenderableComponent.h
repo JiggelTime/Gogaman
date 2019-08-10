@@ -8,17 +8,21 @@
 
 #include "Gogaman/Rendering/PBR_Material.h"
 
+#include "Gogaman/Geometry/BoundingBox3D.h"
+
 namespace Gogaman
 {
 	struct RenderableComponent : public Component<RenderableComponent>
 	{
-		glm::mat4 modelMatrix;
-		glm::mat4 modelMatrixHistory;
+		glm::mat4                          modelMatrix;
+		glm::mat4                          previousModelMatrix;
 
 		std::unique_ptr<VertexArrayBuffer> vertexArrayBuffer;
 		std::unique_ptr<VertexBuffer>      vertexBuffer;
 		std::unique_ptr<IndexBuffer>       indexBuffer;
 
-		PBR_Material material;
+		PBR_Material                       material;
+
+		BoundingBox3D                      axisAlignedBoundingBox;
 	};
 }

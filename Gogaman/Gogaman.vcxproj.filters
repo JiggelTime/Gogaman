@@ -131,7 +131,12 @@
     <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
     <ClInclude Include="src\Gogaman\Core\Time.h" />
     <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
-    <ClInclude Include="src\Gogaman\Rendering\Frustrum.h" />
+    <ClInclude Include="src\Gogaman\Geometry\BoundingBox3D.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
+    <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Intersection.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Ray3D.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

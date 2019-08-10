@@ -59,6 +59,9 @@
     <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Intersection.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Ray3D.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
     <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
@@ -66,7 +69,9 @@
     <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
     <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
-    <ClInclude Include="src\Gogaman\Rendering\Frustrum.h" />
+    <ClInclude Include="src\Gogaman\Geometry\BoundingBox3D.h" />
+    <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
+    <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
