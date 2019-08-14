@@ -14,7 +14,6 @@
     <ClCompile Include="src\Gogaman\ECS\System.cpp" />
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
-    <ClCompile Include="src\Gogaman\Logging\ConsoleLogger.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Renderer.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
@@ -31,7 +30,6 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture3D.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
-    <ClCompile Include="src\Gogaman\Logging\AbstractLogger.cpp" />
     <ClCompile Include="src\Gogaman\Application.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -72,6 +70,7 @@
     <ClInclude Include="src\Gogaman\Geometry\BoundingBox3D.h" />
     <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
+    <ClInclude Include="src\Gogaman\Logging\FileLogger.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />

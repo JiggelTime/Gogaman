@@ -4,7 +4,6 @@
     <ClCompile Include="src\Gogaman\ECS\System.cpp" />
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
-    <ClCompile Include="src\Gogaman\Logging\ConsoleLogger.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Renderer.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderLoader.cpp" />
@@ -19,7 +18,6 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture3D.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp" />
     <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
-    <ClCompile Include="src\Gogaman\Logging\AbstractLogger.cpp" />
     <ClCompile Include="src\Gogaman\Application.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp" />
@@ -137,6 +135,7 @@
     <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Geometry\Intersection.h" />
     <ClInclude Include="src\Gogaman\Geometry\Ray3D.h" />
+    <ClInclude Include="src\Gogaman\Logging\FileLogger.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

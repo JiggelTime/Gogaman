@@ -22,7 +22,7 @@ namespace Gogaman
 
 		//Initialize GLAD
 		int gladStatus = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		GM_ASSERT(gladStatus, "Failed to initialize GLAD");
+		GM_ASSERT(gladStatus, "Failed to initialize GLAD")
 		GM_LOG_CORE_INFO("Initialized OpenGL |");
 		GM_LOG_CORE_INFO("                   | Version:  %s", glGetString(GL_VERSION));
 		GM_LOG_CORE_INFO("                   | Vendor:   %s", glGetString(GL_VENDOR));

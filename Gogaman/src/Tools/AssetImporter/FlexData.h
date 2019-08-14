@@ -390,7 +390,7 @@ namespace FlexData
 		}
 		else
 		{
-			std::cerr << "Failed to open file | Location: " << filepath << std::endl;
+			std::cerr << "Failed to create file | Location: " << filepath << std::endl;
 			exit(1);
 		}
 	}

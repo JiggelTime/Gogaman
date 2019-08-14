@@ -13,13 +13,17 @@ namespace Gogaman
 	class AbstractLogger
 	{
 	public:
-		AbstractLogger(std::string name);
-		~AbstractLogger();
+		inline AbstractLogger(const std::string &name)
+			: m_LogName(name), m_LogLevel(LogLevel::Trace)
+		{}
 
-		virtual void Log(const LogLevel level, const char *format, ...) = 0;
+		~AbstractLogger()
+		{}
 
-		inline void SetLogLevel(LogLevel level) { m_LogLevel = level; }
-		inline LogLevel GetLogLevel() { return m_LogLevel; }
+		inline virtual void Log(const LogLevel level, const char *format, ...) const = 0;
+
+		inline void SetLogLevel(const LogLevel level) { m_LogLevel = level; }
+		inline LogLevel GetLogLevel() const { return m_LogLevel; }
 	protected:
 		std::string m_LogName;
 		LogLevel    m_LogLevel;

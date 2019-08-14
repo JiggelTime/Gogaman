@@ -35,8 +35,8 @@ namespace Gogaman
 				//modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);
 				modelMatrix = glm::scale(modelMatrix,     spatialComponent->scale);
 
-				renderableComponent->modelMatrixHistory = renderableComponent ->modelMatrix;
-				renderableComponent->modelMatrix        = modelMatrix;
+				renderableComponent->previousModelMatrix = renderableComponent ->modelMatrix;
+				renderableComponent->modelMatrix         = modelMatrix;
 			}
 		}
 	};

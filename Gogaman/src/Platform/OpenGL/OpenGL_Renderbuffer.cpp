@@ -20,8 +20,8 @@ namespace Gogaman
 
 	void Renderbuffer::Generate(const int width, const int height)
 	{
-		GM_ASSERT(width  > 0, "Failed to generate renderbuffer: invalid width");
-		GM_ASSERT(height > 0, "Failed to generate renderbuffer: invalid height");
+		GM_ASSERT(width  > 0, "Failed to generate renderbuffer: invalid width")
+		GM_ASSERT(height > 0, "Failed to generate renderbuffer: invalid height")
 
 		this->width  = width;
 		this->height = height;
