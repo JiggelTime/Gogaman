@@ -8,6 +8,9 @@
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 
+#include "Gogaman/Geometry/Sphere.h"
+#include "Gogaman/Geometry/RectangularFrustum.h"
+
 #include "Camera.h"
 #include "PerspectiveCamera.h"
 
@@ -70,9 +73,10 @@ namespace Gogaman
 		//OLD RENDERER THINGS
 
 		//Camera
-		Camera camera = Camera(glm::vec3(0.0f, 0.5f, 0.0f));
-		const float cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
-		float exposure = 1.0f;
+		Camera             camera = Camera(glm::vec3(0.0f, 0.5f, 0.0f));
+		RectangularFrustum cameraFrustum;
+		const float        cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
+		float              exposure = 1.0f;
 
 		float aspectRatio = float(GM_CONFIG.screenWidth) / float(GM_CONFIG.screenHeight);
 		float lastX = GM_CONFIG.screenWidth / 2.0f, lastY = GM_CONFIG.screenHeight / 2.0f;

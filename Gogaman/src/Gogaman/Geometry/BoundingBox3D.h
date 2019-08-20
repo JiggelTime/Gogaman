@@ -4,24 +4,21 @@
 
 namespace Gogaman
 {
-	class BoundingBox3D
+	struct BoundingBox3D
 	{
 	public:
 		inline BoundingBox3D(const glm::vec3 &minimum = glm::vec3(std::numeric_limits<float>::lowest()), const glm::vec3 &maximum = glm::vec3(std::numeric_limits<float>::max()))
-			: m_Minimum(minimum), m_Maximum(maximum)
+			: minimum(minimum), maximum(maximum)
 		{}
 
 		inline BoundingBox3D(const glm::vec3 &point)
-			: m_Minimum(point), m_Maximum(point)
+			: minimum(point), maximum(point)
 		{}
 
-		inline ~BoundingBox3D()
-		{}
+		inline bool operator==(const BoundingBox3D &other) const { return minimum == other.minimum && maximum == other.maximum; }
+		inline bool operator!=(const BoundingBox3D &other) const { return minimum != other.minimum && maximum != other.maximum; }
 
-		inline bool operator==(const BoundingBox3D &other) const { return m_Minimum == other.m_Minimum && m_Maximum == other.m_Maximum; }
-		inline bool operator!=(const BoundingBox3D &other) const { return m_Minimum != other.m_Minimum && m_Maximum != other.m_Maximum; }
-
-		inline const glm::vec3 &Diagonal() const { return m_Maximum - m_Minimum; }
+		inline const glm::vec3 &Diagonal() const { return maximum - minimum; }
 
 		inline float SurfaceArea() const
 		{
@@ -35,9 +32,9 @@ namespace Gogaman
 			return diagonal.x * diagonal.y * diagonal.z;
 		}
 
-		inline bool Contains(const glm::vec3 &point) const { return (m_Minimum.x <= point.x) && (m_Minimum.y <= point.y) && (m_Minimum.z <= point.z) && (m_Maximum.x >= point.x) && (m_Maximum.y >= point.y) && (m_Maximum.z >= point.z); }
-	private:
-		glm::vec3 m_Minimum;
-		glm::vec3 m_Maximum;
+		inline bool Contains(const glm::vec3 &point) const { return (minimum.x <= point.x) && (minimum.y <= point.y) && (minimum.z <= point.z) && (maximum.x >= point.x) && (maximum.y >= point.y) && (maximum.z >= point.z); }
+
+		glm::vec3 minimum;
+		glm::vec3 maximum;
 	};
 }

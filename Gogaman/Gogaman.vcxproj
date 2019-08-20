@@ -57,8 +57,6 @@
     <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
-    <ClInclude Include="src\Gogaman\Geometry\Intersection.h" />
-    <ClInclude Include="src\Gogaman\Geometry\Ray3D.h" />
     <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
     <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
@@ -70,7 +68,7 @@
     <ClInclude Include="src\Gogaman\Geometry\BoundingBox3D.h" />
     <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
-    <ClInclude Include="src\Gogaman\Logging\FileLogger.h" />
+    <ClInclude Include="src\Gogaman\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
@@ -122,7 +120,6 @@
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Input.h" />
     <ClInclude Include="src\Gogaman\InputDefines.h" />
-    <ClInclude Include="src\Gogaman\Logging\ConsoleLogger.h" />
     <ClInclude Include="src\Gogaman\Resource.h" />
     <ClInclude Include="src\Gogaman\ResourceCache.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
@@ -137,7 +134,6 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture2D.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture3D.h" />
     <ClInclude Include="src\Gogaman\Logging\Log.h" />
-    <ClInclude Include="src\Gogaman\Logging\AbstractLogger.h" />
     <ClInclude Include="src\Gogaman.h" />
     <ClInclude Include="src\Gogaman\Application.h" />
     <ClInclude Include="src\Gogaman\Config.h" />

@@ -7,17 +7,21 @@
 #include <functional>
 #include <vector>
 
+//"Flex" encoded in ASCII
 #define FLEX_HEADER_DATA_SIGNATURE 70, 108, 101, 120
-#define FLEX_HEADER_DATA_VERSION   5
+#define FLEX_HEADER_DATA_VERSION   7
 
+//Unit: bytes
 #define FLEX_MESH_TRANSFORM_DATA_SIZE    (sizeof(float) * (3 + 4 + 3))
 #define FLEX_VERTEX_DATA_SIZE            (sizeof(float) * (3 + 2 + 3 + 3))
+#define FLEX_BOUNDING_SPHERE_DATA_SIZE   (sizeof(float) * (3 + 1))
+#define FLEX_BOUNDING_BOX_3D_DATA_SIZE   (sizeof(float) * (3 * 2))
 #define FLEX_POINT_LIGHT_DATA_SIZE       (sizeof(float) * (3 + 3))
 #define FLEX_DIRECTIONAL_LIGHT_DATA_SIZE (sizeof(float) * (3 + 3))
 
-#define FLEX_DEFAULT_ALBEDO_TEXTURE_VALUE     UINT8_MAX, UINT8_MAX, UINT8_MAX, UINT8_MAX
-#define FLEX_DEFAULT_NORMAL_TEXTURE_VALUE     0,         0,         0,         UINT8_MAX
-#define FLEX_DEFAULT_ROUGHNESS_TEXTURE_VALUE  UINT8_MAX
+#define FLEX_DEFAULT_ALBEDO_TEXTURE_VALUE     128, 128, 128, 255
+#define FLEX_DEFAULT_NORMAL_TEXTURE_VALUE     128, 128, 255, 255
+#define FLEX_DEFAULT_ROUGHNESS_TEXTURE_VALUE  128
 #define FLEX_DEFAULT_METALNESS_TEXTURE_VALUE  0
 #define FLEX_DEFAULT_EMISSIVITY_TEXTURE_VALUE 0
 
@@ -68,15 +72,30 @@ namespace FlexData
 		}
 	};
 
+	struct FlexSphereData
+	{
+		float position[3];
+		float radius;
+	};
+
+	struct FlexBoundingBox3D_Data
+	{
+		float minimum[3];
+		float maximum[3];
+	};
+
 	struct FlexMeshData
 	{
-		//Each instance has its own transform
+		//TODO: Support instances, each instance has its own transform (and maybe material index?)
 		//std::vector<FlexTransformData> transforms;
 		FlexTransformData           transform;
-		//Vertex buffer, index buffer, and material index are shared across all instances
+		//Buffers (shared among instances)
 		std::vector<FlexVertexData> vertexBuffer;
 		std::vector<uint16_t>       indexBuffer;
 		uint32_t                    materialIndex;
+		//Bounding volume
+		FlexSphereData              boundingSphere;
+		FlexBoundingBox3D_Data      axisAlignedBoundingBox;
 	};
 
 	struct FlexPointLightData
@@ -93,6 +112,7 @@ namespace FlexData
 
 	struct FlexTextureData
 	{
+		//TODO: Use S3 texture compression (DXT1 format)
 		uint16_t  width;
 		uint16_t  height;
 		uint8_t  *data;
@@ -216,6 +236,10 @@ namespace FlexData
 				fread(meshDataPayload.indexBuffer.data(), 1, indexBufferDataSize, file);
 				//Read material index data
 				fread(&meshDataPayload.materialIndex, sizeof(uint32_t), 1, file);
+				//Read bounding sphere data
+				fread(&meshDataPayload.boundingSphere, FLEX_BOUNDING_SPHERE_DATA_SIZE, 1, file);
+				//Read AABB data
+				fread(&meshDataPayload.axisAlignedBoundingBox, FLEX_BOUNDING_BOX_3D_DATA_SIZE, 1, file);
 
 				dataPayload.meshes.emplace_back(std::move(meshDataPayload));
 			}
@@ -335,6 +359,10 @@ namespace FlexData
 				fwrite(i.indexBuffer.data(), 1, indexBufferDataSize, file);
 				//Write material index data
 				fwrite(&i.materialIndex, sizeof(uint32_t), 1, file);
+				//Write bounding sphere data
+				fwrite(&i.boundingSphere, FLEX_BOUNDING_SPHERE_DATA_SIZE, 1, file);
+				//Write AABB data
+				fwrite(&i.axisAlignedBoundingBox, FLEX_BOUNDING_BOX_3D_DATA_SIZE, 1, file);
 			}
 
 			//Point light data
@@ -382,7 +410,7 @@ namespace FlexData
 		}
 		else
 		{
-			std::cerr << "Failed to open file | Location: " << filepath << std::endl;
+			std::cerr << "Failed to create file | Location: " << filepath << std::endl;
 			exit(1);
 		}
 	}
@@ -450,22 +478,28 @@ namespace FlexData
 		{
 			std::cout << std::endl;
 			std::cout << "[FlexData] Mesh:" << std::endl;
-			std::cout << "[FlexData]	-Position (XYZ): " << i.transform.position[0] << ", " << i.transform.position[1] << ", " << i.transform.position[2] << std::endl;
-			std::cout << "[FlexData]	-Rotation (XYZ): " << i.transform.rotation[0] << ", " << i.transform.rotation[1] << ", " << i.transform.rotation[2] << std::endl;
-			std::cout << "[FlexData]	-Scale    (XYZ): " << i.transform.scale[0]    << ", " << i.transform.scale[1]    << ", " << i.transform.scale[2]    << std::endl;
-			std::cout << "[FlexData]	-Vertices: "       << i.vertexBuffer.size()   << std::endl;
-			std::cout << "[FlexData]	-Indices:  "       << i.indexBuffer.size()    << std::endl;
-			std::cout << "[FlexData]    -Material index: " << i.materialIndex         << std::endl;
+			std::cout << "[FlexData]	-Position:        " << i.transform.position[0] << ", " << i.transform.position[1] << ", " << i.transform.position[2] << std::endl;
+			std::cout << "[FlexData]	-Rotation:        " << i.transform.rotation[0] << ", " << i.transform.rotation[1] << ", " << i.transform.rotation[2] << std::endl;
+			std::cout << "[FlexData]	-Scale:           " << i.transform.scale[0]    << ", " << i.transform.scale[1]    << ", " << i.transform.scale[2]    << std::endl;
+			std::cout << "[FlexData]	-Vertices:        " << i.vertexBuffer.size()   << std::endl;
+			std::cout << "[FlexData]	-Indices:         " << i.indexBuffer.size()    << std::endl;
+			std::cout << "[FlexData]    -Material index:  " << i.materialIndex         << std::endl;
+			std::cout << "[FlexData]    -Bounding sphere:" << std::endl;
+			std::cout << "[FlexData] 	    -Position: " << i.boundingSphere.position[0] << ", " << i.boundingSphere.position[1] << ", " << i.boundingSphere.position[2] << std::endl;
+			std::cout << "[FlexData] 	    -Radius:   " << i.boundingSphere.radius      << std::endl;
+			std::cout << "[FlexData]    -AABB:" << std::endl;
+			std::cout << "[FlexData] 	    -Minimum: " << i.axisAlignedBoundingBox.minimum[0] << ", " << i.axisAlignedBoundingBox.minimum[1] << ", " << i.axisAlignedBoundingBox.minimum[2] << std::endl;
+			std::cout << "[FlexData] 	    -Maximum: " << i.axisAlignedBoundingBox.maximum[0] << ", " << i.axisAlignedBoundingBox.maximum[1] << ", " << i.axisAlignedBoundingBox.maximum[2] << std::endl;
 			if(printVertexData)
 			{
 				for(auto &j : i.vertexBuffer)
 				{
 					std::cout << std::endl;
-					std::cout << "[FlexData] Vertex:" << std::endl;
-					std::cout << "[FlexData] 	-Position (xyz): " << j.position[0] << ", " << j.position[1] << ", " << j.position[2] << std::endl;
-					std::cout << "[FlexData] 	-UV       (xy):  " << j.uv[0] << ", " << j.uv[1] << std::endl;
-					std::cout << "[FlexData] 	-Normal   (xyz): " << j.normal[0] << ", " << j.normal[1] << ", " << j.normal[2] << std::endl;
-					std::cout << "[FlexData] 	-Tangent  (xyz): " << j.tangent[0] << ", " << j.tangent[1] << ", " << j.tangent[2] << std::endl;
+					std::cout << "[FlexData]    -Vertex:" << std::endl;
+					std::cout << "[FlexData] 	    -Position: " << j.position[0] << ", " << j.position[1] << ", " << j.position[2] << std::endl;
+					std::cout << "[FlexData] 	    -UV:       " << j.uv[0]       << ", " << j.uv[1]       << std::endl;
+					std::cout << "[FlexData] 	    -Normal:   " << j.normal[0]   << ", " << j.normal[1]   << ", " << j.normal[2]   << std::endl;
+					std::cout << "[FlexData] 	    -Tangent:  " << j.tangent[0]  << ", " << j.tangent[1]  << ", " << j.tangent[2]  << std::endl;
 				}
 
 				for(auto &j : i.indexBuffer)

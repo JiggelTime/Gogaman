@@ -25,7 +25,7 @@ namespace Gogaman
 		this->width = width;
 
 		if(levels == 0)
-			levels = static_cast<int>(floor(log2(width)) + 1);
+			levels = (int)floor(log2(width)) + 1;
 
 		glTextureStorage1D(m_RendererID, static_cast<GLsizei>(levels), GetNativeTextureInternalFormat(internalFormat), width);
 		if(imageData != nullptr)

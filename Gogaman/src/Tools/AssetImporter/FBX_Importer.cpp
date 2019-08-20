@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <string>
+#include <limits>
 
 namespace Gogaman
 {
@@ -232,13 +233,25 @@ namespace Gogaman
 			FlexData::FlexMeshData meshDataPayload;
 			meshDataPayload.materialIndex = ProcessMaterial(node);
 
-			std::cout << meshDataPayload.materialIndex << std::endl;
+			meshDataPayload.boundingSphere.position[0] = 0.0f;
+			meshDataPayload.boundingSphere.position[1] = 0.0f;
+			meshDataPayload.boundingSphere.position[2] = 0.0f;
+			meshDataPayload.boundingSphere.radius      = 0.0f;
 
-			std::unordered_map<FlexData::FlexVertexData, uint16_t, FlexData::FlexVertexDataHashFunction> vertexIndices;
+			meshDataPayload.axisAlignedBoundingBox.minimum[0] = FLT_MAX;
+			meshDataPayload.axisAlignedBoundingBox.minimum[1] = FLT_MAX;
+			meshDataPayload.axisAlignedBoundingBox.minimum[2] = FLT_MAX;
+			meshDataPayload.axisAlignedBoundingBox.maximum[0] = 0.0f;
+			meshDataPayload.axisAlignedBoundingBox.maximum[1] = 0.0f;
+			meshDataPayload.axisAlignedBoundingBox.maximum[2] = 0.0f;
 
 			uint32_t numTriangles = mesh->GetPolygonCount();
 			meshDataPayload.vertexBuffer.reserve(3 * numTriangles);
 			meshDataPayload.indexBuffer.reserve(3  * numTriangles);
+
+			std::unordered_map<FlexData::FlexVertexData, uint16_t, FlexData::FlexVertexDataHashFunction> vertexIndices;
+			
+			//auto UpdateBoundingSphere = [](FlexData::FlexSphereData &boundingSphere, const glm::vec3 &point) {};
 
 			for(uint32_t i = 0; i < numTriangles; i++)
 			{
@@ -249,9 +262,9 @@ namespace Gogaman
 					
 					FlexData::FlexVertexData vertex;
 					//Position
-					vertex.position[0] = static_cast<float>(controlPoint[0]);
-					vertex.position[1] = static_cast<float>(controlPoint[1]);
-					vertex.position[2] = static_cast<float>(controlPoint[2]);
+					vertex.position[0] = (float)controlPoint[0];
+					vertex.position[1] = (float)controlPoint[1];
+					vertex.position[2] = (float)controlPoint[2];
 					//UV
 					FbxVector2 uv      = GetVertexElement(mesh->GetElementUV(0), controlPointIndex, i, j, FbxVector2(0.0f, 1.0f));
 					vertex.uv[0]       = static_cast<float>(uv[0]);
@@ -280,8 +293,19 @@ namespace Gogaman
 							std::cerr << "Failed to import FBX mesh: number of vertices exceeds " << UINT16_MAX << std::endl;
 							exit(1);
 						}
+
+						//AABB
+						for(int i = 0; i < 3; i++)
+						{
+							//Minimum
+							if(vertex.position[i] < meshDataPayload.axisAlignedBoundingBox.minimum[i])
+								meshDataPayload.axisAlignedBoundingBox.minimum[i] = vertex.position[i];
+							//Maximum
+							if(vertex.position[i] > meshDataPayload.axisAlignedBoundingBox.maximum[i])
+								meshDataPayload.axisAlignedBoundingBox.maximum[i] = vertex.position[i];
+						}
 						
-						uint16_t index = static_cast<uint16_t>(meshDataPayload.vertexBuffer.size());
+						uint16_t index = (uint16_t)meshDataPayload.vertexBuffer.size();
 						meshDataPayload.vertexBuffer.emplace_back(std::move(vertex));
 						meshDataPayload.indexBuffer.emplace_back(index);
 						vertexIndices[vertex] = index;
@@ -295,22 +319,29 @@ namespace Gogaman
 			FbxAMatrix meshTransform = GetNodeTransform(mesh->GetNode());
 			//Position
 			FbxVector4 meshPosition = meshTransform.GetT();
-			meshDataPayload.transform.position[0] = (float)meshPosition[0];
-			meshDataPayload.transform.position[1] = (float)meshPosition[1];
-			meshDataPayload.transform.position[2] = (float)meshPosition[2];
+			for(int i = 0; i < 3; i++)
+			meshDataPayload.transform.position[i] = (float)meshPosition[i];
 			//Rotation
 			FbxVector4 meshRotation = meshTransform.GetR();
-			meshDataPayload.transform.rotation[0] = (float)meshRotation[0];
-			meshDataPayload.transform.rotation[1] = (float)meshRotation[1];
-			meshDataPayload.transform.rotation[2] = (float)meshRotation[2];
-			meshDataPayload.transform.rotation[3] = (float)meshRotation[3];
-			//SEE IF THIS WORKS ^
+			for(int i = 0; i < 4; i++)
+				meshDataPayload.transform.rotation[i] = (float)meshRotation[i];
+			//TODO: Fix rotation. Hardcoded to 0 to disable for now
 			meshDataPayload.transform.rotation[3] = 0.0f;
 			//Scale
 			FbxVector4 meshScale = meshTransform.GetS();
-			meshDataPayload.transform.scale[0] = (float)meshScale[0];
-			meshDataPayload.transform.scale[1] = (float)meshScale[1];
-			meshDataPayload.transform.scale[2] = (float)meshScale[2];
+			for(int i = 0; i < 3; i++)
+				meshDataPayload.transform.scale[i] = (float)meshScale[i];
+
+			//Bounding sphere
+			//TODO: Use Matoušek, Sharir, Welzl's algorithm
+			float axisAlignedBoundingBoxMean[3];
+			for(int i = 0; i < 3; i++)
+			{
+				axisAlignedBoundingBoxMean[i]              = (meshDataPayload.axisAlignedBoundingBox.maximum[i] - meshDataPayload.axisAlignedBoundingBox.minimum[i]) / 2.0f;
+				meshDataPayload.boundingSphere.position[i] = meshDataPayload.axisAlignedBoundingBox.minimum[i] + axisAlignedBoundingBoxMean[i];
+			}
+
+			meshDataPayload.boundingSphere.radius = axisAlignedBoundingBoxMean[0] > axisAlignedBoundingBoxMean[1] ? axisAlignedBoundingBoxMean[0] : (axisAlignedBoundingBoxMean[1] > axisAlignedBoundingBoxMean[2] ? axisAlignedBoundingBoxMean[1] : axisAlignedBoundingBoxMean[2]);
 
 			m_FlexData.meshes.emplace_back(std::move(meshDataPayload));
 		}

@@ -8,6 +8,7 @@
 
 #include "Gogaman/Rendering/PBR_Material.h"
 
+#include "Gogaman/Geometry/Sphere.h"
 #include "Gogaman/Geometry/BoundingBox3D.h"
 
 namespace Gogaman
@@ -23,6 +24,10 @@ namespace Gogaman
 
 		PBR_Material                       material;
 
+		Sphere                             boundingSphere;
+		Sphere                             worldSpaceBoundingSphere;
+
 		BoundingBox3D                      axisAlignedBoundingBox;
+		BoundingBox3D                      worldSpaceAxisAlignedBoundingBox;
 	};
 }

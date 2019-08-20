@@ -27,7 +27,7 @@ namespace Gogaman
 		this->height = height;
 
 		if(levels == 0)
-			levels = static_cast<int>(floor(log2(max(width, height))) + 1);
+			levels = (int)floor(log2(width > height ? width : height)) + 1;
 
 		glTextureStorage2D(m_RendererID, static_cast<GLsizei>(levels), GetNativeTextureInternalFormat(internalFormat), width, height);
 		if(imageData != nullptr)

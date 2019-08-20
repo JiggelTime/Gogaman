@@ -20,7 +20,7 @@
 #define GM_RENDERING_SYSTEM_DIRECTIONAL_LIGHT_GROUP_INDEX 2
 
 #if GM_RENDERING_API == GM_RENDERING_API_OPENGL
-	#define GM_SHADERS_DIRECTORY std::string("../Gogaman/src/Platform/OpenGL/Shaders/")
+	#define GM_SHADERS_DIRECTORY std::string("D:/dev/Gogaman/Gogaman/src/Platform/OpenGL/Shaders/")
 #else
 	#error
 #endif
@@ -326,6 +326,9 @@ namespace Gogaman
 		viewMatrix                   = camera.GetViewMatrix();
 		viewProjectionMatrix         = projectionMatrix * viewMatrix;
 
+		//Update camera frustum
+		cameraFrustum = RectangularFrustum(glm::transpose(viewProjectionMatrix));
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		//Set render mode to wireframe if enabled
@@ -333,7 +336,7 @@ namespace Gogaman
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Geometry pass
-		//TODO: G-Buffer and post processing should be done in low level renderer
+		//TODO: G-Buffer generation and post processing should be done in low level renderer
 		glViewport(0, 0, m_RenderResolutionWidth, m_RenderResolutionHeight);
 		glEnable(GL_DEPTH_TEST);
 		m_G_Buffer->Bind();
@@ -346,29 +349,35 @@ namespace Gogaman
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("temporalJitter",         glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousTemporalJitter", glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("normalMapping",          GM_CONFIG.normalMapping);
-
-		//Generate render data from renderable entities
-		//TODO: Store distance to camera of each mesh for sorting by depth
+		
+		//Frustum cull with bounding sphere
+		std::vector<unsigned int> persistingEntities;
 		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
-			//Is the entire renderable component needed to be loaded into cache here?
+			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
+			if(cameraFrustum.Intersects(renderableComponent->worldSpaceBoundingSphere))
+				persistingEntities.emplace_back(i);
+		}
+
+		GM_LOG_CORE_INFO("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
+		GM_ASSERT(persistingEntities.size() > 0, "Failed to render | No persisting entities after culling")
+
+		for(auto i : persistingEntities)
+		{
+			//Does the entire renderable component need to be loaded into cache?
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
-			//Frustrum cull...
-			
 			//Generate render commands...
 			//The generated command might be pushed into different buckets (G-Buffer bucket, shadow map bucket, etc...)
 			//If this command's state is different from the previous, generate a state change command
-
 			auto GenerateRenderCommandKey = [](const uint32_t materialIndex, const float depth){
-				const uint32_t materialIndexBitShift = 20;
-
 				//Upper 20 bits = materialIndex
 				//Holds 1048576 unique material indices
 				//Lower 12 bits = depth
 				//Holds 4096 unique depth values
 
 				//IEEE floats keep their relative order when interpreted as integers (assuming sign bit is equal across all values)
+				const uint32_t materialIndexBitShift = 20;
 				return ((uint32_t)depth & 0xfff) | ((materialIndex << materialIndexBitShift) & 0xfffff);
 			};
 

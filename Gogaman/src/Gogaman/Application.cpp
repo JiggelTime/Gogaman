@@ -2,8 +2,8 @@
 #include "Application.h"
 
 #include "Base.h"
-#include "Logging/Log.h"
 #include "Config.h"
+#include "Logging/Log.h"
 
 #include "Core/Time.h"
 
@@ -42,6 +42,7 @@ namespace Gogaman
 	void Application::Run()
 	{
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
+		//FlexData::PrintFlexData(data);
 
 		for(const auto &j : data.meshes)
 		{
@@ -115,6 +116,12 @@ namespace Gogaman
 			testRenderableComponent.material.emissivity->interpolationMode = TextureInterpolationMode::Trilinear;
 			testRenderableComponent.material.emissivity->levels            = 0;
 			testRenderableComponent.material.emissivity->Generate(data.materials[0].emissivity.width, data.materials[0].emissivity.height, data.materials[0].emissivity.data);
+			//Bounding sphere
+			testRenderableComponent.boundingSphere.position = glm::vec3(j.boundingSphere.position[0], j.boundingSphere.position[1], j.boundingSphere.position[2]);
+			testRenderableComponent.boundingSphere.radius   = j.boundingSphere.radius;
+			//AABB
+			testRenderableComponent.axisAlignedBoundingBox.minimum = glm::vec3(j.axisAlignedBoundingBox.minimum[0], j.axisAlignedBoundingBox.minimum[1], j.axisAlignedBoundingBox.minimum[2]);
+			testRenderableComponent.axisAlignedBoundingBox.maximum = glm::vec3(j.axisAlignedBoundingBox.maximum[0], j.axisAlignedBoundingBox.maximum[1], j.axisAlignedBoundingBox.maximum[2]);
 
 			m_World.AddComponent(testMeshEntity.identifier, std::move(testRenderableComponent));
 		}
@@ -130,6 +137,8 @@ namespace Gogaman
 			m_World.AddComponent(testPointLightEntity.identifier, std::move(testPointLightComponent));
 		}
 		
+		GM_LOG_CORE_SET_LEVEL(Info);
+
 		while(m_IsRunning)
 		{
 			Time::Update();

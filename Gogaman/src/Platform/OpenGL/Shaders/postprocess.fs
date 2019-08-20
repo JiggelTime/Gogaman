@@ -38,23 +38,15 @@ void main()
 
 	//Tonemapping
 		#if defined(UNCHARTED2)
-			//Hardcoded exposure adjustment
-			renderedValue *= 16.0f;
 			result = Uncharted2Tonemap(renderedValue);
 
 		#elif defined(REINHARD)
-			//Hardcoded exposure adjustment
-			renderedValue *= 16.0f;
 			result = ReinhardTonemap(renderedValue);
 
 		#elif defined(LUMA_REINHARD)
-			//Hardcoded exposure adjustment
-			renderedValue *= 16.0f;
 			result = LumaReinhardTonemap(renderedValue);
 
 		#elif defined(ACESFILMIC)
-			//Hardcoded exposure adjustment
-			renderedValue *= 4.0f;
 			result = ACESFilmicTonemap(renderedValue);
 		#endif
 

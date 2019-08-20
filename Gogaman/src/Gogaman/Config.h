@@ -1,36 +1,31 @@
 #pragma once
 
-#include "Base.h"
-
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 
 namespace Gogaman
 {
-	class Config
+	struct Config
 	{
-	public:
 		static Config &GetConfig()
 		{
 			static Config instance;
 			return instance;
 		}
-	private:
-		Config()  {}
-		~Config() {}
-	public:
+
 		//Logging
+			const bool        logToFile   = true;
 			const std::string logFilepath = "Gogaman.log";
 
 		//Window
 			//Rendering resolution scale
-			const float resScale = 1.0f;
+			const float resScale     = 1.0f;
 			//Window resolution
-			const int screenWidth  = 1920;
-			const int screenHeight = 1080;
+			const int   screenWidth  = 2560;
+			const int   screenHeight = 1440;
 			//Vertical synchronization toggle
-			const bool vSync = true;
+			const bool  vSync        = true;
 
 		//Depth of field
 			bool dof = false;
@@ -45,14 +40,14 @@ namespace Gogaman
 
 		//Bloom
 			//Bloom toggle
-			bool bloom = true;
-			bool bloomKeyPressed = false;
+			bool bloom                  = true;
+			bool bloomKeyPressed        = false;
 			//Bloom resolution scale
-			const float bloomResScale = 0.25f;
+			const float bloomResScale   = 0.25f;
 			//Bloom effect blurriness
 			const float bloomBlurAmount = 0.01f;
 			//Controls strength of bloom effect
-			const float bloomStrength = 0.1f;
+			const float bloomStrength   = 0.1f;
 
 		//Normal mapping toggle
 			bool normalMapping = true;
