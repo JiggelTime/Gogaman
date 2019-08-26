@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "System.h"
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Logging/Log.h"
 #include "World.h"
 

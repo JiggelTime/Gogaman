@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "OpenGL_RenderingContext.h"
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Application.h"
 #include "Gogaman/Logging/Log.h"
 

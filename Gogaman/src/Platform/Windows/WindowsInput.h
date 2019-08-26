@@ -1,19 +1,16 @@
 #pragma once
 
-#include "Gogaman/Input.h"
+#include "Gogaman/Input/AbstractInput.h"
 
 namespace Gogaman
 {
-	class WindowsInput : public Input
+	class Input : public AbstractInput<Input>
 	{
 	public:
-		WindowsInput();
-		~WindowsInput();
-
 		//Keyboard
-		virtual bool IsKeyPressedImplementation(const int scancode)         const override;
+		static bool IsKeyPressed(const int scancode);
 		//Mouse
-		virtual bool IsMouseButtonPressedImplementation(const int scancode) const override;
-		virtual glm::vec2 GetMousePositionImplementation()                  const override;
+		static bool IsMouseButtonPressed(const int scancode);
+		static const glm::vec2 &GetMousePosition();
 	};
 }

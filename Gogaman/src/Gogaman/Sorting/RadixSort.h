@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Logging/Log.h"
 
 namespace Gogaman

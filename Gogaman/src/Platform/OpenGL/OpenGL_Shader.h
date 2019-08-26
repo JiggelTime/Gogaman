@@ -2,7 +2,7 @@
 
 #include "Gogaman/Rendering/Shader/AbstractShader.h"
 
-#include "Gogaman/Config.h"
+#include "Gogaman/Core/Config.h"
 
 #include <glad.h>
 

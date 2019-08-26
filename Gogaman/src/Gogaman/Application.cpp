@@ -1,11 +1,12 @@
 #include "pch.h"
 #include "Application.h"
 
-#include "Base.h"
-#include "Config.h"
+#include "Core/Base.h"
+#include "Core/Config.h"
+#include "Core/Time.h"
 #include "Logging/Log.h"
 
-#include "Core/Time.h"
+#include "Input/Input.h"
 
 #include "Events/EventManager.h"
 
@@ -41,6 +42,8 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
+		GM_LOG_CORE_SET_LEVEL(Info);
+
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
 		//FlexData::PrintFlexData(data);
 
@@ -137,8 +140,6 @@ namespace Gogaman
 			m_World.AddComponent(testPointLightEntity.identifier, std::move(testPointLightComponent));
 		}
 		
-		GM_LOG_CORE_SET_LEVEL(Info);
-
 		while(m_IsRunning)
 		{
 			Time::Update();
@@ -149,6 +150,7 @@ namespace Gogaman
 			GetWindow().Update();
 
 			EventManager::GetInstance().DispatchEvents();
+			Input::Update();
 		}
 
 		m_World.Shutdown();

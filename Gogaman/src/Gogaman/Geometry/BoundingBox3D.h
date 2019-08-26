@@ -15,9 +15,6 @@ namespace Gogaman
 			: minimum(point), maximum(point)
 		{}
 
-		inline bool operator==(const BoundingBox3D &other) const { return minimum == other.minimum && maximum == other.maximum; }
-		inline bool operator!=(const BoundingBox3D &other) const { return minimum != other.minimum && maximum != other.maximum; }
-
 		inline const glm::vec3 &Diagonal() const { return maximum - minimum; }
 
 		inline float SurfaceArea() const

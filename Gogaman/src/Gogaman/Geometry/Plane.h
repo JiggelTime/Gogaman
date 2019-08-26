@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Logging/Log.h"
 
 #include "Sphere.h"
@@ -18,6 +18,13 @@ namespace Gogaman
 		inline Plane(const glm::vec3 &normal, const float distance)
 			: normal(normal), distance(distance)
 		{}
+
+		inline void Normalize()
+		{
+			float normalLength = glm::length(normal);
+			normal   /= normalLength;
+			distance /= normalLength;
+		}
 
 		//Shortest signed distance from plane to point
 		inline float Distance(const glm::vec3 &point) const

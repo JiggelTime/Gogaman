@@ -30,7 +30,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
-    <ClInclude Include="src\Gogaman\CRTP.h" />
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentManager.h" />
@@ -51,7 +50,6 @@
     <ClInclude Include="src\Gogaman\Rendering\AbstractRenderSurface.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractVertexArrayBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractVertexBuffer.h" />
-    <ClInclude Include="src\Gogaman\Rendering\Camera.h" />
     <ClInclude Include="src\Gogaman\Rendering\FullscreenTriangle.h" />
     <ClInclude Include="src\Gogaman\Rendering\IndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\JitterSequences.h" />
@@ -91,8 +89,6 @@
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
-    <ClInclude Include="src\Gogaman\Input.h" />
-    <ClInclude Include="src\Gogaman\InputDefines.h" />
     <ClInclude Include="src\Gogaman\Resource.h" />
     <ClInclude Include="src\Gogaman\ResourceCache.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
@@ -109,8 +105,6 @@
     <ClInclude Include="src\Gogaman\Logging\Log.h" />
     <ClInclude Include="src\Gogaman.h" />
     <ClInclude Include="src\Gogaman\Application.h" />
-    <ClInclude Include="src\Gogaman\Config.h" />
-    <ClInclude Include="src\Gogaman\Base.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
     <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
@@ -132,6 +126,12 @@
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
     <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
+    <ClInclude Include="src\Gogaman\Core\Base.h" />
+    <ClInclude Include="src\Gogaman\Core\CRTP.h" />
+    <ClInclude Include="src\Gogaman\Core\Config.h" />
+    <ClInclude Include="src\Gogaman\Input\AbstractInput.h" />
+    <ClInclude Include="src\Gogaman\Input\Input.h" />
+    <ClInclude Include="src\Gogaman\Input\InputDefines.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

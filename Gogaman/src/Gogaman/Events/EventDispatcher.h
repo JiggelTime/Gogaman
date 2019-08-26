@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Gogaman/Base.h"
 #include "Event.h"
 
 namespace Gogaman

@@ -30,11 +30,14 @@ namespace Gogaman
 				SpatialComponent    *spatialComponent    = m_World->GetComponent<SpatialComponent>(i);
 				RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
+				//Model matrix
+				//Translate
 				glm::mat4 modelMatrix;
-				modelMatrix = glm::translate(modelMatrix, spatialComponent->position);
+				modelMatrix                              = glm::translate(modelMatrix, spatialComponent->position);
+				//Rotate
 				//modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);
-				modelMatrix = glm::scale(modelMatrix,     spatialComponent->scale);
-
+				//Scale
+				modelMatrix                              = glm::scale(modelMatrix,     spatialComponent->scale);
 				renderableComponent->previousModelMatrix = renderableComponent ->modelMatrix;
 				renderableComponent->modelMatrix         = modelMatrix;
 

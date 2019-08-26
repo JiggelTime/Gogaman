@@ -1,27 +1,51 @@
 #pragma once
 
+#include "Gogaman/Events/EventListener.h"
+#include "Gogaman/Events/KeyboardEvent.h"
+#include "Gogaman/Events/MouseEvent.h"
+
 #include "Gogaman/Geometry/RectangularFrustum.h"
 
 #include <glm.hpp>
 
 namespace Gogaman
 {
-	class PerspectiveCamera
+	//TODO: Relocate this, belongs in math
+	struct EulerAngles
+	{
+		inline EulerAngles(const float pitch = 0.0f, const float yaw = 0.0f, const float roll = 0.0f)
+			: pitch(pitch), yaw(yaw), roll(roll)
+		{}
+
+		float pitch;
+		float yaw;
+		float roll;
+	};
+
+	class PerspectiveCamera : public EventListener
 	{
 	public:
-		PerspectiveCamera(const glm::vec3 &position = glm::vec3(0.0f), const glm::vec4 &rotation = glm::vec4(0.0f), const float focalLength = 50.0f, const float aperture = 5.6f, const float sensitivity = 100.0f, const float shutterSpeed = 1.0f / 100.0f, const float nearPlane = 0.1f, const float farPlane = 100.0f);
+		PerspectiveCamera(const glm::vec3 &position = glm::vec3(0.0f), const EulerAngles &rotation = EulerAngles(), const float focalLength = 50.0f, const float SensorHeight = 8.8f, const float aspectRatio = 1.77777f, const float aperture = 5.6f, const float sensitivity = 100.0f, const float shutterSpeed = 1.0f / 100.0f, const float nearPlane = 0.1f, const float farPlane = 100.0f);
 		~PerspectiveCamera();
 
 		void Update();
 
-		void SetPosition(const glm::vec3 &position);
+		virtual void OnEvent(Event &event) override;
+
+		void SetPosition(const glm::vec3 &position) { m_Position = position; }
 		inline const glm::vec3 &GetPosition() const { return m_Position; }
 
-		void SetRotation(const glm::vec4 &rotation);
-		inline const glm::vec4 &GetRotation() const { return m_Rotation; }
+		void SetRotation(const EulerAngles &rotation) { m_Rotation = rotation; }
+		inline const EulerAngles &GetRotation() const { return m_Rotation; }
 
 		void SetFocalLength(const float focalLength);
 		inline float GetFocalLength() const { return m_FocalLength; }
+
+		void SetSensorHeight(const float sensorHeight);
+		inline float GetSensorHeight() const { return m_SensorHeight; }
+
+		void SetAspectRatio(float aspectRatio);
+		inline float GetAspectRatio() const { return m_AspectRatio; }
 
 		void SetAperture(const float aperture);
 		inline float GetAperture() const { return m_Aperture; }
@@ -42,7 +66,6 @@ namespace Gogaman
 		inline void SetFarPlane(float farPlane) { m_FarPlane = farPlane; }
 		inline float GetFarPlane() const { return m_FarPlane; }
 
-		inline void SetFrustum(const RectangularFrustum &frustum) { m_Frustum = frustum; }
 		inline const RectangularFrustum &GetFrustum() const { return m_Frustum; }
 
 		inline const glm::mat4 &GetViewMatrix()                   const { return m_ViewMatrix;                   }
@@ -51,13 +74,20 @@ namespace Gogaman
 		inline const glm::mat4 &GetPreviousViewProjectionMatrix() const { return m_PreviousViewProjectionMatrix; }
 	private:
 		void UpdateExposure();
-		void UpdateMatrices();
+		void UpdateViewMatrix();
+		void UpdateProjectionMatrix();
+
+		bool OnMouseMove(MouseMoveEvent     &event);
+		bool OnMouseScroll(MouseScrollEvent &event);
 	private:
 		glm::vec3          m_Position;
-		glm::vec4          m_Rotation;
+		EulerAngles        m_Rotation;
 
 		//Unit: millimeters
 		float              m_FocalLength;
+		//Unit: millimeters
+		float              m_SensorHeight;
+		float              m_AspectRatio;
 		//Unit: f-stops
 		float              m_Aperture;
 		//Unit: saturation-based ISO sensitivity
@@ -72,7 +102,7 @@ namespace Gogaman
 		float              m_NearPlane, m_FarPlane;
 		RectangularFrustum m_Frustum;
 
-		bool               m_MatricesRequireUpdate;
+		bool               m_ProjectionMatrixRequiresUpdate;
 		glm::mat4          m_ViewMatrix;
 		glm::mat4          m_ProjectionMatrix;
 		glm::mat4          m_ViewProjectionMatrix;

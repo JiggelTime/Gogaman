@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "OpenGL_Texture3D.h"
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Logging/Log.h"
 
 #include <glad.h>

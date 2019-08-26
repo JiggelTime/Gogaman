@@ -1,17 +1,19 @@
 #include "pch.h"
 #include "RenderingSystem.h"
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Application.h"
 #include "Gogaman/Logging/Log.h"
 
 #include "Gogaman/Core/Time.h"
 
+#include "Gogaman/ECS/Entity.h"
 #include "Gogaman/ECS/World.h"
+
 #include "RenderableComponent.h"
 #include "LightComponent.h"
 
-#include "Gogaman/Input.h"
+#include "Gogaman/Input/Input.h"
 
 #include "Gogaman/Events/EventDispatcher.h"
 
@@ -48,6 +50,10 @@ namespace Gogaman
 	{
 		m_RenderResolutionWidth  = static_cast<int>(Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale);
 		m_RenderResolutionHeight = static_cast<int>(Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale);
+
+		m_Camera.SetFocalLength(20.0f);
+		m_Camera.SetSensorHeight(24.0f);
+		m_Camera.SetAspectRatio(GM_CONFIG.aspectRatio);
 
 		InitializeRenderSurfaces();
 
@@ -158,11 +164,9 @@ namespace Gogaman
 
 	void RenderingSystem::Update()
 	{
-		m_Camera.Update();
-
 		//Render resolution
-		m_RenderResolutionWidth  = static_cast<int>(Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale);
-		m_RenderResolutionHeight = static_cast<int>(Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale);
+		m_RenderResolutionWidth  = (int)Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale;
+		m_RenderResolutionHeight = (int)Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale;
 
 		GLFWwindow *window = static_cast<GLFWwindow *>(Application::GetInstance().GetWindow().GetNativeWindow());
 
@@ -176,16 +180,6 @@ namespace Gogaman
 			m_ShaderManager->ReloadAll();
 			InitializeShaders();
 		}
-
-		//Movement
-		if(Input::IsKeyPressed(GM_KEY_W))
-			camera.ProcessKeyboardInput(FORWARD,  Time::GetDeltaTime());
-		if(Input::IsKeyPressed(GM_KEY_S))
-			camera.ProcessKeyboardInput(BACKWARD, Time::GetDeltaTime());
-		if(Input::IsKeyPressed(GM_KEY_A))
-			camera.ProcessKeyboardInput(LEFT,     Time::GetDeltaTime());
-		if(Input::IsKeyPressed(GM_KEY_D))
-			camera.ProcessKeyboardInput(RIGHT,    Time::GetDeltaTime());
 		
 		//Toggle depth of field
 		if(Input::IsKeyPressed(GM_KEY_U) && !GM_CONFIG.dof)
@@ -320,14 +314,7 @@ namespace Gogaman
 
 	void RenderingSystem::Render()
 	{
-		//Update camera matrices
-		previousViewProjectionMatrix = viewProjectionMatrix;
-		projectionMatrix             = glm::perspective(glm::radians(camera.Zoom), aspectRatio, cameraNearPlane, cameraFarPlane);
-		viewMatrix                   = camera.GetViewMatrix();
-		viewProjectionMatrix         = projectionMatrix * viewMatrix;
-
-		//Update camera frustum
-		cameraFrustum = RectangularFrustum(glm::transpose(viewProjectionMatrix));
+		m_Camera.Update();
 
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -344,22 +331,27 @@ namespace Gogaman
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		m_ShaderManager->Get(m_GBufferShader).Bind();
-		m_ShaderManager->Get(m_GBufferShader).UploadUniform("VP",                     viewProjectionMatrix);
-		m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousVP",             previousViewProjectionMatrix);
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("VP",                     m_Camera.GetViewProjectionMatrix());
+		m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousVP",             m_Camera.GetPreviousViewProjectionMatrix());
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("temporalJitter",         glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("previousTemporalJitter", glm::vec2(0.0f));
 		m_ShaderManager->Get(m_GBufferShader).UploadUniform("normalMapping",          GM_CONFIG.normalMapping);
 		
-		//Frustum cull with bounding sphere
-		std::vector<unsigned int> persistingEntities;
+		//Frustum cull
+		std::vector<EntityID> persistingEntities;
 		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
-			if(cameraFrustum.Intersects(renderableComponent->worldSpaceBoundingSphere))
-				persistingEntities.emplace_back(i);
+			//Bounding sphere intersection
+			if(m_Camera.GetFrustum().Intersects(renderableComponent->worldSpaceBoundingSphere))
+			{
+				//AABB intersection
+				//if(cameraFrustum.Intersects(renderableComponent->worldSpaceAxisAlignedBoundingBox))
+					persistingEntities.emplace_back(i);
+			}
 		}
 
-		GM_LOG_CORE_INFO("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
+		GM_LOG_CORE_TRACE("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
 		GM_ASSERT(persistingEntities.size() > 0, "Failed to render | No persisting entities after culling")
 
 		for(auto i : persistingEntities)
@@ -427,7 +419,7 @@ namespace Gogaman
 		}
 
 		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("numLights",            (int)m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities.size());
-		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("cameraPos",            camera.Position);
+		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("cameraPos",            m_Camera.GetPosition());
 		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelGridSize",        GM_CONFIG.voxelGridSize);
 		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelGridSizeInverse", 1.0f / GM_CONFIG.voxelGridSize);
 		m_ShaderManager->Get(m_DeferredLightingShader).UploadUniform("voxelWorldSize",       GM_CONFIG.voxelGridSize / GM_CONFIG.voxelResolution);
@@ -492,9 +484,6 @@ namespace Gogaman
 		m_Texture2Ds["finalImage"].Bind(0);
 
 		RenderFullscreenWindow();
-
-		if(firstIteration)
-			firstIteration = false;
 	}
 
 	void RenderingSystem::Shutdown()
@@ -504,39 +493,11 @@ namespace Gogaman
 	{
 		EventDispatcher dispatcher(event);
 		dispatcher.Dispatch<WindowResizeEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnWindowResize));
-
-		dispatcher.Dispatch<MouseMoveEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnMouseMove));
-		dispatcher.Dispatch<MouseScrollEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnMouseScroll));
 	}
 
 	bool RenderingSystem::OnWindowResize(WindowResizeEvent &event)
 	{
 		glViewport(0, 0, event.GetWidth(), event.GetHeight());
-		return true;
-	}
-
-	bool RenderingSystem::OnMouseMove(MouseMoveEvent &event)
-	{
-		if(firstMouse)
-		{
-			lastX = event.GetPositionX();
-			lastY = event.GetPositionY();
-			firstMouse = false;
-		}
-
-		float xOffset = event.GetPositionX() - lastX;
-		//Y axis is reversed
-		float yOffset = lastY - event.GetPositionY();
-		camera.ProcessMouseInput(xOffset, yOffset);
-
-		lastX = event.GetPositionX();
-		lastY = event.GetPositionY();
-		return true;
-	}
-
-	bool RenderingSystem::OnMouseScroll(MouseScrollEvent &event)
-	{
-		camera.ProcessMouseScrollInput(event.GetOffsetY());
 		return true;
 	}
 }

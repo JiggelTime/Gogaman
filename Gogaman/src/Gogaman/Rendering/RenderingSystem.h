@@ -2,16 +2,16 @@
 
 #include "Gogaman/ECS/System.h"
 
-#include "Gogaman/Config.h"
 #include "Gogaman/Events/EventListener.h"
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 
+#include "Gogaman/Core/Config.h"
+
 #include "Gogaman/Geometry/Sphere.h"
 #include "Gogaman/Geometry/RectangularFrustum.h"
 
-#include "Camera.h"
 #include "PerspectiveCamera.h"
 
 #include "Shader/Shader.h"
@@ -52,8 +52,6 @@ namespace Gogaman
 		void RenderFullscreenWindow() const;
 
 		bool OnWindowResize(WindowResizeEvent &event);
-		bool OnMouseMove(MouseMoveEvent       &event);
-		bool OnMouseScroll(MouseScrollEvent   &event);
 	private:
 		PerspectiveCamera                   m_Camera;
 
@@ -70,34 +68,12 @@ namespace Gogaman
 
 		std::unique_ptr<FullscreenTriangle> m_FullscreenTriangle;
 	private:
-		//OLD RENDERER THINGS
-
-		//Camera
-		Camera             camera = Camera(glm::vec3(0.0f, 0.5f, 0.0f));
-		RectangularFrustum cameraFrustum;
-		const float        cameraNearPlane = 0.1f, cameraFarPlane = 100.0f;
-		float              exposure = 1.0f;
-
-		float aspectRatio = float(GM_CONFIG.screenWidth) / float(GM_CONFIG.screenHeight);
-		float lastX = GM_CONFIG.screenWidth / 2.0f, lastY = GM_CONFIG.screenHeight / 2.0f;
-		bool firstMouse = true;
-		bool firstIteration = true;
-
 		int m_RenderResolutionWidth;
 		int m_RenderResolutionHeight;
 
-		//Timing
-		float deltaTime = 0.0f, lastFrame = 0.0f;
 		uint32_t frameCounter = 0;
 
 		std::unordered_map<std::string, Texture2D>    m_Texture2Ds;
 		std::unordered_map<std::string, Renderbuffer> m_Renderbuffers;
-
-		//Camera matrices
-		glm::mat4 projectionMatrix;
-		glm::mat4 viewMatrix;
-		glm::mat4 viewProjectionMatrix;
-		//Camera matrix from previous frame
-		glm::mat4 previousViewProjectionMatrix;
 	};
 }

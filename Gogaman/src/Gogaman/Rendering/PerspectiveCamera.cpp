@@ -1,13 +1,19 @@
 #include "pch.h"
 #include "PerspectiveCamera.h"
 
+#include "Gogaman/Core/Config.h"
+#include "Gogaman/Core/Time.h"
+#include "Gogaman/Input/Input.h"
+#include "Gogaman/Events/EventDispatcher.h"
+
 namespace Gogaman
 {
-	PerspectiveCamera::PerspectiveCamera(const glm::vec3 &position, const glm::vec4 &rotation, const float focalLength, const float aperture, const float sensitivity, const float shutterSpeed, const float nearPlane, const float farPlane)
-		: m_Position(position), m_Rotation(rotation), m_FocalLength(focalLength), m_Aperture(aperture), m_Sensitivity(sensitivity), m_ShutterSpeed(shutterSpeed), m_NearPlane(nearPlane), m_FarPlane(farPlane)
+	PerspectiveCamera::PerspectiveCamera(const glm::vec3 &position, const EulerAngles &rotation, const float focalLength, const float sensorHeight, const float aspectRatio, const float aperture, const float sensitivity, const float shutterSpeed, const float nearPlane, const float farPlane)
+		: m_Position(position), m_Rotation(rotation), m_FocalLength(focalLength), m_SensorHeight(sensorHeight), m_AspectRatio(aspectRatio), m_Aperture(aperture), m_Sensitivity(sensitivity), m_ShutterSpeed(shutterSpeed), m_NearPlane(nearPlane), m_FarPlane(farPlane)
 	{
-		UpdateExposure();
-		UpdateMatrices();
+		m_ExposureRequiresUpdate         = true;
+		m_ProjectionMatrixRequiresUpdate = true;
+		Update();
 	}
 
 	PerspectiveCamera::~PerspectiveCamera()
@@ -18,8 +24,13 @@ namespace Gogaman
 		if(m_ExposureRequiresUpdate)
 			UpdateExposure();
 
-		if(m_MatricesRequireUpdate)
-			UpdateMatrices();
+		UpdateViewMatrix();
+
+		if(m_ProjectionMatrixRequiresUpdate)
+			UpdateProjectionMatrix();
+
+		m_ViewProjectionMatrix = m_ProjectionMatrix * m_ViewMatrix;
+		m_Frustum = RectangularFrustum(m_ViewProjectionMatrix);
 	}
 
 	void PerspectiveCamera::UpdateExposure()
@@ -30,32 +41,84 @@ namespace Gogaman
 		m_ExposureRequiresUpdate    = false;
 	}
 
-	void PerspectiveCamera::UpdateMatrices()
+	void PerspectiveCamera::UpdateViewMatrix()
 	{
-		//m_ViewMatrix       = glm::lookAt();
-		//m_ProjectionMatrix = glm::perspective();
+		//UVN system
+		float cosPitch = cosf(glm::radians(m_Rotation.pitch));
+		glm::vec3 n;
+		n.x = cosf(glm::radians(m_Rotation.yaw)) * cosPitch;
+		n.y = sinf(glm::radians(m_Rotation.pitch));
+		n.z = sinf(glm::radians(m_Rotation.yaw)) * cosPitch;
+		n = glm::normalize(n);
 
+		glm::vec3 u = glm::normalize(glm::cross(n, glm::vec3(0.0f, 1.0f, 0.0f)));
+
+		float velocity = GM_CONFIG.cameraMovementSpeed * Time::GetDeltaTime();
+		//Forward
+		if(Input::IsKeyPressed(GM_KEY_W))
+			m_Position += n * velocity;
+		//Backward
+		if(Input::IsKeyPressed(GM_KEY_S))
+			m_Position -= n * velocity;
+		//Left
+		if(Input::IsKeyPressed(GM_KEY_A))
+			m_Position -= u * velocity;
+		//Right
+		if(Input::IsKeyPressed(GM_KEY_D))
+			m_Position += u * velocity;
+
+		glm::vec3 v = glm::normalize(glm::cross(u, n));
+		m_ViewMatrix = glm::lookAt(m_Position, m_Position + n, v);
+	}
+
+	void PerspectiveCamera::UpdateProjectionMatrix()
+	{
+		//Unit: radians
+		float verticalAngleOfView      = atanf(m_SensorHeight / (m_FocalLength * 2.0f)) * 2.0f;
+		m_ProjectionMatrix             = glm::perspective(verticalAngleOfView, m_AspectRatio, m_NearPlane, m_FarPlane);
 		m_PreviousViewProjectionMatrix = m_ViewProjectionMatrix;
-		m_ViewProjectionMatrix         = m_ProjectionMatrix * m_ViewMatrix;
-		m_MatricesRequireUpdate        = false;
+
+		m_ProjectionMatrixRequiresUpdate = false;
 	}
 
-	void PerspectiveCamera::SetPosition(const glm::vec3 &position)
+	void PerspectiveCamera::OnEvent(Event &event)
 	{
-		m_Position              = position;
-		m_MatricesRequireUpdate = true;
+		EventDispatcher dispatcher(event);
+		dispatcher.Dispatch<MouseMoveEvent>(GM_BIND_EVENT_CALLBACK(PerspectiveCamera::OnMouseMove));
 	}
 
-	void PerspectiveCamera::SetRotation(const glm::vec4 &rotation)
+	bool PerspectiveCamera::OnMouseMove(MouseMoveEvent &event)
 	{
-		m_Rotation              = rotation;
-		m_MatricesRequireUpdate = true;
+		glm::vec2 movementOffset = Input::GetDeltaMousePosition() * GM_CONFIG.mouseSensitivity;
+
+		m_Rotation.yaw = fmod(m_Rotation.yaw + movementOffset.x, 360.0f);
+
+		m_Rotation.pitch -= movementOffset.y;
+		if(m_Rotation.pitch < -89.0f)
+			m_Rotation.pitch = -89.0f;
+		else if(m_Rotation.pitch > 89.0f)
+			m_Rotation.pitch = 89.0f;
+
+		return true;
 	}
 
 	void PerspectiveCamera::SetFocalLength(const float focalLength)
 	{
-		m_FocalLength            = focalLength;
-		m_ExposureRequiresUpdate = true;
+		m_FocalLength                    = focalLength;
+		m_ProjectionMatrixRequiresUpdate = true;
+	}
+
+	void PerspectiveCamera::SetSensorHeight(const float sensorHeight)
+	{
+		m_SensorHeight                   = sensorHeight;
+		m_ExposureRequiresUpdate         = true;
+		m_ProjectionMatrixRequiresUpdate = true;
+	}
+
+	void PerspectiveCamera::SetAspectRatio(const float aspectRatio)
+	{
+		m_AspectRatio                    = aspectRatio;
+		m_ProjectionMatrixRequiresUpdate = true;
 	}
 
 	void PerspectiveCamera::SetAperture(const float aperture)

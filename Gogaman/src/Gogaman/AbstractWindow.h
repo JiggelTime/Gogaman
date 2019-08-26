@@ -5,8 +5,8 @@
 
 namespace Gogaman
 {
-	template<typename WindowType>
-	class AbstractWindow : CRTP<WindowType, AbstractWindow>
+	template<typename ImplementationType>
+	class AbstractWindow : CRTP<ImplementationType, AbstractWindow>
 	{
 	public:
 		AbstractWindow(const char *title, const int width, const int height)

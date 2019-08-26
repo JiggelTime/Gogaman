@@ -8,7 +8,9 @@ in vec2 texCoordsFrag;
 
 uniform float nearPlane;
 uniform float farPlane;
-uniform float focalDistance;
+#ifndef AUTO_FOCUS
+	uniform float focalDistance;
+#endif
 uniform float fStop;
 uniform float focalLength;
 uniform sampler2D depthTexture;

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Gogaman/CRTP.h"
+#include "Gogaman/Core/CRTP.h"
 #include "Gogaman/Resource.h"
 
-#include "Gogaman/Base.h"
+#include "Gogaman/Core/Base.h"
 #include "Gogaman/Logging/Log.h"
 
 namespace Gogaman

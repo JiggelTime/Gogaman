@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/CRTP.h"
+#include "Gogaman/Core/CRTP.h"
 #include "Gogaman/Resource.h"
 
 namespace Gogaman
