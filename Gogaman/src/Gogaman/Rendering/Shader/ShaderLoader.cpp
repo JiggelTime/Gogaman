@@ -3,17 +3,13 @@
 
 #include "Gogaman/Logging/Log.h"
 
+#include "Shader.h"
+
 namespace Gogaman
 {
-	ShaderLoader::ShaderLoader()
-	{}
-
-	ShaderLoader::~ShaderLoader()
-	{}
-
-	std::unique_ptr<Shader> ShaderLoader::Load(const char *vertexShaderFilepath, const char *fragmentShaderFilepath, const char *geometryShaderFilepath)
+	std::unique_ptr<Shader> ShaderLoader::Load(const std::string &vertexShaderFilepath, const std::string &fragmentShaderFilepath, const std::string &geometryShaderFilepath)
 	{
-		bool geometryShaderPresent = (geometryShaderFilepath == nullptr) ? false : true;
+		bool geometryShaderPresent = geometryShaderFilepath.empty() ? false : true;
 
 		std::string vertexShaderSource;
 		std::string fragmentShaderSource;
@@ -60,7 +56,8 @@ namespace Gogaman
 				GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", geometryShaderFilepath);
 		}
 
-		std::unique_ptr<Shader> shader = std::make_unique<Shader>();
+		std::unique_ptr<Shader> shader(std::make_unique<Shader>());
+		shader->SetFilepaths(std::make_tuple(vertexShaderFilepath, fragmentShaderFilepath, geometryShaderFilepath));
 		if(geometryShaderPresent)
 			shader->Compile(vertexShaderSource, fragmentShaderSource, geometryShaderSource);
 		else
@@ -68,7 +65,7 @@ namespace Gogaman
 		return shader;
 	}
 
-	std::unique_ptr<Shader> ShaderLoader::Load(const char *computeShaderFilepath)
+	std::unique_ptr<Shader> ShaderLoader::Load(const std::string &computeShaderFilepath)
 	{
 		std::string   computeShaderSource;
 		std::ifstream inputStream;
@@ -90,7 +87,8 @@ namespace Gogaman
 			GM_LOG_CORE_ERROR("Failed to load shader file | Location: %s", computeShaderFilepath);
 		}
 
-		std::unique_ptr<Shader> shader = std::make_unique<Shader>();
+		std::unique_ptr<Shader> shader(std::make_unique<Shader>());
+		shader->SetFilepaths(std::make_tuple(computeShaderFilepath, "", ""));
 		shader->Compile(computeShaderSource);
 		return shader;
 	}

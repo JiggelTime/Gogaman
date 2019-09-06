@@ -2,7 +2,12 @@
 
 #include "Gogaman/Rendering/Shader/AbstractShader.h"
 
+#include "Gogaman/Core/Base.h"
+#include "Gogaman/Logging/Log.h"
 #include "Gogaman/Core/Config.h"
+
+#include <glm.hpp>
+#include <gtc/type_ptr.hpp>
 
 #include <glad.h>
 
@@ -26,9 +31,11 @@ namespace Gogaman
 		inline void Bind() const
 		{
 			glUseProgram(m_RendererID);
-			//Supposed to be a no-op for release builds
-			glProgramUniform1i(m_RendererID, glGetUniformLocation(m_RendererID, "debug"),  (int)GM_CONFIG.debug);
-			glProgramUniform1i(m_RendererID, glGetUniformLocation(m_RendererID, "debug2"), (int)GM_CONFIG.debug2);
+
+			#if GM_DEBUG_SHADER_UNIFORMS_ENABLED
+				glProgramUniform1i(m_RendererID, glGetUniformLocation(m_RendererID, "debug"),  (int)GM_CONFIG.debug);
+				glProgramUniform1i(m_RendererID, glGetUniformLocation(m_RendererID, "debug2"), (int)GM_CONFIG.debug2);
+			#endif
 		}
 
 		inline void UploadUniform(const std::string &name, const bool       value) { glProgramUniform1i(m_RendererID,        GetUniformLocation(name.c_str()),                        (int)value);  }
@@ -43,9 +50,9 @@ namespace Gogaman
 	
 		GLint GetUniformLocation(const std::string &name);
 		
-		inline uint32_t GetRendererID() const { return m_RendererID; }
+		inline constexpr uint32_t GetRendererID() { return m_RendererID; }
 
-		static constexpr GLenum GetNativeShaderDataType(const ShaderDataType dataType)
+		static inline constexpr GLenum GetNativeShaderDataType(const ShaderDataType dataType)
 		{
 			switch(dataType)
 			{
@@ -76,7 +83,6 @@ namespace Gogaman
 			}
 
 			GM_ASSERT(false, "Failed to get native shader data type: invalid data type")
-			return 0;
 		}
 	private:
 		void ValidateShader(const uint32_t object, const std::string &type);

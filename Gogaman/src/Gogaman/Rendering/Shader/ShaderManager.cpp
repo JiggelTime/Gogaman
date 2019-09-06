@@ -6,26 +6,16 @@
 
 namespace Gogaman
 {
-	ShaderManager::ShaderManager()
-		: m_NextShaderID(0)
-	{}
-
-	ShaderManager::~ShaderManager()
-	{}
-
 	ShaderID ShaderManager::Create(const std::string &vertexShaderFilepath, const std::string &fragmentShaderFilepath, const std::string &geometryShaderFilepath)
 	{
-		GM_ASSERT(!vertexShaderFilepath.empty(),                               "Failed to create shader: invalid vertex shader filepath");
-		GM_ASSERT(!fragmentShaderFilepath.empty(),                             "Failed to create shader: invalid fragment shader filepath");
-		GM_ASSERT(m_NextShaderID < (std::numeric_limits<ShaderID>::max() - 1), "Failed to create shader: maximum number of shaders (%d) reached", std::numeric_limits<ShaderID>::max() - 1);
+		GM_ASSERT(!vertexShaderFilepath.empty(),   "Failed to create shader: invalid vertex shader filepath");
+		GM_ASSERT(!fragmentShaderFilepath.empty(), "Failed to create shader: invalid fragment shader filepath");
 		
 		auto iterator = m_FilepathShaders.find(vertexShaderFilepath);
 		if(iterator == m_FilepathShaders.end())
 		{
-			ShaderID shaderID = m_NextShaderID++;
-			m_Shaders.Set(shaderID, m_Loader.Load(vertexShaderFilepath.c_str(), fragmentShaderFilepath.c_str(), geometryShaderFilepath.empty() ? nullptr : geometryShaderFilepath.c_str()));
-			
-			m_ShaderFilepaths[shaderID] = std::make_tuple(vertexShaderFilepath, fragmentShaderFilepath, geometryShaderFilepath);
+			std::unique_ptr<Shader> shader(ShaderLoader::Load(vertexShaderFilepath, fragmentShaderFilepath, geometryShaderFilepath));
+			ShaderID shaderID = m_Shaders.Create(std::move(*shader.release()));
 			m_FilepathShaders[vertexShaderFilepath] = shaderID;
 			return shaderID;
 		}
@@ -36,15 +26,12 @@ namespace Gogaman
 	ShaderID ShaderManager::Create(const std::string &computeShaderFilepath)
 	{
 		GM_ASSERT(!computeShaderFilepath.empty(), "Failed to create compute shader: invalid filepath");
-		GM_ASSERT(m_NextShaderID < (std::numeric_limits<ShaderID>::max() - 1), "Failed to create shader: maximum number of shaders (%d) reached", std::numeric_limits<ShaderID>::max() - 1);
 		
 		auto iterator = m_FilepathShaders.find(computeShaderFilepath);
 		if(iterator == m_FilepathShaders.end())
 		{
-			ShaderID shaderID = m_NextShaderID++;
-			m_Shaders.Set(shaderID, m_Loader.Load(computeShaderFilepath.c_str()));
-
-			m_ShaderFilepaths[shaderID] = std::make_tuple(computeShaderFilepath, "", "");
+			std::unique_ptr<Shader> shader(ShaderLoader::Load(computeShaderFilepath));
+			ShaderID shaderID = m_Shaders.Create(std::move(*shader.release()));
 			m_FilepathShaders[computeShaderFilepath] = shaderID;
 			return shaderID;
 		}
@@ -52,29 +39,21 @@ namespace Gogaman
 			return iterator->second;
 	}
 
-	void ShaderManager::Reload(const ShaderID shaderID)
+	void ShaderManager::Reload(Shader &shader)
 	{
-		GM_ASSERT(shaderID < m_NextShaderID, "Failed to reload shader: invalid shader ID");
-
 		std::string filepath1, filepath2, filepath3;
-		std::tie(filepath1, filepath2, filepath3) = m_ShaderFilepaths[shaderID];
+		std::tie(filepath1, filepath2, filepath3) = shader.GetFilepaths();
 		if(filepath2.empty())
-			m_Shaders.Set(shaderID, m_Loader.Load(filepath1.c_str()));
+			shader = std::move(*ShaderLoader::Load(filepath1).release());
 		else
-			m_Shaders.Set(shaderID, m_Loader.Load(filepath1.c_str(), filepath2.c_str(), filepath3.empty() ? nullptr : filepath3.c_str()));
+			shader = std::move(*ShaderLoader::Load(filepath1, filepath2, filepath3).release());
 	}
 
 	void ShaderManager::ReloadAll()
 	{
-		for(ShaderID i = 0; i < (m_NextShaderID - 1); i++)
+		for(auto &i : m_Shaders)
 		{
 			Reload(i);
 		}
-	}
-
-	Shader &ShaderManager::Get(const ShaderID shaderID) const
-	{
-		GM_ASSERT(shaderID < m_NextShaderID, "Failed to get shader: invalid ID");
-		return m_Shaders.Get(shaderID);
 	}
 }

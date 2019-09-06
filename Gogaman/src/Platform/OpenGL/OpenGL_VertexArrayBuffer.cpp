@@ -30,7 +30,7 @@ namespace Gogaman
 			GLuint vertexBufferIndex = (GLuint)vertexAttributeIndex;
 			glEnableVertexArrayAttrib(m_RendererID,  (GLuint)vertexAttributeIndex);
 			glVertexArrayVertexBuffer(m_RendererID, vertexBufferIndex, vertexBuffer.GetRendererID(), (GLintptr)i.offset, (GLsizei)vertexBuffer.GetLayout().GetStride());
-			glVertexArrayAttribFormat(m_RendererID,  (GLuint)vertexAttributeIndex, (GLint)Shader::GetNumShaderDataTypeComponents(i.dataType), Shader::GetNativeShaderDataType(Shader::GetShaderDataBaseType(i.dataType)), i.normalized ? GL_TRUE : GL_FALSE, 0);
+			glVertexArrayAttribFormat(m_RendererID,  (GLuint)vertexAttributeIndex, (GLint)Shader::GetShaderDataTypeComponentCount(i.dataType), Shader::GetNativeShaderDataType(Shader::GetShaderDataBaseType(i.dataType)), i.normalized ? GL_TRUE : GL_FALSE, 0);
 			glVertexArrayAttribBinding(m_RendererID, (GLuint)vertexAttributeIndex, vertexBufferIndex);
 			vertexAttributeIndex++;
 		}

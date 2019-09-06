@@ -18,7 +18,7 @@ namespace Gogaman
 		IndexBuffer &operator=(const IndexBuffer &) = delete;
 		IndexBuffer &operator=(IndexBuffer &&)      = default;
 
-		void UploadData(const uint32_t numIndices, const uint16_t *indices);
+		void UploadData(const uint32_t indexCount, const uint16_t *indices);
 
 		inline void Bind() const { glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID); }
 

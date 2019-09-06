@@ -4,7 +4,6 @@
     <ClCompile Include="src\Gogaman\ECS\System.cpp" />
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
-    <ClCompile Include="src\Gogaman\Rendering\Renderer.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderLoader.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderManager.cpp" />
@@ -25,7 +24,6 @@
     <ClCompile Include="vendor\glad.c" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderState.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -57,8 +55,6 @@
     <ClInclude Include="src\Gogaman\Rendering\ModelMatrixSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\PBR_Material.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderableComponent.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Rendering\Renderer.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderingContext.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderState.h" />
@@ -90,7 +86,6 @@
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Resource.h" />
-    <ClInclude Include="src\Gogaman\ResourceCache.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
@@ -115,7 +110,6 @@
     <ClInclude Include="vendor\stb_image.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderingDevice.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
@@ -132,6 +126,9 @@
     <ClInclude Include="src\Gogaman\Input\AbstractInput.h" />
     <ClInclude Include="src\Gogaman\Input\Input.h" />
     <ClInclude Include="src\Gogaman\Input\InputDefines.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommandBucket.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommandPacket.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

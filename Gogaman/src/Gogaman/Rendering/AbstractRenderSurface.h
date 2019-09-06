@@ -1,17 +1,14 @@
 #pragma once
 
 #include "Gogaman/Core/CRTP.h"
-#include "Gogaman/Resource.h"
 
 #include "Texture/Texture.h"
 #include "Platform/OpenGL/OpenGL_Renderbuffer.h"
 
 namespace Gogaman
 {
-	using RenderSurfaceID = uint8_t;
-
 	template<typename ImplementationType>
-	class AbstractRenderSurface : public CRTP<ImplementationType, AbstractRenderSurface>, public Resource<RenderSurfaceID>
+	class AbstractRenderSurface : public CRTP<ImplementationType, AbstractRenderSurface>
 	{
 	public:
 		AbstractRenderSurface(const AbstractRenderSurface &) = delete;
@@ -42,8 +39,8 @@ namespace Gogaman
 		inline void BlitDepthBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitDepthBuffer(source,   width, height, interpolationMode); }
 		inline void BlitStencilBuffer(const ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitStencilBuffer(source, width, height, interpolationMode); }
 
-		inline int GetNumColorAttachments() const { return this->GetImplementation().GetNumColorAttachments(); }
-		inline int GetNumRenderTargets()    const { return this->GetImplementation().GetNumRenderTargets();    }
+		inline int GetColorAttachmentCount() const { return this->GetImplementation().GetColorAttachmentCount(); }
+		inline int GetRenderTargetCount()    const { return this->GetImplementation().GetRenderTargetCount();    }
 
 		static inline void BindBackBuffer()  { ImplementationType::BindBackBuffer();  }
 

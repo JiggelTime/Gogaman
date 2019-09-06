@@ -2,13 +2,16 @@
 #include "Application.h"
 
 #include "Core/Base.h"
+#include "Logging/Log.h"
+
 #include "Core/Config.h"
 #include "Core/Time.h"
-#include "Logging/Log.h"
 
 #include "Input/Input.h"
 
 #include "Events/EventManager.h"
+
+#include "Gogaman/Resource.h"
 
 #include "SpatialComponent.h"
 #include "Rendering/RenderableComponent.h"
@@ -42,7 +45,7 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
-		GM_LOG_CORE_SET_LEVEL(Info);
+		//GM_LOG_CORE_SET_LEVEL(Info);
 
 		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
 		//FlexData::PrintFlexData(data);
@@ -139,10 +142,11 @@ namespace Gogaman
 
 			m_World.AddComponent(testPointLightEntity.identifier, std::move(testPointLightComponent));
 		}
-		
+
 		while(m_IsRunning)
 		{
 			Time::Update();
+			Input::Update();
 
 			m_World.Update();
 			m_World.Render();
@@ -150,7 +154,6 @@ namespace Gogaman
 			GetWindow().Update();
 
 			EventManager::GetInstance().DispatchEvents();
-			Input::Update();
 		}
 
 		m_World.Shutdown();

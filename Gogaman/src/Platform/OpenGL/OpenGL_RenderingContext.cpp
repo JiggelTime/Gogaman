@@ -2,9 +2,9 @@
 #include "OpenGL_RenderingContext.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Application.h"
 #include "Gogaman/Logging/Log.h"
 
+#include "Gogaman/Application.h"
 #include "Gogaman/Window.h"
 
 namespace Gogaman
@@ -33,7 +33,7 @@ namespace Gogaman
 		glDisable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDisable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		SetBlendState(BlendFactor::SourceAlpha, BlendFactor::InverseSourceAlpha);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		//Debug callback

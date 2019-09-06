@@ -62,6 +62,7 @@ void main()
 			result = GammaCorrection(result);
 		#endif
 
+	if(debug) result = renderedValue;
 	FragColor = vec4(result, 1.0f);
 }
 

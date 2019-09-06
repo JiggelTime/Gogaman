@@ -2,29 +2,31 @@
 
 #include "Shader.h"
 #include "ShaderLoader.h"
-#include "Gogaman/ResourceCache.h"
+#include "Gogaman/Resource.h"
 
 namespace Gogaman
 {
+	using ShaderID        = Resource::ID<uint32_t, 22, 10>;
+	using ShaderContainer = Resource::Container<20, Shader, uint32_t, 22, 10>;
+
 	class ShaderManager
 	{
 	public:
-		ShaderManager();
-		~ShaderManager();
+		ShaderManager()  = default;
+		~ShaderManager() = default;
 
 		ShaderID Create(const std::string &vertexShaderFilepath, const std::string &fragmentShaderFilepath, const std::string &geometryShaderFilepath = "");
 		ShaderID Create(const std::string &computeShaderFilepath);
 
-		void Reload(const ShaderID shaderID);
+		inline void Reload(const ShaderID shaderID) { Reload(m_Shaders.Get(shaderID)); }
 		void ReloadAll();
 
-		Shader &Get(const ShaderID shaderID) const;
+		inline constexpr Shader &Get(const ShaderID shaderID) { return m_Shaders.Get(shaderID); }
 	private:
-		ShaderID                                                                        m_NextShaderID;
-		ShaderLoader                                                                    m_Loader;
-
-		ResourceCache<Shader, ShaderID>                                                 m_Shaders;
-		std::unordered_map<ShaderID, std::tuple<std::string, std::string, std::string>> m_ShaderFilepaths;
-		std::unordered_map<std::string, ShaderID>                                       m_FilepathShaders;
+		void Reload(Shader &shader);
+	private:
+		ShaderLoader                              m_Loader;
+		std::unordered_map<std::string, ShaderID> m_FilepathShaders;
+		ShaderContainer                           m_Shaders;
 	};
 }

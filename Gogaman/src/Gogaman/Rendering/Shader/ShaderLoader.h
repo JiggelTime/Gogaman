@@ -1,16 +1,13 @@
 #pragma once
 
-#include "Shader.h"
-
 namespace Gogaman
 {
+	class Shader;
+
 	class ShaderLoader
 	{
 	public:
-		ShaderLoader();
-		~ShaderLoader();
-
-		std::unique_ptr<Shader> Load(const char *vertexShaderFilepath, const char *fragmentShaderFilepath, const char *geometryShaderFilepath = nullptr);
-		std::unique_ptr<Shader> Load(const char *computeShaderFilepath);
+		static std::unique_ptr<Shader> Load(const std::string &vertexShaderFilepath, const std::string &fragmentShaderFilepath, const std::string &geometryShaderFilepath);
+		static std::unique_ptr<Shader> Load(const std::string &computeShaderFilepath);
 	};
 }

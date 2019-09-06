@@ -1,22 +1,19 @@
 #pragma once
 
-#ifdef GM_PLATFORM_WINDOWS
-	#include <Windows.h>
-#endif
-
 #include <iostream>
 #include <sstream>
 #include <fstream>
 
-#include <memory>
 #include <stdint.h>
+#include <math.h>
+#include <xmmintrin.h>
+
+#include <memory>
 #include <utility>
 #include <algorithm>
 #include <functional>
 #include <random>
 #include <limits>
-
-#include <string>
 
 #include <bitset>
 #include <array>
@@ -26,3 +23,8 @@
 #include <unordered_set>
 #include <map>
 #include <unordered_map>
+#include <string>
+
+#ifdef GM_PLATFORM_WINDOWS
+	#include <Windows.h>
+#endif

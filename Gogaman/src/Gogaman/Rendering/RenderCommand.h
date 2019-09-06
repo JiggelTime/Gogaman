@@ -1,57 +1,62 @@
 #pragma once
 
-#include "Gogaman/Core/CRTP.h"
-
-#include "Shader/Shader.h"
-#include "VertexArrayBuffer.h"
-#include "IndexBuffer.h"
-#include "RenderState.h"
+#include "RenderingContext.h"
 
 namespace Gogaman
 {
-	enum class RenderCommandType : uint8_t
+	namespace RenderCommand
 	{
-		RenderIndexed,
-		RenderInstanced,
-		Compute,
-		BlendStateChange
-	};
+		struct RenderIndexed
+		{
+			static constexpr DispatchRenderCommandFunction DispatchFunction = &DispatchRenderCommand::RenderIndexed;
 
-	using RenderCommandKey = uint32_t;
+			//uint16_t            indexCount;
+			//uint16_t            startIndex;
+			//uint32_t            baseVertex;
+			VertexArrayBufferID vertexArrayBuffer;
+			IndexBufferID       indexBuffer;
+		};
 
-	template<typename ImplementationType>
-	struct AbstractRenderCommand : public CRTP<ImplementationType, AbstractRenderCommand>
+		struct DispatchComputeShader
+		{
+			static constexpr DispatchRenderCommandFunction DispatchFunction = &DispatchRenderCommand::DispatchComputeShader;
+
+			uint16_t threadGroupCountX;
+			uint16_t threadGroupCountY;
+			uint16_t threadGroupCountZ;
+		};
+
+		struct BlendStateChange
+		{
+			static constexpr DispatchRenderCommandFunction DispatchFunction = &DispatchRenderCommand::BlendStateChange;
+
+			BlendFactor sourceBlendFactor;
+			BlendFactor destinationBlendFactor;
+		};
+	}
+
+	using DispatchRenderCommandFunction = void (*)(const RenderingContext &, const void *);
+
+	namespace DispatchRenderCommand
 	{
-		static constexpr RenderCommandType GetTypeStatic() { return ImplementationType::GetTypeStatic(); }
-		inline           RenderCommandType GetType() const { return ImplementationType::GetTypeStatic(); }
+		void RenderIndexed(const RenderingContext &context, const void *data)
+		{
+			const RenderCommand::RenderIndexed *renderCommand = static_cast<const RenderCommand::RenderIndexed *>(data);
 
-		RenderCommandKey key;
-	};
+			GetVertexArrayBuffer(renderCommand->vertexArrayBuffer).Bind();
+			context.RenderIndexed(GetIndexBuffer(renderCommand->indexBuffer).GetIndexCount());
+		}
 
-	struct RenderIndexedCommand : public AbstractRenderCommand<RenderIndexedCommand>
-	{
-		static constexpr RenderCommandType GetTypeStatic() { return RenderCommandType::RenderIndexed; }
+		void DispatchComputeShader(const RenderingContext &context, const void *data)
+		{
+			const RenderCommand::DispatchComputeShader *renderCommand = static_cast<const RenderCommand::DispatchComputeShader *>(data);
+			context.DispatchComputeShader(renderCommand->threadGroupCountX, renderCommand->threadGroupCountY, renderCommand->threadGroupCountZ);
+		}
 
-		VertexArrayBufferID vertexArrayBuffer;
-		IndexBufferID       indexBuffer;
-	};
-
-	struct RenderInstancedCommand : public AbstractRenderCommand<RenderInstancedCommand>
-	{
-		static constexpr RenderCommandType GetTypeStatic() { return RenderCommandType::RenderInstanced; }
-	};
-
-	struct ComputeCommand : public AbstractRenderCommand<ComputeCommand>
-	{
-		static constexpr RenderCommandType GetTypeStatic() { return RenderCommandType::Compute; }
-
-		ShaderID computeShader;
-	};
-
-	struct BlendStateChangeCommand : public AbstractRenderCommand<BlendStateChangeCommand>
-	{
-		static constexpr RenderCommandType GetTypeStatic() { return RenderCommandType::BlendStateChange; }
-
-		BlendState state;
-	};
+		void BlendStateChange(const RenderingContext &context, const void *data)
+		{
+			const RenderCommand::BlendStateChange *renderCommand = static_cast<const RenderCommand::BlendStateChange *>(data);
+			context.SetBlendState(renderCommand->sourceBlendFactor, renderCommand->destinationBlendFactor);
+		}
+	}
 }

@@ -15,14 +15,12 @@
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
-    <ClCompile Include="src\Gogaman\Rendering\Renderer.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderLoader.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderManager.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_IndexBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Renderbuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderingContext.cpp" />
-    <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderState.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_RenderSurface.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture1D.cpp" />
@@ -71,6 +69,15 @@
     <ClInclude Include="src\Gogaman\Input\Input.h" />
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommandBucket.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="src\Gogaman\Rendering\RenderCommandPacket.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractRenderingContext.h" />
@@ -85,10 +92,7 @@
     <ClInclude Include="src\Gogaman\Rendering\ModelMatrixSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\PBR_Material.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderableComponent.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Rendering\Renderer.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderingContext.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderingDevice.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderState.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderSurface.h" />
@@ -121,7 +125,6 @@
     <ClInclude Include="src\Gogaman\Input\AbstractInput.h" />
     <ClInclude Include="src\Gogaman\Input\InputDefines.h" />
     <ClInclude Include="src\Gogaman\Resource.h" />
-    <ClInclude Include="src\Gogaman\ResourceCache.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
@@ -226,7 +229,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)src;$(SolutionDir)Dependencies\FlexData\include;$(SolutionDir)Dependencies\glm\include;$(SolutionDir)Dependencies\glad\include;$(SolutionDir)Dependencies\KHR\include;$(SolutionDir)Dependencies\GLFW\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)Dependencies\FBX_SDK\lib\vs2017\x64\debug;$(SolutionDir)Dependencies\GLFW\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)Dependencies\GLFW\lib;$(LibraryPath)</LibraryPath>
     <SourcePath>src\vendor;$(SourcePath)</SourcePath>
     <OutDir>$(SolutionDir)bin\$(Configuration)-$(Platform)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin-int\$(Configuration)-$(Platform)\$(ProjectName)\</IntDir>

@@ -25,14 +25,14 @@ namespace Gogaman
 
 		virtual void Update() override
 		{
-			for(auto i : m_EntityGroups[0].entities)
+			for(const auto i : m_EntityGroups[0].entities)
 			{
 				SpatialComponent    *spatialComponent    = m_World->GetComponent<SpatialComponent>(i);
 				RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 
 				//Model matrix
 				//Translate
-				glm::mat4 modelMatrix;
+				glm::mat4 modelMatrix = glm::mat4(1.0f);
 				modelMatrix                              = glm::translate(modelMatrix, spatialComponent->position);
 				//Rotate
 				//modelMatrix = glm::rotate(modelMatrix,    spatialComponent->rotationAngle, spatialComponent->rotation);

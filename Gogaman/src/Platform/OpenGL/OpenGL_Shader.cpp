@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "OpenGL_Shader.h"
 
-#include "Gogaman/Logging/Log.h"
-
 namespace Gogaman
 {
 	Shader::Shader()
@@ -120,15 +118,17 @@ namespace Gogaman
 	GLint Shader::GetUniformLocation(const std::string &name)
 	{
 		auto iterator = m_UniformLocations.find(name);
-		//Location not in location cache
 		if(iterator == m_UniformLocations.end())
 		{
 			GLint location = glGetUniformLocation(m_RendererID, name.c_str());
-			GM_ASSERT((location != -1) || (name == "debug") || (name == "debug2"), "Failed to get uniform location: invalid name")
+			#if GM_DEBUG_SHADER_UNIFORMS_ENABLED
+				GM_ASSERT(location != -1 || name == "debug" || name == "debug2", "Failed to get uniform location | %s is an invalid name", name)
+			#else
+				GM_ASSERT(location != -1, "Failed to get uniform location | Invalid name")
+			#endif
 			m_UniformLocations[name] = location;
 			return location;
 		}
-		//Location already in location cache
 		else
 			return iterator->second;
 	}

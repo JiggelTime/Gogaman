@@ -2,6 +2,9 @@
 
 #include "Gogaman/Rendering/AbstractRenderState.h"
 
+#include "Gogaman/Core/Base.h"
+#include "Gogaman/Logging/Log.h"
+
 #include <glad.h>
 
 namespace Gogaman
@@ -9,45 +12,46 @@ namespace Gogaman
 	class RenderState : public AbstractRenderState<RenderState>
 	{
 	public:
-		RenderState();
-		RenderState(const RenderState &) = delete;
-		RenderState(RenderState &&)      = default;
-
-		~RenderState();
-
-		RenderState &operator=(const RenderState &) = delete;
-		RenderState &operator=(RenderState &&)      = default;
-
-		void Update() const;
-	private:
-		static constexpr GLenum GetNativeBlendState(const BlendState state)
+		static inline constexpr GLenum GetNativeBlendFactor(const BlendFactor blendFactor)
 		{
-			switch(state)
+			switch(blendFactor)
 			{
-			case BlendState::Zero:
+			case BlendFactor::Zero:
 				return GL_ZERO;
-			case BlendState::One:
+			case BlendFactor::One:
 				return GL_ONE;
-			case BlendState::Source:
+			case BlendFactor::Source:
 				return GL_SRC_COLOR;
-			case BlendState::InverseSource:
+			case BlendFactor::InverseSource:
 				return GL_ONE_MINUS_SRC_COLOR;
-			case BlendState::SourceAlpha:
+			case BlendFactor::SourceAlpha:
 				return GL_SRC_ALPHA;
-			case BlendState::InverseSourceAlpha:
+			case BlendFactor::InverseSourceAlpha:
 				return GL_ONE_MINUS_SRC_ALPHA;
-			case BlendState::Destination:
+			case BlendFactor::Destination:
 				return GL_DST_COLOR;
-			case BlendState::InverseDestination:
+			case BlendFactor::InverseDestination:
 				return GL_ONE_MINUS_DST_COLOR;
-			case BlendState::DestinationAlpha:
+			case BlendFactor::DestinationAlpha:
 				return GL_DST_ALPHA;
-			case BlendState::InverseDestinationAlpha:
+			case BlendFactor::InverseDestinationAlpha:
 				return GL_ONE_MINUS_DST_ALPHA;
 			}
 
-			GM_ASSERT(false, "Failed to get native blend state: invalid blend state")
-			return 0;
+			GM_ASSERT(false, "Failed to get native blend state | Invalid blend state")
+		}
+
+		static inline constexpr GLenum GetNativeFaceWindingOrder(const FaceWindingOrder windingOrder)
+		{
+			switch(windingOrder)
+			{
+			case FaceWindingOrder::Clockwise:
+				return GL_CW;
+			case FaceWindingOrder::CounterClockwise:
+				return GL_CCW;
+			}
+
+			GM_ASSERT(false, "Failed to get native face winding order | Invalid winding order")
 		}
 	};
 }

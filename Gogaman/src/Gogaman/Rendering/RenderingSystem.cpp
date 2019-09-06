@@ -159,7 +159,7 @@ namespace Gogaman
 	void RenderingSystem::RenderFullscreenWindow() const
 	{
 		m_FullscreenTriangle->GetVertexArrayBuffer().Bind();
-		Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(m_FullscreenTriangle->GetIndexBuffer().GetNumIndices());
+		Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(m_FullscreenTriangle->GetIndexBuffer().GetIndexCount());
 	}
 
 	void RenderingSystem::Update()
@@ -323,7 +323,6 @@ namespace Gogaman
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 		//Geometry pass
-		//TODO: G-Buffer generation and post processing should be done in low level renderer
 		glViewport(0, 0, m_RenderResolutionWidth, m_RenderResolutionHeight);
 		glEnable(GL_DEPTH_TEST);
 		m_G_Buffer->Bind();
@@ -339,7 +338,7 @@ namespace Gogaman
 		
 		//Frustum cull
 		std::vector<EntityID> persistingEntities;
-		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
+		for(const auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
 			//Bounding sphere intersection
@@ -351,10 +350,10 @@ namespace Gogaman
 			}
 		}
 
-		GM_LOG_CORE_TRACE("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
+		//GM_LOG_CORE_TRACE("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
 		GM_ASSERT(persistingEntities.size() > 0, "Failed to render | No persisting entities after culling")
 
-		for(auto i : persistingEntities)
+		for(const auto i : persistingEntities)
 		{
 			//Does the entire renderable component need to be loaded into cache?
 			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
@@ -383,7 +382,7 @@ namespace Gogaman
 			renderableComponent->material.emissivity->Bind(4);
 
 			renderableComponent->vertexArrayBuffer->Bind();
-			Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(renderableComponent->indexBuffer->GetNumIndices());
+			Application::GetInstance().GetWindow().GetRenderingContext().RenderIndexed(renderableComponent->indexBuffer->GetIndexCount());
 		}
 
 		//Sort render batches (using flags)...
@@ -405,7 +404,7 @@ namespace Gogaman
 		m_ShaderManager->Get(m_DeferredLightingShader).Bind();
 
 		uint32_t pointLightIndex = 0;
-		for(auto i : m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities)
+		for(const auto i : m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities)
 		{
 			PointLightComponent *pointLightComponent = m_World->GetComponent<PointLightComponent>(i);
 
@@ -478,8 +477,6 @@ namespace Gogaman
 		m_ShaderManager->Get(m_PostprocessShader).Bind();
 		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("exposureNormalizationCoeffecient", m_Camera.GetExposure());
 		m_ShaderManager->Get(m_PostprocessShader).UploadUniform("time", (float)glfwGetTime());
-
-		GM_LOG_CORE_TRACE("Exposure: %f | Aperture (f-stops): %f | Shutter speed (seconds): %f | Sensitivity (ISO): %f", m_Camera.GetExposure(), m_Camera.GetAperture(), m_Camera.GetShutterSpeed(), m_Camera.GetSensitivity());
 
 		m_Texture2Ds["finalImage"].Bind(0);
 

@@ -1,17 +1,14 @@
 #pragma once
 
 #include "Gogaman/Core/CRTP.h"
-#include "Gogaman/Resource.h"
 
 namespace Gogaman
 {
 	class VertexBuffer;
 	class IndexBuffer;
 
-	using VertexArrayBufferID = uint16_t;
-
 	template<typename ImplementationType>
-	class AbstractVertexArrayBuffer : public CRTP<ImplementationType, AbstractVertexArrayBuffer>, public Resource<VertexArrayBufferID>
+	class AbstractVertexArrayBuffer : public CRTP<ImplementationType, AbstractVertexArrayBuffer>
 	{
 	public:
 		AbstractVertexArrayBuffer(const AbstractVertexArrayBuffer &) = delete;

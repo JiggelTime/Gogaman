@@ -40,7 +40,7 @@ namespace Gogaman
 		void Render()
 		{
 			m_VertexArrayBuffer->Bind();
-			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetNumIndices(), GL_UNSIGNED_SHORT, 0);
+			glDrawElements(GL_TRIANGLES, m_IndexBuffer->GetIndexCount(), GL_UNSIGNED_SHORT, 0);
 		}
 
 		inline const VertexArrayBuffer &GetVertexArrayBuffer() const { return *m_VertexArrayBuffer; }

@@ -2,13 +2,9 @@
 
 #include "Gogaman/Core/CRTP.h"
 
-#include "RenderSurface.h"
-#include "Shader/Shader.h"
-#include "Texture/Texture.h"
-
 namespace Gogaman
 {
-	enum class BlendState : uint8_t
+	enum class BlendFactor : uint8_t
 	{
 		Zero,
 		One,
@@ -22,17 +18,21 @@ namespace Gogaman
 		InverseDestinationAlpha
 	};
 
+	enum class FaceWindingOrder : bool
+	{
+		Clockwise,
+		CounterClockwise
+	};
+
 	template<typename ImplementationType>
 	class AbstractRenderState : public CRTP<ImplementationType, AbstractRenderState>
 	{
 	public:
-		inline void Update() const { this->GetImplementation().Update(); }
+		static inline constexpr auto GetNativeBlendFactor(const BlendFactor blendFactor) { return ImplementationType::GetNativeBlendFactor(blendFactor); }
+
+		static inline constexpr auto GetNativeFaceWindingOrder(const FaceWindingOrder windingOrder) { return ImplementationType::GetNativeFaceWindingOrder(windingOrder); }
 	protected:
-		AbstractRenderState()  = default;
-		~AbstractRenderState() = default;
-	protected:
-		RenderSurfaceID           m_RenderSurface;
-		ShaderID                  m_Shader;
-		std::array<TextureID, 16> m_Textures;
+		AbstractRenderState()  = delete;
+		~AbstractRenderState() = delete;
 	};
 }

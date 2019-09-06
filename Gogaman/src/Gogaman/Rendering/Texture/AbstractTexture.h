@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Gogaman/Core/CRTP.h"
-#include "Gogaman/Resource.h"
 
 #include "Gogaman/Core/Base.h"
 #include "Gogaman/Logging/Log.h"
@@ -52,27 +51,15 @@ namespace Gogaman
 		Mirror
 	};
 
-	using TextureID = uint16_t;
-
 	template<typename ImplementationType>
-	class AbstractTexture : public CRTP<ImplementationType, AbstractTexture>, public Resource<TextureID>
+	class AbstractTexture : public CRTP<ImplementationType, AbstractTexture>
 	{
 	public:
 		AbstractTexture(const AbstractTexture &) = delete;
-		AbstractTexture(AbstractTexture &&other) noexcept
-			: identifier(std::exchange(other.identifier, 0), internalFormat(std::exchange(other.internalFormat, TextureInternalFormat::None)), format(std::exchange(other.format, TextureFormat::None)), interpolationMode(std::exchange(other.interpolationMode, TextureInterpolationMode::None)), levels(std::exchange(other.levels, 0)))
-		{}
+		AbstractTexture(AbstractTexture &&other) = default;
 
 		AbstractTexture &operator=(const AbstractTexture &) = delete;
-		AbstractTexture &operator=(AbstractTexture &&other) noexcept
-		{
-			std::swap(identifier,        other.identifier);
-			std::swap(internalFormat,    other.internalFormat);
-			std::swap(format,            other.format);
-			std::swap(interpolationMode, other.interpolationMode);
-			std::swap(levels,            other.levels);
-			return *this;
-		}
+		AbstractTexture &operator=(AbstractTexture &&other) = default;
 
 		void RegenerateMipmap() const { this->GetImplementation().RegenerateMipmap(); }
 
@@ -83,7 +70,7 @@ namespace Gogaman
 		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode)                                             const { this->GetImplementation().BindImage(unit, level, accessMode);                 }
 		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode, const TextureInternalFormat internalFormat) const { this->GetImplementation().BindImage(unit, level, accessMode, internalFormat); }
 	
-		static constexpr uint8_t GetNumTextureInternalFormatComponents(TextureInternalFormat internalFormat)
+		static constexpr uint8_t GetInternalFormatComponents(const TextureInternalFormat internalFormat)
 		{
 			switch(internalFormat)
 			{

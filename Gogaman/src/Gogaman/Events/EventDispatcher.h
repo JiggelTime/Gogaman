@@ -11,12 +11,12 @@ namespace Gogaman
 			: m_Event(event)
 		{}
 
-		template<typename EventType>
-		bool Dispatch(std::function<bool(EventType &)> callback)
+		template<typename EventType, typename CallbackFunction>
+		bool Dispatch(const CallbackFunction &callbackFunction)
 		{
 			if(m_Event.GetType() == EventType::GetTypeStatic())
 			{
-				m_Event.handled = callback(*(EventType *)&m_Event);
+				m_Event.handled = callbackFunction(static_cast<EventType &>(m_Event));
 				return true;
 			}
 

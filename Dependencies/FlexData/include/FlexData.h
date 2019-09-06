@@ -196,10 +196,8 @@ namespace FlexData
 				exit(1);
 			}
 			//Read header version
-			uint8_t headerVersionBuffer[sizeof(uint8_t)];
-			fread(headerVersionBuffer, 1, sizeof(uint8_t), file);
-			uint8_t headerVersion = *(uint8_t *)headerVersionBuffer;
-			//uint8_t headerVersion = *reinterpret_cast<uint8_t *>(headerVersionBuffer);
+			uint8_t headerVersion;
+			fread(&headerVersion, 1, sizeof(uint8_t), file);
 			if(headerVersion != dataPayload.header.version)
 			{
 				std::cerr << "Failed to import FlexData: file version " << +headerVersion << " is incompatible with FlexData version " << +dataPayload.header.version << std::endl;
@@ -246,11 +244,8 @@ namespace FlexData
 
 			//Point light data
 			//Read number of point lights
-			using numPointLightsType = uint32_t;
-			uint8_t numPointLightsData[sizeof(numPointLightsType)];
-			fread(numPointLightsData, 1, sizeof(numPointLightsType), file);
-			numPointLightsType numPointLights = *(numPointLightsType *)numPointLightsData;
-			//numPointLightsType numPointLights = *reinterpret_cast<numPointLightsType *>(numPointLightsData);
+			uint32_t numPointLights;
+			fread(&numPointLights, 1, sizeof(uint32_t), file);
 			dataPayload.pointLights.reserve(numPointLights);
 			//Read point light data
 			std::vector<FlexPointLightData> pointLightData(numPointLights);
@@ -259,10 +254,8 @@ namespace FlexData
 
 			//Directional light data
 			//Read number of directional lights
-			uint8_t numDirectionalLightsData[sizeof(uint32_t)];
-			fread(numDirectionalLightsData, 1, sizeof(uint32_t), file);
-			uint32_t numDirectionalLights = *(uint32_t *)numDirectionalLightsData;
-			//uint32_t numDirectionalLights = *reinterpret_cast<uint32_t *>(numDirectionalLightsData);
+			uint32_t numDirectionalLights;
+			fread(&numDirectionalLights, 1, sizeof(uint32_t), file);
 			dataPayload.directionalLights.reserve(numDirectionalLights);
 			//Read point light data
 			std::vector<FlexDirectionalLightData> directionalLightData(numDirectionalLights);
@@ -271,13 +264,11 @@ namespace FlexData
 			
 			//Material data
 			//Read number of materials
-			using numMaterialsType = uint32_t;
-			uint8_t numMaterialsData[sizeof(numMaterialsType)];
-			fread(numMaterialsData, 1, sizeof(numMaterialsType), file);
-			numMaterialsType numMaterials = *(numMaterialsType *)numMaterialsData;
-			//reinterpret_cast
+			uint32_t numMaterials;
+			fread(&numMaterials, 1, sizeof(uint32_t), file);
 			dataPayload.materials.reserve(numMaterials);
-			for(numMaterialsType i = 0; i < numMaterials; i++)
+			//Read material data
+			for(uint32_t i = 0; i < numMaterials; i++)
 			{
 				auto ReadTexture = [](FILE *file, FlexTextureData &texturePayload, const uint8_t bytesPerPixel)
 				{
