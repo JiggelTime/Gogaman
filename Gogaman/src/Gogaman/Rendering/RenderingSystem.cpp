@@ -10,6 +10,7 @@
 #include "Gogaman/ECS/Entity.h"
 #include "Gogaman/ECS/World.h"
 
+#include "Gogaman/BoundingVolumeComponent.h"
 #include "RenderableComponent.h"
 #include "LightComponent.h"
 
@@ -34,6 +35,7 @@ namespace Gogaman
 	RenderingSystem::RenderingSystem()
 	{
 		EntityGroup renderableGroup;
+		renderableGroup.componentFlags.set(GetComponentTypeID<BoundingVolumeComponent>());
 		renderableGroup.componentFlags.set(GetComponentTypeID<RenderableComponent>());
 		AddEntityGroup(std::move(renderableGroup));
 
@@ -317,6 +319,9 @@ namespace Gogaman
 	{
 		m_Camera.Update();
 
+		std::vector<EntityID> persistingEntities;
+		FrustumCull(persistingEntities);
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 		//Set render mode to wireframe if enabled
@@ -337,23 +342,6 @@ namespace Gogaman
 		geometryBufferShader.UploadUniform("temporalJitter",         glm::vec2(0.0f));
 		geometryBufferShader.UploadUniform("previousTemporalJitter", glm::vec2(0.0f));
 		geometryBufferShader.UploadUniform("normalMapping",          GM_CONFIG.normalMapping);
-		
-		//Frustum cull
-		std::vector<EntityID> persistingEntities;
-		for(const auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
-		{
-			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i);
-			//Bounding sphere intersection
-			if(m_Camera.GetFrustum().Intersects(renderableComponent->worldSpaceBoundingSphere))
-			{
-				//AABB intersection
-				//if(cameraFrustum.Intersects(renderableComponent->worldSpaceAxisAlignedBoundingBox))
-					persistingEntities.emplace_back(i);
-			}
-		}
-
-		//GM_LOG_CORE_TRACE("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
-		GM_ASSERT(persistingEntities.size() > 0, "Failed to render | No persisting entities after culling")
 
 		for(const auto i : persistingEntities)
 		{
@@ -488,6 +476,24 @@ namespace Gogaman
 		m_Texture2Ds["finalImage"].Bind(0);
 
 		RenderFullscreenWindow();
+	}
+
+	void RenderingSystem::FrustumCull(std::vector<EntityID> &persistingEntities) const
+	{
+		for(const auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
+		{
+			BoundingVolumeComponent *boundingVolumeComponent = m_World->GetComponent<BoundingVolumeComponent>(i);
+			//Bounding sphere intersection
+			if(m_Camera.GetFrustum().Intersects(boundingVolumeComponent->worldSpaceBoundingSphere))
+			{
+				//AABB intersection
+				//if(cameraFrustum.Intersects(renderableComponent->worldSpaceAxisAlignedBoundingBox))
+					persistingEntities.emplace_back(i);
+			}
+		}
+
+		GM_LOG_CORE_TRACE("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
+		GM_ASSERT(persistingEntities.size() > 0, "No persisting entities after culling")
 	}
 
 	void RenderingSystem::Shutdown()

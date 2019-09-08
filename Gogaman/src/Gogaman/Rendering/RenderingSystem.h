@@ -51,6 +51,8 @@ namespace Gogaman
 
 		void RenderFullscreenWindow() const;
 
+		void FrustumCull(std::vector<EntityID> &persistingEntities) const;
+
 		bool OnWindowResize(WindowResizeEvent &event);
 	private:
 		PerspectiveCamera                   m_Camera;

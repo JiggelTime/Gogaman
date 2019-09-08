@@ -128,8 +128,8 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderCommandBucket.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderCommandPacket.h" />
-    <ClInclude Include="src\Gogaman\Rendering\BoundingVolumeSystem.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeComponent.h" />
+    <ClInclude Include="src\Gogaman\BoundingVolumeSystem.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

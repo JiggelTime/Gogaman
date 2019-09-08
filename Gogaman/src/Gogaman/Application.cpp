@@ -12,10 +12,12 @@
 #include "Events/EventManager.h"
 
 #include "SpatialComponent.h"
+#include "BoundingVolumeComponent.h"
 #include "Rendering/RenderableComponent.h"
 #include "Rendering/LightComponent.h"
 
 #include "Rendering/ModelMatrixSystem.h"
+#include "BoundingVolumeSystem.h"
 #include "Rendering/RenderingSystem.h"
 
 #include <FlexData.h>
@@ -34,6 +36,7 @@ namespace Gogaman
 		GM_CONFIG.vSync ? GetWindow().EnableVerticalSynchronization() : GetWindow().DisableVerticalSynchronization();
 
 		m_World.AddSystem(std::make_unique<ModelMatrixSystem>());
+		m_World.AddSystem(std::make_unique<BoundingVolumeSystem>());
 		m_World.AddSystem(std::make_unique<RenderingSystem>());
 		m_World.Initialize();
 	}
@@ -61,7 +64,19 @@ namespace Gogaman
 			testSpatialComponent.rotationAngle = 0.0f;
 			testSpatialComponent.scale         = glm::vec3(j.transform.scale[0], j.transform.scale[1], j.transform.scale[2]);
 			//testSpatialComponent.scale = glm::vec3(1.0f);
+
 			m_World.AddComponent<SpatialComponent>(testMeshEntity.identifier, std::move(testSpatialComponent));
+
+			//Set bounding volume component data
+			BoundingVolumeComponent testBoundingVolumeComponent;
+			//Bounding sphere
+			testBoundingVolumeComponent.boundingSphere.position = glm::vec3(j.boundingSphere.position[0], j.boundingSphere.position[1], j.boundingSphere.position[2]);
+			testBoundingVolumeComponent.boundingSphere.radius   = j.boundingSphere.radius;
+			//AABB
+			testBoundingVolumeComponent.axisAlignedBoundingBox.minimum = glm::vec3(j.axisAlignedBoundingBox.minimum[0], j.axisAlignedBoundingBox.minimum[1], j.axisAlignedBoundingBox.minimum[2]);
+			testBoundingVolumeComponent.axisAlignedBoundingBox.maximum = glm::vec3(j.axisAlignedBoundingBox.maximum[0], j.axisAlignedBoundingBox.maximum[1], j.axisAlignedBoundingBox.maximum[2]);
+
+			m_World.AddComponent<BoundingVolumeComponent>(testMeshEntity.identifier, std::move(testBoundingVolumeComponent));
 
 			//Set renderable component data
 			RenderableComponent testRenderableComponent;
@@ -121,12 +136,6 @@ namespace Gogaman
 			testRenderableComponent.material.emissivity->interpolationMode = TextureInterpolationMode::Trilinear;
 			testRenderableComponent.material.emissivity->levels            = 0;
 			testRenderableComponent.material.emissivity->Generate(data.materials[0].emissivity.width, data.materials[0].emissivity.height, data.materials[0].emissivity.data);
-			//Bounding sphere
-			testRenderableComponent.boundingSphere.position = glm::vec3(j.boundingSphere.position[0], j.boundingSphere.position[1], j.boundingSphere.position[2]);
-			testRenderableComponent.boundingSphere.radius   = j.boundingSphere.radius;
-			//AABB
-			testRenderableComponent.axisAlignedBoundingBox.minimum = glm::vec3(j.axisAlignedBoundingBox.minimum[0], j.axisAlignedBoundingBox.minimum[1], j.axisAlignedBoundingBox.minimum[2]);
-			testRenderableComponent.axisAlignedBoundingBox.maximum = glm::vec3(j.axisAlignedBoundingBox.maximum[0], j.axisAlignedBoundingBox.maximum[1], j.axisAlignedBoundingBox.maximum[2]);
 
 			m_World.AddComponent(testMeshEntity.identifier, std::move(testRenderableComponent));
 		}

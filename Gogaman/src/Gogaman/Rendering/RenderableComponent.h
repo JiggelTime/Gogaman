@@ -6,9 +6,6 @@
 
 #include "Gogaman/Rendering/PBR_Material.h"
 
-#include "Gogaman/Geometry/Sphere.h"
-#include "Gogaman/Geometry/BoundingBox3D.h"
-
 namespace Gogaman
 {
 	struct RenderableComponent : public Component<RenderableComponent>
@@ -21,11 +18,5 @@ namespace Gogaman
 		VertexArrayBufferID vertexArrayBuffer;
 
 		PBR_Material        material;
-
-		Sphere              boundingSphere;
-		Sphere              worldSpaceBoundingSphere;
-
-		BoundingBox3D       axisAlignedBoundingBox;
-		BoundingBox3D       worldSpaceAxisAlignedBoundingBox;
 	};
 }

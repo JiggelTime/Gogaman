@@ -39,14 +39,6 @@ namespace Gogaman
 				modelMatrix                              = glm::scale(modelMatrix, spatialComponent->scale);
 				renderableComponent->previousModelMatrix = renderableComponent ->modelMatrix;
 				renderableComponent->modelMatrix         = modelMatrix;
-
-				//Bounding sphere
-				renderableComponent->worldSpaceBoundingSphere.position = (renderableComponent->boundingSphere.position * spatialComponent->scale) + spatialComponent->position;
-				renderableComponent->worldSpaceBoundingSphere.radius   = renderableComponent->boundingSphere.radius * (spatialComponent->scale.x > spatialComponent->scale.y ? spatialComponent->scale.x : (spatialComponent->scale.y > spatialComponent->scale.z ? spatialComponent->scale.y : spatialComponent->scale.z));
-			
-				//AABB
-				renderableComponent->worldSpaceAxisAlignedBoundingBox.minimum = (renderableComponent->axisAlignedBoundingBox.minimum * spatialComponent->scale) + spatialComponent->position;
-				renderableComponent->worldSpaceAxisAlignedBoundingBox.maximum = (renderableComponent->axisAlignedBoundingBox.maximum * spatialComponent->scale) + spatialComponent->position;
 			}
 		}
 	};

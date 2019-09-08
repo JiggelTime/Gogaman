@@ -68,7 +68,7 @@
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
     <ClInclude Include="src\Gogaman\Input\Input.h" />
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
-    <ClInclude Include="src\Gogaman\Rendering\BoundingVolumeSystem.h" />
+    <ClInclude Include="src\Gogaman\BoundingVolumeSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
