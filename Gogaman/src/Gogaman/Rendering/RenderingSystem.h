@@ -55,7 +55,7 @@ namespace Gogaman
 	private:
 		PerspectiveCamera                   m_Camera;
 
-		std::unique_ptr<ShaderManager>      m_ShaderManager;
+		ShaderManager                       m_ShaderManager;
 		ShaderID                            m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
 
 		std::unique_ptr<RenderSurface>      m_BRDF_Buffer;

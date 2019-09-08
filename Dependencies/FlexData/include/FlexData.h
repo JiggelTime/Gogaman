@@ -326,7 +326,7 @@ namespace FlexData
 
 			//Mesh data
 			//Write number of meshes
-			dataPayload.numMeshes = data.meshes.size();
+			dataPayload.numMeshes = (uint32_t)data.meshes.size();
 			fwrite(&dataPayload.numMeshes, sizeof(dataPayload.numMeshes), 1, file);
 			for(const auto &i : data.meshes)
 			{
@@ -358,7 +358,7 @@ namespace FlexData
 
 			//Point light data
 			//Write number of point lights
-			dataPayload.numPointLights = data.pointLights.size();
+			dataPayload.numPointLights = (uint32_t)data.pointLights.size();
 			fwrite(&dataPayload.numPointLights, sizeof(dataPayload.numPointLights), 1, file);
 			//Write point light data
 			uint64_t pointLightDataSize = FLEX_POINT_LIGHT_DATA_SIZE * data.pointLights.size();
@@ -366,7 +366,7 @@ namespace FlexData
 
 			//Directional light data
 			//Write number of directional lights
-			dataPayload.numDirectionalLights = data.directionalLights.size();
+			dataPayload.numDirectionalLights = (uint32_t)data.directionalLights.size();
 			fwrite(&dataPayload.numDirectionalLights, sizeof(dataPayload.numDirectionalLights), 1, file);
 			//Write directional light data
 			uint64_t directionalLightDataSize = FLEX_DIRECTIONAL_LIGHT_DATA_SIZE * data.directionalLights.size();
@@ -374,7 +374,7 @@ namespace FlexData
 
 			//Material data
 			//Write number of materials
-			dataPayload.numMaterials = data.materials.size();
+			dataPayload.numMaterials = (uint32_t)data.materials.size();
 			fwrite(&dataPayload.numMaterials, sizeof(dataPayload.numMaterials), 1, file);
 			for(const auto &i : data.materials)
 			{

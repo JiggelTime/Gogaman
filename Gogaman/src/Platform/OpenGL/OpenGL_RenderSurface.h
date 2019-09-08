@@ -37,8 +37,8 @@ namespace Gogaman
 		void BlitDepthBuffer(const   RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
 		void BlitStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
 
-		inline int GetColorAttachmentCount() const { return m_NumColorAttachments;  }
-		inline int GetRenderTargetCount()    const { return m_RenderTargets.size(); }
+		inline int GetColorAttachmentCount() const { return m_NumColorAttachments;       }
+		inline int GetRenderTargetCount()    const { return (int)m_RenderTargets.size(); }
 		
 		inline uint32_t GetRendererID() const { return m_RendererID; }
 		

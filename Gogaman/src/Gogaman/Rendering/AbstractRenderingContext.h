@@ -4,7 +4,9 @@
 
 #include "RenderSurface.h"
 //#include "Shader/Shader.h"
-#include "Texture/Texture.h"
+#include "Texture/Texture1D.h"
+#include "Texture/Texture2D.h"
+#include "Texture/Texture3D.h"
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArrayBuffer.h"
@@ -15,23 +17,29 @@
 
 namespace Gogaman
 {
-	using RenderSurfaceID            = Resource::ID<uint32_t, 24, 8>;
-	using RenderSurfaceContainer     = Resource::Container<256, IndexBuffer, uint32_t, 24, 8>;
+	using RenderSurfaceID            = Resource::ID<uint8_t>;
+	using RenderSurfaceContainer     = Resource::Container<255, RenderSurface,      uint8_t>;
 	
 	//using ShaderID                   = Resource::ID<uint32_t, 24, 8>;
-	//using ShaderContainer            = Resource::Container<256, IndexBuffer, uint32_t, 24, 8>;
+	//using ShaderContainer            = Resource::Container<256, Shader, uint32_t, 24, 8>;
 
-	using TextureID                  = Resource::ID<uint32_t, 19, 13>;
-	using TextureContainer           = Resource::Container<8192, IndexBuffer, uint32_t, 19, 13>;
+	using Texture1D_ID               = Resource::ID<uint16_t>;
+	using Texture1D_Container        = Resource::Container<8192, Texture1D,         uint16_t>;
 
-	using VertexBufferID             = Resource::ID<uint32_t, 20, 12>;
-	using VertexBufferContainer      = Resource::Container<4096, IndexBuffer, uint32_t, 20, 12>;
+	using Texture2D_ID               = Resource::ID<uint16_t>;
+	using Texture2D_Container        = Resource::Container<8192, Texture2D,         uint16_t>;
 
-	using IndexBufferID              = Resource::ID<uint32_t, 20, 12>;
-	using IndexBufferContainer       = Resource::Container<4096, IndexBuffer, uint32_t, 20, 12>;
+	using Texture3D_ID               = Resource::ID<uint16_t>;
+	using Texture3D_Container        = Resource::Container<8192, Texture3D,         uint16_t>;
 
-	using VertexArrayBufferID        = Resource::ID<uint32_t, 20, 12>;
-	using VertexArrayBufferContainer = Resource::Container<4096, VertexArrayBuffer, uint32_t, 20, 12>;
+	using VertexBufferID             = Resource::ID<uint16_t>;
+	using VertexBufferContainer      = Resource::Container<4096, VertexBuffer,      uint16_t>;
+
+	using IndexBufferID              = Resource::ID<uint16_t>;
+	using IndexBufferContainer       = Resource::Container<4096, IndexBuffer,       uint16_t>;
+
+	using VertexArrayBufferID        = Resource::ID<uint16_t>;
+	using VertexArrayBufferContainer = Resource::Container<4096, VertexArrayBuffer, uint16_t>;
 
 	template<typename ImplementationType>
 	class AbstractRenderingContext : public CRTP<ImplementationType, AbstractRenderingContext>
@@ -50,43 +58,23 @@ namespace Gogaman
 	
 		inline void SetFaceWindingOrder(const FaceWindingOrder windingOrder) const { this->GetImplementation().SetFaceWindingOrder(windingOrder); }
 
-		inline RenderSurfaceID CreateRenderSurface() { return m_RenderSurfaces.Add(RenderSurface); }
-		inline constexpr RenderSurface &GetRenderSurface(const RenderSurfaceID renderSurfaceID) { return m_RenderSurfaces.Get(renderSurfaceID); }
-		inline void DeleteRenderSurface(const RenderSurfaceID renderSurfaceID) { m_RenderSurfaces.Erase(renderSurfaceID); }
-		inline constexpr auto GetRenderSurfaceCount() { return m_RenderSurfaces.GetResourceCount(); }
-
-		//inline ShaderID CreateShader() { return m_Shaders.Add(Shader); }
-		//inline constexpr Shader &GetShader(const ShaderID shaderID) { return m_Shaders.Get(shaderID); }
-		//inline void DeleteShader(const ShaderID shaderID) { m_Shaders.Erase(shaderID); }
-		//inline constexpr auto GetShaderCount() { return m_Shaders.GetResourceCount(); }
-
-		inline TextureID CreateTexture() { return m_Textures.Add(Texture); }
-		inline constexpr Texture &GetTexture(const TextureID textureID) { return m_Textures.Get(textureID); }
-		inline void DeleteTexture(const TextureID textureID) { m_Textures.Erase(textureID); }
-		inline constexpr auto GetTextureCount() { return m_Textures.GetResourceCount(); }
-
-		inline VertexBufferID CreateVertexBuffer() { return m_VertexBuffers.Add(VertexBuffer); }
-		inline constexpr VertexBuffer &GetVertexBuffer(const VertexBufferID vertexBufferID) { return m_VertexBuffers.Get(vertexBufferID); }
-		inline void DeleteVertexBuffer(const VertexBufferID vertexBufferID) { m_VertexBuffers.Erase(vertexBufferID); }
-		inline constexpr auto GetVertexBufferCount() { return m_VertexBuffers.GetResourceCount(); }
-
-		inline IndexBufferID CreateIndexBuffer() { return m_IndexBuffers.Add(IndexBuffer); }
-		inline constexpr IndexBuffer &GetIndexBuffer(const IndexBufferID indexBufferID) { return m_IndexBuffers.Get(indexBufferID); }
-		inline void DeleteIndexBuffer(const IndexBufferID indexBufferID) { m_IndexBuffers.Erase(indexBufferID); }
-		inline constexpr auto GetIndexBufferCount() { return m_IndexBuffers.GetResourceCount(); }
-
-		inline VertexArrayBufferID CreateVertexArrayBuffer() { return m_VertexArrayBuffers.Add(VertexArrayBuffer); }
-		inline constexpr VertexArrayBuffer &GetVertexArrayBuffer(const VertexArrayBufferID vertexArrayBufferID) { return m_VertexArrayBuffers.Get(vertexArrayBufferID); }
-		inline void DeleteVertexArrayBuffer(const VertexArrayBufferID vertexArrayBufferID) { m_VertexArrayBuffers.Erase(vertexArrayBufferID); }
-		inline constexpr auto GetVertexArrayBufferCount() { return m_VertexArrayBuffers.GetResourceCount(); }
-
+		inline constexpr RenderSurfaceContainer     &GetRenderSurfaces()     { return m_RenderSurfaces;     }
+		//inline constexpr ShaderContainer            &GetShaders()            { return m_Shaders;            }
+		inline constexpr Texture1D_Container        &GetTexture1Ds()         { return m_Texture1Ds;         }
+		inline constexpr Texture2D_Container        &GetTexture2Ds()         { return m_Texture2Ds;         }
+		inline constexpr Texture3D_Container        &GetTexture3Ds()         { return m_Texture3Ds;         }
+		inline constexpr VertexBufferContainer      &GetVertexBuffers()      { return m_VertexBuffers;      }
+		inline constexpr IndexBufferContainer       &GetIndexBuffers()       { return m_IndexBuffers;       }
+		inline constexpr VertexArrayBufferContainer &GetVertexArrayBuffers() { return m_VertexArrayBuffers; }
 	protected:
 		AbstractRenderingContext()  = default;
 		~AbstractRenderingContext() = default;
 	private:
 		RenderSurfaceContainer     m_RenderSurfaces;
 		//ShaderContainer            m_Shaders;
-		TextureContainer           m_Textures;
+		Texture1D_Container        m_Texture1Ds;
+		Texture2D_Container        m_Texture2Ds;
+		Texture3D_Container        m_Texture3Ds;
 		VertexBufferContainer      m_VertexBuffers;
 		IndexBufferContainer       m_IndexBuffers;
 		VertexArrayBufferContainer m_VertexArrayBuffers;

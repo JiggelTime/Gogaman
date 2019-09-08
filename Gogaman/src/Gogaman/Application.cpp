@@ -11,8 +11,6 @@
 
 #include "Events/EventManager.h"
 
-#include "Gogaman/Resource.h"
-
 #include "SpatialComponent.h"
 #include "Rendering/RenderableComponent.h"
 #include "Rendering/LightComponent.h"
@@ -67,12 +65,13 @@ namespace Gogaman
 
 			//Set renderable component data
 			RenderableComponent testRenderableComponent;
-			testRenderableComponent.vertexArrayBuffer = std::make_unique<VertexArrayBuffer>();
-			testRenderableComponent.vertexBuffer      = std::make_unique<VertexBuffer>();
-			testRenderableComponent.indexBuffer       = std::make_unique<IndexBuffer>();
+
+			VertexBuffer      &vertexBuffer      = Application::GetInstance().GetWindow().GetRenderingContext().GetVertexBuffers().Create(testRenderableComponent.vertexBuffer);
+			IndexBuffer       &indexBuffer       = Application::GetInstance().GetWindow().GetRenderingContext().GetIndexBuffers().Create(testRenderableComponent.indexBuffer);
+			VertexArrayBuffer &vertexArrayBuffer = Application::GetInstance().GetWindow().GetRenderingContext().GetVertexArrayBuffers().Create(testRenderableComponent.vertexArrayBuffer);
 			
-			testRenderableComponent.vertexBuffer->UploadData(FLEX_VERTEX_DATA_SIZE * j.vertexBuffer.size(), j.vertexBuffer.data());
-			testRenderableComponent.vertexBuffer->SetLayout({
+			vertexBuffer.UploadData(FLEX_VERTEX_DATA_SIZE * (uint32_t)j.vertexBuffer.size(), j.vertexBuffer.data());
+			vertexBuffer.SetLayout({
 				//Position
 				{ ShaderDataType::Float3 },
 				//UV
@@ -83,10 +82,10 @@ namespace Gogaman
 				{ ShaderDataType::Float3 }
 			});
 
-			testRenderableComponent.vertexArrayBuffer->AddVertexBuffer(*testRenderableComponent.vertexBuffer.get());
+			vertexArrayBuffer.AddVertexBuffer(vertexBuffer);
 
-			testRenderableComponent.indexBuffer->UploadData(j.indexBuffer.size(), j.indexBuffer.data());
-			testRenderableComponent.vertexArrayBuffer->SetIndexBuffer(*testRenderableComponent.indexBuffer.get());
+			indexBuffer.UploadData((uint32_t)j.indexBuffer.size(), j.indexBuffer.data());
+			vertexArrayBuffer.SetIndexBuffer(indexBuffer);
 
 			testRenderableComponent.material.albedo = std::make_unique<Texture2D>();
 			testRenderableComponent.material.albedo->internalFormat    = TextureInternalFormat::RGBW8;

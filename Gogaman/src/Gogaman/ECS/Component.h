@@ -2,18 +2,18 @@
 
 namespace Gogaman
 {
-	static int nextComponentTypeID = 0;
+	static uint32_t nextComponentTypeID = 0;
 
 	template<typename ComponentType>
 	struct Component
 	{
-		static inline int GetTypeID()
+		static inline uint32_t GetTypeID()
 		{
-			static int typeID = nextComponentTypeID++;
+			static uint32_t typeID = nextComponentTypeID++;
 			return typeID;
 		}
 	};
 
 	template<typename ComponentType>
-	static inline int GetComponentTypeID() { return Component<ComponentType>::GetTypeID(); }
+	static inline uint32_t GetComponentTypeID() { return Component<ComponentType>::GetTypeID(); }
 }

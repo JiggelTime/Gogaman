@@ -31,8 +31,8 @@ namespace Gogaman
 			GetComponentManager<ComponentType>()->AddComponent(entity, std::move(component));
 			//TODO: optimize this
 			ComponentFlags currentFlags = m_EntityComponentFlags[entity];
-			m_EntityComponentFlags[entity] |= (1 << GetComponentTypeID<ComponentType>());
-			ComponentFlags newFlags     = m_EntityComponentFlags[entity];
+			m_EntityComponentFlags[entity] |= (1ULL << GetComponentTypeID<ComponentType>());
+			ComponentFlags newFlags = m_EntityComponentFlags[entity];
 
 			for(auto &i : m_Systems)
 			{

@@ -41,6 +41,7 @@ namespace Gogaman
 
 	void ShaderManager::Reload(Shader &shader)
 	{
+		//TODO: Fix shader destructor not being called when overwritten
 		std::string filepath1, filepath2, filepath3;
 		std::tie(filepath1, filepath2, filepath3) = shader.GetFilepaths();
 		if(filepath2.empty())

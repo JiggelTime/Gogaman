@@ -9,6 +9,12 @@ namespace Gogaman
 	class AbstractTexture2D : public CRTP<ImplementationType, AbstractTexture2D>, public Texture
 	{
 	public:
+		AbstractTexture2D(const AbstractTexture2D &) = delete;
+		AbstractTexture2D(AbstractTexture2D &&other) = default;
+
+		AbstractTexture2D &operator=(const AbstractTexture2D &) = delete;
+		AbstractTexture2D &operator=(AbstractTexture2D &&other) = default;
+
 		void Generate(const int width, const int height, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, height, imageData); }
 	protected:
 		AbstractTexture2D()

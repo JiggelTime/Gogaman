@@ -27,7 +27,6 @@
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentFlags.h" />
     <ClInclude Include="src\Gogaman\ECS\ComponentManager.h" />
@@ -129,6 +128,8 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderCommandBucket.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderCommandPacket.h" />
+    <ClInclude Include="src\Gogaman\Rendering\BoundingVolumeSystem.h" />
+    <ClInclude Include="src\Gogaman\BoundingVolumeComponent.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

@@ -6,8 +6,10 @@
 
 namespace Gogaman
 {
-	using ShaderID        = Resource::ID<uint32_t, 22, 10>;
-	using ShaderContainer = Resource::Container<20, Shader, uint32_t, 22, 10>;
+	//TODO: Use a fixed-size array to store shaders instead of a resource container (assume shaders cannot be created/deleted at runtime, only overwritten)
+	//The number of shaders can be determined at compile-time using same method as for component type IDs.
+	using ShaderID        = Resource::ID<uint8_t>;
+	using ShaderContainer = Resource::Container<255, Shader, uint8_t>;
 
 	class ShaderManager
 	{

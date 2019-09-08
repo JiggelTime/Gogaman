@@ -44,7 +44,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Gogaman\Containers\Freelist.h" />
+    <ClInclude Include="src\Gogaman\BoundingVolumeComponent.h" />
     <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
     <ClInclude Include="src\Gogaman\Core\Time.h" />
     <ClInclude Include="src\Gogaman\Core\CRTP.h" />
@@ -68,6 +68,7 @@
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
     <ClInclude Include="src\Gogaman\Input\Input.h" />
     <ClInclude Include="src\Gogaman\Logging\Logger.h" />
+    <ClInclude Include="src\Gogaman\Rendering\BoundingVolumeSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

@@ -3,8 +3,6 @@
 #include "Gogaman/ECS/Component.h"
 
 #include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
 
 namespace Gogaman
 {

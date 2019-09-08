@@ -53,5 +53,8 @@ namespace Gogaman
 
 			GM_ASSERT(false, "Failed to get native face winding order | Invalid winding order")
 		}
+	private:
+		RenderState()  = delete;
+		~RenderState() = delete;
 	};
 }

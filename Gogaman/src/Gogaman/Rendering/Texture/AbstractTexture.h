@@ -61,7 +61,7 @@ namespace Gogaman
 		AbstractTexture &operator=(const AbstractTexture &) = delete;
 		AbstractTexture &operator=(AbstractTexture &&other) = default;
 
-		void RegenerateMipmap() const { this->GetImplementation().RegenerateMipmap(); }
+		inline void RegenerateMipmap() const { this->GetImplementation().RegenerateMipmap(); }
 
 		inline void Bind(const int unit) const { this->GetImplementation().Bind(unit); }
 
@@ -70,7 +70,7 @@ namespace Gogaman
 		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode)                                             const { this->GetImplementation().BindImage(unit, level, accessMode);                 }
 		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode, const TextureInternalFormat internalFormat) const { this->GetImplementation().BindImage(unit, level, accessMode, internalFormat); }
 	
-		static constexpr uint8_t GetInternalFormatComponents(const TextureInternalFormat internalFormat)
+		static inline constexpr uint8_t GetInternalFormatComponentCount(const TextureInternalFormat internalFormat)
 		{
 			switch(internalFormat)
 			{
@@ -108,7 +108,7 @@ namespace Gogaman
 			return 0;
 		}
 
-		static constexpr uint8_t GetNumTextureFormatComponents(TextureFormat format)
+		static inline constexpr uint8_t GetTextureFormatComponentCount(TextureFormat format)
 		{
 			switch(format)
 			{
@@ -123,6 +123,20 @@ namespace Gogaman
 			GM_ASSERT(false, "Failed to get number of texture format components: invalid format")
 			return 0;
 		}
+
+		static inline float GetMaxAnisotropicInterpolationSamples() { return ImplementationType::GetMaxAnisotropicInterpolationSamples(); }
+
+		static inline constexpr auto GetNativeTextureAccessMode(const TextureAccessMode accessMode) { return ImplementationType::GetNativeTextureAccessMode(accessMode); }
+
+		static inline constexpr auto GetNativeTextureInternalFormat(const TextureInternalFormat internalFormat) { return ImplementationType::GetNativeTextureInternalFormat(internalFormat); }
+
+		static inline constexpr auto GetNativeTextureFormat(const TextureFormat format) { return ImplementationType::GetNativeTextureFormat(format); }
+
+		static inline constexpr auto GetNativeTextureInterpolationMinMode(const TextureInterpolationMode interpolationMode) { return ImplementationType::GetNativeTextureInterpolationMinMode(interpolationMode); }
+	
+		static inline constexpr auto GetNativeTextureInterpolationMagMode(const TextureInterpolationMode interpolationMode) { return ImplementationType::GetNativeTextureInterpolationMagMode(interpolationMode); }
+	
+		static inline constexpr auto GetNativeTextureWrapMode(const TextureWrapMode wrapMode) { return ImplementationType::GetNativeTextureWrapMode(wrapMode); }
 	protected:
 		AbstractTexture()
 			: internalFormat(TextureInternalFormat::XYZW8), format(TextureFormat::XYZW), interpolationMode(TextureInterpolationMode::Point), levels(1)

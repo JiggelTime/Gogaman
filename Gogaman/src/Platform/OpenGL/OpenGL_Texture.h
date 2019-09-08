@@ -41,7 +41,7 @@ namespace Gogaman
 			return maxAnisotropicInterpolationSamples;
 		}
 
-		static constexpr GLenum GetNativeTextureAccessMode(const TextureAccessMode accessMode)
+		static inline constexpr GLenum GetNativeTextureAccessMode(const TextureAccessMode accessMode)
 		{
 			switch(accessMode)
 			{
@@ -56,7 +56,7 @@ namespace Gogaman
 			}
 		}
 
-		static constexpr GLenum GetNativeTextureInternalFormat(const TextureInternalFormat internalFormat)
+		static inline constexpr GLenum GetNativeTextureInternalFormat(const TextureInternalFormat internalFormat)
 		{
 			switch(internalFormat)
 			{
@@ -107,7 +107,7 @@ namespace Gogaman
 			return 0;
 		}
 
-		static constexpr GLenum GetNativeTextureFormat(const TextureFormat format)
+		static inline constexpr GLenum GetNativeTextureFormat(const TextureFormat format)
 		{
 			switch(format)
 			{
@@ -123,7 +123,7 @@ namespace Gogaman
 			return 0;
 		}
 
-		static constexpr GLint GetNativeTextureInterpolationMinMode(const TextureInterpolationMode interpolationMode)
+		static inline constexpr GLint GetNativeTextureInterpolationMinMode(const TextureInterpolationMode interpolationMode)
 		{
 			switch(interpolationMode)
 			{
@@ -139,7 +139,7 @@ namespace Gogaman
 			return 0;
 		}
 
-		static constexpr GLint GetNativeTextureInterpolationMagMode(const TextureInterpolationMode interpolationMode)
+		static inline constexpr GLint GetNativeTextureInterpolationMagMode(const TextureInterpolationMode interpolationMode)
 		{
 			switch(interpolationMode)
 			{
@@ -155,7 +155,7 @@ namespace Gogaman
 			return 0;
 		}
 
-		static constexpr GLint GetNativeTextureWrapMode(const TextureWrapMode wrapMode)
+		static inline constexpr GLint GetNativeTextureWrapMode(const TextureWrapMode wrapMode)
 		{
 			switch(wrapMode)
 			{

@@ -12,5 +12,8 @@ namespace Gogaman
 		//Mouse
 		static bool IsMouseButtonPressed(const int scancode);
 		static const glm::vec2 &GetMousePosition();
+	private:
+		Input()  = delete;
+		~Input() = delete;
 	};
 }
