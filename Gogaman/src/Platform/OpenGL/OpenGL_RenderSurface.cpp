@@ -2,7 +2,7 @@
 #include "OpenGL_RenderSurface.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 namespace Gogaman
 {
@@ -36,7 +36,7 @@ namespace Gogaman
 		}
 	}
 
-	void RenderSurface::AddColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex)
+	void RenderSurface::AddColorBuffer(const RenderBuffer &renderbuffer, const int attachmentIndex)
 	{
 		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach color buffer to render surface: invalid attachment index");
 		glNamedFramebufferRenderbuffer(m_RendererID, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_RENDERBUFFER, renderbuffer.GetRendererID());
@@ -55,7 +55,7 @@ namespace Gogaman
 		glNamedFramebufferTexture(m_RendererID, GL_DEPTH_ATTACHMENT, texture.GetRendererID(), 0);
 	}
 
-	void RenderSurface::AddDepthBuffer(const Renderbuffer &renderbuffer)
+	void RenderSurface::AddDepthBuffer(const RenderBuffer &renderbuffer)
 	{
 		GM_ASSERT((renderbuffer.internalFormat == TextureInternalFormat::Depth16) || (renderbuffer.internalFormat == TextureInternalFormat::Depth24) || (renderbuffer.internalFormat == TextureInternalFormat::Depth32) || (renderbuffer.internalFormat == TextureInternalFormat::Depth32F), "Failed to attach depth buffer to render surface: invalid render buffer internal format");
 		glNamedFramebufferRenderbuffer(m_RendererID, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderbuffer.GetRendererID());

@@ -93,8 +93,8 @@ namespace Gogaman
 			return globalTransform * geometryTransform;
 		}
 
-		template<typename GeometryElement, typename Value>
-		Value FBX_Importer::GetVertexElement(const GeometryElement *element, const int controlPointIndex, const int triangle, const int vertex, const Value defaultValue) const
+		template<typename GeometryElementType, typename ValueType>
+		ValueType FBX_Importer::GetVertexElement(const GeometryElementType *element, const int controlPointIndex, const int triangle, const int vertex, const ValueType defaultValue) const
 		{
 			int index = 0;
 			if(!element)
@@ -231,6 +231,7 @@ namespace Gogaman
 			}
 
 			FlexData::FlexMeshData meshDataPayload;
+
 			meshDataPayload.materialIndex = ProcessMaterial(node);
 
 			meshDataPayload.boundingSphere.position[0] = 0.0f;

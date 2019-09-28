@@ -3,7 +3,7 @@
 #include "Gogaman/Core/CRTP.h"
 
 #include "Texture/Texture.h"
-#include "Platform/OpenGL/OpenGL_Renderbuffer.h"
+#include "Platform/OpenGL/OpenGL_RenderBuffer.h"
 
 namespace Gogaman
 {
@@ -24,11 +24,11 @@ namespace Gogaman
 		inline void AddColorBuffer(const Texture &texture, const int level, const bool isRenderTarget)                            { this->GetImplementation().AddColorBuffer(texture, level, isRenderTarget);                  }
 		inline void AddColorBuffer(const Texture &texture, const int level, const int attachmentIndex, const bool isRenderTarget) { this->GetImplementation().AddColorBuffer(texture, level, attachmentIndex, isRenderTarget); }
 
-		inline void AddColorBuffer(const Renderbuffer &renderbuffer)                            { this->GetImplementation().AddColorBuffer(renderbuffer);                  }
-		inline void AddColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex) { this->GetImplementation().AddColorBuffer(renderbuffer, attachmentIndex); }
+		inline void AddColorBuffer(const RenderBuffer &renderbuffer)                            { this->GetImplementation().AddColorBuffer(renderbuffer);                  }
+		inline void AddColorBuffer(const RenderBuffer &renderbuffer, const int attachmentIndex) { this->GetImplementation().AddColorBuffer(renderbuffer, attachmentIndex); }
 		
 		inline void AddDepthBuffer(const Texture      &texture)      { this->GetImplementation().AddDepthBuffer(texture);      }
-		inline void AddDepthBuffer(const Renderbuffer &renderbuffer) { this->GetImplementation().AddDepthBuffer(renderbuffer); }
+		inline void AddDepthBuffer(const RenderBuffer &renderbuffer) { this->GetImplementation().AddDepthBuffer(renderbuffer); }
 
 		inline void Bind()   const { this->GetImplementation().Bind();   }
 		inline void Unbind() const { this->GetImplementation().Unbind(); }
@@ -39,8 +39,8 @@ namespace Gogaman
 		inline void BlitDepthBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitDepthBuffer(source,   width, height, interpolationMode); }
 		inline void BlitStencilBuffer(const ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().BlitStencilBuffer(source, width, height, interpolationMode); }
 
-		inline int GetColorAttachmentCount() const { return this->GetImplementation().GetColorAttachmentCount(); }
-		inline int GetRenderTargetCount()    const { return this->GetImplementation().GetRenderTargetCount();    }
+		inline constexpr int GetColorAttachmentCount() const { return this->GetImplementation().GetColorAttachmentCount(); }
+		inline           int GetRenderTargetCount()    const { return this->GetImplementation().GetRenderTargetCount();    }
 
 		static inline void BindBackBuffer()  { ImplementationType::BindBackBuffer();  }
 

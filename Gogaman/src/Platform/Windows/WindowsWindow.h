@@ -13,10 +13,10 @@ namespace Gogaman
 		WindowsWindow(const char *title, const int width, const int height);
 		~WindowsWindow();
 
-		virtual void  Update() override;
+		virtual void Update() override;
 
-		virtual void  EnableVerticalSynchronization()  override;
-		virtual void  DisableVerticalSynchronization() override;
+		virtual void EnableVerticalSynchronization()  override;
+		virtual void DisableVerticalSynchronization() override;
 
 		virtual void *GetNativeWindow() const override { return m_Window; }
 	private:

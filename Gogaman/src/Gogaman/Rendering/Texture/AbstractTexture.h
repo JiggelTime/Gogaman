@@ -3,7 +3,7 @@
 #include "Gogaman/Core/CRTP.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 namespace Gogaman
 {
@@ -105,7 +105,6 @@ namespace Gogaman
 			}
 
 			GM_ASSERT(false, "Failed to get number of texture internal format components: invalid internal format")
-			return 0;
 		}
 
 		static inline constexpr uint8_t GetTextureFormatComponentCount(TextureFormat format)
@@ -121,7 +120,6 @@ namespace Gogaman
 			}
 
 			GM_ASSERT(false, "Failed to get number of texture format components: invalid format")
-			return 0;
 		}
 
 		static inline float GetMaxAnisotropicInterpolationSamples() { return ImplementationType::GetMaxAnisotropicInterpolationSamples(); }

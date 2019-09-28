@@ -2,7 +2,7 @@
 #include "EventManager.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 #include "Event.h"
 #include "EventListener.h"
 

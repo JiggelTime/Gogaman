@@ -2,7 +2,7 @@
 #include "ShaderManager.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 namespace Gogaman
 {

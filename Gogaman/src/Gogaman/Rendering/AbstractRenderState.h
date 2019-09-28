@@ -4,35 +4,44 @@
 
 namespace Gogaman
 {
-	enum class BlendFactor : uint8_t
+	namespace RenderState
 	{
-		Zero,
-		One,
-		Source,
-		InverseSource,
-		SourceAlpha,
-		InverseSourceAlpha,
-		Destination,
-		InverseDestination,
-		DestinationAlpha,
-		InverseDestinationAlpha
-	};
+		enum class DepthComparisonMode : uint8_t
+		{
+			Never,
+			Always,
+			NotEqual,
+			Equal,
+			LessThan,
+			LessThanOrEqual,
+			GreaterThan,
+			GreaterThanOrEqual
+		};
 
-	enum class FaceWindingOrder : bool
-	{
-		Clockwise,
-		CounterClockwise
-	};
+		enum class BlendFactor : uint8_t
+		{
+			Zero,
+			One,
+			Source,
+			InverseSource,
+			SourceAlpha,
+			InverseSourceAlpha,
+			Destination,
+			InverseDestination,
+			DestinationAlpha,
+			InverseDestinationAlpha
+		};
 
-	template<typename ImplementationType>
-	class AbstractRenderState : public CRTP<ImplementationType, AbstractRenderState>
-	{
-	public:
-		static inline constexpr auto GetNativeBlendFactor(const BlendFactor blendFactor) { return ImplementationType::GetNativeBlendFactor(blendFactor); }
+		enum class FaceWindingOrder : bool
+		{
+			Clockwise,
+			CounterClockwise
+		};
 
-		static inline constexpr auto GetNativeFaceWindingOrder(const FaceWindingOrder windingOrder) { return ImplementationType::GetNativeFaceWindingOrder(windingOrder); }
-	protected:
-		AbstractRenderState()  = delete;
-		~AbstractRenderState() = delete;
-	};
+		static inline constexpr auto GetNativeDepthComparisonMode(const DepthComparisonMode comparisonMode);
+
+		static inline constexpr auto GetNativeBlendFactor(const BlendFactor blendFactor);
+
+		static inline constexpr auto GetNativeFaceWindingOrder(const FaceWindingOrder windingOrder);
+	}
 }

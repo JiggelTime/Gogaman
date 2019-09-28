@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "OpenGL_VertexBuffer.h"
 
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 namespace Gogaman
 {

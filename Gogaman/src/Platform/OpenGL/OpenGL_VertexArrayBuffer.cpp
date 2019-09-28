@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "OpenGL_VertexArrayBuffer.h"
 
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include "Gogaman/Rendering/VertexBuffer.h"
 #include "Gogaman/Rendering/IndexBuffer.h"

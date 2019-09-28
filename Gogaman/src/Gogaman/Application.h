@@ -28,3 +28,5 @@ namespace Gogaman
 
 	Application *CreateApplication();
 }
+
+#define GM_RENDERING_CONTEXT Application::GetInstance().GetWindow().GetRenderingContext()

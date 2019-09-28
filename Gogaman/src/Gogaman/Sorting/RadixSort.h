@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 namespace Gogaman
 {
 	namespace RadixSort
 	{
 		//Least significant digit radix sort | Time complexity: O(5n) | Space complexity: O(n)
-		uint32_t *Sort(const uint32_t numKeys, uint32_t *keys)
+		inline uint32_t *Sort(const uint32_t numKeys, uint32_t *keys)
 		{
 			GM_ASSERT(numKeys > 0, "Failed to sort: invalid number of keys")
 			GM_ASSERT(keys,        "Failed to sort: invalid keys")

@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ShaderLoader.h"
 
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include "Shader.h"
 

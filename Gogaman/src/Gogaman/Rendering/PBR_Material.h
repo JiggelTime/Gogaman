@@ -1,21 +1,15 @@
 #pragma once
 
-#include "Texture/Texture2D.h"
-
-#include "Shader/Shader.h"
-
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
+#include "RenderingContext.h"
 
 namespace Gogaman
 {
 	struct PBR_Material
 	{
-		std::unique_ptr<Texture2D> albedo;
-		std::unique_ptr<Texture2D> normal;
-		std::unique_ptr<Texture2D> roughness;
-		std::unique_ptr<Texture2D> metalness;
-		std::unique_ptr<Texture2D> emissivity;
+		Texture2D_ID albedo;
+		Texture2D_ID normal;
+		Texture2D_ID roughness;
+		Texture2D_ID metalness;
+		Texture2D_ID emissivity;
 	};
 }

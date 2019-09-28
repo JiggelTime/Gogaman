@@ -2,7 +2,7 @@
 #include "System.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 #include "World.h"
 
 namespace Gogaman
@@ -36,8 +36,6 @@ namespace Gogaman
 
 	void System::AddEntityGroup(EntityGroup &&group)
 	{
-		GM_ASSERT(m_NumEntityGroups <= GM_MAX_ENTITY_GROUPS, "Failed to add entity group: number of entity groups in system exceeds %d", GM_MAX_ENTITY_GROUPS)
-		m_EntityGroups[m_NumEntityGroups] = std::move(group);
-		m_NumEntityGroups++;
+		m_EntityGroups.emplace_back(std::move(group));
 	}
 }

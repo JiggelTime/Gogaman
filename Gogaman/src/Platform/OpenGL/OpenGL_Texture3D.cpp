@@ -2,7 +2,7 @@
 #include "OpenGL_Texture3D.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include <glad.h>
 

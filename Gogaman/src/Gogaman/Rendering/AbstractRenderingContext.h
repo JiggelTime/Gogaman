@@ -11,35 +11,35 @@
 #include "IndexBuffer.h"
 #include "VertexArrayBuffer.h"
 
-#include "Gogaman/Resource.h"
+#include "Gogaman/Container.h"
 
 #include "RenderState.h"
 
 namespace Gogaman
 {
-	using RenderSurfaceID            = Resource::ID<uint8_t>;
-	using RenderSurfaceContainer     = Resource::Container<255, RenderSurface,      uint8_t>;
+	using RenderSurfaceID            = ContainerID<uint8_t>;
+	using RenderSurfaceContainer     = StaticContainer<255,   RenderSurface,     uint8_t>;
 	
-	//using ShaderID                   = Resource::ID<uint32_t, 24, 8>;
-	//using ShaderContainer            = Resource::Container<256, Shader, uint32_t, 24, 8>;
+	//using ShaderID                   = ContainerID<uint32_t, 24, 8>;
+	//using ShaderContainer            = Container<256, Shader, uint32_t, 24, 8>;
 
-	using Texture1D_ID               = Resource::ID<uint16_t>;
-	using Texture1D_Container        = Resource::Container<8192, Texture1D,         uint16_t>;
+	using Texture1D_ID               = ContainerID<uint16_t>;
+	using Texture1D_Container        = DynamicContainer<8192, Texture1D,         uint16_t>;
 
-	using Texture2D_ID               = Resource::ID<uint16_t>;
-	using Texture2D_Container        = Resource::Container<8192, Texture2D,         uint16_t>;
+	using Texture2D_ID               = ContainerID<uint16_t>;
+	using Texture2D_Container        = DynamicContainer<8192, Texture2D,         uint16_t>;
 
-	using Texture3D_ID               = Resource::ID<uint16_t>;
-	using Texture3D_Container        = Resource::Container<8192, Texture3D,         uint16_t>;
+	using Texture3D_ID               = ContainerID<uint16_t>;
+	using Texture3D_Container        = DynamicContainer<8192, Texture3D,         uint16_t>;
 
-	using VertexBufferID             = Resource::ID<uint16_t>;
-	using VertexBufferContainer      = Resource::Container<4096, VertexBuffer,      uint16_t>;
+	using VertexBufferID             = ContainerID<uint16_t>;
+	using VertexBufferContainer      = DynamicContainer<4096, VertexBuffer,      uint16_t>;
 
-	using IndexBufferID              = Resource::ID<uint16_t>;
-	using IndexBufferContainer       = Resource::Container<4096, IndexBuffer,       uint16_t>;
+	using IndexBufferID              = ContainerID<uint16_t>;
+	using IndexBufferContainer       = DynamicContainer<4096, IndexBuffer,       uint16_t>;
 
-	using VertexArrayBufferID        = Resource::ID<uint16_t>;
-	using VertexArrayBufferContainer = Resource::Container<4096, VertexArrayBuffer, uint16_t>;
+	using VertexArrayBufferID        = ContainerID<uint16_t>;
+	using VertexArrayBufferContainer = DynamicContainer<4096, VertexArrayBuffer, uint16_t>;
 
 	template<typename ImplementationType>
 	class AbstractRenderingContext : public CRTP<ImplementationType, AbstractRenderingContext>
@@ -54,9 +54,14 @@ namespace Gogaman
 		inline void DispatchComputeShader(const uint16_t threadGroupCount) const { DispatchComputeShader(threadGroupCount, threadGroupCount, threadGroupCount); }
 		inline void DispatchComputeShader(const uint16_t threadGroupCountX, const uint16_t threadGroupCountY, const uint16_t threadGroupCountZ) const { this->GetImplementation().DispatchComputeShader(threadGroupCountX, threadGroupCountY, threadGroupCountZ); }
 		
-		inline void SetBlendState(const BlendFactor sourceBlendFactor, const BlendFactor destinationBlendFactor) const { this->GetImplementation().SetBlendState(sourceBlendFactor, destinationBlendFactor); }
+		inline void EnableDepthTesting()  const { this->GetImplementation().EnableDepthTesting();  }
+		inline void DisableDepthTesting() const { this->GetImplementation().DisableDepthTesting(); }
+
+		inline void SetDepthComparisonMode(const RenderState::DepthComparisonMode comparisonMode) const { this->GetImplementation().SetDepthComparisonMode(comparisonMode); }
+
+		inline void SetBlendState(const RenderState::BlendFactor sourceBlendFactor, const RenderState::BlendFactor destinationBlendFactor) const { this->GetImplementation().SetBlendState(sourceBlendFactor, destinationBlendFactor); }
 	
-		inline void SetFaceWindingOrder(const FaceWindingOrder windingOrder) const { this->GetImplementation().SetFaceWindingOrder(windingOrder); }
+		inline void SetFaceWindingOrder(const RenderState::FaceWindingOrder windingOrder) const { this->GetImplementation().SetFaceWindingOrder(windingOrder); }
 
 		inline constexpr RenderSurfaceContainer     &GetRenderSurfaces()     { return m_RenderSurfaces;     }
 		//inline constexpr ShaderContainer            &GetShaders()            { return m_Shaders;            }

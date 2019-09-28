@@ -23,7 +23,13 @@ namespace Gogaman
 		void Shutdown();
 
 		Entity CreateEntity();
-		void   DestroyEntity(Entity entity);
+		void DestroyEntity(Entity entity);
+
+		template<typename ComponentType>
+		inline void AddComponent(const Entity entity, ComponentType &&component)
+		{
+			AddComponent<ComponentType>(entity.identifier, std::move(component));
+		}
 
 		template<typename ComponentType>
 		inline void AddComponent(const EntityID entity, ComponentType &&component)
@@ -36,9 +42,11 @@ namespace Gogaman
 
 			for(auto &i : m_Systems)
 			{
-				for(uint8_t j = 0; j < i->GetNumEntityGroups(); j++)
+				for(uint8_t j = 0; j < i->GetEntityGroupCount(); j++)
 				{
 					const ComponentFlags entityGroupFlags = i->GetEntityGroupComponentFlags(j);
+					//auto entityGroupFlagsANDnewFlags = entityGroupFlags & newFlags;
+
 					//New match
 					if(((entityGroupFlags & newFlags) == entityGroupFlags) && ((entityGroupFlags & currentFlags) != entityGroupFlags))
 						i->AddEntity(entity, j);
@@ -61,7 +69,7 @@ namespace Gogaman
 			GetComponentManager<ComponentType>()->RemoveComponent(entity);
 			//TODO: optimize this
 			ComponentFlags currentFlags = m_EntityComponentFlags[entity];
-			m_EntityComponentFlags[entity] &= ~(1 << GetComponentTypeID<ComponentType>());
+			m_EntityComponentFlags[entity] &= ~(1ULL << GetComponentTypeID<ComponentType>());
 			ComponentFlags newFlags     = m_EntityComponentFlags[entity];
 
 			for(auto &i : m_Systems)
@@ -74,6 +82,9 @@ namespace Gogaman
 					i->RemoveEntity(entity);
 			}
 		}
+
+		template<typename ComponentType>
+		inline const uint32_t GetComponentCount() { return GetComponentManager<ComponentType>()->GetComponentCount(); }
 
 		void AddSystem(std::unique_ptr<System> system);
 	private:

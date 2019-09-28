@@ -17,8 +17,8 @@ namespace Gogaman
 		ModelMatrixSystem()
 		{
 			EntityGroup group;
-			group.componentFlags.set(GetComponentTypeID<SpatialComponent>());
-			group.componentFlags.set(GetComponentTypeID<RenderableComponent>());
+			group.AddComponentType<SpatialComponent>();
+			group.AddComponentType<RenderableComponent>();
 			AddEntityGroup(std::move(group));
 		}
 

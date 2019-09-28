@@ -7,8 +7,6 @@
 #include <fbxsdk.h>
 
 #include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
 
 #include <unordered_map>
 
@@ -27,8 +25,8 @@ namespace Gogaman
 			virtual FlexData::FlexData Import(const char *filepath) override;
 		private:
 			FbxAMatrix                GetNodeTransform(FbxNode *node) const;
-			template<typename GeometryElement, typename Value>
-			Value                     GetVertexElement(const GeometryElement *element, const int controlPointIndex, const int triangle, const int vertex, const Value defaultValue) const;
+			template<typename GeometryElementType, typename ValueType>
+			ValueType                 GetVertexElement(const GeometryElementType *element, const int controlPointIndex, const int triangle, const int vertex, const ValueType defaultValue) const;
 			FlexData::FlexTextureData ProcessTexture(const FbxFileTexture *fileTexture, const uint8_t exportChannels, const FlexData::FlexTextureData &defaultTexture);
 			uint32_t                  ProcessMaterial(const FbxNode *node);
 			void                      ProcessMesh(FbxNode *node);
@@ -37,7 +35,7 @@ namespace Gogaman
 		private:
 			std::unordered_map<std::string, FlexData::FlexTextureData> m_Textures;
 
-			FbxManager                                                        *m_SDK_Manager;
+			FbxManager *m_SDK_Manager;
 		};
 	}
 }

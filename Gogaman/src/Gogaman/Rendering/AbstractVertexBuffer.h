@@ -21,7 +21,7 @@ namespace Gogaman
 		inline void Bind() const { this->GetImplementation().Bind(); }
 
 		inline void SetLayout(const VertexBufferLayout &layout) { m_Layout = layout; }
-		inline const VertexBufferLayout &GetLayout() const { return m_Layout; }
+		inline constexpr const VertexBufferLayout &GetLayout() const { return m_Layout; }
 	protected:
 		AbstractVertexBuffer()  = default;
 		~AbstractVertexBuffer() = default;

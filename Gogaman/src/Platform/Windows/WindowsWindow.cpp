@@ -2,7 +2,7 @@
 #include "WindowsWindow.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"

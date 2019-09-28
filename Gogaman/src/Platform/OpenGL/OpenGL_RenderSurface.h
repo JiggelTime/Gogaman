@@ -23,11 +23,11 @@ namespace Gogaman
 		void AddColorBuffer(const Texture &texture, const int level, const bool isRenderTarget) { AddColorBuffer(texture, level, m_NumColorAttachments, isRenderTarget); }
 		void AddColorBuffer(const Texture &texture, const int level, const int attachmentIndex, const bool isRenderTarget);
 
-		void AddColorBuffer(const Renderbuffer &renderbuffer) { AddColorBuffer(renderbuffer, m_NumColorAttachments); }
-		void AddColorBuffer(const Renderbuffer &renderbuffer, const int attachmentIndex);
+		void AddColorBuffer(const RenderBuffer &renderbuffer) { AddColorBuffer(renderbuffer, m_NumColorAttachments); }
+		void AddColorBuffer(const RenderBuffer &renderbuffer, const int attachmentIndex);
 		
 		void AddDepthBuffer(const Texture      &texture);
-		void AddDepthBuffer(const Renderbuffer &renderbuffer);
+		void AddDepthBuffer(const RenderBuffer &renderbuffer);
 
 		void Bind() const;
 		
@@ -37,8 +37,8 @@ namespace Gogaman
 		void BlitDepthBuffer(const   RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
 		void BlitStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
 
-		inline int GetColorAttachmentCount() const { return m_NumColorAttachments;       }
-		inline int GetRenderTargetCount()    const { return (int)m_RenderTargets.size(); }
+		inline constexpr int GetColorAttachmentCount() const { return m_NumColorAttachments;       }
+		inline           int GetRenderTargetCount()    const { return (int)m_RenderTargets.size(); }
 		
 		inline uint32_t GetRendererID() const { return m_RendererID; }
 		

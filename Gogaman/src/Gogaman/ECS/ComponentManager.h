@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 #include "Entity.h"
 
 #define GM_MAX_COMPONENTS 1024
@@ -25,12 +25,16 @@ namespace Gogaman
 	class ComponentManager : public AbstractComponentManager
 	{
 	public:
+		ComponentManager()
+			: m_ComponentCount(0)
+		{}
+
 		inline void AddComponent(const EntityID entity, ComponentType &&component)
 		{
-			GM_ASSERT(m_NumComponents < GM_MAX_COMPONENTS, "Failed to add entity component: maximum number of components (%d) reached", GM_MAX_COMPONENTS)
+			GM_ASSERT(m_ComponentCount < GM_MAX_COMPONENTS, "Failed to add entity component: maximum number of components (%d) reached", GM_MAX_COMPONENTS)
 			//Write component at next free index
-			m_Components[m_NumComponents] = std::move(component);
-			m_EntityComponentIndices[entity] = m_NumComponents++;
+			m_Components[m_ComponentCount] = std::move(component);
+			m_EntityComponentIndices[entity] = m_ComponentCount++;
 		}
 
 		inline ComponentType *GetComponent(const EntityID entity)
@@ -44,7 +48,7 @@ namespace Gogaman
 		{
 			int    componentIndex     = m_EntityComponentIndices[entity];
 			GM_ASSERT(componentIndex >= 0 && componentIndex < GM_MAX_COMPONENTS, "Failed to remove entity component: invalid entity component index")
-			int    lastComponentIndex = m_NumComponents - 1;
+			int    lastComponentIndex = m_ComponentCount - 1;
 			Entity lastEntity         = m_ComponentIndexEntities[lastComponentIndex];
 			
 			//Override component
@@ -55,10 +59,12 @@ namespace Gogaman
 			m_EntityComponentIndices[lastEntity]     = componentIndex;
 			//Set entity at removed component to last entity
 			m_ComponentIndexEntities[componentIndex] = lastEntity;
-			m_NumComponents--;
+			m_ComponentCount--;
 		}
+
+		inline constexpr uint32_t GetComponentCount() const { return m_ComponentCount; }
 	private:
-		uint32_t                                     m_NumComponents;
+		uint32_t                                     m_ComponentCount;
 		std::array<EntityID,      GM_MAX_COMPONENTS> m_ComponentIndexEntities;
 		std::unordered_map<EntityID, uint32_t>       m_EntityComponentIndices;
 		std::array<ComponentType, GM_MAX_COMPONENTS> m_Components;

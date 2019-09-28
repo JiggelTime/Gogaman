@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include "Sphere.h"
 #include "RectangularFrustum.h"

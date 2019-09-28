@@ -33,45 +33,45 @@ namespace Gogaman
 		virtual void OnEvent(Event &event) override;
 
 		void SetPosition(const glm::vec3 &position) { m_Position = position; }
-		inline const glm::vec3 &GetPosition() const { return m_Position; }
+		inline constexpr const glm::vec3 &GetPosition() const { return m_Position; }
 
 		void SetRotation(const EulerAngles &rotation) { m_Rotation = rotation; }
-		inline const EulerAngles &GetRotation() const { return m_Rotation; }
+		inline constexpr const EulerAngles &GetRotation() const { return m_Rotation; }
 
 		void SetFocalLength(const float focalLength);
-		inline float GetFocalLength() const { return m_FocalLength; }
+		inline constexpr float GetFocalLength() const { return m_FocalLength; }
 
 		void SetSensorHeight(const float sensorHeight);
-		inline float GetSensorHeight() const { return m_SensorHeight; }
+		inline constexpr float GetSensorHeight() const { return m_SensorHeight; }
 
 		void SetAspectRatio(float aspectRatio);
-		inline float GetAspectRatio() const { return m_AspectRatio; }
+		inline constexpr float GetAspectRatio() const { return m_AspectRatio; }
 
 		void SetAperture(const float aperture);
-		inline float GetAperture() const { return m_Aperture; }
+		inline constexpr float GetAperture() const { return m_Aperture; }
 
 		void SetSensitivity(const float sensitivity);
-		inline float GetSensitivity() const { return m_Sensitivity; }
+		inline constexpr float GetSensitivity() const { return m_Sensitivity; }
 
 		void SetShutterSpeed(const float shutterSpeed);
-		inline float GetShutterSpeed() const { return m_ShutterSpeed; }
+		inline constexpr float GetShutterSpeed() const { return m_ShutterSpeed; }
 
-		inline float GetExposure() const { return m_Exposure; }
+		inline constexpr float GetExposure() const { return m_Exposure; }
 
-		inline float GetBloomLuminanceCoeffecient() const { return m_BloomLuminanceCoeffecient; }
+		inline constexpr float GetBloomLuminanceCoeffecient() const { return m_BloomLuminanceCoeffecient; }
 
 		inline void SetNearPlane(float nearPlane) { m_NearPlane = nearPlane; }
-		inline float GetNearPlane() const { return m_NearPlane; }
+		inline constexpr float GetNearPlane() const { return m_NearPlane; }
 
 		inline void SetFarPlane(float farPlane) { m_FarPlane = farPlane; }
-		inline float GetFarPlane() const { return m_FarPlane; }
+		inline constexpr float GetFarPlane() const { return m_FarPlane; }
 
-		inline const RectangularFrustum &GetFrustum() const { return m_Frustum; }
+		inline constexpr const RectangularFrustum &GetFrustum() const { return m_Frustum; }
 
-		inline const glm::mat4 &GetViewMatrix()                   const { return m_ViewMatrix;                   }
-		inline const glm::mat4 &GetProjectionMatrix()             const { return m_ProjectionMatrix;             }
-		inline const glm::mat4 &GetViewProjectionMatrix()         const { return m_ViewProjectionMatrix;         }
-		inline const glm::mat4 &GetPreviousViewProjectionMatrix() const { return m_PreviousViewProjectionMatrix; }
+		inline constexpr const glm::mat4 &GetViewMatrix()                   const { return m_ViewMatrix;                   }
+		inline constexpr const glm::mat4 &GetProjectionMatrix()             const { return m_ProjectionMatrix;             }
+		inline constexpr const glm::mat4 &GetViewProjectionMatrix()         const { return m_ViewProjectionMatrix;         }
+		inline constexpr const glm::mat4 &GetPreviousViewProjectionMatrix() const { return m_PreviousViewProjectionMatrix; }
 	private:
 		void UpdateExposure();
 		void UpdateViewMatrix();

@@ -3,16 +3,40 @@
 #include "Gogaman/Rendering/AbstractRenderState.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include <glad.h>
 
 namespace Gogaman
 {
-	class RenderState : public AbstractRenderState<RenderState>
+	namespace RenderState
 	{
-	public:
-		static inline constexpr GLenum GetNativeBlendFactor(const BlendFactor blendFactor)
+		static inline constexpr auto GetNativeDepthComparisonMode(const DepthComparisonMode comparisonMode)
+		{
+			switch(comparisonMode)
+			{
+			case DepthComparisonMode::Never:
+				return GL_NEVER;
+			case DepthComparisonMode::Always:
+				return GL_ALWAYS;
+			case DepthComparisonMode::NotEqual:
+				return GL_NOTEQUAL;
+			case DepthComparisonMode::Equal:
+				return GL_EQUAL;
+			case DepthComparisonMode::LessThan:
+				return GL_LESS;
+			case DepthComparisonMode::LessThanOrEqual:
+				return GL_LEQUAL;
+			case DepthComparisonMode::GreaterThan:
+				return GL_GREATER;
+			case DepthComparisonMode::GreaterThanOrEqual:
+				return GL_GEQUAL;
+			}
+
+			GM_ASSERT(false, "Failed to get native depth test mode | Invalid depth test mode")
+		}
+
+		static inline constexpr auto GetNativeBlendFactor(const BlendFactor blendFactor)
 		{
 			switch(blendFactor)
 			{
@@ -38,10 +62,10 @@ namespace Gogaman
 				return GL_ONE_MINUS_DST_ALPHA;
 			}
 
-			GM_ASSERT(false, "Failed to get native blend state | Invalid blend state")
+			GM_ASSERT(false, "Failed to get native blend state | Invalid blend factor")
 		}
 
-		static inline constexpr GLenum GetNativeFaceWindingOrder(const FaceWindingOrder windingOrder)
+		static inline constexpr auto GetNativeFaceWindingOrder(const FaceWindingOrder windingOrder)
 		{
 			switch(windingOrder)
 			{
@@ -53,8 +77,5 @@ namespace Gogaman
 
 			GM_ASSERT(false, "Failed to get native face winding order | Invalid winding order")
 		}
-	private:
-		RenderState()  = delete;
-		~RenderState() = delete;
 	};
 }

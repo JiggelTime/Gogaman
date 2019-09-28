@@ -14,18 +14,19 @@
 
 #include "PerspectiveCamera.h"
 
+#include "RenderingContext.h"
+
 #include "Shader/Shader.h"
 #include "Shader/ShaderManager.h"
 
 #include "Texture/Texture2D.h"
-#include "Platform/OpenGL/OpenGL_Renderbuffer.h"
-#include "RenderSurface.h"
+#include "Platform/OpenGL/OpenGL_RenderBuffer.h"
+
+#include "RenderCommandBucket.h"
 
 #include "FullscreenTriangle.h"
 
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
-#include <gtc/type_ptr.hpp>
+#include "PBR_Material.h"
 
 #include <glad.h>
 #include <GLFW/glfw3.h>
@@ -49,33 +50,41 @@ namespace Gogaman
 		void InitializeRenderSurfaces();
 		void InitializeShaders();
 
+		void ImportFlexData();
+
 		void RenderFullscreenWindow() const;
 
-		void FrustumCull(std::vector<EntityID> &persistingEntities) const;
+		void FrustumCull(std::vector<std::pair<EntityID, float>> &persistingEntities) const;
 
 		bool OnWindowResize(WindowResizeEvent &event);
 	private:
 		PerspectiveCamera                   m_Camera;
 
 		ShaderManager                       m_ShaderManager;
-		ShaderID                            m_PrecomputeBRDFShader, m_GBufferShader, m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
 
-		std::unique_ptr<RenderSurface>      m_BRDF_Buffer;
+		RenderSurfaceID                     m_PrecomputedBRDF;
 		Texture2D                           m_BRDF_LUT;
-		Renderbuffer                        m_BRDF_Depth;
+		RenderBuffer                        m_BRDF_Depth;
+		ShaderID                            m_PrecomputedBRDF_Shader;
 
-		std::unique_ptr<RenderSurface>      m_G_Buffer;
+		RenderSurfaceID                     m_G_Buffer;
+		Texture2D_ID                        m_G_BufferPositionMetalness, m_G_BufferNormal, m_G_BufferAlbedoEmissivityRoughness, m_G_BufferVelocity, m_G_BufferDepth;
+		ShaderID                            m_G_BufferShader;
+		RenderCommandBucket<8192, uint32_t> m_G_BufferBucket;
 
-		std::unique_ptr<RenderSurface>      m_FinalBuffer;
+		RenderSurfaceID                     m_FinalBuffer;
+		Texture2D_ID                        m_FinalImage;
+		RenderBuffer                        m_FinalImageDepth;
+
+		ShaderID m_DeferredLightingShader, m_SkyboxShader, m_LightShader, m_PostprocessShader;
 
 		std::unique_ptr<FullscreenTriangle> m_FullscreenTriangle;
+
+		std::vector<PBR_Material>           m_Materials;
 	private:
 		int m_RenderResolutionWidth;
 		int m_RenderResolutionHeight;
 
 		uint32_t frameCounter = 0;
-
-		std::unordered_map<std::string, Texture2D>    m_Texture2Ds;
-		std::unordered_map<std::string, Renderbuffer> m_Renderbuffers;
 	};
 }

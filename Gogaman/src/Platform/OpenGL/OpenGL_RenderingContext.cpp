@@ -2,7 +2,7 @@
 #include "OpenGL_RenderingContext.h"
 
 #include "Gogaman/Core/Base.h"
-#include "Gogaman/Logging/Log.h"
+#include "Gogaman/Core/Logging/Log.h"
 
 #include "Gogaman/Application.h"
 #include "Gogaman/Window.h"
@@ -30,10 +30,10 @@ namespace Gogaman
 
 		//Initialize pipeline state
 		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-		glDisable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
+		DisableDepthTesting();
+		SetDepthComparisonMode(RenderState::DepthComparisonMode::LessThanOrEqual);
 		glDisable(GL_BLEND);
-		SetBlendState(BlendFactor::SourceAlpha, BlendFactor::InverseSourceAlpha);
+		SetBlendState(RenderState::BlendFactor::SourceAlpha, RenderState::BlendFactor::InverseSourceAlpha);
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		//Debug callback

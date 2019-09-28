@@ -23,9 +23,17 @@ namespace Gogaman
 		
 		inline void DispatchComputeShader(const uint16_t threadGroupCountX, const uint16_t threadGroupCountY, const uint16_t threadGroupCountZ) const { glDispatchCompute(threadGroupCountX, threadGroupCountY, threadGroupCountZ); }
 	
-		inline void SetBlendState(const BlendFactor sourceBlendFactor, const BlendFactor destinationBlendFactor) const { glBlendFunc(RenderState::GetNativeBlendFactor(sourceBlendFactor), RenderState::GetNativeBlendFactor(destinationBlendFactor)); }
+		inline void EnableDepthTesting()  const { glEnable(GL_DEPTH_TEST);  }
+		inline void DisableDepthTesting() const { glDisable(GL_DEPTH_TEST); }
 
-		inline void SetFaceWindingOrder(const FaceWindingOrder windingOrder) const { glFrontFace(RenderState::GetNativeFaceWindingOrder(windingOrder)); }
+		inline void SetDepthComparisonMode(const RenderState::DepthComparisonMode comparisonMode) const { glDepthFunc(RenderState::GetNativeDepthComparisonMode(comparisonMode)); }
+
+		inline void EnableBlending()  const { glEnable(GL_BLEND);  }
+		inline void DisableBlending() const { glDisable(GL_BLEND); }
+
+		inline void SetBlendState(const RenderState::BlendFactor sourceBlendFactor, const RenderState::BlendFactor destinationBlendFactor) const { glBlendFunc(RenderState::GetNativeBlendFactor(sourceBlendFactor), RenderState::GetNativeBlendFactor(destinationBlendFactor)); }
+
+		inline void SetFaceWindingOrder(const RenderState::FaceWindingOrder windingOrder) const { glFrontFace(RenderState::GetNativeFaceWindingOrder(windingOrder)); }
 	private:
 		GLFWwindow *m_GLFW_Window;
 	};

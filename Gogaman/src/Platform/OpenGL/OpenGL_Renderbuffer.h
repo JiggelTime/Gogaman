@@ -6,17 +6,17 @@
 
 namespace Gogaman
 {
-	class Renderbuffer
+	class RenderBuffer
 	{
 	public:
-		Renderbuffer();
-		Renderbuffer(const Renderbuffer &) = delete;
-		Renderbuffer(Renderbuffer &&)      = default;
+		RenderBuffer();
+		RenderBuffer(const RenderBuffer &) = delete;
+		RenderBuffer(RenderBuffer &&)      = default;
 
-		~Renderbuffer();
+		~RenderBuffer();
 
-		Renderbuffer &operator=(const Renderbuffer &) = delete;
-		Renderbuffer &operator=(Renderbuffer &&)      = default;
+		RenderBuffer &operator=(const RenderBuffer &) = delete;
+		RenderBuffer &operator=(RenderBuffer &&)      = default;
 
 		void Generate(const int width, const int height);
 

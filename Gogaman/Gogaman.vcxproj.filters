@@ -16,7 +16,6 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture2D.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Texture3D.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_Shader.cpp" />
-    <ClCompile Include="src\Gogaman\Logging\Log.cpp" />
     <ClCompile Include="src\Gogaman\Application.cpp" />
     <ClCompile Include="src\pch.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGL_VertexArrayBuffer.cpp" />
@@ -25,6 +24,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Gogaman\Core\Logging\Log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -84,7 +84,6 @@
     <ClInclude Include="src\Gogaman\Events\KeyboardEvent.h" />
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
-    <ClInclude Include="src\Gogaman\Resource.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />
@@ -96,7 +95,6 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture1D.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture2D.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_Texture3D.h" />
-    <ClInclude Include="src\Gogaman\Logging\Log.h" />
     <ClInclude Include="src\Gogaman.h" />
     <ClInclude Include="src\Gogaman\Application.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
@@ -118,7 +116,6 @@
     <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
     <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
-    <ClInclude Include="src\Gogaman\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\Core\Base.h" />
     <ClInclude Include="src\Gogaman\Core\CRTP.h" />
     <ClInclude Include="src\Gogaman\Core\Config.h" />
@@ -130,6 +127,9 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderCommandPacket.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeComponent.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeSystem.h" />
+    <ClInclude Include="src\Gogaman\Core\Logging\Log.h" />
+    <ClInclude Include="src\Gogaman\Core\Logging\Logger.h" />
+    <ClInclude Include="src\Gogaman\Container.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />
