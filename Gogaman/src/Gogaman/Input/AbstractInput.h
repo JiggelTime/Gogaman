@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Gogaman/Core/CRTP.h"
-#include "InputDefines.h"
+#include "InputDefinitions.h"
 
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

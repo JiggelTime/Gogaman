@@ -47,6 +47,8 @@ namespace Gogaman
 	public:
 		inline void Initialize() { this->GetImplementation().Initialize(); }
 
+		inline void SetViewport(const uint16_t width, const uint16_t height) const { this->GetImplementation().SetViewport(width, height); }
+
 		inline void SwapBuffers() { this->GetImplementation().SwapBuffers(); }
 
 		inline void RenderIndexed(const uint32_t indexCount) const { this->GetImplementation().RenderIndexed(indexCount); }

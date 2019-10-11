@@ -33,8 +33,8 @@ namespace Gogaman
 		AbstractShader &operator=(const AbstractShader &) = delete;
 		AbstractShader &operator=(AbstractShader &&other) = default;
 
-		inline void Compile(const std::string &vertexShaderSource, const std::string &fragmentShaderSource, const std::string &geometryShaderSource = "") { this->GetImplementation().Compile(vertexShaderSource, fragmentShaderSource, geometryShaderSource); }
-		inline void Compile(const std::string &computeShaderSource) { this->GetImplementation().Compile(computeShaderSource); }
+		inline void Compile(const std::string &vertexKernelSource, const std::string &fragmentKernelSource, const std::string &geometryKernelSource = "") { this->GetImplementation().Compile(vertexKernelSource, fragmentKernelSource, geometryKernelSource); }
+		inline void Compile(const std::string &computeKernelSource) { this->GetImplementation().Compile(computeKernelSource); }
 
 		inline void Bind() const { this->GetImplementation().Bind(); }
 
@@ -102,6 +102,8 @@ namespace Gogaman
 	protected:
 		inline AbstractShader()  = default;
 		inline ~AbstractShader() = default;
+
+		static inline std::string PreprocessKernel(const std::string &source) { return ImplementationType::PreprocessKernel(source); }
 	private:
 		std::tuple<std::string, std::string, std::string> m_Filepaths;
 	};

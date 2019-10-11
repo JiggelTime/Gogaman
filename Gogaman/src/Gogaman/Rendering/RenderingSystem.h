@@ -22,8 +22,6 @@
 #include "Texture/Texture2D.h"
 #include "Platform/OpenGL/OpenGL_RenderBuffer.h"
 
-#include "RenderCommandBucket.h"
-
 #include "FullscreenTriangle.h"
 
 #include "PBR_Material.h"
@@ -70,7 +68,6 @@ namespace Gogaman
 		RenderSurfaceID                     m_G_Buffer;
 		Texture2D_ID                        m_G_BufferPositionMetalness, m_G_BufferNormal, m_G_BufferAlbedoEmissivityRoughness, m_G_BufferVelocity, m_G_BufferDepth;
 		ShaderID                            m_G_BufferShader;
-		RenderCommandBucket<8192, uint32_t> m_G_BufferBucket;
 
 		RenderSurfaceID                     m_FinalBuffer;
 		Texture2D_ID                        m_FinalImage;

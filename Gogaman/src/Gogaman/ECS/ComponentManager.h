@@ -4,7 +4,7 @@
 #include "Gogaman/Core/Logging/Log.h"
 #include "Entity.h"
 
-#define GM_MAX_COMPONENTS 1024
+#define GM_MAX_COMPONENTS 2048
 
 namespace Gogaman
 {
@@ -37,11 +37,11 @@ namespace Gogaman
 			m_EntityComponentIndices[entity] = m_ComponentCount++;
 		}
 
-		inline ComponentType *GetComponent(const EntityID entity)
+		inline ComponentType &GetComponent(const EntityID entity)
 		{
 			int componentIndex = m_EntityComponentIndices[entity];
 			GM_ASSERT(componentIndex >= 0 && componentIndex < GM_MAX_COMPONENTS, "Failed to get entity component: invalid entity component index")
-			return &m_Components[componentIndex];
+			return m_Components[componentIndex];
 		}
 
 		inline void RemoveComponent(const EntityID entity)

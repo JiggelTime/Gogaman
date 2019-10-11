@@ -58,7 +58,7 @@ namespace Gogaman
 		}
 
 		template<typename ComponentType>
-		inline ComponentType *GetComponent(const EntityID entity)
+		inline ComponentType &GetComponent(const EntityID entity)
 		{
 			return GetComponentManager<ComponentType>()->GetComponent(entity);
 		}
@@ -84,7 +84,7 @@ namespace Gogaman
 		}
 
 		template<typename ComponentType>
-		inline const uint32_t GetComponentCount() { return GetComponentManager<ComponentType>()->GetComponentCount(); }
+		inline uint32_t GetComponentCount() { return GetComponentManager<ComponentType>()->GetComponentCount(); }
 
 		void AddSystem(std::unique_ptr<System> system);
 	private:

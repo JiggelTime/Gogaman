@@ -8,8 +8,6 @@
 //Journal of Computer Graphics Techniques (JCGT), vol. 3, no. 2, 1-30, 2014.
 //Available online http://jcgt.org/published/0003/02/01/
 
-#version 450 core
-
 #define NORMAL_MAP_STRENGTH 1.0f
 #define ROUGHNESS_MINIMUM 0.001f
 

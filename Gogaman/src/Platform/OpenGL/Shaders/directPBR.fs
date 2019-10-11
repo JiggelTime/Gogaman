@@ -1,10 +1,4 @@
-#version 450 core
-
-#define PI      3.14159265359f
-#define SQRT2   1.41421356237f
-#define EPSILON 0.000001f
-
-#define MAX_POINT_LIGHTS 64
+#define MAX_POINT_LIGHTS 256
 //DISNEY / LAMBERT | Disney is higher quality but slower
 #define DIFFUSE_BRDF_DISNEY
 //Lower quality but faster

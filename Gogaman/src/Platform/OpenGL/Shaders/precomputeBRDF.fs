@@ -1,10 +1,7 @@
-//https://learnopengl.com/PBR/IBL/Specular-IBL
+//Courtesy of https://learnopengl.com/PBR/IBL/Specular-IBL
 
-#version 330 core
 out vec2 FragColor;
 in vec2 TexCoords;
-
-#define PI 3.14159265359f
 
 //http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html
 //Efficient VanDerCorpus calculation.

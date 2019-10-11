@@ -70,9 +70,6 @@
     <ClInclude Include="src\Gogaman\Core\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderCommandBucket.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderCommandPacket.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractRenderingContext.h" />
@@ -118,7 +115,7 @@
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Input\AbstractInput.h" />
-    <ClInclude Include="src\Gogaman\Input\InputDefines.h" />
+    <ClInclude Include="src\Gogaman\Input\InputDefinitions.h" />
     <ClInclude Include="src\Gogaman\Container.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
     <ClInclude Include="src\Gogaman\Window.h" />

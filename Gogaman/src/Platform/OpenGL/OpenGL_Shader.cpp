@@ -1,12 +1,14 @@
 #include "pch.h"
 #include "OpenGL_Shader.h"
 
+#define GM_GLSL_VERSION 450
+#define GM_ENABLE_SHADER_VALIDATION 1
+
 namespace Gogaman
 {
 	Shader::Shader()
 	{
 		m_RendererID = glCreateProgram();
-		GM_LOG_CORE_TRACE("Created shader with ID: %d", m_RendererID);
 	}
 
 	Shader::~Shader()
@@ -14,104 +16,126 @@ namespace Gogaman
 		glDeleteProgram(m_RendererID);
 	}
 
-	void Shader::Compile(const std::string &vertexShaderSource, const std::string &fragmentShaderSource, const std::string &geometryShaderSource)
+	void Shader::Compile(const std::string &vertexKernelSource, const std::string &fragmentKernelSource, const std::string &geometryKernelSource)
 	{
-		bool geometryShaderPresent = (geometryShaderSource.empty()) ? false : true;
-
-		GLuint vertexShader, fragmentShader, geometryShader;
-
-		//Compile vertex shader
-		vertexShader = glCreateShader(GL_VERTEX_SHADER);
-		const char *vertexShaderSourceData = vertexShaderSource.c_str();
-		glShaderSource(vertexShader, 1, &vertexShaderSourceData, nullptr);
-		glCompileShader(vertexShader);
-		ValidateShader(vertexShader, "vertex shader");
-
-		//Compile fragment shader
-		fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-		const char *fragmentShaderSourceData = fragmentShaderSource.c_str();
-		glShaderSource(fragmentShader, 1, &fragmentShaderSourceData, nullptr);
-		glCompileShader(fragmentShader);
-		ValidateShader(fragmentShader, "fragment shader");
-
-		//Compile geometry shader if present
+		uint32_t kernelRendererIDs[3];
+		kernelRendererIDs[0] = CreateKernel(GL_VERTEX_SHADER, vertexKernelSource);
+		kernelRendererIDs[1] = CreateKernel(GL_FRAGMENT_SHADER, fragmentKernelSource);
+		bool geometryShaderPresent = geometryKernelSource.empty() ? false : true;
 		if(geometryShaderPresent)
 		{
-			geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-			const char *geometryShaderSourceData = geometryShaderSource.c_str();
-			glShaderSource(geometryShader, 1, &geometryShaderSourceData, nullptr);
-			glCompileShader(geometryShader);
-			ValidateShader(geometryShader, "geometry shader");
+			kernelRendererIDs[2] = CreateKernel(GL_GEOMETRY_SHADER, geometryKernelSource);
+			AddKernels(3, kernelRendererIDs);
 		}
-		
-		//Compile shader program
-		glAttachShader(m_RendererID, vertexShader);
-		glAttachShader(m_RendererID, fragmentShader);
-		if(geometryShaderPresent)
-			glAttachShader(m_RendererID, geometryShader);
-		glLinkProgram(m_RendererID);
-		ValidateShader(m_RendererID, "shader program");
+		else
+			AddKernels(2, kernelRendererIDs);
 
-		glDetachShader(m_RendererID, vertexShader);
-		glDetachShader(m_RendererID, fragmentShader);
-		glDeleteShader(vertexShader);
-		glDeleteShader(fragmentShader);
-		
-		if(geometryShaderPresent)
-		{
-			glDetachShader(m_RendererID, geometryShader);
-			glDeleteShader(geometryShader);
-		}
+		#if GM_ENABLE_SHADER_VALIDATION
+			Validate();
+		#endif
 	}
 
 	void Shader::Compile(const std::string &computeShaderSource)
 	{
-		GLuint computeShader;
+		uint32_t kernelRendererID = CreateKernel(GL_COMPUTE_SHADER, computeShaderSource);
+		AddKernels(1, &kernelRendererID);
 
-		//Compile compute shader
-		computeShader = glCreateShader(GL_COMPUTE_SHADER);
-		const char *computeShaderSourceData = computeShaderSource.c_str();
-		glShaderSource(computeShader, 1, &computeShaderSourceData, nullptr);
-		glCompileShader(computeShader);
-		ValidateShader(computeShader, "compute shader");
-
-		//Compile shader program
-		m_RendererID = glCreateProgram();
-		glAttachShader(m_RendererID, computeShader);
-		glLinkProgram(m_RendererID);
-		ValidateShader(m_RendererID, "shader program");
-
-		glDetachShader(m_RendererID, computeShader);
-		glDeleteShader(computeShader);
+		#if GM_ENABLE_SHADER_VALIDATION
+			Validate();
+		#endif
 	}
 
-	//Supposed to be no-op for release builds
-	void Shader::ValidateShader(const uint32_t object, const std::string &type)
+	void Shader::AddKernels(const uint8_t kernelCount, const uint32_t *kernelRendererIDs) const
 	{
-		int success;
-		if(type != "shader program")
+		for(uint8_t i = 0; i < kernelCount; i++)
 		{
-			glGetShaderiv(object, GL_COMPILE_STATUS, &success);
-			if(!success)
-			{
-				GLint logSize = 0;
-				glGetShaderiv(object, GL_INFO_LOG_LENGTH, &logSize);
-				GLchar *infoLog = new GLchar[logSize];
-				glGetShaderInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Failed to compile %s | Error: %s", type, infoLog);
-			}
+			glAttachShader(m_RendererID, kernelRendererIDs[i]);
 		}
-		else
+
+		glLinkProgram(m_RendererID);
+
+		for(uint8_t i = 0; i < kernelCount; i++)
 		{
-			glGetProgramiv(object, GL_LINK_STATUS, &success);
-			if(!success)
+			uint32_t kernelRendererID = kernelRendererIDs[i];
+			glDetachShader(m_RendererID, kernelRendererID);
+			glDeleteShader(kernelRendererID);
+		}
+	}
+
+	void Shader::Validate() const
+	{
+		int isValid;
+		glGetProgramiv(m_RendererID, GL_LINK_STATUS, &isValid);
+		if(!isValid)
+		{
+			GLint logSize = 0;
+			glGetProgramiv(m_RendererID, GL_INFO_LOG_LENGTH, &logSize);
+			GLchar *infoLog = new GLchar[logSize];
+			glGetProgramInfoLog(m_RendererID, logSize, nullptr, infoLog);
+			GM_LOG_CORE_ERROR("Failed to link shader | Error: %s", infoLog);
+			delete[] infoLog;
+		}
+	}
+
+	std::string Shader::PreprocessKernel(const std::string &source)
+	{
+		std::string processedSource("#version ");
+		processedSource += std::to_string(GM_GLSL_VERSION) + " core\n";
+
+		const std::string preprocessorDefinitions[] = { "PI 3.14159265359f", "SQRT2 1.41421356237f", "EPSILON 0.000001f" };
+		for(const auto &i : preprocessorDefinitions)
+		{
+			processedSource += "#define " + i + "\n";
+		}
+
+		processedSource += source;
+		return processedSource;
+	}
+
+	void Shader::CompileKernel(const uint32_t rendererID, const GLenum type, const std::string &processedSource)
+	{
+		const char *source = processedSource.c_str();
+		glShaderSource(rendererID, 1, &source, nullptr);
+		glCompileShader(rendererID);
+	}
+
+	uint32_t Shader::CreateKernel(const GLenum type, const std::string &source)
+	{
+		uint32_t rendererID = glCreateShader(type);
+		Shader::CompileKernel(rendererID, type, PreprocessKernel(source));
+		#if GM_ENABLE_SHADER_VALIDATION
+			ValidateKernel(rendererID, type);
+		#endif
+		return rendererID;
+	}
+
+	void Shader::ValidateKernel(const uint32_t rendererID, const GLenum type)
+	{
+		int isValid;
+		glGetShaderiv(rendererID, GL_COMPILE_STATUS, &isValid);
+		if(!isValid)
+		{
+			GLint logSize = 0;
+			glGetShaderiv(rendererID, GL_INFO_LOG_LENGTH, &logSize);
+			GLchar *infoLog = new GLchar[logSize];
+			glGetShaderInfoLog(rendererID, logSize, nullptr, infoLog);
+			switch(type)
 			{
-				GLint logSize = 0;
-				glGetProgramiv(object, GL_INFO_LOG_LENGTH, &logSize);
-				GLchar *infoLog = new GLchar[logSize];
-				glGetProgramInfoLog(object, logSize, nullptr, infoLog);
-				GM_LOG_CORE_ERROR("Failed to link %s | Error: %s", type, infoLog);
+			case GL_VERTEX_SHADER:
+				GM_LOG_CORE_ERROR("Failed to compile vertex shader | Error: %s", infoLog);
+				break;
+			case GL_GEOMETRY_SHADER:
+				GM_LOG_CORE_ERROR("Failed to compile geometry shader | Error: %s", infoLog);
+				break;
+			case GL_FRAGMENT_SHADER:
+				GM_LOG_CORE_ERROR("Failed to compile fragment shader | Error: %s", infoLog);
+				break;
+			case GL_COMPUTE_SHADER:
+				GM_LOG_CORE_ERROR("Failed to compile compute shader | Error: %s", infoLog);
+				break;
 			}
+
+			delete[] infoLog;
 		}
 	}
 

@@ -31,21 +31,21 @@ namespace Gogaman
 			if(isRenderTarget)
 			{
 				m_RenderTargets.emplace_back(GL_COLOR_ATTACHMENT0 + attachmentIndex);
-				glNamedFramebufferDrawBuffers(m_RendererID, static_cast<GLsizei>(m_RenderTargets.size()), m_RenderTargets.data());
+				glNamedFramebufferDrawBuffers(m_RendererID, (GLsizei)m_RenderTargets.size(), m_RenderTargets.data());
 			}
 		}
 	}
 
 	void RenderSurface::AddColorBuffer(const RenderBuffer &renderbuffer, const int attachmentIndex)
 	{
-		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach color buffer to render surface: invalid attachment index");
+		GM_ASSERT(attachmentIndex <= m_NumColorAttachments && attachmentIndex >= 0, "Failed to attach color buffer to render surface | Invalid attachment index");
 		glNamedFramebufferRenderbuffer(m_RendererID, GL_COLOR_ATTACHMENT0 + attachmentIndex, GL_RENDERBUFFER, renderbuffer.GetRendererID());
 
 		if(attachmentIndex == m_NumColorAttachments)
 		{
 			m_NumColorAttachments++;
 			m_RenderTargets.emplace_back(GL_COLOR_ATTACHMENT0 + attachmentIndex);
-			glNamedFramebufferDrawBuffers(m_RendererID, static_cast<GLsizei>(m_RenderTargets.size()), m_RenderTargets.data());
+			glNamedFramebufferDrawBuffers(m_RendererID, (GLsizei)m_RenderTargets.size(), m_RenderTargets.data());
 		}
 	}
 
@@ -69,35 +69,37 @@ namespace Gogaman
 
 	void RenderSurface::Clear() const
 	{
-		const GLfloat clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		glClearNamedFramebufferfv(m_RendererID, GL_DEPTH, 0, &clearColor[0]);
-		for(int i = 0; i < m_NumColorAttachments; i++)
-			glClearNamedFramebufferfv(m_RendererID, GL_COLOR, i, clearColor);
+		const GLfloat clearDepthValue = 1.0f;
+		glClearNamedFramebufferfv(m_RendererID, GL_DEPTH, 0, &clearDepthValue);
+		const GLfloat clearValues[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		for(int i = 0; i < m_RenderTargets.size(); i++)
+			glClearNamedFramebufferfv(m_RendererID, GL_COLOR, i, clearValues);
 	}
 
 	void RenderSurface::BlitColorBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const
 	{
-		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface color buffer: invalid interpolation mode")
+		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface color buffer | Invalid interpolation mode")
 		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolationMode));
 	}
 
 	void RenderSurface::BlitDepthBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const
 	{
-		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface depth buffer: invalid interpolation mode")
+		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface depth buffer | Invalid interpolation mode")
 		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolationMode));
 	}
 
 	void RenderSurface::BlitStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const
 	{
-		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface stencil buffer: invalid interpolation mode")
+		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface stencil buffer | Invalid interpolation mode")
 		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolationMode));
 	}
 
 	void RenderSurface::ClearBackBuffer()
 	{
-		const GLfloat clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-		glClearNamedFramebufferfv(0, GL_DEPTH, 0, &clearColor[0]);
-		glClearNamedFramebufferfv(0, GL_COLOR, 0, clearColor);
+		const GLfloat clearDepthValue = 1.0f;
+		glClearNamedFramebufferfv(0, GL_DEPTH, 0, &clearDepthValue);
+		const GLfloat clearValues[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+		glClearNamedFramebufferfv(0, GL_COLOR, 0, clearValues);
 	}
 
 	void RenderSurface::ValidateRenderSurface() const

@@ -25,8 +25,8 @@ namespace Gogaman
 		Shader &operator=(const Shader &) = delete;
 		Shader &operator=(Shader &&)      = default;
 
-		void Compile(const std::string &vertexShaderSource, const std::string &fragmentShaderSource, const std::string &geometryShaderSource = "");
-		void Compile(const std::string &computerShaderSource);
+		void Compile(const std::string &vertexKernelSource, const std::string &fragmentKernelSource, const std::string &geometryKernelSource = "");
+		void Compile(const std::string &computeKernelSource);
 
 		inline void Bind() const
 		{
@@ -85,7 +85,13 @@ namespace Gogaman
 			GM_ASSERT(false, "Failed to get native shader data type: invalid data type")
 		}
 	private:
-		void ValidateShader(const uint32_t object, const std::string &type);
+		void AddKernels(const uint8_t kernelCount, const uint32_t *kernelRendererIDs) const;
+		void Validate() const;
+		
+		static std::string PreprocessKernel(const std::string &source);
+		static void CompileKernel(const uint32_t rendererID, const GLenum type, const std::string &processedSource);
+		static uint32_t CreateKernel(const GLenum type, const std::string &source);
+		static void ValidateKernel(const uint32_t rendererID, const GLenum type);
 	private:
 		std::unordered_map<std::string, GLint> m_UniformLocations;
 

@@ -17,6 +17,8 @@ namespace Gogaman
 
 		void Initialize();
 
+		inline void SetViewport(const uint16_t width, const uint16_t height) const { glViewport(0, 0, width, height); }
+
 		inline void SwapBuffers() { glfwSwapBuffers(m_GLFW_Window); }
 
 		inline void RenderIndexed(const uint32_t indexCount) const { glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_SHORT, 0); }

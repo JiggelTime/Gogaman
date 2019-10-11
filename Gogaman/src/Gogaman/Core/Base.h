@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#define GM_RENDERING_API_OPENGL   1
-#define GM_RENDERING_API_VULKAN   2
+#define GM_RENDERING_API_OPENGL 1
+#define GM_RENDERING_API_VULKAN 2
 
 #define GM_RENDERING_API GM_RENDERING_API_OPENGL
 
-//Replace "1" with GM_DEBUG
 #if 1
 	#define GM_ASSERTIONS_ENABLED 1
 #else
@@ -28,11 +27,10 @@
 
 	#define GM_STATIC_ASSERT(x, message) static_assert(x, message);
 #else
-	#define GM_ASSERT(x, ...)
+	#define GM_ASSERT(x, ...) ;
 	#define GM_STATIC_ASSERT(x, message)
 #endif
 
-//Replace "1" with GM_DEBUG
 #if 1
 	#define GM_DEBUG_SHADER_UNIFORMS_ENABLED 1
 #else

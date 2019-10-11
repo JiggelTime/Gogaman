@@ -19,6 +19,8 @@
 #include "RenderableComponent.h"
 #include "LightComponent.h"
 
+#include "Gogaman/Sorting/RadixSort.h"
+
 #include <FlexData.h>
 
 #include <glm.hpp>
@@ -163,8 +165,8 @@ namespace Gogaman
 
 		m_LightShader = m_ShaderManager.Create(GM_SHADERS_DIRECTORY.append("lampshader.vs"), GM_SHADERS_DIRECTORY.append("lampshader.fs"));
 		
-		m_SkyboxShader = m_ShaderManager.Create(GM_SHADERS_DIRECTORY.append("skyboxshader.vs"), GM_SHADERS_DIRECTORY.append("skyboxshader.fs"));
-		m_ShaderManager.Get(m_SkyboxShader).UploadUniform("skybox", 0);
+		//m_SkyboxShader = m_ShaderManager.Create(GM_SHADERS_DIRECTORY.append("skyboxshader.vs"), GM_SHADERS_DIRECTORY.append("skyboxshader.fs"));
+		//m_ShaderManager.Get(m_SkyboxShader).UploadUniform("skybox", 0);
 
 		m_PostprocessShader = m_ShaderManager.Create(GM_SHADERS_DIRECTORY.append("postprocess.vs"), GM_SHADERS_DIRECTORY.append("postprocess.fs"));
 		m_ShaderManager.Get(m_PostprocessShader).UploadUniform("hdrTexture", 0);
@@ -174,7 +176,7 @@ namespace Gogaman
 	{
 		World &world = Application::GetInstance().GetWorld();
 		
-		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/testScene.flex");
+		FlexData::FlexData data = FlexData::ImportFlexData("D:/dev/testScene/simpleScene.flex");
 		//FlexData::PrintFlexData(data);
 
 		m_Materials.reserve(data.materials.size());
@@ -220,6 +222,7 @@ namespace Gogaman
 			m_Materials.emplace_back(std::move(material));
 		}
 
+		//const auto &i = data.meshes[0];
 		for(const auto &i : data.meshes)
 		{
 			Entity mesh = world.CreateEntity();
@@ -272,6 +275,7 @@ namespace Gogaman
 		}
 
 		for(const auto &i : data.pointLights)
+		//const auto &i = data.pointLights[0];
 		{
 			Entity pointLight = world.CreateEntity();
 
@@ -446,70 +450,85 @@ namespace Gogaman
 		std::vector<std::pair<EntityID, float>> persistingEntities;
 		FrustumCull(persistingEntities);
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-		//Set render mode to wireframe if enabled
-		if(GM_CONFIG.wireframe)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		GM_RENDERING_CONTEXT.SetViewport(m_RenderResolutionWidth, m_RenderResolutionHeight);
 
 		//Geometry pass
-		glViewport(0, 0, m_RenderResolutionWidth, m_RenderResolutionHeight);
-		GM_RENDERING_CONTEXT.EnableDepthTesting();
-
 		RenderSurface &geometryBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer);
 		geometryBuffer.Bind();
 		geometryBuffer.Clear();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		Shader &geometryBufferShader = m_ShaderManager.Get(m_G_BufferShader);
-		geometryBufferShader.Bind();
-		geometryBufferShader.UploadUniform("VP",                     m_Camera.GetViewProjectionMatrix());
-		geometryBufferShader.UploadUniform("previousVP",             m_Camera.GetPreviousViewProjectionMatrix());
-		geometryBufferShader.UploadUniform("temporalJitter",         glm::vec2(0.0f));
-		geometryBufferShader.UploadUniform("previousTemporalJitter", glm::vec2(0.0f));
-		geometryBufferShader.UploadUniform("normalMapping",          GM_CONFIG.normalMapping);
-
-		for(const std::pair<EntityID, float> &i : persistingEntities)
-		{
-			RenderableComponent *renderableComponent = m_World->GetComponent<RenderableComponent>(i.first);
-
-			//Generate render commands
-			auto GenerateRenderCommandKey = [](const uint32_t materialIndex, const float depth){
-				//Upper 20 bits: material | Lower 12 bits: depth
+		if(persistingEntities.size() > 0)
+		{	
+			std::vector<std::pair<uint32_t, EntityID>> commands;
+			commands.reserve(persistingEntities.size());
+			for(auto &&[entityID, depth] : persistingEntities)
+			{
+				//32-bit key | Upper 20 bits: material | Lower 12 bits: depth
 				//IEEE floats keep their relative order when interpreted as integers (assuming sign bit is equal across all values)
-				const uint32_t materialIndexBitShift = 20;
-				return ((uint32_t)depth & 0xfff) | ((materialIndex << materialIndexBitShift) & 0xfffff);
-			};
+				auto GenerateKey = [](const uint32_t materialIndex, const float depth){ return ((uint32_t)depth & 0xfff) | ((materialIndex << 20) & 0xfffff); };
 
-			//auto packet = m_G_BufferBucket.AddRenderCommand<RenderCommand::RenderIndexed>(GenerateRenderCommandKey(renderableComponent->material, i.second));
+				RenderableComponent &renderableComponent = m_World->GetComponent<RenderableComponent>(entityID);
+				uint32_t key = GenerateKey(renderableComponent.materialIndex, depth);
+				GM_LOG_CORE_ERROR("Before Sorting | key: %d, entity: %d", key, entityID);
+				commands.emplace_back(std::make_pair(key, entityID));
+			}
 
-			geometryBufferShader.UploadUniform("M",         renderableComponent->modelMatrix);
-			geometryBufferShader.UploadUniform("previousM", renderableComponent->previousModelMatrix);
+			//Sort commands
+			//RadixSort::Sort(commands.size(), commands.data());
+			std::sort(commands.begin(), commands.end(), [](const std::pair<uint32_t, EntityID>& a, const std::pair<uint32_t, EntityID>& b) { return a.first < b.first ? true : false; });
+
+			//Set state
+			GM_RENDERING_CONTEXT.EnableDepthTesting();
+
+			if(GM_CONFIG.wireframe)
+				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 			
-			PBR_Material &material = m_Materials[renderableComponent->materialIndex];
-			GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.albedo).Bind(0);
-			GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.normal).Bind(1);
-			GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.roughness).Bind(2);
-			GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.metalness).Bind(3);
-			GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.emissivity).Bind(4);
+			//Upload G-Buffer uniforms
+			Shader &geometryBufferShader = m_ShaderManager.Get(m_G_BufferShader);
+			geometryBufferShader.Bind();
+			geometryBufferShader.UploadUniform("VP",                     m_Camera.GetViewProjectionMatrix());
+			geometryBufferShader.UploadUniform("previousVP",             m_Camera.GetPreviousViewProjectionMatrix());
+			geometryBufferShader.UploadUniform("temporalJitter",         glm::vec2(0.0f));
+			geometryBufferShader.UploadUniform("previousTemporalJitter", glm::vec2(0.0f));
+			geometryBufferShader.UploadUniform("normalMapping",          GM_CONFIG.normalMapping);
 
-			IndexBuffer       &indexBuffer       = GM_RENDERING_CONTEXT.GetIndexBuffers().Get(renderableComponent->indexBuffer);
-			VertexArrayBuffer &vertexArrayBuffer = GM_RENDERING_CONTEXT.GetVertexArrayBuffers().Get(renderableComponent->vertexArrayBuffer);
+			//Render sorted commands
+			uint32_t previousMaterialIndex = 0;
+			for(auto &&[key, entityID] : commands)
+			{
+				GM_LOG_CORE_ERROR("After Sorting | key: %d, entity: %d", key, entityID);
+				RenderableComponent &renderableComponent = m_World->GetComponent<RenderableComponent>(entityID);
 
-			vertexArrayBuffer.Bind();
-			GM_RENDERING_CONTEXT.RenderIndexed(indexBuffer.GetIndexCount());
+				geometryBufferShader.UploadUniform("M",         renderableComponent.modelMatrix);
+				geometryBufferShader.UploadUniform("previousM", renderableComponent.previousModelMatrix);
+				
+				if(renderableComponent.materialIndex != previousMaterialIndex || entityID == commands[0].second)
+				{
+					PBR_Material &material = m_Materials[renderableComponent.materialIndex];
+					GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.albedo).Bind(0);
+					GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.normal).Bind(1);
+					GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.roughness).Bind(2);
+					GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.metalness).Bind(3);
+					GM_RENDERING_CONTEXT.GetTexture2Ds().Get(material.emissivity).Bind(4);
+
+					previousMaterialIndex = renderableComponent.materialIndex;
+				}
+
+				IndexBuffer       &indexBuffer       = GM_RENDERING_CONTEXT.GetIndexBuffers().Get(renderableComponent.indexBuffer);
+				VertexArrayBuffer &vertexArrayBuffer = GM_RENDERING_CONTEXT.GetVertexArrayBuffers().Get(renderableComponent.vertexArrayBuffer);
+
+				vertexArrayBuffer.Bind();
+				GM_RENDERING_CONTEXT.RenderIndexed(indexBuffer.GetIndexCount());
+			}
+
+			//Reset state
+			GM_RENDERING_CONTEXT.DisableDepthTesting();
+
+			if(GM_CONFIG.wireframe)
+				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 
-		//m_G_BufferBucket.SortPackets();
-		//m_G_BufferBucket.DispatchPackets(GM_RENDERING_CONTEXT);
-
-		GM_RENDERING_CONTEXT.DisableDepthTesting();
-
-		//Reset render mode back to fill
-		if(GM_CONFIG.wireframe)
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-		//Optimization: change internal format of separable circular blur convolution textures from floating point
+	//TODO: DOF Optimization: change internal format of separable circular blur convolution textures from floating point
 
 	//Deferred shading
 		RenderSurface &finalBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_FinalBuffer);
@@ -519,20 +538,18 @@ namespace Gogaman
 		Shader &deferredLightingShader = m_ShaderManager.Get(m_DeferredLightingShader);
 		deferredLightingShader.Bind();
 
-		GM_LOG_CORE_INFO("Point lights: %d", m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities.size());
-
 		uint32_t pointLightIndex = 0;
 		for(const auto i : m_EntityGroups[GM_RENDERING_SYSTEM_POINT_LIGHT_GROUP_INDEX].entities)
 		{
-			PointLightComponent *pointLightComponent = m_World->GetComponent<PointLightComponent>(i);
+			PointLightComponent &pointLightComponent = m_World->GetComponent<PointLightComponent>(i);
 
-			std::string positionUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].position";
-			std::string radianceUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].radiance";
+			std::string positionUniformName     = "pointLights[" + std::to_string(pointLightIndex) + "].position";
+			std::string radianceUniformName     = "pointLights[" + std::to_string(pointLightIndex) + "].radiance";
+			//std::string coneApertureUniformName = "pointLights[" + std::to_string(pointLightIndex) + "].coneAperture";
 
-			deferredLightingShader.UploadUniform(positionUniformName, pointLightComponent->position);
-			deferredLightingShader.UploadUniform(radianceUniformName, pointLightComponent->radiance);
-			//TODO: Fix coneAperture uniform name
-			deferredLightingShader.UploadUniform("pointLights[0].coneAperture", 0.0f);
+			deferredLightingShader.UploadUniform(positionUniformName, pointLightComponent.position);
+			deferredLightingShader.UploadUniform(radianceUniformName, pointLightComponent.radiance);
+			//deferredLightingShader.UploadUniform("pointLights[0].coneAperture", 0.0f);
 			pointLightIndex++;
 		}
 
@@ -589,9 +606,8 @@ namespace Gogaman
 		*/
 
 		//Post-process (tonemapping, exposure, film grain, gamma correction)
-		glViewport(0, 0, Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight());
+		GM_RENDERING_CONTEXT.SetViewport(Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight());
 		RenderSurface::BindBackBuffer();
-		RenderSurface::ClearBackBuffer();
 		
 		Shader &postProcessShader = m_ShaderManager.Get(m_PostprocessShader);
 		postProcessShader.Bind();
@@ -607,21 +623,20 @@ namespace Gogaman
 	{
 		for(const auto i : m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities)
 		{
-			BoundingVolumeComponent *boundingVolumeComponent = m_World->GetComponent<BoundingVolumeComponent>(i);
+			BoundingVolumeComponent &boundingVolumeComponent = m_World->GetComponent<BoundingVolumeComponent>(i);
 			//Bounding sphere intersection
-			if(m_Camera.GetFrustum().Intersects(boundingVolumeComponent->worldSpaceBoundingSphere))
+			if(m_Camera.GetFrustum().Intersects(boundingVolumeComponent.worldSpaceBoundingSphere))
 			{
 				//AABB intersection
 				//if(cameraFrustum.Intersects(renderableComponent->worldSpaceAxisAlignedBoundingBox))
 				{
-					float depth = glm::length(m_Camera.GetPosition() - boundingVolumeComponent->worldSpaceBoundingSphere.position);
+					float depth = glm::length(m_Camera.GetPosition() - boundingVolumeComponent.worldSpaceBoundingSphere.position);
 					persistingEntities.emplace_back(std::make_pair(i, depth));
 				}
 			}
 		}
 
 		GM_LOG_CORE_TRACE("Renderable entity count before culling: %d | Renderable entity count after culling: %d", m_EntityGroups[GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX].entities.size(), persistingEntities.size());
-		GM_ASSERT(persistingEntities.size() > 0, "No persisting entities after culling")
 	}
 
 	void RenderingSystem::Shutdown()

@@ -39,7 +39,7 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
-		GM_LOG_CORE_SET_LEVEL(Info);
+		//GM_LOG_CORE_SET_LEVEL(Error);
 
 		while(m_IsRunning)
 		{
