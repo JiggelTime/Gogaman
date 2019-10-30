@@ -15,6 +15,9 @@
 #include "BoundingVolumeSystem.h"
 #include "Rendering/RenderingSystem.h"
 
+#include "Rendering/RenderGraph/RenderGraph.h"
+#include "Rendering/RenderGraph/RenderGraphStageBuilder.h"
+
 namespace Gogaman
 {
 	Application *Application::s_Instance = nullptr;
@@ -40,6 +43,30 @@ namespace Gogaman
 	void Application::Run()
 	{
 		//GM_LOG_CORE_SET_LEVEL(Error);
+
+		RenderGraph::Graph graph;
+
+		RenderGraph::Stage &gBuffer = graph.CreateStage();
+		RenderGraph::StageBuilder builder(&graph, &gBuffer);
+		builder.CreateTextureResource("albedo");
+		builder.CreateTextureResource("normals");
+		builder.CreateTextureResource("roughness");
+
+		RenderGraph::Stage &deferredShading = graph.CreateStage();
+		RenderGraph::StageBuilder builder2(&graph, &deferredShading);
+		builder2.ReadTextureResource("albedo");
+		builder2.ReadTextureResource("normals");
+		builder2.ReadTextureResource("roughness");
+		builder2.CreateTextureResource("shadedImage");
+
+		RenderGraph::Stage &taa = graph.CreateStage();
+		RenderGraph::StageBuilder builder3(&graph, &taa);
+		builder3.WriteTextureResource("shadedImage", "antiAliasedImage");
+
+		graph.SetBackBuffer("antiAliasedImage");
+
+		graph.Compile();
+		graph.Log();
 
 		while(m_IsRunning)
 		{

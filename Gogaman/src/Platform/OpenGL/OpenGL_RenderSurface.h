@@ -33,9 +33,9 @@ namespace Gogaman
 		
 		void Clear() const;
 
-		void BlitColorBuffer(const   RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
-		void BlitDepthBuffer(const   RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
-		void BlitStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
+		void CopyColorBuffer(const   RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
+		void CopyDepthBuffer(const   RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
+		void CopyStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const;
 
 		inline constexpr int GetColorAttachmentCount() const { return m_NumColorAttachments;       }
 		inline           int GetRenderTargetCount()    const { return (int)m_RenderTargets.size(); }

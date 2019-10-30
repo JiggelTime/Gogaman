@@ -12,7 +12,7 @@ namespace Gogaman
 	private:
 		CRTP()
 		{}
-
+	private:
 		friend AbstractType<ImplementationType>;
 	};
 }

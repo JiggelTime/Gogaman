@@ -4,6 +4,8 @@
 
 #include "Gogaman/Rendering/PBR_Material.h"
 
+#include <glm.hpp>
+
 namespace Gogaman
 {
 	struct RenderableComponent

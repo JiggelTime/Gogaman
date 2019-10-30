@@ -17,7 +17,7 @@ namespace Gogaman
 	Texture2D::~Texture2D()
 	{}
 
-	void Texture2D::Generate(const int width, const int height, const uint8_t *imageData)
+	void Texture2D::Generate(const uint16_t width, const uint16_t height, const uint8_t *imageData)
 	{
 		GM_ASSERT(width  > 0, "Failed to generate texture2D: invalid width")
 		GM_ASSERT(height > 0, "Failed to generate texture2D: invalid height")

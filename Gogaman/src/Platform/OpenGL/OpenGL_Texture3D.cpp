@@ -17,7 +17,7 @@ namespace Gogaman
 	Texture3D::~Texture3D()
 	{}
 
-	void Texture3D::Generate(const int width, const int height, const int depth, const uint8_t *imageData)
+	void Texture3D::Generate(const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t *imageData)
 	{
 		GM_ASSERT(width  > 0, "Failed to generate texture3D: invalid width")
 		GM_ASSERT(height > 0, "Failed to generate texture3D: invalid height")

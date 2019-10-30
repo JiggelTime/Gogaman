@@ -445,37 +445,84 @@ namespace Gogaman
 
 	void RenderingSystem::Render()
 	{
+		//TODO: DOF Optimization: change internal format of separable circular blur convolution textures from floating point
+		
 		m_Camera.Update();
 
-		std::vector<std::pair<EntityID, float>> persistingEntities;
-		FrustumCull(persistingEntities);
-
 		GM_RENDERING_CONTEXT.SetViewport(m_RenderResolutionWidth, m_RenderResolutionHeight);
+		
+		GeometryPass();
+		DeferredShadingPass();
+		
+		//Copy gBuffer depth to HDR FBO
+		RenderSurface &finalBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_FinalBuffer);
+		finalBuffer.CopyDepthBuffer(GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
 
-		//Geometry pass
+		/*
+		//Forward rendering
+		//glEnable(GL_DEPTH_TEST);
+
+		//Lights
+		m_ShaderManager->Get(m_LightShader).Bind();
+		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("projection", projectionMatrix);
+		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("view",       viewMatrix);
+		//Light 0
+		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("M",          glm::mat4());
+		m_ShaderManager->Get(m_LightShader).UploadUniformVec3("lightColor", pointLight0.GetColor());
+		
+		RenderFullscreenQuad();
+		
+			//Skybox
+		glDepthFunc(GL_LEQUAL);
+		skyboxShader.Bind();
+		glm::mat4 cubemapView(glm::mat3(camera.GetViewMatrix()));
+		skyboxShader.UploadUniformMat4("projection", projectionMatrix);
+		skyboxShader.UploadUniformMat4("view", cubemapView);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glBindVertexArray(skyboxVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthFunc(GL_LESS);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		
+		glDisable(GL_DEPTH_TEST);
+		*/
+
+		GM_RENDERING_CONTEXT.SetViewport(Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight());
+		
+		PostProcessPass();
+	}
+
+	void RenderingSystem::GeometryPass()
+	{
+		std::vector<std::pair<EntityID, float>> culledEntities;
+		FrustumCull(culledEntities);
+
 		RenderSurface &geometryBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer);
 		geometryBuffer.Bind();
 		geometryBuffer.Clear();
 
-		if(persistingEntities.size() > 0)
-		{	
+		if(culledEntities.size() > 0)
+		{
+			//Generate commands
 			std::vector<std::pair<uint32_t, EntityID>> commands;
-			commands.reserve(persistingEntities.size());
-			for(auto &&[entityID, depth] : persistingEntities)
+			commands.reserve(culledEntities.size());
+			for(auto &&[entityID, depth] : culledEntities)
 			{
 				//32-bit key | Upper 20 bits: material | Lower 12 bits: depth
 				//IEEE floats keep their relative order when interpreted as integers (assuming sign bit is equal across all values)
-				auto GenerateKey = [](const uint32_t materialIndex, const float depth){ return ((uint32_t)depth & 0xfff) | ((materialIndex << 20) & 0xfffff); };
+				auto GenerateKey = [](const uint32_t materialIndex, const float depth) { return ((uint32_t)depth & 0xfff) | ((materialIndex << 20) & 0xfffff); };
 
 				RenderableComponent &renderableComponent = m_World->GetComponent<RenderableComponent>(entityID);
 				uint32_t key = GenerateKey(renderableComponent.materialIndex, depth);
-				GM_LOG_CORE_ERROR("Before Sorting | key: %d, entity: %d", key, entityID);
+				GM_LOG_CORE_TRACE("Before Sorting | key: %d, entity: %d", key, entityID);
 				commands.emplace_back(std::make_pair(key, entityID));
 			}
 
 			//Sort commands
 			//RadixSort::Sort(commands.size(), commands.data());
-			std::sort(commands.begin(), commands.end(), [](const std::pair<uint32_t, EntityID>& a, const std::pair<uint32_t, EntityID>& b) { return a.first < b.first ? true : false; });
+			std::sort(commands.begin(), commands.end(), [](const std::pair<uint32_t, EntityID> &a, const std::pair<uint32_t, EntityID> &b) { return a.first < b.first ? true : false; });
 
 			//Set state
 			GM_RENDERING_CONTEXT.EnableDepthTesting();
@@ -496,7 +543,7 @@ namespace Gogaman
 			uint32_t previousMaterialIndex = 0;
 			for(auto &&[key, entityID] : commands)
 			{
-				GM_LOG_CORE_ERROR("After Sorting | key: %d, entity: %d", key, entityID);
+				GM_LOG_CORE_TRACE("After Sorting | key: %d, entity: %d", key, entityID);
 				RenderableComponent &renderableComponent = m_World->GetComponent<RenderableComponent>(entityID);
 
 				geometryBufferShader.UploadUniform("M",         renderableComponent.modelMatrix);
@@ -527,10 +574,10 @@ namespace Gogaman
 			if(GM_CONFIG.wireframe)
 				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
+	}
 
-	//TODO: DOF Optimization: change internal format of separable circular blur convolution textures from floating point
-
-	//Deferred shading
+	void RenderingSystem::DeferredShadingPass()
+	{
 		RenderSurface &finalBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_FinalBuffer);
 		finalBuffer.Bind();
 		finalBuffer.Clear();
@@ -569,46 +616,12 @@ namespace Gogaman
 		m_BRDF_LUT.Bind(3);
 
 		RenderFullscreenWindow();
-		
-		//Copy gBuffer depth to HDR FBO
-		finalBuffer.BlitDepthBuffer(geometryBuffer, m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
-		finalBuffer.Bind();
+	}
 
-		/*
-		//Forward rendering
-		//glEnable(GL_DEPTH_TEST);
-
-		//Lights
-		m_ShaderManager->Get(m_LightShader).Bind();
-		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("projection", projectionMatrix);
-		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("view",       viewMatrix);
-		//Light 0
-		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("M",          glm::mat4());
-		m_ShaderManager->Get(m_LightShader).UploadUniformVec3("lightColor", pointLight0.GetColor());
-		
-		RenderFullscreenQuad();
-		
-			//Skybox
-		glDepthFunc(GL_LEQUAL);
-		skyboxShader.Bind();
-		glm::mat4 cubemapView(glm::mat3(camera.GetViewMatrix()));
-		skyboxShader.UploadUniformMat4("projection", projectionMatrix);
-		skyboxShader.UploadUniformMat4("view", cubemapView);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glBindVertexArray(skyboxVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		glDepthFunc(GL_LESS);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		
-		glDisable(GL_DEPTH_TEST);
-		*/
-
-		//Post-process (tonemapping, exposure, film grain, gamma correction)
-		GM_RENDERING_CONTEXT.SetViewport(Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight());
+	void RenderingSystem::PostProcessPass()
+	{
 		RenderSurface::BindBackBuffer();
-		
+
 		Shader &postProcessShader = m_ShaderManager.Get(m_PostprocessShader);
 		postProcessShader.Bind();
 		postProcessShader.UploadUniform("exposureNormalizationCoeffecient", m_Camera.GetExposure());

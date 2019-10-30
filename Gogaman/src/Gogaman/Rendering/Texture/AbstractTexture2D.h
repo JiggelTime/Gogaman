@@ -15,7 +15,7 @@ namespace Gogaman
 		AbstractTexture2D &operator=(const AbstractTexture2D &) = delete;
 		AbstractTexture2D &operator=(AbstractTexture2D &&other) = default;
 
-		void Generate(const int width, const int height, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, height, imageData); }
+		void Generate(const uint16_t width, const uint16_t height, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, height, imageData); }
 	protected:
 		AbstractTexture2D()
 			: width(0), height(0), wrapS(TextureWrapMode::Repeat), wrapT(TextureWrapMode::Repeat)
@@ -23,7 +23,7 @@ namespace Gogaman
 
 		~AbstractTexture2D() = default;
 	public:
-		int             width, height;
+		uint16_t        width, height;
 		TextureWrapMode wrapS, wrapT;
 	};
 }

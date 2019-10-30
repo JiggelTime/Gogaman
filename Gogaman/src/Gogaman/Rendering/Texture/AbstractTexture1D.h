@@ -15,7 +15,7 @@ namespace Gogaman
 		AbstractTexture1D &operator=(const AbstractTexture1D &) = delete;
 		AbstractTexture1D &operator=(AbstractTexture1D &&other) = default;
 
-		void Generate(const int width, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, imageData); }
+		void Generate(const uint16_t width, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, imageData); }
 	protected:
 		AbstractTexture1D()
 			: width(0), wrapS(TextureWrapMode::Repeat)
@@ -23,7 +23,7 @@ namespace Gogaman
 
 		~AbstractTexture1D() = default;
 	public:
-		int             width;
+		uint16_t        width;
 		TextureWrapMode wrapS;
 	};
 }

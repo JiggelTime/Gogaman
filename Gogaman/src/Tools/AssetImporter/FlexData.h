@@ -45,7 +45,8 @@ namespace FlexData
 	{
 		inline bool operator==(const FlexMaterialData &other) const
 		{
-			auto CompareFlexTexture = [](const uint8_t bytesPerPixel, const FlexTextureData &texture, const FlexTextureData &texture2){
+			auto CompareFlexTexture = [](const uint8_t bytesPerPixel, const FlexTextureData &texture, const FlexTextureData &texture2)
+			{
 				if((texture.width != texture2.width) || (texture.height != texture2.height))
 					return false;
 				else
@@ -96,20 +97,20 @@ namespace FlexData
 	{
 		inline uint32_t operator()(const FlexVertexData &other) const
 		{
-			auto HashFloat = [](uint32_t &digest, const float value) { digest ^= std::hash<float>()(value) + 0x9e3779b9 + (digest << 6) + (digest >> 2); };
-			
 			uint32_t digest = 0;
-			HashFloat(digest, other.position[0]);
-			HashFloat(digest, other.position[1]);
-			HashFloat(digest, other.position[2]);
-			HashFloat(digest, other.uv[0]);
-			HashFloat(digest, other.uv[1]);
-			HashFloat(digest, other.normal[0]);
-			HashFloat(digest, other.normal[1]);
-			HashFloat(digest, other.normal[2]);
-			HashFloat(digest, other.tangent[0]);
-			HashFloat(digest, other.tangent[1]);
-			HashFloat(digest, other.tangent[2]);
+			auto HashFloat = [&](const float value) { digest ^= std::hash<float>()(value) + 0x9e3779b9 + (digest << 6) + (digest >> 2); };
+			
+			HashFloat(other.position[0]);
+			HashFloat(other.position[1]);
+			HashFloat(other.position[2]);
+			HashFloat(other.uv[0]);
+			HashFloat(other.uv[1]);
+			HashFloat(other.normal[0]);
+			HashFloat(other.normal[1]);
+			HashFloat(other.normal[2]);
+			HashFloat(other.tangent[0]);
+			HashFloat(other.tangent[1]);
+			HashFloat(other.tangent[2]);
 			return digest;
 		}
 	};
@@ -213,25 +214,26 @@ namespace FlexData
 			//Read material data
 			for(uint32_t i = 0; i < materialCount; i++)
 			{
-				auto ReadTexture = [](FILE *file, FlexTextureData &texturePayload, const uint8_t bytesPerPixel)
+				auto ReadTexture = [&](FlexTextureData &texturePayload, const uint8_t bytesPerPixel)
 				{
 					//Read width
 					fread(&texturePayload.width, sizeof(texturePayload.width), 1, file);
 					//Read height
 					fread(&texturePayload.height, sizeof(texturePayload.height), 1, file);
 					//Read texture data
-					uint64_t  textureDataSize = texturePayload.width * texturePayload.height * bytesPerPixel;
-					uint8_t  *textureData = new uint8_t[textureDataSize];
-					fread(textureData, 1, textureDataSize, file);
-					texturePayload.data = textureData;
+					uint64_t textureDataSize = texturePayload.width * texturePayload.height * bytesPerPixel;
+					//uint8_t *textureData = new uint8_t[textureDataSize];
+					//fread(textureData, 1, textureDataSize, file);
+					//texturePayload.data = textureData;
+					fread(texturePayload.data, 1, textureDataSize, file);
 				};
 
 				FlexMaterialData materialDataPayload;
-				ReadTexture(file, materialDataPayload.albedo,     4);
-				ReadTexture(file, materialDataPayload.normal,     4);
-				ReadTexture(file, materialDataPayload.roughness,  1);
-				ReadTexture(file, materialDataPayload.metalness,  1);
-				ReadTexture(file, materialDataPayload.emissivity, 1);
+				ReadTexture(materialDataPayload.albedo,     4);
+				ReadTexture(materialDataPayload.normal,     4);
+				ReadTexture(materialDataPayload.roughness,  1);
+				ReadTexture(materialDataPayload.metalness,  1);
+				ReadTexture(materialDataPayload.emissivity, 1);
 
 				dataPayload.materials.emplace_back(std::move(materialDataPayload));
 			}

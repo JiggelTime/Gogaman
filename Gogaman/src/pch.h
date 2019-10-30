@@ -26,5 +26,6 @@
 #include <string>
 
 #ifdef GM_PLATFORM_WINDOWS
+	#define NOMINMAX
 	#include <Windows.h>
 #endif

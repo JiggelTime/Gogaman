@@ -15,6 +15,9 @@
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraph.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStage.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStageBuilder.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderLoader.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderManager.cpp" />
@@ -70,6 +73,11 @@
     <ClInclude Include="src\Gogaman\Core\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeSystem.h" />
     <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraph.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphTypeAlias.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStageBuilder.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphResource.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStage.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractIndexBuffer.h" />
     <ClInclude Include="src\Gogaman\Rendering\AbstractRenderingContext.h" />

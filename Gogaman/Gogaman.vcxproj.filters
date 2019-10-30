@@ -25,6 +25,9 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Gogaman\Core\Logging\Log.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraph.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStage.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStageBuilder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -127,6 +130,11 @@
     <ClInclude Include="src\Gogaman\Core\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\Container.h" />
     <ClInclude Include="src\Gogaman\Input\InputDefinitions.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStage.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraph.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphResource.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStageBuilder.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\RenderGraphTypeAlias.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

@@ -17,7 +17,7 @@ namespace Gogaman
 	Texture1D::~Texture1D()
 	{}
 
-	void Texture1D::Generate(const int width, const uint8_t *imageData)
+	void Texture1D::Generate(const uint16_t width, const uint8_t *imageData)
 	{
 		GM_ASSERT(width > 0, "Failed to generate texture1D: invalid width")
 		GM_ASSERT((interpolationMode != TextureInterpolationMode::Trilinear) || levels != 1, "Failed to generate texture1D with trilinear interpolation: texture has only 1 level")

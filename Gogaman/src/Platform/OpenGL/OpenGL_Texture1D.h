@@ -16,6 +16,6 @@ namespace Gogaman
 		Texture1D &operator=(const Texture1D &) = delete;
 		Texture1D &operator=(Texture1D &&)      = default;
 
-		void Generate(const int width, const uint8_t *imageData = nullptr);
+		void Generate(const uint16_t width, const uint8_t *imageData = nullptr);
 	};
 }

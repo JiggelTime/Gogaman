@@ -50,6 +50,10 @@ namespace Gogaman
 
 		void ImportFlexData();
 
+		void GeometryPass();
+		void DeferredShadingPass();
+		void PostProcessPass();
+
 		void RenderFullscreenWindow() const;
 
 		void FrustumCull(std::vector<std::pair<EntityID, float>> &persistingEntities) const;

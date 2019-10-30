@@ -74,22 +74,18 @@ namespace Gogaman
 		{
 			switch(internalFormat)
 			{
-				//Depth
+				//One channel
 			case TextureFormat::Depth16:
 			case TextureFormat::Depth24:
 			case TextureFormat::Depth32:
 			case TextureFormat::Depth32F:
-				return 1;
-				//Depth channel and stencil channel
-			case TextureFormat::Depth24Stencil8:
-				return 2;
-				//One channel
 			case TextureFormat::X8:
 			case TextureFormat::X16:
 			case TextureFormat::X16F:
 			case TextureFormat::X32F:
 				return 1;
 				//Two channels
+			case TextureFormat::Depth24Stencil8:
 			case TextureFormat::XY8:
 			case TextureFormat::XY16:
 			case TextureFormat::XY16F:
@@ -145,6 +141,6 @@ namespace Gogaman
 		TextureInternalFormat    internalFormat;
 		TextureFormat            format;
 		TextureInterpolationMode interpolationMode;
-		int                      levels;
+		uint8_t                  levels;
 	};
 }
