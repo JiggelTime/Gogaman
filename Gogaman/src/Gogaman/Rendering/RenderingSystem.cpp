@@ -21,6 +21,9 @@
 
 #include "Gogaman/Sorting/RadixSort.h"
 
+#include "RenderGraph/RenderGraphResource.h"
+#include "RenderGraph/RenderGraphStageBuilder.h"
+
 #include <FlexData.h>
 
 #include <glm.hpp>
@@ -179,9 +182,14 @@ namespace Gogaman
 		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
 		{
 			//Setup
-			builder.CreateTextureResource("albedo");
-			builder.CreateTextureResource("normals");
-			builder.CreateTextureResource("roughness");
+			RenderGraph::TextureDescriptor albedo;
+			builder.CreateTexture("albedo", std::move(albedo));
+
+			RenderGraph::TextureDescriptor normal;
+			builder.CreateTexture("normal", std::move(normal));
+
+			RenderGraph::TextureDescriptor roughness;
+			builder.CreateTexture("roughness", std::move(roughness));
 		},
 		[]()
 		{
@@ -193,10 +201,12 @@ namespace Gogaman
 		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
 		{
 			//Setup
-			builder.ReadTextureResource("albedo");
-			builder.ReadTextureResource("normals");
-			builder.ReadTextureResource("roughness");
-			builder.CreateTextureResource("shadedImage");
+			builder.ReadTexture("albedo");
+			builder.ReadTexture("normal");
+			builder.ReadTexture("roughness");
+
+			RenderGraph::TextureDescriptor shadedImage;
+			builder.CreateTexture("shadedImage", std::move(shadedImage));
 		},
 		[]()
 		{
@@ -208,7 +218,7 @@ namespace Gogaman
 		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
 		{
 			//Setup
-			builder.WriteTextureResource("shadedImage", "antiAliasedImage");
+			builder.WriteTexture("shadedImage", "antiAliasedImage");
 		},
 		[]()
 		{
@@ -220,7 +230,7 @@ namespace Gogaman
 		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
 		{
 			//Setup
-			builder.WriteTextureResource("antiAliasedImage", "postProcessedImage");
+			builder.WriteTexture("antiAliasedImage", "postProcessedImage");
 		},
 		[]()
 		{

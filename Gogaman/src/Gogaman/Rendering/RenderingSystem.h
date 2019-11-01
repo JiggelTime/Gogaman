@@ -27,7 +27,6 @@
 #include "PBR_Material.h"
 
 #include "RenderGraph/RenderGraph.h"
-#include "RenderGraph/RenderGraphStageBuilder.h"
 
 #include <glad.h>
 #include <GLFW/glfw3.h>
