@@ -16,7 +16,6 @@
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraph.cpp" />
-    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStage.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\RenderGraphStageBuilder.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\Shader\ShaderLoader.cpp" />
@@ -124,7 +123,7 @@
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman\Input\AbstractInput.h" />
     <ClInclude Include="src\Gogaman\Input\InputDefinitions.h" />
-    <ClInclude Include="src\Gogaman\Container.h" />
+    <ClInclude Include="src\Gogaman\StableArray.h" />
     <ClInclude Include="src\Gogaman\Utility\ForEachMacro.h" />
     <ClInclude Include="src\Gogaman\Window.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGL_IndexBuffer.h" />

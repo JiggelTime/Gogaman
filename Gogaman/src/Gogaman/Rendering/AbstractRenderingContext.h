@@ -11,35 +11,35 @@
 #include "IndexBuffer.h"
 #include "VertexArrayBuffer.h"
 
-#include "Gogaman/Container.h"
+#include "Gogaman/StableArray.h"
 
 #include "RenderState.h"
 
 namespace Gogaman
 {
 	using RenderSurfaceID            = ContainerID<uint8_t>;
-	using RenderSurfaceContainer     = StaticContainer<255,   RenderSurface,     uint8_t>;
+	using RenderSurfaceContainer     = StableArray<255,   RenderSurface,     uint8_t>;
 	
 	//using ShaderID                   = ContainerID<uint32_t, 24, 8>;
 	//using ShaderContainer            = Container<256, Shader, uint32_t, 24, 8>;
 
 	using Texture1D_ID               = ContainerID<uint16_t>;
-	using Texture1D_Container        = DynamicContainer<8192, Texture1D,         uint16_t>;
+	using Texture1D_Container        = DynamicStableArray<8192, Texture1D,         uint16_t>;
 
 	using Texture2D_ID               = ContainerID<uint16_t>;
-	using Texture2D_Container        = DynamicContainer<8192, Texture2D,         uint16_t>;
+	using Texture2D_Container        = DynamicStableArray<8192, Texture2D,         uint16_t>;
 
 	using Texture3D_ID               = ContainerID<uint16_t>;
-	using Texture3D_Container        = DynamicContainer<8192, Texture3D,         uint16_t>;
+	using Texture3D_Container        = DynamicStableArray<8192, Texture3D,         uint16_t>;
 
 	using VertexBufferID             = ContainerID<uint16_t>;
-	using VertexBufferContainer      = DynamicContainer<4096, VertexBuffer,      uint16_t>;
+	using VertexBufferContainer      = DynamicStableArray<4096, VertexBuffer,      uint16_t>;
 
 	using IndexBufferID              = ContainerID<uint16_t>;
-	using IndexBufferContainer       = DynamicContainer<4096, IndexBuffer,       uint16_t>;
+	using IndexBufferContainer       = DynamicStableArray<4096, IndexBuffer,       uint16_t>;
 
 	using VertexArrayBufferID        = ContainerID<uint16_t>;
-	using VertexArrayBufferContainer = DynamicContainer<4096, VertexArrayBuffer, uint16_t>;
+	using VertexArrayBufferContainer = DynamicStableArray<4096, VertexArrayBuffer, uint16_t>;
 
 	template<typename ImplementationType>
 	class AbstractRenderingContext : public CRTP<ImplementationType, AbstractRenderingContext>

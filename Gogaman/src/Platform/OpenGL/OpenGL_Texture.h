@@ -22,12 +22,12 @@ namespace Gogaman
 		
 		inline void Bind(const int unit) const { glBindTextureUnit(unit, m_RendererID); }
 
-		inline void BindImage(const int unit)                                                      const { BindImage(unit, 1); }
-		inline void BindImage(const int unit, const int level)                                     const { BindImage(unit, level, TextureAccessMode::Full); }
-		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode) const { BindImage(unit, level, accessMode, internalFormat); }
-		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode, const TextureInternalFormat internalFormat) const
+		inline void BindImage(const int unit)                                              const { BindImage(unit, 1); }
+		inline void BindImage(const int unit, const int level)                             const { BindImage(unit, level, TextureAccess::Full); }
+		inline void BindImage(const int unit, const int level, const TextureAccess access) const { BindImage(unit, level, access, internalFormat); }
+		inline void BindImage(const int unit, const int level, const TextureAccess access, const TextureInternalFormat internalFormat) const
 		{
-			glBindImageTexture(unit, m_RendererID, level - 1, levels != 1 ? GL_TRUE : GL_FALSE, 0, GetNativeTextureAccessMode(accessMode), GetNativeTextureInternalFormat(internalFormat));
+			glBindImageTexture(unit, m_RendererID, level - 1, levels != 1 ? GL_TRUE : GL_FALSE, 0, GetNativeTextureAccess(access), GetNativeTextureInternalFormat(internalFormat));
 		}
 		
 		inline void Clear() const { glClearTexImage(m_RendererID, 0, GetNativeTextureFormat(format), GL_UNSIGNED_BYTE, nullptr); }
@@ -41,15 +41,15 @@ namespace Gogaman
 			return maxAnisotropicInterpolationSamples;
 		}
 
-		static inline constexpr GLenum GetNativeTextureAccessMode(const TextureAccessMode accessMode)
+		static inline constexpr GLenum GetNativeTextureAccess(const TextureAccess access)
 		{
-			switch(accessMode)
+			switch(access)
 			{
-			case TextureAccessMode::Full:
+			case TextureAccess::Full:
 				return GL_READ_WRITE;
-			case TextureAccessMode::ReadOnly:
+			case TextureAccess::ReadOnly:
 				return GL_READ_ONLY;
-			case TextureAccessMode::WriteOnly:
+			case TextureAccess::WriteOnly:
 				return GL_WRITE_ONLY;
 			default:
 				GM_ASSERT(false, "Failed to get native texture access: invalid access type")
@@ -123,15 +123,15 @@ namespace Gogaman
 			return 0;
 		}
 
-		static inline constexpr GLint GetNativeTextureInterpolationMinMode(const TextureInterpolationMode interpolationMode)
+		static inline constexpr GLint GetNativeTextureInterpolationMin(const TextureInterpolation interpolation)
 		{
-			switch(interpolationMode)
+			switch(interpolation)
 			{
-			case TextureInterpolationMode::Point:
+			case TextureInterpolation::Point:
 				return GL_NEAREST;
-			case TextureInterpolationMode::Bilinear:
+			case TextureInterpolation::Bilinear:
 				return GL_LINEAR;
-			case TextureInterpolationMode::Trilinear:
+			case TextureInterpolation::Trilinear:
 				return GL_LINEAR_MIPMAP_LINEAR;
 			}
 			
@@ -139,15 +139,15 @@ namespace Gogaman
 			return 0;
 		}
 
-		static inline constexpr GLint GetNativeTextureInterpolationMagMode(const TextureInterpolationMode interpolationMode)
+		static inline constexpr GLint GetNativeTextureInterpolationMag(const TextureInterpolation interpolation)
 		{
-			switch(interpolationMode)
+			switch(interpolation)
 			{
-			case TextureInterpolationMode::Point:
+			case TextureInterpolation::Point:
 				return GL_NEAREST;
-			case TextureInterpolationMode::Bilinear:
+			case TextureInterpolation::Bilinear:
 				return GL_LINEAR;
-			case TextureInterpolationMode::Trilinear:
+			case TextureInterpolation::Trilinear:
 				return GL_LINEAR;
 			}
 			
@@ -155,15 +155,15 @@ namespace Gogaman
 			return 0;
 		}
 
-		static inline constexpr GLint GetNativeTextureWrapMode(const TextureWrapMode wrapMode)
+		static inline constexpr GLint GetNativeTextureWrap(const TextureWrap wrap)
 		{
-			switch(wrapMode)
+			switch(wrap)
 			{
-			case TextureWrapMode::Repeat:
+			case TextureWrap::Repeat:
 				return GL_REPEAT;
-			case TextureWrapMode::Clamp:
+			case TextureWrap::Clamp:
 				return GL_CLAMP_TO_EDGE;
-			case TextureWrapMode::Mirror:
+			case TextureWrap::Mirror:
 				return GL_MIRRORED_REPEAT;
 			}
 			

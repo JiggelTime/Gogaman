@@ -6,45 +6,44 @@ namespace Gogaman
 {
 	namespace RenderGraph
 	{
-		class TextureResource;
 		class StageBuilder;
 
-		//TODO: Change to a struct?
+		//TODO: Change to struct?
 		class Stage
 		{
 		public:
-			//using SetupFunction   = std::function<void(StageBuilder &)>;
-			//using ExecuteFunction = std::function<void()>;
+			using SetupFunction   = std::function<void(StageBuilder &&)>;
+			using ExecuteFunction = std::function<void()>;
 		public:
-			inline Stage(const StageIndex index)
-				: m_Index(index)
+			inline Stage(const StageIndex index, const SetupFunction &setupFunction, const ExecuteFunction &executeFunction)
+				: m_Index(index), m_SetupFunction(setupFunction), m_ExecuteFunction(executeFunction)
 			{}
 
 			inline ~Stage() = default;
 
-			//inline void Setup(StageBuilder &builder) { m_SetupFunction(builder); }
-			//inline void Execute() { m_ExecuteFunction(); }
+			inline void Setup(StageBuilder &&builder) { m_SetupFunction(std::move(builder)); }
+			inline void Execute() { m_ExecuteFunction(); }
 
 			inline constexpr StageIndex GetIndex() const { return m_Index; }
 			
-			inline constexpr const std::vector<TextureResourceIndex> &GetCreateTextureResources() const { return m_CreateTextureResources; }
-			inline constexpr const std::vector<TextureResourceIndex> &GetReadTextureResources() const { return m_ReadTextureResources; }
-			inline constexpr const std::vector<TextureResourceIndex> &GetWriteTextureResources() const { return m_WriteTextureResources; }
+			inline constexpr const std::vector<VirtualTextureIndex> &GetCreateTextures() const { return m_CreateTextures; }
+			inline constexpr const std::vector<VirtualTextureIndex> &GetReadTextures() const { return m_ReadTextures; }
+			inline constexpr const std::vector<VirtualTextureIndex> &GetWriteTextures() const { return m_WriteTextures; }
 
-			inline void AddDestroyTextureResource(const TextureResourceIndex index) { m_DestroyTextureResources.emplace_back(index); }
-			inline constexpr const std::vector<TextureResourceIndex> &GetDestroyTextureResources() const { return m_DestroyTextureResources; }
+			inline void AddDestroyTexture(const VirtualTextureIndex index) { m_DestroyTextures.emplace_back(index); }
+			inline constexpr const std::vector<VirtualTextureIndex> &GetDestroyTextures() const { return m_DestroyTextures; }
 		private:
 			friend StageBuilder;
 
 			StageIndex m_Index;
 
-			//SetupFunction   m_SetupFunction;
-			//ExecuteFunction m_ExecuteFunction;
+			SetupFunction   m_SetupFunction;
+			ExecuteFunction m_ExecuteFunction;
 
-			std::vector<TextureResourceIndex> m_CreateTextureResources;
-			std::vector<TextureResourceIndex> m_ReadTextureResources;
-			std::vector<TextureResourceIndex> m_WriteTextureResources;
-			std::vector<TextureResourceIndex> m_DestroyTextureResources;
+			std::vector<VirtualTextureIndex> m_CreateTextures;
+			std::vector<VirtualTextureIndex> m_ReadTextures;
+			std::vector<VirtualTextureIndex> m_WriteTextures;
+			std::vector<VirtualTextureIndex> m_DestroyTextures;
 		};
 	}
 }

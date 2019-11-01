@@ -15,9 +15,6 @@
 #include "BoundingVolumeSystem.h"
 #include "Rendering/RenderingSystem.h"
 
-#include "Rendering/RenderGraph/RenderGraph.h"
-#include "Rendering/RenderGraph/RenderGraphStageBuilder.h"
-
 namespace Gogaman
 {
 	Application *Application::s_Instance = nullptr;
@@ -27,6 +24,8 @@ namespace Gogaman
 	{
 		GM_ASSERT(s_Instance == nullptr, "Failed to construct application: instance already exists");
 		s_Instance = this;
+
+		GM_LOG_CORE_SET_LEVEL(Info);
 
 		m_Window = std::unique_ptr<Window>(Window::Create("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight));
 		GM_CONFIG.vSync ? GetWindow().EnableVerticalSynchronization() : GetWindow().DisableVerticalSynchronization();
@@ -42,32 +41,6 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
-		//GM_LOG_CORE_SET_LEVEL(Error);
-
-		RenderGraph::Graph graph;
-
-		RenderGraph::Stage &gBuffer = graph.CreateStage();
-		RenderGraph::StageBuilder builder(&graph, &gBuffer);
-		builder.CreateTextureResource("albedo");
-		builder.CreateTextureResource("normals");
-		builder.CreateTextureResource("roughness");
-
-		RenderGraph::Stage &deferredShading = graph.CreateStage();
-		RenderGraph::StageBuilder builder2(&graph, &deferredShading);
-		builder2.ReadTextureResource("albedo");
-		builder2.ReadTextureResource("normals");
-		builder2.ReadTextureResource("roughness");
-		builder2.CreateTextureResource("shadedImage");
-
-		RenderGraph::Stage &taa = graph.CreateStage();
-		RenderGraph::StageBuilder builder3(&graph, &taa);
-		builder3.WriteTextureResource("shadedImage", "antiAliasedImage");
-
-		graph.SetBackBuffer("antiAliasedImage");
-
-		graph.Compile();
-		graph.Log();
-
 		while(m_IsRunning)
 		{
 			Time::Update();

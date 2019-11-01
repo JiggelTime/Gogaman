@@ -3,14 +3,14 @@
 #include "Shader.h"
 #include "ShaderLoader.h"
 
-#include "Gogaman/Container.h"
+#include "Gogaman/StableArray.h"
 
 namespace Gogaman
 {
 	//TODO: Use a fixed-size array to store shaders instead of a resource container (assume shaders cannot be created/deleted at runtime, only overwritten)
 	//The number of shaders can be determined at compile-time using same method as for component type IDs.
 	using ShaderID        = ContainerID<uint8_t>;
-	using ShaderContainer = StaticContainer<255, Shader, uint8_t>;
+	using ShaderContainer = StableArray<255, Shader, uint8_t>;
 
 	class ShaderManager
 	{

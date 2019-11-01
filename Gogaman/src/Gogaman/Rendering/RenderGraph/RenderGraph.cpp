@@ -1,34 +1,39 @@
 #include "pch.h"
 #include "RenderGraph.h"
 
+#include "RenderGraphStageBuilder.h"
+
+#include "Gogaman/Application.h"
+
 namespace Gogaman
 {
 	namespace RenderGraph
 	{
+		void Graph::CreateStage(const Stage::SetupFunction &setupFunction, const Stage::ExecuteFunction &executeFunction)
+		{
+			static StageIndex nextIndex = 0;
+			Stage &stage = m_Stages.emplace_back(Stage(nextIndex++, setupFunction, executeFunction));
+			stage.Setup(StageBuilder(this, &stage));
+		}
+
 		void Graph::SetBackBuffer(const std::string &name)
 		{
 			m_BackBuffer = name;
 		}
 
-		Stage &Graph::CreateStage()
-		{
-			static StageIndex nextIndex = 0;
-			return m_Stages.emplace_back(Stage(nextIndex++));
-		}
-
 		void Graph::Compile()
 		{
-			for(TextureResource &i : m_TextureResources)
+			for(const VirtualTexture &i : m_VirtualTextures)
 			{
 				GM_ASSERT(!i.GetReadStages().empty() || i.GetName() == m_BackBuffer, "Failed to compile render graph | Resource \"%s\" is never used", i.GetName().c_str())
 			}
 			
 			m_StageDependencies.resize(m_Stages.size());
 
-			TextureResource &backBuffer = GetTextureResource(m_BackBuffer);
+			const VirtualTexture &backBuffer = GetVirtualTexture(m_BackBuffer);
 			GM_ASSERT(!backBuffer.GetWriteStages().empty(), "Failed to compile render graph | No stages write to back buffer")
 
-			//Generate dependencies
+			//Generate stage schedule
 			for(StageIndex i : backBuffer.GetWriteStages())
 			{
 				m_StageSchedule.emplace_back(i);
@@ -110,18 +115,18 @@ namespace Gogaman
 			}*/
 
 			//Calculate resource lifetimes
-			//Greedy allocation algorithm: last stage to use a physical resource is responsible for releasing it
-			std::unordered_set<TextureResourcePhysicalID> visitedPhysicalIDs;
+			//Greedy allocation algorithm | Last stage to use a physical resource is responsible for releasing it
+			std::unordered_set<VirtualTextureID> visitedIDs;
 			for(auto j = m_StageSchedule.rbegin(); j != m_StageSchedule.rend(); j++)
 			{
 				Stage &stage = m_Stages[*j];
-				for(TextureResourceIndex k : stage.GetReadTextureResources())
+				for(VirtualTextureIndex k : stage.GetReadTextures())
 				{
-					TextureResourcePhysicalID physicalID = m_TextureResources[k].GetPhysicalID();
-					if(visitedPhysicalIDs.count(physicalID) == 0)
+					VirtualTextureID identifier = m_VirtualTextures[k].GetID();
+					if(visitedIDs.count(identifier) == 0)
 					{
-						stage.AddDestroyTextureResource(k);
-						visitedPhysicalIDs.emplace(physicalID);
+						stage.AddDestroyTexture(k);
+						visitedIDs.emplace(identifier);
 					}
 				}
 			}
@@ -130,9 +135,9 @@ namespace Gogaman
 		void Graph::GenerateDependencies(const Stage &stage)
 		{
 			std::vector<StageIndex> &dependencies = m_StageDependencies[stage.GetIndex()];
-			for(TextureResourceIndex i : stage.GetReadTextureResources())
+			for(VirtualTextureIndex i : stage.GetReadTextures())
 			{
-				for(StageIndex j : m_TextureResources[i].GetWriteStages())
+				for(StageIndex j : m_VirtualTextures[i].GetWriteStages())
 				{
 					GM_ASSERT(j != stage.GetIndex(), "Failed to generate dependencies | Stage has self dependancy")
 
@@ -144,20 +149,33 @@ namespace Gogaman
 			}
 		}
 
-		/*
-		bool Graph::IsStagePrerequisite(const uint16_t sourceStageIndex, const uint16_t destinationStageIndex) const
+		void Graph::Execute()
 		{
-			if(sourceStageIndex == destinationStageIndex)
-				return true;
-
-			for(auto i : m_StageDependencies[destinationStageIndex])
+			for(StageIndex i : m_StageSchedule)
 			{
-				if(IsStagePrerequisite(sourceStageIndex, i))
-					return true;
-			}
+				Stage &stage = m_Stages[i];
 
-			return false;
-		}*/
+				//Realize resources
+				for(VirtualTextureIndex j : stage.GetCreateTextures())
+				{
+					VirtualTexture &virtualTexture = m_VirtualTextures[j];
+					auto &physicalTexture = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_VirtualTexturePhysicalIDs[virtualTexture.GetID()]);
+					physicalTexture.internalFormat = virtualTexture.GetDescriptor().internalFormat;
+					physicalTexture.format         = virtualTexture.GetDescriptor().format;
+					physicalTexture.interpolation  = virtualTexture.GetDescriptor().interpolation;
+					physicalTexture.levels         = virtualTexture.GetDescriptor().levels;
+					physicalTexture.Generate(virtualTexture.GetDescriptor().width, virtualTexture.GetDescriptor().height);
+				}
+
+				stage.Execute();
+
+				//Derealize resources
+				for(VirtualTextureIndex j : stage.GetDestroyTextures())
+				{
+					GM_RENDERING_CONTEXT.GetTexture2Ds().Erase(m_VirtualTexturePhysicalIDs[m_VirtualTextures[j].GetID()]);
+				}
+			}
+		}
 
 		void Graph::Log() const
 		{
@@ -165,28 +183,44 @@ namespace Gogaman
 			for(StageIndex i : m_StageSchedule)
 			{
 				const Stage &stage = m_Stages[i];
-				GM_LOG_CORE_INFO("	Stage %d", i);
+				GM_LOG_CORE_INFO("Stage %d", i);
+
+				auto LogVirtualTexture = [&](const VirtualTextureIndex index)
+				{
+					const VirtualTexture &virtualTexture = m_VirtualTextures[index];
+					GM_LOG_CORE_INFO("		%s", virtualTexture.GetName().c_str());
+				};
+
+				GM_LOG_CORE_INFO("	Creates:");
+				for (VirtualTextureIndex j : stage.GetCreateTextures())
+				{
+					LogVirtualTexture(j);
+				}
 
 				GM_LOG_CORE_INFO("	Reads:");
-				for(TextureResourceIndex j :  stage.GetReadTextureResources())
+				for(VirtualTextureIndex j :  stage.GetReadTextures())
 				{
-					const TextureResource &textureResource = m_TextureResources[j];
-					GM_LOG_CORE_INFO("		%s", textureResource.GetName().c_str());
+					LogVirtualTexture(j);
 				}
 
 				GM_LOG_CORE_INFO("	Writes:");
-				for(TextureResourceIndex j :  stage.GetWriteTextureResources())
+				for(VirtualTextureIndex j :  stage.GetWriteTextures())
 				{
-					const TextureResource &textureResource = m_TextureResources[j];
-					GM_LOG_CORE_INFO("		%s", textureResource.GetName().c_str());
+					LogVirtualTexture(j);
+				}
+				
+				GM_LOG_CORE_INFO("	Destroys:");
+				for (VirtualTextureIndex j : stage.GetDestroyTextures())
+				{
+					LogVirtualTexture(j);
 				}
 			}
 		}
 
-		TextureResource &Graph::GetTextureResource(const std::string &name)
+		VirtualTexture &Graph::GetVirtualTexture(const std::string &name)
 		{
-			GM_ASSERT(m_TextureResourceIndices.count(name) > 0, "Failed to get texture resource | Texture resource does not exist")
-			return m_TextureResources[m_TextureResourceIndices[name]];
+			GM_ASSERT(m_VirtualTextureIndices.count(name) > 0, "Failed to get texture resource | Texture resource does not exist")
+			return m_VirtualTextures[m_VirtualTextureIndices[name]];
 		}
 	}
 }

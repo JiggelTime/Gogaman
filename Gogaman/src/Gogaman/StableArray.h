@@ -3,7 +3,7 @@
 #include "Core/Base.h"
 #include "Core/Logging/Log.h"
 
-#define GM_ENABLE_CONTAINER_ID_VALIDATION 0
+#define GM_ENABLE_CONTAINER_ID_VALIDATION 1
 
 namespace Gogaman
 {
@@ -16,27 +16,27 @@ namespace Gogaman
 		IndexDataType index;
 	};
 
-	template<uint32_t maxElementCount, typename ResourceType, typename ID_IndexDataType>
-	class StaticContainer
+	template<uint32_t maxElementCount, typename ResourceType, typename IdentifierIndexDataType>
+	class StableArray
 	{
 	public:
-		inline StaticContainer()
+		inline StableArray()
 		{
-			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<ID_IndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit")
+			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<IdentifierIndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit")
 
 			m_Resources.reserve(maxElementCount);
 		}
 
-		inline StaticContainer(const StaticContainer &) = delete;
-		inline StaticContainer(StaticContainer &&)      = default;
+		inline StableArray(const StableArray &) = delete;
+		inline StableArray(StableArray &&)      = default;
 
-		inline ~StaticContainer() = default;
+		inline ~StableArray() = default;
 
-		inline StaticContainer &operator=(const StaticContainer &) = delete;
-		inline StaticContainer &operator=(StaticContainer &&)      = default;
+		inline StableArray &operator=(const StableArray &) = delete;
+		inline StableArray &operator=(StableArray &&)      = default;
 
 		template<typename ...ParameterTypes>
-		inline ResourceType &Create(ContainerID<ID_IndexDataType> &identifier, ParameterTypes &&...constructorParameters)
+		inline ResourceType &Create(ContainerID<IdentifierIndexDataType> &identifier, ParameterTypes &&...constructorParameters)
 		{
 			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
 			
@@ -47,27 +47,27 @@ namespace Gogaman
 		}
 
 		template<typename ...ParameterTypes>
-		inline ContainerID<ID_IndexDataType> Create(ParameterTypes &&...constructorParameters)
+		inline ContainerID<IdentifierIndexDataType> Create(ParameterTypes &&...constructorParameters)
 		{
 			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
 
-			ContainerID<ID_IndexDataType> identifier;
+			ContainerID<IdentifierIndexDataType> identifier;
 			identifier.index = m_Resources.size();
 			
 			m_Resources.emplace_back(std::forward<ParameterTypes>(constructorParameters)...);
 			return identifier;
 		}
 
-		inline constexpr ResourceType &Get(const ContainerID<ID_IndexDataType> identifier) { return Get(identifier.index); }
+		inline constexpr ResourceType &Get(const ContainerID<IdentifierIndexDataType> identifier) { return Get(identifier.index); }
 
-		inline constexpr ResourceType &Get(const ID_IndexDataType internalIndex)
+		inline constexpr ResourceType &Get(const IdentifierIndexDataType internalIndex)
 		{
 			GM_ASSERT(internalIndex < m_Resources.size(), "Failed to get element | Invalid internal index")
 			return m_Resources[internalIndex];
 		}
 
-		inline constexpr uint32_t GetResourceCount()    { return (uint32_t)m_Resources.size();  }
-		inline constexpr uint32_t GetMaxResourceCount() { return maxElementCount;              }
+		inline constexpr uint32_t GetResourceCount() { return (uint32_t)m_Resources.size(); }
+		inline constexpr uint32_t GetMaxResourceCount() { return maxElementCount; }
 
 		inline typename std::vector<ResourceType>::iterator       begin()       { return m_Resources.begin(); }
 		inline typename std::vector<ResourceType>::const_iterator begin() const { return m_Resources.begin(); }
@@ -78,30 +78,31 @@ namespace Gogaman
 		std::vector<ResourceType> m_Resources;
 	};
 
-	template<uint32_t maxElementCount, typename ResourceType, typename ID_IndexDataType>
-	class DynamicContainer
+	template<uint32_t maxElementCount, typename ResourceType, typename IdentifierIndexDataType>
+	class DynamicStableArray
 	{
 	private:
-		using ExternalID = ContainerID<ID_IndexDataType>;
+		using ExternalID = ContainerID<IdentifierIndexDataType>;
 
 		union InternalID
 		{
-			ID_IndexDataType index;
-			ID_IndexDataType nextFreeExternalIndex;
+			IdentifierIndexDataType index;
+			IdentifierIndexDataType nextFreeExternalIndex;
 		};
 	public:
-		inline DynamicContainer()
+		inline DynamicStableArray()
 			: m_FreelistHead(0)
 		{
-			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<ID_IndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit")
+			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<IdentifierIndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit")
 
+			m_InternalIndexExternalIndices.resize(maxElementCount);
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
 				m_Generations.reserve(maxElementCount);
 			#endif
 			m_InternalIDs.reserve(maxElementCount);
 			m_Resources.reserve(maxElementCount);
 
-			for(ID_IndexDataType i = 0; i < maxElementCount;)
+			for(IdentifierIndexDataType i = 0; i < maxElementCount;)
 			{
 				#if GM_ENABLE_CONTAINER_ID_VALIDATION
 					m_Generations.emplace_back(0);
@@ -113,31 +114,33 @@ namespace Gogaman
 			}
 		}
 
-		inline DynamicContainer(const DynamicContainer &) = delete;
-		inline DynamicContainer(DynamicContainer &&)      = default;
+		inline DynamicStableArray(const DynamicStableArray &) = delete;
+		inline DynamicStableArray(DynamicStableArray &&)      = default;
 
-		inline ~DynamicContainer() = default;
+		inline ~DynamicStableArray() = default;
 
-		inline DynamicContainer &operator=(const DynamicContainer &) = delete;
-		inline DynamicContainer &operator=(DynamicContainer &&)      = default;
+		inline DynamicStableArray &operator=(const DynamicStableArray &) = delete;
+		inline DynamicStableArray &operator=(DynamicStableArray &&)      = default;
 
 		template<typename ...ParameterTypes>
 		inline ResourceType &Create(ExternalID &identifier, ParameterTypes &&...constructorParameters)
 		{
 			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
 			
-			ID_IndexDataType externalIndex     = m_FreelistHead;
-			m_FreelistHead                     = m_InternalIDs[m_FreelistHead].nextFreeExternalIndex;
-			m_InternalIDs[externalIndex].index = m_Resources.size();
+			IdentifierIndexDataType externalIndex = m_FreelistHead;
+			m_FreelistHead = m_InternalIDs[m_FreelistHead].nextFreeExternalIndex;
+
+			IdentifierIndexDataType internalIndex = m_Resources.size();
+			m_InternalIDs[externalIndex].index = internalIndex;
+			m_InternalIndexExternalIndices[internalIndex] = externalIndex;
 
 			ResourceType &element = m_Resources.emplace_back(std::forward<ParameterTypes>(constructorParameters)...);
 			
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
 				identifier.generation = m_Generations[externalIndex];
 			#endif
-			identifier.index      = externalIndex;
+			identifier.index = externalIndex;
 
-			m_LastAddedExternalIndex = externalIndex;
 			return element;
 		}
 
@@ -146,9 +149,11 @@ namespace Gogaman
 		{
 			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
 
-			ID_IndexDataType externalIndex     = m_FreelistHead;
-			m_FreelistHead                     = m_InternalIDs[m_FreelistHead].nextFreeExternalIndex;
-			m_InternalIDs[externalIndex].index = m_Resources.size();
+			IdentifierIndexDataType externalIndex = m_FreelistHead;
+			m_FreelistHead = m_InternalIDs[m_FreelistHead].nextFreeExternalIndex;
+
+			IdentifierIndexDataType internalIndex = m_Resources.size();
+			m_InternalIDs[externalIndex].index = internalIndex;
 			
 			m_Resources.emplace_back(std::forward<ParameterTypes>(constructorParameters)...);
 
@@ -158,7 +163,7 @@ namespace Gogaman
 			#endif
 			identifier.index      = externalIndex;
 
-			m_LastAddedExternalIndex = externalIndex;
+			m_InternalIndexExternalIndices[internalIndex] = externalIndex;
 			return identifier;
 		}
 
@@ -179,7 +184,7 @@ namespace Gogaman
 			return Get(m_InternalIDs[identifier.index].index);
 		}
 
-		inline constexpr ResourceType &Get(const ID_IndexDataType internalIndex)
+		inline constexpr ResourceType &Get(const IdentifierIndexDataType internalIndex)
 		{
 			GM_ASSERT(internalIndex < m_Resources.size(), "Failed to get element | Invalid internal index")
 			return m_Resources[internalIndex];
@@ -192,22 +197,24 @@ namespace Gogaman
 				GM_ASSERT(IsIdentifierValid(identifier), "Failed to erase element | Invalid ID")
 			#endif
 
-			ID_IndexDataType internalIndex = m_InternalIDs[identifier.index].index;
+			IdentifierIndexDataType internalIndex = m_InternalIDs[identifier.index].index;
 
-			Get(internalIndex) = m_Resources.back();
+			Get(internalIndex) = std::move(m_Resources.back());
 			m_Resources.pop_back();
 
-			m_InternalIDs[m_LastAddedExternalIndex].index = internalIndex;
+			IdentifierIndexDataType lastElementExternalIndex = m_InternalIndexExternalIndices[m_Resources.size()];
+			m_InternalIDs[lastElementExternalIndex].index = internalIndex;
+			m_InternalIndexExternalIndices[internalIndex] = lastElementExternalIndex;
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
 				m_Generations[identifier.index]++;
 			#endif
 
 			m_InternalIDs[identifier.index].nextFreeExternalIndex = m_FreelistHead;
-			m_FreelistHead                                        = identifier.index;
+			m_FreelistHead = identifier.index;
 		}
 
-		inline constexpr uint32_t GetResourceCount()    { return (uint32_t)m_Resources.size();  }
-		inline constexpr uint32_t GetMaxResourceCount() { return maxElementCount;              }
+		inline constexpr uint32_t GetResourceCount() { return (uint32_t)m_Resources.size(); }
+		inline constexpr uint32_t GetMaxResourceCount() { return maxElementCount; }
 
 		inline typename std::vector<ResourceType>::iterator       begin()       { return m_Resources.begin(); }
 		inline typename std::vector<ResourceType>::const_iterator begin() const { return m_Resources.begin(); }
@@ -215,12 +222,12 @@ namespace Gogaman
 		inline typename std::vector<ResourceType>::iterator       end()         { return m_Resources.end();   }
 		inline typename std::vector<ResourceType>::const_iterator end()   const { return m_Resources.end();   }
 	private:
-		ID_IndexDataType          m_FreelistHead;
-		ID_IndexDataType          m_LastAddedExternalIndex;
+		IdentifierIndexDataType              m_FreelistHead;
+		std::vector<IdentifierIndexDataType> m_InternalIndexExternalIndices;
 		#if GM_ENABLE_CONTAINER_ID_VALIDATION
-			std::vector<uint16_t> m_Generations;
+			std::vector<uint16_t>     m_Generations;
 		#endif
-		std::vector<InternalID>   m_InternalIDs;
-		std::vector<ResourceType> m_Resources;
+		std::vector<InternalID>       m_InternalIDs;
+		std::vector<ResourceType>     m_Resources;
 	};
 }

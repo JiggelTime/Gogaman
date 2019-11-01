@@ -66,6 +66,7 @@ namespace Gogaman
 
 		InitializeRenderSurfaces();
 		InitializeShaders();
+		InitializeRenderGraph();
 
 		ImportFlexData();
 
@@ -86,7 +87,7 @@ namespace Gogaman
 
 		m_BRDF_LUT.internalFormat    = TextureInternalFormat::XY16F;
 		m_BRDF_LUT.format            = TextureFormat::XY;
-		m_BRDF_LUT.interpolationMode = TextureInterpolationMode::Bilinear;
+		m_BRDF_LUT.interpolation = TextureInterpolation::Bilinear;
 		m_BRDF_LUT.Generate(GM_BRDF_LUT_XY, GM_BRDF_LUT_XY);
 		precomputedBRDF.AddColorBuffer(m_BRDF_LUT);
 		
@@ -96,35 +97,35 @@ namespace Gogaman
 		Texture2D &geometryBufferPositionMetalness = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_G_BufferPositionMetalness);
 		geometryBufferPositionMetalness.internalFormat    = TextureInternalFormat::XYZW16F;
 		geometryBufferPositionMetalness.format            = TextureFormat::XYZW;
-		geometryBufferPositionMetalness.interpolationMode = TextureInterpolationMode::Point;
+		geometryBufferPositionMetalness.interpolation = TextureInterpolation::Point;
 		geometryBufferPositionMetalness.Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
 		geometryBuffer.AddColorBuffer(geometryBufferPositionMetalness);
 
 		Texture2D &geometryBufferNormal = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_G_BufferNormal);
 		geometryBufferNormal.internalFormat    = TextureInternalFormat::XY16F;
 		geometryBufferNormal.format            = TextureFormat::XY;
-		geometryBufferNormal.interpolationMode = TextureInterpolationMode::Point;
+		geometryBufferNormal.interpolation = TextureInterpolation::Point;
 		geometryBufferNormal.Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
 		geometryBuffer.AddColorBuffer(geometryBufferNormal);
 
 		Texture2D &geometryBufferAlbedoEmissivityRoughness = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_G_BufferAlbedoEmissivityRoughness);
 		geometryBufferAlbedoEmissivityRoughness.internalFormat    = TextureInternalFormat::XYZW8;
 		geometryBufferAlbedoEmissivityRoughness.format            = TextureFormat::XYZW;
-		geometryBufferAlbedoEmissivityRoughness.interpolationMode = TextureInterpolationMode::Bilinear;
+		geometryBufferAlbedoEmissivityRoughness.interpolation = TextureInterpolation::Bilinear;
 		geometryBufferAlbedoEmissivityRoughness.Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
 		geometryBuffer.AddColorBuffer(geometryBufferAlbedoEmissivityRoughness);
 
 		Texture2D &geometryBufferVelocity = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_G_BufferVelocity);
 		geometryBufferVelocity.internalFormat    = TextureInternalFormat::XY16F;
 		geometryBufferVelocity.format            = TextureFormat::XY;
-		geometryBufferVelocity.interpolationMode = TextureInterpolationMode::Point;
+		geometryBufferVelocity.interpolation = TextureInterpolation::Point;
 		geometryBufferVelocity.Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
 		geometryBuffer.AddColorBuffer(geometryBufferVelocity);
 
 		Texture2D &geometryBufferDepth = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_G_BufferDepth);
 		geometryBufferDepth.internalFormat    = TextureInternalFormat::Depth32;
 		geometryBufferDepth.format            = TextureFormat::X;
-		geometryBufferDepth.interpolationMode = TextureInterpolationMode::Point;
+		geometryBufferDepth.interpolation = TextureInterpolation::Point;
 		geometryBufferDepth.Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
 		geometryBuffer.AddDepthBuffer(geometryBufferDepth);
 
@@ -134,7 +135,7 @@ namespace Gogaman
 		Texture2D &finalImage = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(m_FinalImage);
 		finalImage.internalFormat    = TextureInternalFormat::XYZW16F;
 		finalImage.format            = TextureFormat::XYZW;
-		finalImage.interpolationMode = TextureInterpolationMode::Bilinear;
+		finalImage.interpolation = TextureInterpolation::Bilinear;
 		finalImage.Generate(m_RenderResolutionWidth, m_RenderResolutionHeight);
 		finalBuffer.AddColorBuffer(finalImage);
 
@@ -172,6 +173,67 @@ namespace Gogaman
 		m_ShaderManager.Get(m_PostprocessShader).UploadUniform("hdrTexture", 0);
 	}
 
+	void RenderingSystem::InitializeRenderGraph()
+	{
+		//G-Buffer stage
+		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
+		{
+			//Setup
+			builder.CreateTextureResource("albedo");
+			builder.CreateTextureResource("normals");
+			builder.CreateTextureResource("roughness");
+		},
+		[]()
+		{
+			//Execute
+			GM_LOG_CORE_INFO("Executing gBuffer stage!");
+		});
+
+		//Deferred Shading stage
+		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
+		{
+			//Setup
+			builder.ReadTextureResource("albedo");
+			builder.ReadTextureResource("normals");
+			builder.ReadTextureResource("roughness");
+			builder.CreateTextureResource("shadedImage");
+		},
+		[]()
+		{
+			//Execute
+			GM_LOG_CORE_INFO("Executing deferred shading stage!");
+		});
+
+		//TAA stage
+		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
+		{
+			//Setup
+			builder.WriteTextureResource("shadedImage", "antiAliasedImage");
+		},
+		[]()
+		{
+			//Execute
+			GM_LOG_CORE_INFO("Executing TAA stage!");
+		});
+
+		//Post process stage
+		m_RenderGraph.CreateStage([](RenderGraph::StageBuilder &&builder)
+		{
+			//Setup
+			builder.WriteTextureResource("antiAliasedImage", "postProcessedImage");
+		},
+		[]()
+		{
+			//Execute
+			GM_LOG_CORE_INFO("Executing post process stage!");
+		});
+
+		m_RenderGraph.SetBackBuffer("postProcessedImage");
+
+		m_RenderGraph.Compile();
+		//m_RenderGraph.Log();
+	}
+
 	void RenderingSystem::ImportFlexData()
 	{
 		World &world = Application::GetInstance().GetWorld();
@@ -187,35 +249,35 @@ namespace Gogaman
 			Texture2D &albedoTexture = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(material.albedo);
 			albedoTexture.internalFormat    = TextureInternalFormat::RGBW8;
 			albedoTexture.format            = TextureFormat::XYZW;
-			albedoTexture.interpolationMode = TextureInterpolationMode::Trilinear;
+			albedoTexture.interpolation = TextureInterpolation::Trilinear;
 			albedoTexture.levels            = 0;
 			albedoTexture.Generate(i.albedo.width, i.albedo.height, i.albedo.data);
 
 			Texture2D &normalTexture = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(material.normal);
 			normalTexture.internalFormat    = TextureInternalFormat::XYZW8;
 			normalTexture.format            = TextureFormat::XYZW;
-			normalTexture.interpolationMode = TextureInterpolationMode::Trilinear;
+			normalTexture.interpolation = TextureInterpolation::Trilinear;
 			normalTexture.levels            = 0;
 			normalTexture.Generate(i.normal.width, i.normal.height, i.normal.data);
 
 			Texture2D &roughnessTexture = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(material.roughness);
 			roughnessTexture.internalFormat    = TextureInternalFormat::X8;
 			roughnessTexture.format            = TextureFormat::X;
-			roughnessTexture.interpolationMode = TextureInterpolationMode::Trilinear;
+			roughnessTexture.interpolation = TextureInterpolation::Trilinear;
 			roughnessTexture.levels            = 0;
 			roughnessTexture.Generate(i.roughness.width, i.roughness.height, i.roughness.data);
 
 			Texture2D &metalnessTexture = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(material.metalness);
 			metalnessTexture.internalFormat    = TextureInternalFormat::X8;
 			metalnessTexture.format            = TextureFormat::X;
-			metalnessTexture.interpolationMode = TextureInterpolationMode::Trilinear;
+			metalnessTexture.interpolation = TextureInterpolation::Trilinear;
 			metalnessTexture.levels            = 0;
 			metalnessTexture.Generate(i.metalness.width, i.metalness.height, i.metalness.data);
 			
 			Texture2D &emissivityTexture = GM_RENDERING_CONTEXT.GetTexture2Ds().Create(material.emissivity);
 			emissivityTexture.internalFormat    = TextureInternalFormat::X8;
 			emissivityTexture.format            = TextureFormat::X;
-			emissivityTexture.interpolationMode = TextureInterpolationMode::Trilinear;
+			emissivityTexture.interpolation = TextureInterpolation::Trilinear;
 			emissivityTexture.levels            = 0;
 			emissivityTexture.Generate(i.emissivity.width, i.emissivity.height, i.emissivity.data);
 
@@ -445,6 +507,8 @@ namespace Gogaman
 
 	void RenderingSystem::Render()
 	{
+		m_RenderGraph.Execute();
+
 		//TODO: DOF Optimization: change internal format of separable circular blur convolution textures from floating point
 		
 		m_Camera.Update();
@@ -456,7 +520,7 @@ namespace Gogaman
 		
 		//Copy gBuffer depth to HDR FBO
 		RenderSurface &finalBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_FinalBuffer);
-		finalBuffer.CopyDepthBuffer(GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolationMode::Point);
+		finalBuffer.CopyDepthBuffer(GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolation::Point);
 
 		/*
 		//Forward rendering

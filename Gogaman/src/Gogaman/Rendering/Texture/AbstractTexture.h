@@ -7,7 +7,7 @@
 
 namespace Gogaman
 {
-	enum class TextureAccessMode : uint8_t
+	enum class TextureAccess : uint8_t
 	{
 		Full,
 		ReadOnly,
@@ -36,7 +36,7 @@ namespace Gogaman
 		XYZW
 	};
 
-	enum class TextureInterpolationMode : uint8_t
+	enum class TextureInterpolation : uint8_t
 	{
 		Point,
 		Bilinear,
@@ -44,7 +44,7 @@ namespace Gogaman
 		Anisotropic
 	};
 
-	enum class TextureWrapMode : uint8_t
+	enum class TextureWrap : uint8_t
 	{
 		Repeat,
 		Clamp,
@@ -65,10 +65,10 @@ namespace Gogaman
 
 		inline void Bind(const int unit) const { this->GetImplementation().Bind(unit); }
 
-		inline void BindImage(const int unit)                                                                                                  const { this->GetImplementation().BindImage(unit);                                    }
-		inline void BindImage(const int unit, const int level)                                                                                 const { this->GetImplementation().BindImage(unit, level);                             }
-		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode)                                             const { this->GetImplementation().BindImage(unit, level, accessMode);                 }
-		inline void BindImage(const int unit, const int level, const TextureAccessMode accessMode, const TextureInternalFormat internalFormat) const { this->GetImplementation().BindImage(unit, level, accessMode, internalFormat); }
+		inline void BindImage(const int unit)                                                                                          const { this->GetImplementation().BindImage(unit);                                }
+		inline void BindImage(const int unit, const int level)                                                                         const { this->GetImplementation().BindImage(unit, level);                         }
+		inline void BindImage(const int unit, const int level, const TextureAccess access)                                             const { this->GetImplementation().BindImage(unit, level, access);                 }
+		inline void BindImage(const int unit, const int level, const TextureAccess access, const TextureInternalFormat internalFormat) const { this->GetImplementation().BindImage(unit, level, access, internalFormat); }
 	
 		static inline constexpr uint8_t GetInternalFormatComponentCount(const TextureInternalFormat internalFormat)
 		{
@@ -120,27 +120,27 @@ namespace Gogaman
 
 		static inline float GetMaxAnisotropicInterpolationSamples() { return ImplementationType::GetMaxAnisotropicInterpolationSamples(); }
 
-		static inline constexpr auto GetNativeTextureAccessMode(const TextureAccessMode accessMode) { return ImplementationType::GetNativeTextureAccessMode(accessMode); }
+		static inline constexpr auto GetNativeTextureAccess(const TextureAccess access) { return ImplementationType::GetNativeTextureAccess(access); }
 
 		static inline constexpr auto GetNativeTextureInternalFormat(const TextureInternalFormat internalFormat) { return ImplementationType::GetNativeTextureInternalFormat(internalFormat); }
 
 		static inline constexpr auto GetNativeTextureFormat(const TextureFormat format) { return ImplementationType::GetNativeTextureFormat(format); }
 
-		static inline constexpr auto GetNativeTextureInterpolationMinMode(const TextureInterpolationMode interpolationMode) { return ImplementationType::GetNativeTextureInterpolationMinMode(interpolationMode); }
+		static inline constexpr auto GetNativeTextureInterpolationMin(const TextureInterpolation interpolation) { return ImplementationType::GetNativeTextureInterpolationMin(interpolation); }
 	
-		static inline constexpr auto GetNativeTextureInterpolationMagMode(const TextureInterpolationMode interpolationMode) { return ImplementationType::GetNativeTextureInterpolationMagMode(interpolationMode); }
+		static inline constexpr auto GetNativeTextureInterpolationMag(const TextureInterpolation interpolation) { return ImplementationType::GetNativeTextureInterpolationMag(interpolation); }
 	
-		static inline constexpr auto GetNativeTextureWrapMode(const TextureWrapMode wrapMode) { return ImplementationType::GetNativeTextureWrapMode(wrapMode); }
+		static inline constexpr auto GetNativeTextureWrap(const TextureWrap wrap) { return ImplementationType::GetNativeTextureWrap(wrap); }
 	protected:
 		AbstractTexture()
-			: internalFormat(TextureInternalFormat::XYZW8), format(TextureFormat::XYZW), interpolationMode(TextureInterpolationMode::Point), levels(1)
+			: internalFormat(TextureInternalFormat::XYZW8), format(TextureFormat::XYZW), interpolation(TextureInterpolation::Point), levels(1)
 		{}
 
 		~AbstractTexture() = default;
 	public:
-		TextureInternalFormat    internalFormat;
-		TextureFormat            format;
-		TextureInterpolationMode interpolationMode;
-		uint8_t                  levels;
+		TextureInternalFormat internalFormat;
+		TextureFormat         format;
+		TextureInterpolation  interpolation;
+		uint8_t               levels;
 	};
 }

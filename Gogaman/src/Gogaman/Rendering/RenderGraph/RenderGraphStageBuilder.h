@@ -1,26 +1,17 @@
 #pragma once
 
+#include "RenderGraphResource.h"
+#include "RenderGraphStage.h"
+#include "RenderGraph.h"
+
 namespace Gogaman
 {
 	namespace RenderGraph
 	{
-		/*
-		enum class ResourceState
-		{
-			Clear
-		};
-
-		struct TextureDescriptor
-		{
-			uint16_t      width, height;
-			TextureFormat format;
-			ResourceState initialState;
-		};
-		*/
-		class Stage;
-		class TextureResource;
-		class Graph;
-
+		//class Stage;
+		//class TextureResource;
+		//class Graph;
+		
 		class StageBuilder
 		{
 		public:
@@ -30,14 +21,44 @@ namespace Gogaman
 
 			inline ~StageBuilder() = default;
 
-			//auto CreateTexture(TextureDescriptor &descriptor);
-			//TODO: Template name?
-			//TODO: Automatically detect created resource?
-			TextureResource &CreateTextureResource(const std::string &name);
+			template<const char *name>
+			VirtualTexture &CreateTexture(TextureDescriptor &&descriptor)
+			{
+				VirtualTexture &textureResource = m_Graph->m_VirtualTextures.emplace_back(VirtualTexture(name, std::move(descriptor)));
+				m_Graph->m_VirtualTextureIndices[name] = textureResource.GetIndex();
 
-			TextureResource &ReadTextureResource(const std::string &name);
+				textureResource.AddWriteStage(m_Stage->GetIndex());
+				m_Stage->m_CreateTextures.emplace_back(textureResource.GetIndex());
+				m_Stage->m_WriteTextures.emplace_back(textureResource.GetIndex());
+				return textureResource;
+			}
 
-			TextureResource &WriteTextureResource(const std::string &name, const std::string &outputName);
+			template<const char *name>
+			VirtualTexture &ReadTexture()
+			{
+				VirtualTexture &textureResource = m_Graph->GetVirtualTexture(name);
+				textureResource.AddReadStage(m_Stage->GetIndex());
+				m_Stage->m_ReadTextures.emplace_back(textureResource.GetIndex());
+				return textureResource;
+			}
+
+			template<const char *name, const char *outputName>
+			VirtualTexture &WriteTexture()
+			{
+				GM_ASSERT(outputName != name, "Failed to write texture resource | Invalid output name")
+
+				VirtualTexture &input = ReadTexture<name>();
+
+				TextureDescriptor inputDescriptorCopy = input.GetDescriptor();
+				VirtualTexture &output = m_Graph->m_VirtualTextures.emplace_back(VirtualTexture(outputName, std::move(inputDescriptorCopy)));
+				m_Graph->m_VirtualTextureIndices[outputName] = output.GetIndex();
+
+				output.AddWriteStage(m_Stage->GetIndex());
+				m_Stage->m_WriteTextures.emplace_back(output.GetIndex());
+
+				output.SetID(input.GetID());
+				return output;
+			}
 		private:
 			Graph *m_Graph;
 			Stage *m_Stage;

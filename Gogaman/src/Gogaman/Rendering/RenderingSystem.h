@@ -26,6 +26,9 @@
 
 #include "PBR_Material.h"
 
+#include "RenderGraph/RenderGraph.h"
+#include "RenderGraph/RenderGraphStageBuilder.h"
+
 #include <glad.h>
 #include <GLFW/glfw3.h>
 
@@ -47,6 +50,7 @@ namespace Gogaman
 	private:
 		void InitializeRenderSurfaces();
 		void InitializeShaders();
+		void InitializeRenderGraph();
 
 		void ImportFlexData();
 
@@ -60,6 +64,8 @@ namespace Gogaman
 
 		bool OnWindowResize(WindowResizeEvent &event);
 	private:
+		RenderGraph::Graph                  m_RenderGraph;
+
 		PerspectiveCamera                   m_Camera;
 
 		ShaderManager                       m_ShaderManager;

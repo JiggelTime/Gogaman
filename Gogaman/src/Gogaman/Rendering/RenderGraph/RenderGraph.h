@@ -7,6 +7,8 @@
 #include "RenderGraphStage.h"
 #include "RenderGraphResource.h"
 
+#include "Gogaman/Rendering/RenderingContext.h"
+
 namespace Gogaman
 {
 	namespace RenderGraph
@@ -19,17 +21,19 @@ namespace Gogaman
 			inline Graph()  = default;
 			inline ~Graph() = default;
 
-			void SetBackBuffer(const std::string &name);
+			void CreateStage(const Stage::SetupFunction &setupFunction, const Stage::ExecuteFunction &executeFunction);
 			
-			Stage &CreateStage();
+			void SetBackBuffer(const std::string &name);
 
 			void Compile();
+
+			void Execute();
 
 			void Log() const;
 		private:
 			void GenerateDependencies(const Stage &stage);
 
-			TextureResource &GetTextureResource(const std::string &name);
+			VirtualTexture &GetVirtualTexture(const std::string &name);
 		private:
 			friend StageBuilder;
 
@@ -37,8 +41,9 @@ namespace Gogaman
 			std::vector<StageIndex>                               m_StageSchedule;
 			std::vector<Stage>                                    m_Stages;
 			std::string                                           m_BackBuffer;
-			std::unordered_map<std::string, TextureResourceIndex> m_TextureResourceIndices;
-			std::vector<TextureResource>                          m_TextureResources;
+			std::unordered_map<std::string, VirtualTextureIndex> m_VirtualTextureIndices;
+			std::unordered_map<VirtualTextureID, Texture2D_ID>   m_VirtualTexturePhysicalIDs;
+			std::vector<VirtualTexture>                          m_VirtualTextures;
 		};
 	}
 }

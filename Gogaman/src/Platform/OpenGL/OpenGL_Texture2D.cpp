@@ -21,7 +21,7 @@ namespace Gogaman
 	{
 		GM_ASSERT(width  > 0, "Failed to generate texture2D: invalid width")
 		GM_ASSERT(height > 0, "Failed to generate texture2D: invalid height")
-		GM_ASSERT((interpolationMode != TextureInterpolationMode::Trilinear) || levels != 1, "Failed to generate texture2D with trilinear interpolation: texture has only 1 level")
+		GM_ASSERT((interpolationMode != TextureInterpolation::Trilinear) || levels != 1, "Failed to generate texture2D with trilinear interpolation: texture has only 1 level")
 
 		this->width  = width;
 		this->height = height;
@@ -34,11 +34,11 @@ namespace Gogaman
 			glTextureSubImage2D(m_RendererID, 0, 0, 0, width, height, GetNativeTextureFormat(format), GL_UNSIGNED_BYTE, imageData);
 
 		//Set properties
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S,     GetNativeTextureWrapMode(wrapS));
-		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T,     GetNativeTextureWrapMode(wrapT));
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_S,     GetNativeTextureWrap(wrapS));
+		glTextureParameteri(m_RendererID, GL_TEXTURE_WRAP_T,     GetNativeTextureWrap(wrapT));
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MIN_FILTER, GetNativeTextureInterpolationMinMode(interpolationMode));
 		glTextureParameteri(m_RendererID, GL_TEXTURE_MAG_FILTER, GetNativeTextureInterpolationMagMode(interpolationMode));
-		if(interpolationMode == TextureInterpolationMode::Anisotropic)
+		if(interpolationMode == TextureInterpolation::Anisotropic)
 		{
 			glTextureParameterf(m_RendererID, GL_TEXTURE_MAX_ANISOTROPY_EXT, GetMaxAnisotropicInterpolationSamples());
 		}

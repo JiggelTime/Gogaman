@@ -76,22 +76,22 @@ namespace Gogaman
 			glClearNamedFramebufferfv(m_RendererID, GL_COLOR, i, clearValues);
 	}
 
-	void RenderSurface::CopyColorBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const
+	void RenderSurface::CopyColorBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolation interpolation) const
 	{
-		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface color buffer | Invalid interpolation mode")
-		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolationMode));
+		GM_ASSERT(interpolation != TextureInterpolation::Trilinear, "Failed to blit render surface color buffer | Invalid interpolation mode")
+		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_COLOR_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolation));
 	}
 
-	void RenderSurface::CopyDepthBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const
+	void RenderSurface::CopyDepthBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolation interpolation) const
 	{
-		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface depth buffer | Invalid interpolation mode")
-		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolationMode));
+		GM_ASSERT(interpolation != TextureInterpolation::Trilinear, "Failed to blit render surface depth buffer | Invalid interpolation mode")
+		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolation));
 	}
 
-	void RenderSurface::CopyStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const
+	void RenderSurface::CopyStencilBuffer(const RenderSurface &source, const int width, const int height, const TextureInterpolation interpolation) const
 	{
-		GM_ASSERT(interpolationMode != TextureInterpolationMode::Trilinear, "Failed to blit render surface stencil buffer | Invalid interpolation mode")
-		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolationMode));
+		GM_ASSERT(interpolation != TextureInterpolation::Trilinear, "Failed to blit render surface stencil buffer | Invalid interpolation mode")
+		glBlitNamedFramebuffer(source.GetRendererID(), m_RendererID, 0, 0, width, height, 0, 0, width, height, GL_STENCIL_BUFFER_BIT, Texture::GetNativeTextureInterpolationMinMode(interpolation));
 	}
 
 	void RenderSurface::ClearBackBuffer()

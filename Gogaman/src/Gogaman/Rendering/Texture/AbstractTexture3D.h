@@ -18,12 +18,12 @@ namespace Gogaman
 		void Generate(const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t *imageData = nullptr) { this->GetImplementation().Generate(width, height, depth, imageData); }
 	protected:
 		AbstractTexture3D()
-			: width(0), height(0), depth(0), wrapS(TextureWrapMode::Repeat), wrapT(TextureWrapMode::Repeat), wrapR(TextureWrapMode::Repeat)
+			: width(0), height(0), depth(0), wrapS(TextureWrap::Repeat), wrapT(TextureWrap::Repeat), wrapR(TextureWrap::Repeat)
 		{}
 
 		~AbstractTexture3D() = default;
 	public:
 		uint16_t        width, height, depth;
-		TextureWrapMode wrapS, wrapT, wrapR;
+		TextureWrap wrapS, wrapT, wrapR;
 	};
 }

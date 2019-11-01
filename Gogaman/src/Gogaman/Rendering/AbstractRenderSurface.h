@@ -35,9 +35,9 @@ namespace Gogaman
 		
 		inline void Clear()  const { this->GetImplementation().Clear();  }
 
-		inline void CopyColorBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().CopyColorBuffer(source,   width, height, interpolationMode); }
-		inline void CopyDepthBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().CopyDepthBuffer(source,   width, height, interpolationMode); }
-		inline void CopyStencilBuffer(const ImplementationType &source, const int width, const int height, const TextureInterpolationMode interpolationMode) const { this->GetImplementation().CopyStencilBuffer(source, width, height, interpolationMode); }
+		inline void CopyColorBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolation interpolation) const { this->GetImplementation().CopyColorBuffer(source,   width, height, interpolation); }
+		inline void CopyDepthBuffer(const   ImplementationType &source, const int width, const int height, const TextureInterpolation interpolation) const { this->GetImplementation().CopyDepthBuffer(source,   width, height, interpolation); }
+		inline void CopyStencilBuffer(const ImplementationType &source, const int width, const int height, const TextureInterpolation interpolation) const { this->GetImplementation().CopyStencilBuffer(source, width, height, interpolation); }
 
 		inline constexpr int GetColorAttachmentCount() const { return this->GetImplementation().GetColorAttachmentCount(); }
 		inline           int GetRenderTargetCount()    const { return this->GetImplementation().GetRenderTargetCount();    }
