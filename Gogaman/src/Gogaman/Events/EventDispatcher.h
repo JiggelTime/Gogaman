@@ -12,7 +12,7 @@ namespace Gogaman
 		{}
 
 		template<typename EventType, typename CallbackFunction>
-		bool Dispatch(const CallbackFunction &callbackFunction)
+		inline bool Dispatch(const CallbackFunction &callbackFunction)
 		{
 			if(m_Event.GetType() == EventType::GetTypeStatic())
 			{

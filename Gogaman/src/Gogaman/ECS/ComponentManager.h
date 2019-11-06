@@ -31,8 +31,8 @@ namespace Gogaman
 
 		inline void AddComponent(const EntityID entity, ComponentType &&component)
 		{
-			GM_ASSERT(m_ComponentCount < GM_MAX_COMPONENTS, "Failed to add entity component: maximum number of components (%d) reached", GM_MAX_COMPONENTS)
-			//Write component at next free index
+			GM_ASSERT(m_ComponentCount < GM_MAX_COMPONENTS, "Failed to add entity component: maximum number of components (%d) reached", GM_MAX_COMPONENTS);
+
 			m_Components[m_ComponentCount] = std::move(component);
 			m_EntityComponentIndices[entity] = m_ComponentCount++;
 		}
@@ -40,24 +40,20 @@ namespace Gogaman
 		inline ComponentType &GetComponent(const EntityID entity)
 		{
 			int componentIndex = m_EntityComponentIndices[entity];
-			GM_ASSERT(componentIndex >= 0 && componentIndex < GM_MAX_COMPONENTS, "Failed to get entity component: invalid entity component index")
+			GM_ASSERT(componentIndex >= 0 && componentIndex < GM_MAX_COMPONENTS, "Failed to get entity component: invalid entity component index");
 			return m_Components[componentIndex];
 		}
 
 		inline void RemoveComponent(const EntityID entity)
 		{
 			int    componentIndex     = m_EntityComponentIndices[entity];
-			GM_ASSERT(componentIndex >= 0 && componentIndex < GM_MAX_COMPONENTS, "Failed to remove entity component: invalid entity component index")
+			GM_ASSERT(componentIndex >= 0 && componentIndex < GM_MAX_COMPONENTS, "Failed to remove entity component: invalid entity component index");
 			int    lastComponentIndex = m_ComponentCount - 1;
 			Entity lastEntity         = m_ComponentIndexEntities[lastComponentIndex];
 			
-			//Override component
 			m_Components[componentIndex] = m_Components[lastComponentIndex];
-			//Remove entry from hash table
 			m_EntityComponentIndices.erase(entity);
-			//Set last entity's index to index of removed entity
 			m_EntityComponentIndices[lastEntity]     = componentIndex;
-			//Set entity at removed component to last entity
 			m_ComponentIndexEntities[componentIndex] = lastEntity;
 			m_ComponentCount--;
 		}

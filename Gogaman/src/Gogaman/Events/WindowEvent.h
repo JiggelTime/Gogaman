@@ -33,8 +33,8 @@ namespace Gogaman
 		static constexpr EventType GetTypeStatic() { return EventType::WindowResize; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
-		inline int GetWidth()  const { return m_Width; }
-		inline int GetHeight() const { return m_Height; }
+		inline constexpr int GetWidth()  const { return m_Width; }
+		inline constexpr int GetHeight() const { return m_Height; }
 	private:
 		int m_Width, m_Height;
 	};

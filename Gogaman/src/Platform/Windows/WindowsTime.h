@@ -6,7 +6,7 @@
 
 namespace Gogaman
 {
-	class Time : public AbstractTime<Time>
+	GM_CLASS_IMPLEMENTATION(WindowsTime, AbstractTime)
 	{
 	public:
 		static inline const float GetTime() { return (float)glfwGetTime(); }

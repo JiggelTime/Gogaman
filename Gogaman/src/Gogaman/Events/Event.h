@@ -24,8 +24,6 @@ namespace Gogaman
 	class Event
 	{
 	public:
-		//TODO: Use CRTP ?
-		//constexpr EventType GetType() const { return EventType::GetType(); }
 		virtual EventType     GetType()     const = 0;
 		virtual EventCategory GetCategory() const = 0;
 	public:

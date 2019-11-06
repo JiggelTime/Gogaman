@@ -20,17 +20,17 @@ namespace Gogaman
 	class StableArray
 	{
 	public:
-		inline StableArray()
+		StableArray()
 		{
-			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<IdentifierIndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit")
+			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<IdentifierIndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit");
 
 			m_Resources.reserve(maxElementCount);
 		}
 
-		inline StableArray(const StableArray &) = delete;
-		inline StableArray(StableArray &&)      = default;
+		StableArray(const StableArray &) = delete;
+		StableArray(StableArray &&)      = default;
 
-		inline ~StableArray() = default;
+		~StableArray() = default;
 
 		inline StableArray &operator=(const StableArray &) = delete;
 		inline StableArray &operator=(StableArray &&)      = default;
@@ -38,7 +38,7 @@ namespace Gogaman
 		template<typename ...ParameterTypes>
 		inline ResourceType &Create(ContainerID<IdentifierIndexDataType> &identifier, ParameterTypes &&...constructorParameters)
 		{
-			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
+			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1);
 			
 			identifier.index = m_Resources.size();
 
@@ -49,7 +49,7 @@ namespace Gogaman
 		template<typename ...ParameterTypes>
 		inline ContainerID<IdentifierIndexDataType> Create(ParameterTypes &&...constructorParameters)
 		{
-			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
+			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1);
 
 			ContainerID<IdentifierIndexDataType> identifier;
 			identifier.index = m_Resources.size();
@@ -62,7 +62,7 @@ namespace Gogaman
 
 		inline constexpr ResourceType &Get(const IdentifierIndexDataType internalIndex)
 		{
-			GM_ASSERT(internalIndex < m_Resources.size(), "Failed to get element | Invalid internal index")
+			GM_ASSERT(internalIndex < m_Resources.size(), "Failed to get element | Invalid internal index");
 			return m_Resources[internalIndex];
 		}
 
@@ -90,10 +90,10 @@ namespace Gogaman
 			IdentifierIndexDataType nextFreeExternalIndex;
 		};
 	public:
-		inline DynamicStableArray()
+		DynamicStableArray()
 			: m_FreelistHead(0)
 		{
-			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<IdentifierIndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit")
+			GM_STATIC_ASSERT(maxElementCount <= std::numeric_limits<IdentifierIndexDataType>::max(), "Failed to construct container | Max element count exceeds ID type limit");
 
 			m_InternalIndexExternalIndices.resize(maxElementCount);
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
@@ -114,10 +114,10 @@ namespace Gogaman
 			}
 		}
 
-		inline DynamicStableArray(const DynamicStableArray &) = delete;
-		inline DynamicStableArray(DynamicStableArray &&)      = default;
+		DynamicStableArray(const DynamicStableArray &) = delete;
+		DynamicStableArray(DynamicStableArray &&)      = default;
 
-		inline ~DynamicStableArray() = default;
+		~DynamicStableArray() = default;
 
 		inline DynamicStableArray &operator=(const DynamicStableArray &) = delete;
 		inline DynamicStableArray &operator=(DynamicStableArray &&)      = default;
@@ -125,7 +125,7 @@ namespace Gogaman
 		template<typename ...ParameterTypes>
 		inline ResourceType &Create(ExternalID &identifier, ParameterTypes &&...constructorParameters)
 		{
-			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
+			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1);
 			
 			IdentifierIndexDataType externalIndex = m_FreelistHead;
 			m_FreelistHead = m_InternalIDs[m_FreelistHead].nextFreeExternalIndex;
@@ -147,7 +147,7 @@ namespace Gogaman
 		template<typename ...ParameterTypes>
 		inline ExternalID Create(ParameterTypes &&...constructorParameters)
 		{
-			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1)
+			GM_ASSERT(m_Resources.size() < maxElementCount, "Failed to add element | Resource count exceeds %d", maxElementCount - 1);
 
 			IdentifierIndexDataType externalIndex = m_FreelistHead;
 			m_FreelistHead = m_InternalIDs[m_FreelistHead].nextFreeExternalIndex;
@@ -172,29 +172,29 @@ namespace Gogaman
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
 				return identifier.generation == m_Generations[identifier.index];
 			#else
-				GM_ASSERT(false, "Failed to validate ID | Container ID validation is disabled")
+				GM_ASSERT(false, "Failed to validate ID | Container ID validation is disabled");
 			#endif
 		}
 
 		inline constexpr ResourceType &Get(const ExternalID identifier)
 		{
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
-				GM_ASSERT(IsIdentifierValid(identifier), "Failed to get element | Identifier's generation does not match current generation")
+				GM_ASSERT(IsIdentifierValid(identifier), "Failed to get element | Identifier's generation does not match current generation");
 			#endif
 			return Get(m_InternalIDs[identifier.index].index);
 		}
 
 		inline constexpr ResourceType &Get(const IdentifierIndexDataType internalIndex)
 		{
-			GM_ASSERT(internalIndex < m_Resources.size(), "Failed to get element | Invalid internal index")
+			GM_ASSERT(internalIndex < m_Resources.size(), "Failed to get element | Invalid internal index");
 			return m_Resources[internalIndex];
 		}
 
 		inline void Erase(const ExternalID identifier)
 		{
-			GM_ASSERT(m_Resources.size() > 0,            "Failed to erase element | Container is empty")
+			GM_ASSERT(m_Resources.size() > 0,            "Failed to erase element | Container is empty");
 			#if GM_ENABLE_CONTAINER_ID_VALIDATION
-				GM_ASSERT(IsIdentifierValid(identifier), "Failed to erase element | Invalid ID")
+				GM_ASSERT(IsIdentifierValid(identifier), "Failed to erase element | Invalid ID");
 			#endif
 
 			IdentifierIndexDataType internalIndex = m_InternalIDs[identifier.index].index;

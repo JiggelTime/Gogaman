@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "WindowsWindow.h"
 
-#include "Gogaman/Core/Base.h"
 #include "Gogaman/Core/Logging/Log.h"
+
+#include <GLFW/glfw3.h>
 
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"
@@ -11,12 +12,12 @@
 
 namespace Gogaman
 {
-	bool WindowsWindow::s_GLFW_Initialized = false;
+	bool WindowsWindow::s_IsGLFW_Initialized = false;
 
-	WindowsWindow::WindowsWindow(const char *title, const int width, const int height)
-		: Window(title, width, height)
+	WindowsWindow::WindowsWindow(const char *title, const uint16_t width, const uint16_t height)
+		: AbstractWindow<WindowsWindow>(title, width, height)
 	{
-		if(!s_GLFW_Initialized)
+		if(!s_IsGLFW_Initialized)
 		{
 			//Initialize GLFW
 			glfwSetErrorCallback(GLFW_ErrorCallback);
@@ -24,26 +25,26 @@ namespace Gogaman
 			bool glfwSuccess = glfwInit();
 			GM_ASSERT(glfwSuccess, "Failed to intitialize GLFW");
 
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-			glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+			glfwWindowHint(GLFW_RESIZABLE,  GLFW_FALSE);
 
-			s_GLFW_Initialized = true;
+			s_IsGLFW_Initialized = true;
 		}
 		
-		//Create GLFW window
 		m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, nullptr, nullptr);
 		GM_ASSERT(m_Window, "Failed to create GLFW window");
 
-		m_RenderingContext = std::make_unique<RenderingContext>(this);
-		m_RenderingContext->Initialize();
+		m_Device = std::make_unique<RHI::Device>();
+		m_Device->Initialize(m_Window);
 
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		
-		//Set GLFW event callbacks
+		//Set GLFW callback functions
 		//Window
-		glfwSetWindowSizeCallback(m_Window,  [](GLFWwindow *window, int width, int height) { WindowResizeEvent event(width, height); });
+		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width, int height) { WindowResizeEvent event(width, height); });
+
 		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow *window) { WindowCloseEvent event; });
+
 		glfwSetCursorEnterCallback(m_Window, [](GLFWwindow *window, int entered)
 		{
 			if(entered)
@@ -51,6 +52,7 @@ namespace Gogaman
 			else
 				EventManager::GetInstance().Send(std::move(std::make_unique<WindowUnfocusEvent>()));
 		});
+
 		//Keyboard
 		glfwSetKeyCallback(m_Window, [](GLFWwindow *window, int key, int scancode, int action, int mods)
 		{
@@ -61,9 +63,12 @@ namespace Gogaman
 			else
 				EventManager::GetInstance().Send(std::move(std::make_unique<KeyReleaseEvent>(key)));
 		});
+
 		//Mouse
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos)    { EventManager::GetInstance().Send(std::move(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos)));         });
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos) { EventManager::GetInstance().Send(std::move(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos))); });
+		
 		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventManager::GetInstance().Send(std::move(std::make_unique<MouseScrollEvent>((float)xoffset, (float)yoffset))); });
+		
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow *window, int button, int action, int mods)
 		{
 			if(action == GLFW_PRESS)
@@ -75,40 +80,36 @@ namespace Gogaman
 
 	WindowsWindow::~WindowsWindow()
 	{
-		if(m_Window != nullptr)
-			glfwDestroyWindow(m_Window);
+		m_Device.reset();
+
+		glfwDestroyWindow(m_Window);
 	}
 
 	void WindowsWindow::GLFW_ErrorCallback(const int error, const char *description)
 	{
-		GM_LOG_CORE_ERROR("GLFW error %d, %s", error, description);
-	}
-
-	Window *Window::Create(const char *title, const int width, const int height)
-	{
-		return new WindowsWindow(title, width, height);
+		GM_LOG_CORE_ERROR("GLFW error | Error code: %d | Message: %s", error, description);
 	}
 	
 	void WindowsWindow::Update()
 	{
 		glfwPollEvents();
-		m_RenderingContext->SwapBuffers();
-	}
-
-	void Window::Shutdown()
-	{
-		glfwTerminate();
+		//m_RenderingContext->SwapBuffers();
 	}
 
 	void WindowsWindow::EnableVerticalSynchronization()
 	{
-		glfwSwapInterval(1);
-		m_VerticalSynchronization = true;
+		//glfwSwapInterval(1);
+		m_IsVerticalSynchronizationEnabled = true;
 	}
 
 	void WindowsWindow::DisableVerticalSynchronization()
 	{
-		glfwSwapInterval(0);
-		m_VerticalSynchronization = false;
+		//glfwSwapInterval(0);
+		m_IsVerticalSynchronizationEnabled = false;
+	}
+
+	void WindowsWindow::Shutdown()
+	{
+		glfwTerminate();
 	}
 }

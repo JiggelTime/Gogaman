@@ -4,7 +4,7 @@
 
 namespace Gogaman
 {
-	class Input : public AbstractInput<Input>
+	GM_CLASS_IMPLEMENTATION(WindowsInput, AbstractInput)
 	{
 	public:
 		//Keyboard
@@ -13,7 +13,7 @@ namespace Gogaman
 		static bool IsMouseButtonPressed(const int scancode);
 		static const glm::vec2 &GetMousePosition();
 	private:
-		Input()  = delete;
-		~Input() = delete;
+		WindowsInput()  = delete;
+		~WindowsInput() = delete;
 	};
 }

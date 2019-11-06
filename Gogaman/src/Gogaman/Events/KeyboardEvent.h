@@ -9,7 +9,7 @@ namespace Gogaman
 	public:
 		inline virtual EventCategory GetCategory() const override { return EventCategory::Keyboard; }
 
-		inline int GetKeycode() const { return m_Scancode; }
+		inline constexpr int GetKeycode() const { return m_Scancode; }
 	protected:
 		KeyboardEvent(const int scancode)
 			: m_Scancode(scancode)

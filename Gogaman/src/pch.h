@@ -14,6 +14,7 @@
 #include <functional>
 #include <random>
 #include <limits>
+#include <optional>
 
 #include <bitset>
 #include <array>

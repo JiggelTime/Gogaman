@@ -1,14 +1,19 @@
 ﻿#pragma once
 
-#define GM_RENDERING_API_OPENGL 1
-#define GM_RENDERING_API_VULKAN 2
+#include "Logging/Log.h"
 
-#define GM_RENDERING_API GM_RENDERING_API_OPENGL
+#define GM_RENDERING_API_NONE   0
+#define GM_RENDERING_API_VULKAN 1
 
+#define GM_RENDERING_API GM_RENDERING_API_VULKAN
+
+//Debug vs release build features
 #if 1
-	#define GM_ASSERTIONS_ENABLED 1
+	#define GM_ASSERTIONS_ENABLED    1
+	#define GM_RHI_DEBUGGING_ENABLED 1
 #else
-	#define GM_ASSERTIONS_ENABLED 0
+	#define GM_ASSERTIONS_ENABLED    0
+	#define GM_RHI_DEBUGGING_ENABLED 0
 #endif
 
 #if GM_ASSERTIONS_ENABLED
@@ -29,12 +34,6 @@
 #else
 	#define GM_ASSERT(x, ...) ;
 	#define GM_STATIC_ASSERT(x, message)
-#endif
-
-#if 1
-	#define GM_DEBUG_SHADER_UNIFORMS_ENABLED 1
-#else
-	#define GM_DEBUG_SHADER_UNIFORMS_ENABLED 0
 #endif
 
 #define GM_FORCE_INLINE __forceinline

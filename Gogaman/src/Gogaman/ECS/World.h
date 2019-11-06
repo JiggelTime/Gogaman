@@ -91,7 +91,7 @@ namespace Gogaman
 		template<typename ComponentType>
 		inline ComponentManager<ComponentType> *GetComponentManager()
 		{
-			int componentTypeID = GetComponentTypeID<ComponentType>();
+			uint32_t componentTypeID = GetComponentTypeID<ComponentType>();
 			if(componentTypeID >= m_ComponentManagers.size())
 				m_ComponentManagers.resize(componentTypeID + 1);
 

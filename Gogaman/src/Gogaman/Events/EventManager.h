@@ -26,7 +26,7 @@ namespace Gogaman
 		static EventManager &GetInstance() { return *s_Instance; }
 	private:
 		EventManager();
-		~EventManager();
+		~EventManager() = default;
 	private:
 		std::vector<EventListener *>       m_Listeners;
 		std::queue<std::unique_ptr<Event>> m_Events;

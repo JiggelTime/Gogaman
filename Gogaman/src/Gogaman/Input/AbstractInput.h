@@ -30,8 +30,10 @@ namespace Gogaman
 		static inline const glm::vec2 &GetPreviousMousePosition() { return m_PreviousMousePosition;                }
 		static inline const glm::vec2 &GetDeltaMousePosition()    { return m_DeltaMousePosition;                   }
 	private:
-		inline AbstractInput()  = delete;
-		inline ~AbstractInput() = delete;
+		friend ImplementationType;
+	private:
+		AbstractInput()  = delete;
+		~AbstractInput() = delete;
 	private:
 		static inline glm::vec2 m_PreviousMousePosition = glm::vec2(0.0f);
 		static inline glm::vec2 m_DeltaMousePosition    = glm::vec2(0.0f);

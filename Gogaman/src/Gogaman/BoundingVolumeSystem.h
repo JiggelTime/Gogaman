@@ -21,7 +21,7 @@ namespace Gogaman
 			AddEntityGroup(std::move(group));
 		}
 
-		virtual void Update() override
+		inline virtual void Update() override
 		{
 			for(const auto i : m_EntityGroups[0].entities)
 			{

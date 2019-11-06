@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core/CRTP.h"
+#include "CRTP.h"
 
 namespace Gogaman
 {
@@ -17,9 +17,15 @@ namespace Gogaman
 			m_FrameCount++;
 		}
 
-		static inline const float    GetTime()       { return ImplementationType::GetTime(); }
-		static inline const float    GetDeltaTime()  { return m_DeltaTime;                   }
-		static inline const uint32_t GetFrameCount() { return m_FrameCount;                  }
+		static inline const float GetTime() { return ImplementationType::GetTime(); }
+
+		static inline constexpr const float    GetDeltaTime()  { return m_DeltaTime;  }
+		static inline constexpr const uint32_t GetFrameCount() { return m_FrameCount; }
+	private:
+		friend ImplementationType;
+	private:
+		AbstractTime()  = delete;
+		~AbstractTime() = delete;
 	private:
 		static inline float    m_PreviousTime = 0.0f;
 		static inline float    m_DeltaTime    = 0.0f;

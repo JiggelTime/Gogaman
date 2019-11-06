@@ -7,12 +7,14 @@ namespace Gogaman
 	class CRTP
 	{
 	protected:
-		ImplementationType       &GetImplementation()       { return static_cast<ImplementationType       &>(*this); }
-		ImplementationType const &GetImplementation() const { return static_cast<ImplementationType const &>(*this); }
+		inline       ImplementationType &GetImplementation()       { return static_cast<ImplementationType       &>(*this); }
+		inline const ImplementationType &GetImplementation() const { return static_cast<const ImplementationType &>(*this); }
+	private:
+		friend AbstractType<ImplementationType>;
 	private:
 		CRTP()
 		{}
-	private:
-		friend AbstractType<ImplementationType>;
 	};
 }
+
+#define GM_CLASS_IMPLEMENTATION(x, y) class x : public y<x>

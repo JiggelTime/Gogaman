@@ -1,29 +1,36 @@
 #pragma once
 
-#include "Gogaman/Window.h"
+#include "Gogaman/Core/AbstractWindow.h"
 
-#include <glad.h>
-#include <GLFW/glfw3.h>
+#include "Gogaman/Core/Base.h"
+
+#include "Gogaman/RenderHardwareInterface/Device.h"
+
+struct GLFWwindow;
 
 namespace Gogaman
 {
-	class WindowsWindow : public Window
+	GM_CLASS_IMPLEMENTATION(WindowsWindow, AbstractWindow)
 	{
 	public:
-		WindowsWindow(const char *title, const int width, const int height);
+		WindowsWindow(const char *title, const uint16_t width, const uint16_t height);
 		~WindowsWindow();
 
-		virtual void Update() override;
+		void Update();
 
-		virtual void EnableVerticalSynchronization()  override;
-		virtual void DisableVerticalSynchronization() override;
+		inline constexpr GLFWwindow *GetNativeWindow() { return m_Window; }
+		
+		void EnableVerticalSynchronization();
+		void DisableVerticalSynchronization();
 
-		virtual void *GetNativeWindow() const override { return m_Window; }
+		static void Shutdown();
 	private:
 		static void GLFW_ErrorCallback(const int error, const char *description);
 	private:
 		GLFWwindow *m_Window;
-		
-		static bool s_GLFW_Initialized;
+
+		std::unique_ptr<RHI::Device> m_Device;
+
+		static bool s_IsGLFW_Initialized;
 	};
 }

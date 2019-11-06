@@ -23,8 +23,8 @@ namespace Gogaman
 		static constexpr EventType GetTypeStatic() { return EventType::MouseMove; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
-		inline float GetPositionX() const { return m_PositionX; }
-		inline float GetPositionY() const { return m_PositionY; }
+		inline constexpr float GetPositionX() const { return m_PositionX; }
+		inline constexpr float GetPositionY() const { return m_PositionY; }
 	private:
 		float m_PositionX;
 		float m_PositionY;
@@ -40,8 +40,8 @@ namespace Gogaman
 		static constexpr EventType GetTypeStatic() { return EventType::MouseScroll; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
-		inline float GetOffsetX() const { return m_OffsetX; }
-		inline float GetOffsetY() const { return m_OffsetY; }
+		inline constexpr float GetOffsetX() const { return m_OffsetX; }
+		inline constexpr float GetOffsetY() const { return m_OffsetY; }
 	private:
 		float m_OffsetX;
 		float m_OffsetY;
@@ -57,7 +57,7 @@ namespace Gogaman
 		static constexpr EventType GetTypeStatic() { return EventType::MouseButtonPress; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
-		inline int GetButton() const { return m_Scancode; }
+		inline constexpr int GetButton() const { return m_Scancode; }
 	private:
 		int m_Scancode;
 	};
@@ -72,7 +72,7 @@ namespace Gogaman
 		static constexpr EventType GetTypeStatic() { return EventType::MouseButtonRelease; }
 		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
 
-		inline int GetButton() const { return m_Scancode; }
+		inline constexpr int GetButton() const { return m_Scancode; }
 	private:
 		int m_Scancode;
 	};
