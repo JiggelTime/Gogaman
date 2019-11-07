@@ -180,36 +180,52 @@ namespace Gogaman
 			VkQueueFamilyProperties *queueFamilyProperties = new VkQueueFamilyProperties[queueFamilyCount];
 			vkGetPhysicalDeviceQueueFamilyProperties(m_VulkanPhysicalDevice, &queueFamilyCount, queueFamilyProperties);
 
-			std::optional<uint32_t> directQueueIndex, computeQueueIndex, copyQueueIndex;
+			std::optional<uint32_t> directQueueIndex, computeQueueIndex, copyQueueIndex, presentQueueIndex;
 			for(uint32_t i = 0; i < queueFamilyCount; i++)
 			{
 				VkQueueFlags flags = queueFamilyProperties[i].queueFlags;
 
-				if(!directQueueIndex.has_value()  && (flags & VK_QUEUE_GRAPHICS_BIT))
+				if(!directQueueIndex.has_value() && (flags & VK_QUEUE_GRAPHICS_BIT))
 					directQueueIndex = i;
+
 				if(!computeQueueIndex.has_value() && (flags & VK_QUEUE_COMPUTE_BIT))
-					computeQueueIndex  = i;
-				if(!copyQueueIndex.has_value()    && (flags & VK_QUEUE_TRANSFER_BIT))
+					computeQueueIndex = i;
+
+				if(!copyQueueIndex.has_value() && (flags & VK_QUEUE_TRANSFER_BIT))
 					copyQueueIndex = i;
+
+				VkBool32 isPresentationSupported;
+				vkGetPhysicalDeviceSurfaceSupportKHR(m_VulkanPhysicalDevice, i, m_VulkanSurface, &isPresentationSupported);
+				if(!presentQueueIndex.has_value() && isPresentationSupported)
+					presentQueueIndex = i;
 			}
 
 			delete[] queueFamilyProperties;
 
-			GM_ASSERT(directQueueIndex.has_value(),  "Failed to initialize Vulkan | Direct command queue not found");
-			GM_ASSERT(computeQueueIndex.has_value(), "Failed to initialize Vulkan | Compute command queue not found");
-			GM_ASSERT(copyQueueIndex.has_value(),    "Failed to initialize Vulkan | Copy command queue not found");
+			GM_ASSERT(directQueueIndex.has_value(),  "Failed to initialize Vulkan | No physical devices supporting direct command queue found");
+			GM_ASSERT(computeQueueIndex.has_value(), "Failed to initialize Vulkan | No physical devices supporting compute command queue found");
+			GM_ASSERT(copyQueueIndex.has_value(),    "Failed to initialize Vulkan | No physical devices supporting copy command queue found");
+			GM_ASSERT(presentQueueIndex.has_value(), "Failed to initialize Vulkan | No physical devices supporting presentation to window surface found");
 
-			VkBool32 isSurfaceSupported;
-			vkGetPhysicalDeviceSurfaceSupportKHR(m_VulkanPhysicalDevice, directQueueIndex.value(), m_VulkanSurface, &isSurfaceSupported);
-			GM_ASSERT(isSurfaceSupported, "Failed to initialize Vulkan | Physical device does not support presentation to window surface");
+			m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Direct]  = directQueueIndex.value();
+			m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Compute] = computeQueueIndex.value();
+			m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Copy]    = copyQueueIndex.value();
 
-			VkDeviceQueueCreateInfo deviceQueueDescriptor = {};
-			deviceQueueDescriptor.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-			deviceQueueDescriptor.queueFamilyIndex = directQueueIndex.value();
-			deviceQueueDescriptor.queueCount       = 1;
+			std::unordered_set<uint32_t> uniqueQueueTypeIndices = { directQueueIndex.value(), computeQueueIndex.value(), copyQueueIndex.value(), presentQueueIndex.value() };
+			std::vector<VkDeviceQueueCreateInfo> deviceQueueDescriptors;
+			deviceQueueDescriptors.reserve(uniqueQueueTypeIndices.size());
 			const float queuePriority = 1.0f;
-			deviceQueueDescriptor.pQueuePriorities = &queuePriority;
-
+			for(auto i : uniqueQueueTypeIndices)
+			{
+				VkDeviceQueueCreateInfo descriptor;
+				descriptor = {};
+				descriptor.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+				descriptor.queueFamilyIndex = i;
+				descriptor.queueCount       = 1;
+				descriptor.pQueuePriorities = &queuePriority;
+				deviceQueueDescriptors.emplace_back(std::move(descriptor));
+			}
+			
 			const std::vector<const char *> requiredDeviceExtensionNames = { "VK_KHR_swapchain" };
 
 			#if GM_RHI_DEBUGGING_ENABLED
@@ -242,8 +258,8 @@ namespace Gogaman
 
 			VkDeviceCreateInfo deviceDescriptor = {};
 			deviceDescriptor.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-			deviceDescriptor.queueCreateInfoCount    = 1;
-			deviceDescriptor.pQueueCreateInfos       = &deviceQueueDescriptor;
+			deviceDescriptor.queueCreateInfoCount    = (uint32_t)deviceQueueDescriptors.size();
+			deviceDescriptor.pQueueCreateInfos       = deviceQueueDescriptors.data();
 			#if GM_RHI_DEBUGGING_ENABLED
 				deviceDescriptor.enabledLayerCount   = (uint32_t)requiredValidationLayerNames.size();
 				deviceDescriptor.ppEnabledLayerNames = requiredValidationLayerNames.data();
@@ -287,6 +303,11 @@ namespace Gogaman
 			};
 
 			return false;
+		}
+	
+		constexpr uint32_t VulkanDevice::GetNativeCommandQueueType(const CommandQueueType type)
+		{
+			return m_VulkanCommandQueueTypeIndices[(uint8_t)type];
 		}
 	}
 }

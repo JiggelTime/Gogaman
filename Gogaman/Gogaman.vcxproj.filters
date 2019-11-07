@@ -70,6 +70,9 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractDevice.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Device.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDevice.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderContext.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderContext.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderContext.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

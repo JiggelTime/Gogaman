@@ -27,6 +27,8 @@ namespace Gogaman
 			{
 				this->GetImplementation().InitializeAPI(nativeWindow);
 			}
+
+			inline constexpr auto GetNativeCommandQueueType(const CommandQueueType type) { return this->GetImplementation().GetNativeCommandQueueType(type); }
 		private:
 			friend ImplementationType;
 		private:

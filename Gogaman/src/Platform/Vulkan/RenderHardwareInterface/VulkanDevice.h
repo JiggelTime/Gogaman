@@ -21,6 +21,8 @@ namespace Gogaman
 
 			VulkanDevice &operator=(const VulkanDevice &) = delete;
 			VulkanDevice &operator=(VulkanDevice &&other) = default;
+
+			constexpr uint32_t GetNativeCommandQueueType(const CommandQueueType type);
 		private:
 			friend AbstractDevice;
 		private:
@@ -35,6 +37,8 @@ namespace Gogaman
 			VkSurfaceKHR                 m_VulkanSurface;
 			VkPhysicalDevice             m_VulkanPhysicalDevice;
 			VkDevice                     m_VulkanDevice;
+			uint32_t                     m_VulkanCommandQueueTypeIndices[3];
+			std::vector<VkQueue>         m_VulkanCommandQueues[3];
 		};
 	}
 }
