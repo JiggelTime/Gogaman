@@ -2,6 +2,8 @@
 
 #include <glm.hpp>
 
+#define GM_VSYNC_MODE DoubleBuffered
+
 namespace Gogaman
 {
 	struct Config
@@ -18,13 +20,11 @@ namespace Gogaman
 
 		//Window
 			//Rendering resolution scale
-			const float resScale     = 1.0f;
+			const float resScale        = 1.0f;
 			//Window resolution
-			const int   screenWidth  = 2560;
-			const int   screenHeight = 1440;
-			const float aspectRatio  = float(screenWidth) / float(screenHeight);
-			//Vertical synchronization toggle
-			const bool  vSync        = true;
+			const uint16_t screenWidth  = 2560;
+			const uint16_t screenHeight = 1440;
+			const float aspectRatio     = float(screenWidth) / float(screenHeight);
 
 		//Controls
 			const float mouseSensitivity    = 0.1f;
@@ -40,56 +40,6 @@ namespace Gogaman
 			const float fStop = 0.01f;
 			//Distance between the lens and the film (mm)
 			const float focalLength = 50.0f;
-
-		//Bloom
-			//Bloom toggle
-			bool bloom                  = true;
-			bool bloomKeyPressed        = false;
-			//Bloom resolution scale
-			const float bloomResScale   = 0.25f;
-			//Bloom effect blurriness
-			const float bloomBlurAmount = 0.01f;
-			//Controls strength of bloom effect
-			const float bloomStrength   = 0.1f;
-
-		//Normal mapping toggle
-			bool normalMapping = true;
-			bool normalMappingKeyPressed = false;
-
-		//Wireframe mode toggle
-			bool wireframe = false;
-			bool wireframeKeyPressed = false;
-
-		//Temporal anti-aliasing
-			bool taa = true;
-			bool taaKeyPressed = false;
-			//Less = sharper but more aliasing, higher = blurrier but less aliasing
-			const float temporalJitterSpread = 1.0f;
-
-		//Voxel cone traced global illumination
-			//GI resolution scale
-			const float giResScale = 0.25f * resScale;
-			//Toggle indirect lighting upscaling
-			bool giUpscaling = true;
-			bool giUpscalingKeyPressed = false;
-			//Automatic voxelization toggle
-			bool autoVoxelize = true;
-			bool autoVoxelizeKeyPressed = false;
-			//Width, length, and height of voxel volume
-			const int voxelResolution = 64;
-			//Number of voxel GI compute shader work groups
-			const int voxelComputeWorkGroups = static_cast<const int>(glm::ceil(voxelResolution / 8.0f));
-			float voxelGridSize = 1.7f;
-			glm::vec3 voxelGridPos = glm::vec3(0.0f, 0.0f, 0.0f);
-			//Frequency of re-voxelization (every N frames)
-			const int voxelizationFrequency = 1;
-
-		//Debug
-			int renderMode = 0;
-			bool debug = false;
-			bool debugKeyPressed = false;
-			bool debug2 = false;
-			bool debug2KeyPressed = false;
 	};
 }
 

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "VulkanDevice.h"
 
+#include "Gogaman/Core/Config.h"
 #include "Gogaman/Core/Application.h"
 
 #include <GLFW/glfw3.h>
@@ -14,6 +15,8 @@ namespace Gogaman
 
 		VulkanDevice::~VulkanDevice()
 		{
+			vkDestroySwapchainKHR(m_VulkanDevice, m_VulkanSwapChain, nullptr);
+
 			vkDestroyDevice(m_VulkanDevice, nullptr);
 
 			vkDestroySurfaceKHR(m_VulkanInstance, m_VulkanSurface, nullptr);
@@ -137,16 +140,122 @@ namespace Gogaman
 			VkPhysicalDevice *physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
 			vkEnumeratePhysicalDevices(m_VulkanInstance, &physicalDeviceCount, physicalDevices);
 
+			const std::vector<const char *> requiredDeviceExtensionNames = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+
+			uint32_t presentQueueTypeIndex;
+			auto IsPhysicalDeviceSupported = [&](const VkPhysicalDevice &physicalDevice)
+			{
+				//Ensure Vulkan API version is supported
+				VkPhysicalDeviceProperties properties;
+				vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+				if(properties.apiVersion < applicationDescriptor.apiVersion)
+					return false;
+
+				//Ensure required Vulkan device extensions are supported
+				uint32_t supportedDeviceExtentionCount;
+				vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &supportedDeviceExtentionCount, nullptr);
+				VkExtensionProperties *supportedDeviceExtensionProperties = new VkExtensionProperties[supportedDeviceExtentionCount];
+				vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &supportedDeviceExtentionCount, supportedDeviceExtensionProperties);
+
+				for(const char *i : requiredDeviceExtensionNames)
+				{
+					bool isDeviceExtensionSupported = false;
+					for(uint32_t j = 0; j < supportedDeviceExtentionCount; j++)
+					{
+						if(strcmp(supportedDeviceExtensionProperties[j].extensionName, i) == 0)
+						{
+							isDeviceExtensionSupported = true;
+							break;
+						}
+					}
+
+					if(!isDeviceExtensionSupported)
+						return false;
+				}
+
+				delete[] supportedDeviceExtensionProperties;
+
+				uint32_t queueTypeCount;
+				vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueTypeCount, nullptr);
+				VkQueueFamilyProperties *queueFamilyProperties = new VkQueueFamilyProperties[queueTypeCount];
+				vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueTypeCount, queueFamilyProperties);
+
+				std::optional<uint32_t> directQueueIndex, computeQueueIndex, copyQueueIndex, presentQueueIndex;
+				for(uint32_t i = 0; i < queueTypeCount; i++)
+				{
+					VkQueueFlags flags = queueFamilyProperties[i].queueFlags;
+
+					if(!directQueueIndex.has_value() && (flags & VK_QUEUE_GRAPHICS_BIT))
+						directQueueIndex = i;
+
+					if(!computeQueueIndex.has_value() && (flags & VK_QUEUE_COMPUTE_BIT))
+						computeQueueIndex = i;
+
+					if(!copyQueueIndex.has_value() && (flags & VK_QUEUE_TRANSFER_BIT))
+						copyQueueIndex = i;
+
+					VkBool32 isPresentationSupported;
+					vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, m_VulkanSurface, &isPresentationSupported);
+					if(!presentQueueIndex.has_value() && isPresentationSupported)
+						presentQueueIndex = i;
+				}
+
+				delete[] queueFamilyProperties;
+
+				if(!directQueueIndex.has_value() || !computeQueueIndex.has_value() || !copyQueueIndex.has_value() || !presentQueueIndex.has_value())
+					return false;
+
+				//Ensure swap chain surface format is supported
+				uint32_t supportedSurfaceFormatCount;
+				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_VulkanSurface, &supportedSurfaceFormatCount, nullptr);
+				if(supportedSurfaceFormatCount == 0)
+					return false;
+
+				VkSurfaceFormatKHR *supportedSurfaceFormats = new VkSurfaceFormatKHR[supportedSurfaceFormatCount];
+				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_VulkanSurface, &supportedSurfaceFormatCount, supportedSurfaceFormats);
+
+				bool isSwapChainSurfaceFormatSupported = false;
+				for(uint32_t i = 0; i < supportedSurfaceFormatCount; i++)
+				{
+					if(supportedSurfaceFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && supportedSurfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+					{
+						isSwapChainSurfaceFormatSupported = true;
+						break;
+					}
+				}
+
+				delete[] supportedSurfaceFormats;
+
+				if(!isSwapChainSurfaceFormatSupported)
+					return false;
+
+				//Ensure swap chain image usage is supported
+				VkSurfaceCapabilitiesKHR supportedSurfaceCapabilities;
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_VulkanSurface, &supportedSurfaceCapabilities);
+				if(!(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) || !(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
+					return false;
+
+				//Ensure at least 1 surface present mode is supported
+				uint32_t supportedSurfacePresentModeCount;
+				vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, m_VulkanSurface, &supportedSurfacePresentModeCount, nullptr);
+				if(supportedSurfacePresentModeCount == 0)
+					return false;
+
+				m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Direct]  = directQueueIndex.value();
+				m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Compute] = computeQueueIndex.value();
+				m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Copy]    = copyQueueIndex.value();
+				presentQueueTypeIndex                                               = presentQueueIndex.value();
+
+				return true;
+			};
+
 			//Select a physical device | Heuristic: most local memory
 			m_VulkanPhysicalDevice = VK_NULL_HANDLE;
 			uint64_t mostPhysicalDeviceMemory = 0;
 			for(uint32_t i = 0; i < physicalDeviceCount; i++)
 			{
 				const VkPhysicalDevice &physicalDevice = physicalDevices[i];
-
-				VkPhysicalDeviceProperties properties;
-				vkGetPhysicalDeviceProperties(physicalDevice, &properties);
-				if(properties.apiVersion < applicationDescriptor.apiVersion)
+				if(!IsPhysicalDeviceSupported(physicalDevice))
 					continue;
 
 				VkPhysicalDeviceMemoryProperties memoryProperties;
@@ -172,46 +281,9 @@ namespace Gogaman
 
 			delete[] physicalDevices;
 
-			GM_ASSERT(m_VulkanPhysicalDevice != VK_NULL_HANDLE, "Failed to initialize Vulkan | No suitable physical device found");
+			GM_ASSERT(m_VulkanPhysicalDevice != VK_NULL_HANDLE, "Failed to initialize Vulkan | No supported physical device found");
 
-			//Retrieve queue families
-			uint32_t queueFamilyCount;
-			vkGetPhysicalDeviceQueueFamilyProperties(m_VulkanPhysicalDevice, &queueFamilyCount, nullptr);
-			VkQueueFamilyProperties *queueFamilyProperties = new VkQueueFamilyProperties[queueFamilyCount];
-			vkGetPhysicalDeviceQueueFamilyProperties(m_VulkanPhysicalDevice, &queueFamilyCount, queueFamilyProperties);
-
-			std::optional<uint32_t> directQueueIndex, computeQueueIndex, copyQueueIndex, presentQueueIndex;
-			for(uint32_t i = 0; i < queueFamilyCount; i++)
-			{
-				VkQueueFlags flags = queueFamilyProperties[i].queueFlags;
-
-				if(!directQueueIndex.has_value() && (flags & VK_QUEUE_GRAPHICS_BIT))
-					directQueueIndex = i;
-
-				if(!computeQueueIndex.has_value() && (flags & VK_QUEUE_COMPUTE_BIT))
-					computeQueueIndex = i;
-
-				if(!copyQueueIndex.has_value() && (flags & VK_QUEUE_TRANSFER_BIT))
-					copyQueueIndex = i;
-
-				VkBool32 isPresentationSupported;
-				vkGetPhysicalDeviceSurfaceSupportKHR(m_VulkanPhysicalDevice, i, m_VulkanSurface, &isPresentationSupported);
-				if(!presentQueueIndex.has_value() && isPresentationSupported)
-					presentQueueIndex = i;
-			}
-
-			delete[] queueFamilyProperties;
-
-			GM_ASSERT(directQueueIndex.has_value(),  "Failed to initialize Vulkan | No physical devices supporting direct command queue found");
-			GM_ASSERT(computeQueueIndex.has_value(), "Failed to initialize Vulkan | No physical devices supporting compute command queue found");
-			GM_ASSERT(copyQueueIndex.has_value(),    "Failed to initialize Vulkan | No physical devices supporting copy command queue found");
-			GM_ASSERT(presentQueueIndex.has_value(), "Failed to initialize Vulkan | No physical devices supporting presentation to window surface found");
-
-			m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Direct]  = directQueueIndex.value();
-			m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Compute] = computeQueueIndex.value();
-			m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Copy]    = copyQueueIndex.value();
-
-			std::unordered_set<uint32_t> uniqueQueueTypeIndices = { directQueueIndex.value(), computeQueueIndex.value(), copyQueueIndex.value(), presentQueueIndex.value() };
+			std::unordered_set<uint32_t> uniqueQueueTypeIndices = { GetNativeCommandQueueType(CommandQueueType::Direct), GetNativeCommandQueueType(CommandQueueType::Compute), GetNativeCommandQueueType(CommandQueueType::Copy), presentQueueTypeIndex };
 			std::vector<VkDeviceQueueCreateInfo> deviceQueueDescriptors;
 			deviceQueueDescriptors.reserve(uniqueQueueTypeIndices.size());
 			const float queuePriority = 1.0f;
@@ -225,33 +297,6 @@ namespace Gogaman
 				descriptor.pQueuePriorities = &queuePriority;
 				deviceQueueDescriptors.emplace_back(std::move(descriptor));
 			}
-			
-			const std::vector<const char *> requiredDeviceExtensionNames = { "VK_KHR_swapchain" };
-
-			#if GM_RHI_DEBUGGING_ENABLED
-				//Ensure required Vulkan device extensions are supported
-				uint32_t supportedDeviceExtentionCount;
-				vkEnumerateDeviceExtensionProperties(m_VulkanPhysicalDevice, nullptr, &supportedDeviceExtentionCount, nullptr);
-				VkExtensionProperties *supportedDeviceExtensionProperties = new VkExtensionProperties[supportedDeviceExtentionCount];
-				vkEnumerateDeviceExtensionProperties(m_VulkanPhysicalDevice, nullptr, &supportedDeviceExtentionCount, supportedDeviceExtensionProperties);
-
-				for(const char *i : requiredDeviceExtensionNames)
-				{
-					bool isDeviceExtensionSupported = false;
-					for(uint32_t j = 0; j < supportedDeviceExtentionCount; j++)
-					{
-						if(strcmp(supportedDeviceExtensionProperties[j].extensionName, i) == 0)
-						{
-							isDeviceExtensionSupported = true;
-							break;
-						}
-					}
-
-					GM_ASSERT(isDeviceExtensionSupported, "Failed to initialize Vulkan | Required Vulkan device extension \"%s\" not supported", i);
-				}
-
-				delete[] supportedDeviceExtensionProperties;
-			#endif
 
 			VkPhysicalDeviceFeatures requiredDeviceFeatures;
 			vkGetPhysicalDeviceFeatures(m_VulkanPhysicalDevice, &requiredDeviceFeatures);
@@ -305,6 +350,82 @@ namespace Gogaman
 			return false;
 		}
 	
+		void VulkanDevice::CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
+		{
+			VkSurfaceCapabilitiesKHR supportedSurfaceCapabilities;
+			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_VulkanPhysicalDevice, m_VulkanSurface, &supportedSurfaceCapabilities);
+
+			VkExtent2D swapChainExtent;
+			if(supportedSurfaceCapabilities.currentExtent.width == UINT32_MAX)
+			{
+				swapChainExtent.width  = std::clamp((uint32_t)width,  supportedSurfaceCapabilities.minImageExtent.width,  supportedSurfaceCapabilities.maxImageExtent.width);
+				swapChainExtent.height = std::clamp((uint32_t)height, supportedSurfaceCapabilities.minImageExtent.height, supportedSurfaceCapabilities.maxImageExtent.height);
+			}
+			else
+				swapChainExtent = supportedSurfaceCapabilities.currentExtent;
+
+			uint32_t swapChainImageCount;
+			if(supportedSurfaceCapabilities.maxImageCount == 0)
+				swapChainImageCount = supportedSurfaceCapabilities.minImageCount + 1;
+			else
+				swapChainImageCount = std::min(supportedSurfaceCapabilities.minImageCount + 1, supportedSurfaceCapabilities.maxImageCount);
+
+			VkPresentModeKHR swapChainPresentMode;
+			switch(verticalSynchronization)
+			{
+			case VerticalSynchronization::Disabled:
+				swapChainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+				break;
+			case VerticalSynchronization::DoubleBuffered:
+				swapChainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+				break;
+			}
+
+			uint32_t supportedSurfacePresentModeCount;
+			vkGetPhysicalDeviceSurfacePresentModesKHR(m_VulkanPhysicalDevice, m_VulkanSurface, &supportedSurfacePresentModeCount, nullptr);
+			VkPresentModeKHR *supportedSurfacePresentModes = new VkPresentModeKHR[supportedSurfacePresentModeCount];
+			vkGetPhysicalDeviceSurfacePresentModesKHR(m_VulkanPhysicalDevice, m_VulkanSurface, &supportedSurfacePresentModeCount, supportedSurfacePresentModes);
+
+			bool isSwapChainPresentModeSupported = false;
+			for(uint32_t i = 0; i < supportedSurfacePresentModeCount; i++)
+			{
+				if(supportedSurfacePresentModes[i] == swapChainPresentMode)
+				{
+					isSwapChainPresentModeSupported = true;
+					break;
+				}
+			}
+
+			delete[] supportedSurfacePresentModes;
+
+			GM_ASSERT(isSwapChainPresentModeSupported, "Failed to create swap chain | Physical device does not support %s vertical synchronization", verticalSynchronization == VerticalSynchronization::Disabled ? "disabled" : "double buffered");
+		
+			VkSwapchainCreateInfoKHR swapChainDescriptor = {};
+			swapChainDescriptor.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+			swapChainDescriptor.surface          = m_VulkanSurface;
+			swapChainDescriptor.minImageCount    = swapChainImageCount;
+			swapChainDescriptor.imageFormat      = VK_FORMAT_B8G8R8A8_UNORM;
+			swapChainDescriptor.imageColorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+			swapChainDescriptor.imageExtent      = swapChainExtent;
+			swapChainDescriptor.imageArrayLayers = 1;
+			swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			swapChainDescriptor.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+			swapChainDescriptor.preTransform     = supportedSurfaceCapabilities.currentTransform;
+			swapChainDescriptor.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+			swapChainDescriptor.presentMode      = swapChainPresentMode;
+			swapChainDescriptor.clipped          = VK_TRUE;
+			swapChainDescriptor.oldSwapchain     = VK_NULL_HANDLE;
+
+			if(vkCreateSwapchainKHR(m_VulkanDevice, &swapChainDescriptor, nullptr, &m_VulkanSwapChain) != VK_SUCCESS)
+				GM_ASSERT(false, "Failed to create swap chain");
+		}
+		
+		void VulkanDevice::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
+		{
+			vkDestroySwapchainKHR(m_VulkanDevice, m_VulkanSwapChain, nullptr);
+			CreateSwapChain(width, height, verticalSynchronization);
+		}
+		
 		constexpr uint32_t VulkanDevice::GetNativeCommandQueueType(const CommandQueueType type)
 		{
 			return m_VulkanCommandQueueTypeIndices[(uint8_t)type];

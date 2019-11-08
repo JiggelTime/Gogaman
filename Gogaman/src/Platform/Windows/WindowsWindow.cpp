@@ -14,8 +14,8 @@ namespace Gogaman
 {
 	bool WindowsWindow::s_IsGLFW_Initialized = false;
 
-	WindowsWindow::WindowsWindow(const char *title, const uint16_t width, const uint16_t height)
-		: AbstractWindow<WindowsWindow>(title, width, height)
+	WindowsWindow::WindowsWindow(const char *title, const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronizationMode)
+		: AbstractWindow<WindowsWindow>(title, width, height, verticalSynchronizationMode)
 	{
 		if(!s_IsGLFW_Initialized)
 		{
@@ -96,16 +96,11 @@ namespace Gogaman
 		//m_RenderingContext->SwapBuffers();
 	}
 
-	void WindowsWindow::EnableVerticalSynchronization()
+	void WindowsWindow::SetVerticalSynchronization(const VerticalSynchronization verticalSynchronization)
 	{
 		//glfwSwapInterval(1);
-		m_IsVerticalSynchronizationEnabled = true;
-	}
-
-	void WindowsWindow::DisableVerticalSynchronization()
-	{
-		//glfwSwapInterval(0);
-		m_IsVerticalSynchronizationEnabled = false;
+		m_Device->RecreateSwapChain(m_Width, m_Height, verticalSynchronization);
+		m_VerticalSynchronization = verticalSynchronization;
 	}
 
 	void WindowsWindow::Shutdown()

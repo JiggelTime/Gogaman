@@ -27,8 +27,7 @@ namespace Gogaman
 
 		GM_LOG_CORE_SET_LEVEL(Info);
 
-		m_Window = std::make_unique<Window>("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight);
-		GM_CONFIG.vSync ? m_Window->EnableVerticalSynchronization() : m_Window->DisableVerticalSynchronization();
+		m_Window = std::make_unique<Window>("Gogaman", GM_CONFIG.screenWidth, GM_CONFIG.screenHeight, VerticalSynchronization::Disabled);
 
 		//m_World.AddSystem(std::make_unique<ModelMatrixSystem>());
 		m_World.AddSystem(std::make_unique<BoundingVolumeSystem>());

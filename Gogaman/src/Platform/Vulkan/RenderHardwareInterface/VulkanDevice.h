@@ -22,11 +22,15 @@ namespace Gogaman
 			VulkanDevice &operator=(const VulkanDevice &) = delete;
 			VulkanDevice &operator=(VulkanDevice &&other) = default;
 
+			void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
+
 			constexpr uint32_t GetNativeCommandQueueType(const CommandQueueType type);
 		private:
 			friend AbstractDevice;
 		private:
 			void InitializeAPI(void *nativeWindow);
+
+			void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
 			static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * callbackData, void *userData);
 		private:
@@ -39,6 +43,7 @@ namespace Gogaman
 			VkDevice                     m_VulkanDevice;
 			uint32_t                     m_VulkanCommandQueueTypeIndices[3];
 			std::vector<VkQueue>         m_VulkanCommandQueues[3];
+			VkSwapchainKHR               m_VulkanSwapChain;
 		};
 	}
 }
