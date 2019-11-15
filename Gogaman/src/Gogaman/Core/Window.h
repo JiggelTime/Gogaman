@@ -4,7 +4,10 @@
 #ifdef GM_PLATFORM_WINDOWS
 	#include "Platform/Windows/WindowsWindow.h"
 
-	namespace Gogaman { using Window = WindowsWindow; }
+	namespace Gogaman
+	{
+		using Window = WindowsWindow;
+	}
 #else
 	#error "Unsupported platform"
 #endif

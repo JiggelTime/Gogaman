@@ -9,11 +9,13 @@
 
 //Debug vs release build features
 #if 1
-	#define GM_ASSERTIONS_ENABLED    1
-	#define GM_RHI_DEBUGGING_ENABLED 1
+	#define GM_ASSERTIONS_ENABLED                 1
+	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED 1
+	#define GM_RHI_DEBUGGING_ENABLED              1
 #else
-	#define GM_ASSERTIONS_ENABLED    0
-	#define GM_RHI_DEBUGGING_ENABLED 0
+	#define GM_ASSERTIONS_ENABLED                 0
+	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED 0
+	#define GM_RHI_DEBUGGING_ENABLED              0
 #endif
 
 #if GM_ASSERTIONS_ENABLED
@@ -36,6 +38,53 @@
 	#define GM_STATIC_ASSERT(x, message)
 #endif
 
+#define KiB 1024
+#define MiB (1024 * KiB)
+#define GiB (1024 * MiB)
+#define TiB (1024 * GiB)
+
 #define GM_FORCE_INLINE __forceinline
+
+/*
+void *AllocateVirtual(const uint64_t size);
+//void CommitVirtual(void *memory, const uint64_t size);
+void DeallocateVirtual(void *memory, const uint64_t size);
+
+#ifdef GM_PLATFORM_WINDOWS
+	void *AllocateVirtual(const uint64_t size)
+	{
+		void *memory = VirtualAlloc(NULL, size, MEM_RESERVE, PAGE_READWRITE);
+		GM_ASSERT(memory, "Failed to allocate virtual memory");
+		return memory;
+	}
+
+	void CommitVirtual(void *memory, const uint64_t size)
+	{
+		//VirtualAlloc(memory, size, MEM_COMMIT, PAGE_READWRITE);
+	}
+
+	void DeallocateVirtual(void *memory, const uint64_t size)
+	{
+		GM_ASSERT(VirtualFree(memory, 0, MEM_RELEASE), "Failed to deallocate virtual memory");
+	}
+#elif defined GM_PLATFORM_LINUX | GM_PLATFORM_OSX
+	void *AllocateVirtual(const uint64_t size)
+	{
+		void *memory = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_POPULATE | MAP_ANONYMOUS, -1, 0);
+		GM_ASSERT(memory, "Failed to allocate virtual memory");
+		return memory;
+	}
+
+	void CommitVirtual(void *memory, const uint64_t size)
+	{}
+
+	void DeallocateVirtual(void *memory, const uint64_t size)
+	{
+		GM_ASSERT(!munmap(memory, size), "Failed to deallocate virtual memory");
+	}
+#else
+	#error "Unsupported platform"
+#endif
+*/
 
 #define GM_BIND_EVENT_CALLBACK(x) std::bind(&x, this, std::placeholders::_1)

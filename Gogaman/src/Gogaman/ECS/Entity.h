@@ -10,7 +10,7 @@ namespace Gogaman
 
 	struct Entity
 	{
-		World    *world;
 		EntityID  identifier;
+		World    *world;
 	};
 }

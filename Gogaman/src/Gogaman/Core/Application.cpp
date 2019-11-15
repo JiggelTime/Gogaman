@@ -53,7 +53,7 @@ namespace Gogaman
 			m_World.Update();
 			m_World.Render();
 			
-			m_Window->Update();
+			//m_Window->Update();
 
 			EventManager::GetInstance().DispatchEvents();
 		}

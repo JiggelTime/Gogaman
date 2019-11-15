@@ -27,6 +27,6 @@ namespace Gogaman
 		virtual EventType     GetType()     const = 0;
 		virtual EventCategory GetCategory() const = 0;
 	public:
-		bool handled;
+		bool isHandled;
 	};
 }

@@ -3,7 +3,7 @@
 #ifdef GM_PLATFORM_WINDOWS
 	#include "Platform/Windows/WindowsTime.h"
 
-	namespace Gogaman { using Time = WindowsTime; }
+	namespace Gogaman { using Time = AbstractTime<WindowsTime>; }
 #else
-	#error
+	#error "Unsupported platform"
 #endif

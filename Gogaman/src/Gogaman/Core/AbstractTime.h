@@ -17,10 +17,10 @@ namespace Gogaman
 			m_FrameCount++;
 		}
 
-		static inline const float GetTime() { return ImplementationType::GetTime(); }
+		static inline float GetTime() { return ImplementationType::GetTime(); }
 
-		static inline constexpr const float    GetDeltaTime()  { return m_DeltaTime;  }
-		static inline constexpr const uint32_t GetFrameCount() { return m_FrameCount; }
+		static inline constexpr float    GetDeltaTime()  { return m_DeltaTime;  }
+		static inline constexpr uint32_t GetFrameCount() { return m_FrameCount; }
 	private:
 		friend ImplementationType;
 	private:

@@ -1,21 +1,21 @@
 #include "pch.h"
 #include "WindowsWindow.h"
 
-#include "Gogaman/Core/Logging/Log.h"
-
-#include <GLFW/glfw3.h>
+#include "Gogaman/Core/Base.h"
 
 #include "Gogaman/Events/WindowEvent.h"
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 #include "Gogaman/Events/EventManager.h"
 
+#include <GLFW/glfw3.h>
+
 namespace Gogaman
 {
 	bool WindowsWindow::s_IsGLFW_Initialized = false;
 
-	WindowsWindow::WindowsWindow(const char *title, const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronizationMode)
-		: AbstractWindow<WindowsWindow>(title, width, height, verticalSynchronizationMode)
+	WindowsWindow::WindowsWindow(const char *title, const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
+		: AbstractWindow<WindowsWindow>(title, width, height, verticalSynchronization)
 	{
 		if(!s_IsGLFW_Initialized)
 		{
@@ -34,8 +34,8 @@ namespace Gogaman
 		m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, nullptr, nullptr);
 		GM_ASSERT(m_Window, "Failed to create GLFW window");
 
-		m_Device = std::make_unique<RHI::Device>();
-		m_Device->Initialize(m_Window);
+		m_Device = std::make_unique<RHI::Device>(m_Window);
+		m_Device->CreateSwapChain(width, height, verticalSynchronization);
 
 		glfwSetInputMode(m_Window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 		
@@ -96,9 +96,16 @@ namespace Gogaman
 		//m_RenderingContext->SwapBuffers();
 	}
 
+	void WindowsWindow::Resize(const uint16_t width, const uint16_t height)
+	{
+		m_Device->RecreateSwapChain(width, height, m_VerticalSynchronization);
+
+		m_Width  = width;
+		m_Height = height;
+	}
+
 	void WindowsWindow::SetVerticalSynchronization(const VerticalSynchronization verticalSynchronization)
 	{
-		//glfwSwapInterval(1);
 		m_Device->RecreateSwapChain(m_Width, m_Height, verticalSynchronization);
 		m_VerticalSynchronization = verticalSynchronization;
 	}

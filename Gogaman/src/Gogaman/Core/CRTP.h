@@ -10,11 +10,11 @@ namespace Gogaman
 		inline       ImplementationType &GetImplementation()       { return static_cast<ImplementationType       &>(*this); }
 		inline const ImplementationType &GetImplementation() const { return static_cast<const ImplementationType &>(*this); }
 	private:
-		friend AbstractType<ImplementationType>;
-	private:
 		CRTP()
 		{}
+	private:
+		friend AbstractType<ImplementationType>;
 	};
 }
 
-#define GM_CLASS_IMPLEMENTATION(x, y) class x : public y<x>
+#define GM_STATIC_CLASS_IMPLEMENTATION(x, y) class x : public y<x>

@@ -4,30 +4,18 @@
 #include "Gogaman/Core/Config.h"
 #include "Gogaman/Core/Application.h"
 
+#include "Gogaman/RenderHardwareInterface/Texture.h"
+//This has to be here for abstract device to compile
+#include "Gogaman/RenderHardwareInterface/RenderSurface.h"
+
 #include <GLFW/glfw3.h>
 
 namespace Gogaman
 {
 	namespace RHI
 	{
-		VulkanDevice::VulkanDevice()
-		{}
-
-		VulkanDevice::~VulkanDevice()
-		{
-			vkDestroySwapchainKHR(m_VulkanDevice, m_VulkanSwapChain, nullptr);
-
-			vkDestroyDevice(m_VulkanDevice, nullptr);
-
-			vkDestroySurfaceKHR(m_VulkanInstance, m_VulkanSurface, nullptr);
-
-			auto DestroyDebugMessengerFunction = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VulkanInstance, "vkDestroyDebugUtilsMessengerEXT");
-			DestroyDebugMessengerFunction(m_VulkanInstance, m_VulkanDebugMessenger, nullptr);
-
-			vkDestroyInstance(m_VulkanInstance, nullptr);
-		}
-
-		void VulkanDevice::InitializeAPI(void *nativeWindow)
+		Device::Device(void *nativeWindow)
+			: AbstractDevice(nativeWindow)
 		{
 			VkApplicationInfo applicationDescriptor = {};
 			applicationDescriptor.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -115,7 +103,7 @@ namespace Gogaman
 				renderingInstanceDescriptor.enabledLayerCount   = 0;
 			#endif
 
-			if(vkCreateInstance(&renderingInstanceDescriptor, nullptr, &m_VulkanInstance) != VK_SUCCESS)
+			if(vkCreateInstance(&renderingInstanceDescriptor, nullptr, &m_NativeData.vulkanInstance) != VK_SUCCESS)
 				GM_ASSERT(false, "Failed to initialize Vulkan | Failed to create Vulkan instance");
 
 			#if GM_RHI_DEBUGGING_ENABLED
@@ -126,19 +114,19 @@ namespace Gogaman
 				debugMessengerDescriptor.pfnUserCallback = VulkanDebugCallback;
 				debugMessengerDescriptor.pUserData       = nullptr;
 
-				auto CreateDebugMessengerFunction = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_VulkanInstance, "vkCreateDebugUtilsMessengerEXT");
+				auto CreateDebugMessengerFunction = (PFN_vkCreateDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_NativeData.vulkanInstance, "vkCreateDebugUtilsMessengerEXT");
 				GM_ASSERT(CreateDebugMessengerFunction, "Failed to initialize Vulkan | Failed to load function \"%s\"", "vkCreateDebugUtilsMessengerEXT");
-				CreateDebugMessengerFunction(m_VulkanInstance, &debugMessengerDescriptor, nullptr, &m_VulkanDebugMessenger);
+				CreateDebugMessengerFunction(m_NativeData.vulkanInstance, &debugMessengerDescriptor, nullptr, &m_NativeData.vulkanDebugMessenger);
 			#endif
 
-			if(glfwCreateWindowSurface(m_VulkanInstance, (GLFWwindow *)nativeWindow, nullptr, &m_VulkanSurface) != VK_SUCCESS)
+			if(glfwCreateWindowSurface(m_NativeData.vulkanInstance, (GLFWwindow *)nativeWindow, nullptr, &m_NativeData.vulkanSurface) != VK_SUCCESS)
 				GM_ASSERT(false, "Failed to initialize Vulkan | Failed to create window surface");
 
 			uint32_t physicalDeviceCount;
-			vkEnumeratePhysicalDevices(m_VulkanInstance, &physicalDeviceCount, nullptr);
+			vkEnumeratePhysicalDevices(m_NativeData.vulkanInstance, &physicalDeviceCount, nullptr);
 			GM_ASSERT(physicalDeviceCount > 0, "Failed to initialize Vulkan | No physical devices supporting Vulkan found");
 			VkPhysicalDevice *physicalDevices = new VkPhysicalDevice[physicalDeviceCount];
-			vkEnumeratePhysicalDevices(m_VulkanInstance, &physicalDeviceCount, physicalDevices);
+			vkEnumeratePhysicalDevices(m_NativeData.vulkanInstance, &physicalDeviceCount, physicalDevices);
 
 			const std::vector<const char *> requiredDeviceExtensionNames = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
@@ -195,7 +183,7 @@ namespace Gogaman
 						copyQueueIndex = i;
 
 					VkBool32 isPresentationSupported;
-					vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, m_VulkanSurface, &isPresentationSupported);
+					vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, m_NativeData.vulkanSurface, &isPresentationSupported);
 					if(!presentQueueIndex.has_value() && isPresentationSupported)
 						presentQueueIndex = i;
 				}
@@ -207,12 +195,12 @@ namespace Gogaman
 
 				//Ensure swap chain surface format is supported
 				uint32_t supportedSurfaceFormatCount;
-				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_VulkanSurface, &supportedSurfaceFormatCount, nullptr);
+				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_NativeData.vulkanSurface, &supportedSurfaceFormatCount, nullptr);
 				if(supportedSurfaceFormatCount == 0)
 					return false;
 
 				VkSurfaceFormatKHR *supportedSurfaceFormats = new VkSurfaceFormatKHR[supportedSurfaceFormatCount];
-				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_VulkanSurface, &supportedSurfaceFormatCount, supportedSurfaceFormats);
+				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_NativeData.vulkanSurface, &supportedSurfaceFormatCount, supportedSurfaceFormats);
 
 				bool isSwapChainSurfaceFormatSupported = false;
 				for(uint32_t i = 0; i < supportedSurfaceFormatCount; i++)
@@ -231,26 +219,28 @@ namespace Gogaman
 
 				//Ensure swap chain image usage is supported
 				VkSurfaceCapabilitiesKHR supportedSurfaceCapabilities;
-				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_VulkanSurface, &supportedSurfaceCapabilities);
+				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_NativeData.vulkanSurface, &supportedSurfaceCapabilities);
 				if(!(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) || !(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
 					return false;
 
 				//Ensure at least 1 surface present mode is supported
 				uint32_t supportedSurfacePresentModeCount;
-				vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, m_VulkanSurface, &supportedSurfacePresentModeCount, nullptr);
+				vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, m_NativeData.vulkanSurface, &supportedSurfacePresentModeCount, nullptr);
 				if(supportedSurfacePresentModeCount == 0)
 					return false;
 
-				m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Direct]  = directQueueIndex.value();
-				m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Compute] = computeQueueIndex.value();
-				m_VulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Copy]    = copyQueueIndex.value();
-				presentQueueTypeIndex                                               = presentQueueIndex.value();
+				m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Direct]  = directQueueIndex.value();
+				m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Compute] = computeQueueIndex.value();
+				m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Copy]    = copyQueueIndex.value();
+				presentQueueTypeIndex                                                            = presentQueueIndex.value();
+
+				m_NativeData.vulkanPhysicalDeviceLimits = properties.limits;
 
 				return true;
 			};
 
 			//Select a physical device | Heuristic: most local memory
-			m_VulkanPhysicalDevice = VK_NULL_HANDLE;
+			m_NativeData.vulkanPhysicalDevice = VK_NULL_HANDLE;
 			uint64_t mostPhysicalDeviceMemory = 0;
 			for(uint32_t i = 0; i < physicalDeviceCount; i++)
 			{
@@ -275,13 +265,14 @@ namespace Gogaman
 				if(memory > mostPhysicalDeviceMemory)
 				{
 					mostPhysicalDeviceMemory = memory;
-					m_VulkanPhysicalDevice   = physicalDevice;
+
+					m_NativeData.vulkanPhysicalDevice = physicalDevice;
 				}
 			}
 
 			delete[] physicalDevices;
 
-			GM_ASSERT(m_VulkanPhysicalDevice != VK_NULL_HANDLE, "Failed to initialize Vulkan | No supported physical device found");
+			GM_ASSERT(m_NativeData.vulkanPhysicalDevice != VK_NULL_HANDLE, "Failed to initialize Vulkan | No supported physical device found");
 
 			std::unordered_set<uint32_t> uniqueQueueTypeIndices = { GetNativeCommandQueueType(CommandQueueType::Direct), GetNativeCommandQueueType(CommandQueueType::Compute), GetNativeCommandQueueType(CommandQueueType::Copy), presentQueueTypeIndex };
 			std::vector<VkDeviceQueueCreateInfo> deviceQueueDescriptors;
@@ -299,7 +290,7 @@ namespace Gogaman
 			}
 
 			VkPhysicalDeviceFeatures requiredDeviceFeatures;
-			vkGetPhysicalDeviceFeatures(m_VulkanPhysicalDevice, &requiredDeviceFeatures);
+			vkGetPhysicalDeviceFeatures(m_NativeData.vulkanPhysicalDevice, &requiredDeviceFeatures);
 
 			VkDeviceCreateInfo deviceDescriptor = {};
 			deviceDescriptor.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -315,11 +306,25 @@ namespace Gogaman
 			deviceDescriptor.ppEnabledExtensionNames = requiredDeviceExtensionNames.data();
 			deviceDescriptor.pEnabledFeatures        = &requiredDeviceFeatures;
 
-			if(vkCreateDevice(m_VulkanPhysicalDevice, &deviceDescriptor, nullptr, &m_VulkanDevice) != VK_SUCCESS)
+			if(vkCreateDevice(m_NativeData.vulkanPhysicalDevice, &deviceDescriptor, nullptr, &m_NativeData.vulkanDevice) != VK_SUCCESS)
 				GM_ASSERT(false, "Failed to initialize Vulkan | Failed to create logical device");
 		}
+
+		Device::~Device()
+		{
+			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
+
+			vkDestroyDevice(m_NativeData.vulkanDevice, nullptr);
+
+			vkDestroySurfaceKHR(m_NativeData.vulkanInstance, m_NativeData.vulkanSurface, nullptr);
+
+			auto DestroyDebugMessengerFunction = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_NativeData.vulkanInstance, "vkDestroyDebugUtilsMessengerEXT");
+			DestroyDebugMessengerFunction(m_NativeData.vulkanInstance, m_NativeData.vulkanDebugMessenger, nullptr);
+
+			vkDestroyInstance(m_NativeData.vulkanInstance, nullptr);
+		}
 	
-		VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDevice::VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *callbackData, void *userData)
+		VKAPI_ATTR VkBool32 VKAPI_CALL Device::VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT *callbackData, void *userData)
 		{
 			auto LogMessage = [&](const char *messageType)
 			{
@@ -350,10 +355,10 @@ namespace Gogaman
 			return false;
 		}
 	
-		void VulkanDevice::CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
+		void Device::CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
 		{
 			VkSurfaceCapabilitiesKHR supportedSurfaceCapabilities;
-			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_VulkanPhysicalDevice, m_VulkanSurface, &supportedSurfaceCapabilities);
+			vkGetPhysicalDeviceSurfaceCapabilitiesKHR(m_NativeData.vulkanPhysicalDevice, m_NativeData.vulkanSurface, &supportedSurfaceCapabilities);
 
 			VkExtent2D swapChainExtent;
 			if(supportedSurfaceCapabilities.currentExtent.width == UINT32_MAX)
@@ -370,39 +375,36 @@ namespace Gogaman
 			else
 				swapChainImageCount = std::min(supportedSurfaceCapabilities.minImageCount + 1, supportedSurfaceCapabilities.maxImageCount);
 
-			VkPresentModeKHR swapChainPresentMode;
-			switch(verticalSynchronization)
+			VkPresentModeKHR swapChainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
+			if(verticalSynchronization == VerticalSynchronization::Disabled)
 			{
-			case VerticalSynchronization::Disabled:
-				swapChainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
-				break;
-			case VerticalSynchronization::DoubleBuffered:
-				swapChainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
-				break;
-			}
+				uint32_t supportedSurfacePresentModeCount;
+				vkGetPhysicalDeviceSurfacePresentModesKHR(m_NativeData.vulkanPhysicalDevice, m_NativeData.vulkanSurface, &supportedSurfacePresentModeCount, nullptr);
+				VkPresentModeKHR *supportedSurfacePresentModes = new VkPresentModeKHR[supportedSurfacePresentModeCount];
+				vkGetPhysicalDeviceSurfacePresentModesKHR(m_NativeData.vulkanPhysicalDevice, m_NativeData.vulkanSurface, &supportedSurfacePresentModeCount, supportedSurfacePresentModes);
 
-			uint32_t supportedSurfacePresentModeCount;
-			vkGetPhysicalDeviceSurfacePresentModesKHR(m_VulkanPhysicalDevice, m_VulkanSurface, &supportedSurfacePresentModeCount, nullptr);
-			VkPresentModeKHR *supportedSurfacePresentModes = new VkPresentModeKHR[supportedSurfacePresentModeCount];
-			vkGetPhysicalDeviceSurfacePresentModesKHR(m_VulkanPhysicalDevice, m_VulkanSurface, &supportedSurfacePresentModeCount, supportedSurfacePresentModes);
-
-			bool isSwapChainPresentModeSupported = false;
-			for(uint32_t i = 0; i < supportedSurfacePresentModeCount; i++)
-			{
-				if(supportedSurfacePresentModes[i] == swapChainPresentMode)
+				auto IsPresentModeSupported = [&](const VkPresentModeKHR presentMode)
 				{
-					isSwapChainPresentModeSupported = true;
-					break;
-				}
+					for(uint32_t i = 0; i < supportedSurfacePresentModeCount; i++)
+					{
+						if(supportedSurfacePresentModes[i] == presentMode)
+							return true;
+					}
+
+					return false;
+				};
+
+				if(IsPresentModeSupported(VK_PRESENT_MODE_MAILBOX_KHR))
+					swapChainPresentMode = VK_PRESENT_MODE_MAILBOX_KHR;
+				else if(IsPresentModeSupported(VK_PRESENT_MODE_IMMEDIATE_KHR))
+					swapChainPresentMode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+
+				delete[] supportedSurfacePresentModes;
 			}
 
-			delete[] supportedSurfacePresentModes;
-
-			GM_ASSERT(isSwapChainPresentModeSupported, "Failed to create swap chain | Physical device does not support %s vertical synchronization", verticalSynchronization == VerticalSynchronization::Disabled ? "disabled" : "double buffered");
-		
 			VkSwapchainCreateInfoKHR swapChainDescriptor = {};
 			swapChainDescriptor.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-			swapChainDescriptor.surface          = m_VulkanSurface;
+			swapChainDescriptor.surface          = m_NativeData.vulkanSurface;
 			swapChainDescriptor.minImageCount    = swapChainImageCount;
 			swapChainDescriptor.imageFormat      = VK_FORMAT_B8G8R8A8_UNORM;
 			swapChainDescriptor.imageColorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
@@ -416,19 +418,19 @@ namespace Gogaman
 			swapChainDescriptor.clipped          = VK_TRUE;
 			swapChainDescriptor.oldSwapchain     = VK_NULL_HANDLE;
 
-			if(vkCreateSwapchainKHR(m_VulkanDevice, &swapChainDescriptor, nullptr, &m_VulkanSwapChain) != VK_SUCCESS)
+			if(vkCreateSwapchainKHR(m_NativeData.vulkanDevice, &swapChainDescriptor, nullptr, &m_NativeData.vulkanSwapChain) != VK_SUCCESS)
 				GM_ASSERT(false, "Failed to create swap chain");
 		}
 		
-		void VulkanDevice::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
+		void Device::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
 		{
-			vkDestroySwapchainKHR(m_VulkanDevice, m_VulkanSwapChain, nullptr);
+			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
 			CreateSwapChain(width, height, verticalSynchronization);
 		}
 		
-		constexpr uint32_t VulkanDevice::GetNativeCommandQueueType(const CommandQueueType type)
+		constexpr uint32_t Device::GetNativeCommandQueueType(const CommandQueueType type) const
 		{
-			return m_VulkanCommandQueueTypeIndices[(uint8_t)type];
+			return m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)type];
 		}
 	}
 }

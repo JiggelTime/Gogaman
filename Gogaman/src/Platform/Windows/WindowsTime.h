@@ -6,9 +6,12 @@
 
 namespace Gogaman
 {
-	GM_CLASS_IMPLEMENTATION(WindowsTime, AbstractTime)
+	GM_STATIC_CLASS_IMPLEMENTATION(WindowsTime, AbstractTime)
 	{
 	public:
-		static inline const float GetTime() { return (float)glfwGetTime(); }
+		static inline float GetTime() { return (float)glfwGetTime(); }
+	private:
+		WindowsTime()  = delete;
+		~WindowsTime() = delete;
 	};
 }

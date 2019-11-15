@@ -12,7 +12,7 @@ namespace Gogaman
 
 	EventManager::EventManager()
 	{
-		GM_ASSERT(s_Instance == nullptr, "Failed to construct event queue: instance already exists");
+		GM_ASSERT(s_Instance == nullptr, "Failed to construct event queue | Instance already exists");
 	}
 	
 	void EventManager::DispatchEvents()

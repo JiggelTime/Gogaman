@@ -18,7 +18,8 @@ namespace Gogaman
 		System(System &&)                 = default;
 		System &operator=(System &&)      = default;
 
-		inline virtual void Initialize() {}
+		
+		void Initialize() {}
 
 		inline virtual void Update()     {}
 
@@ -37,7 +38,7 @@ namespace Gogaman
 	protected:
 		void AddEntityGroup(EntityGroup &&group);
 	protected:
-		World                    *m_World;
 		std::vector<EntityGroup>  m_EntityGroups;
+		World                    *m_World;
 	};
 }

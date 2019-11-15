@@ -16,7 +16,7 @@ namespace Gogaman
 		{
 			if(m_Event.GetType() == EventType::GetTypeStatic())
 			{
-				m_Event.handled = callbackFunction(static_cast<EventType &>(m_Event));
+				m_Event.isHandled = callbackFunction(static_cast<EventType &>(m_Event));
 				return true;
 			}
 

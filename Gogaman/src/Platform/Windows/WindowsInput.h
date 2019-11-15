@@ -4,7 +4,7 @@
 
 namespace Gogaman
 {
-	GM_CLASS_IMPLEMENTATION(WindowsInput, AbstractInput)
+	GM_STATIC_CLASS_IMPLEMENTATION(WindowsInput, AbstractInput)
 	{
 	public:
 		//Keyboard

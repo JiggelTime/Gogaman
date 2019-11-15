@@ -2,6 +2,8 @@
 
 #include "Gogaman/Core/CRTP.h"
 
+#include "Context.h"
+
 namespace Gogaman
 {
 	enum class VerticalSynchronization : uint8_t
@@ -29,22 +31,47 @@ namespace Gogaman
 			AbstractDevice &operator=(const AbstractDevice &) = delete;
 			AbstractDevice &operator=(AbstractDevice &&other) = default;
 
-			inline void Initialize(void *nativeWindow)
-			{
-				this->GetImplementation().InitializeAPI(nativeWindow);
-			}
+			inline void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().CreateSwapChain(width, height, verticalSynchronization); }
 
-			inline void RecreateSwapChain(const uint16_t width, const uint16_t height)
-			{
-				this->GetImplementation().ResizeSwapChain(width, height);
-			}
+			inline void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().RecreateSwapChain(width, height, verticalSynchronization); }
 
-			inline constexpr auto GetNativeCommandQueueType(const CommandQueueType type) { return this->GetImplementation().GetNativeCommandQueueType(type); }
+			inline constexpr const Context &GetContext() const { return m_Context; }
+			inline constexpr       Context &GetContext()       { return m_Context; }
+
+			//inline constexpr const Resources &GetResources() const { return m_Resources; }
+		    //inline constexpr       Resources &GetResources()       { return m_Resources; }
+
+			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
+			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
+
+			inline constexpr auto GetNativeCommandQueueType(const CommandQueueType type) const { return this->GetImplementation().GetNativeCommandQueueType(type); }
+
+			inline constexpr uint32_t GetTextureWidthLimit()  const { return this->GetImplementation().GetTextureWidthLimit();  }
+			inline constexpr uint32_t GetTextureHeightLimit() const { return this->GetImplementation().GetTextureHeightLimit(); }
+			inline constexpr uint32_t GetTextureDepthLimit()  const { return this->GetImplementation().GetTextureDepthLimit();  }
+
+			inline constexpr uint32_t GetVertexShaderInputAttributeCountLimit() const { return this->GetImplementation().GetVertexShaderInputAttributeCountLimit(); }
+
+			inline constexpr uint32_t GetPixelShaderOutputAttachmentCountLimit() const { return this->GetImplementation().GetPixelShaderOutputAttachmentCountLimit(); }
+
+			inline constexpr const uint32_t *GetComputeShaderWorkGroupCountLimit()      const { return this->GetImplementation().GetComputeShaderWorkGroupCountLimit();      }
+			inline constexpr uint32_t        GetComputeShaderWorkGroupInvocationLimit() const { return this->GetImplementation().GetComputeShaderWorkGroupInvocationLimit(); }
+			inline constexpr const uint32_t *GetComputeShaderWorkGroupSizeLimit()       const { return this->GetImplementation().GetComputeShaderWorkGroupSizeLimit();       }
+
+			inline constexpr uint32_t GetRenderSurfaceWidthLimit()                const { return this->GetImplementation().GetRenderSurfaceWidthLimit();                }
+			inline constexpr uint32_t GetRenderSurfaceHeightLimit()               const { return this->GetImplementation().GetRenderSurfaceHeightLimit();               }
+			inline constexpr uint32_t GetRenderSurfaceDepthLimit()                const { return this->GetImplementation().GetRenderSurfaceDepthLimit();                }
+			inline constexpr uint32_t GetRenderSurfaceColorAttachmentCountLimit() const { return this->GetImplementation().GetRenderSurfaceColorAttachmentCountLimit(); }
+		private:
+			AbstractDevice(void *nativeWindow)
+			{}
+
+			~AbstractDevice() = default;
+		private:
+			Context   m_Context;
+			//Resources m_Resources;
 		private:
 			friend ImplementationType;
-		private:
-			AbstractDevice()  = default;
-			~AbstractDevice() = default;
 		};
 	}
 }
