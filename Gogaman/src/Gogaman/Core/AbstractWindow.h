@@ -2,7 +2,7 @@
 
 #include "CRTP.h"
 
-#include "Gogaman/RenderHardwareInterface/RenderHardwareInterface.h"
+#include "Gogaman/RenderHardwareInterface/Device.h"
 
 #include "Gogaman/Events/EventListener.h"
 #include "Gogaman/Events/EventDispatcher.h"
@@ -40,8 +40,8 @@ namespace Gogaman
 
 		inline constexpr const char *GetTitle() const { return m_Title; }
 
-		inline constexpr const RenderHardwareInterface &GetRHI() const { return *m_RHI.get(); }
-		inline constexpr       RenderHardwareInterface &GetRHI()       { return *m_RHI.get(); }
+		inline constexpr const RHI::Device &GetRenderHardwareInterfaceDevice() const { return *m_RenderHardwareInterfaceDevice.get(); }
+		inline constexpr       RHI::Device &GetRenderHardwareInterfaceDevice()       { return *m_RenderHardwareInterfaceDevice.get(); }
 		
 		inline constexpr uint16_t GetWidth()  const { return m_Width;  }
 		inline constexpr uint16_t GetHeight() const { return m_Height; }
@@ -57,10 +57,10 @@ namespace Gogaman
 
 		~AbstractWindow() = default;
 	protected:
-		const char                               *m_Title;
-		std::unique_ptr<RenderHardwareInterface>  m_RHI;
-		uint16_t                                  m_Width, m_Height;
-		VerticalSynchronization                   m_VerticalSynchronization;
+		const char                   *m_Title;
+		std::unique_ptr<RHI::Device>  m_RenderHardwareInterfaceDevice;
+		uint16_t                      m_Width, m_Height;
+		VerticalSynchronization       m_VerticalSynchronization;
 	private:
 		friend ImplementationType;
 	};

@@ -2,9 +2,7 @@
 
 #include "Gogaman/Core/CRTP.h"
 
-#include "Device.h"
-//#include "Gogaman/Core/Window.h"
-//#include "Gogaman/Core/Application.h"
+#include "Gogaman/Core/Base.h"
 
 namespace Gogaman
 {
@@ -14,6 +12,14 @@ namespace Gogaman
 		class AbstractTexture : public CRTP<ImplementationType, AbstractTexture>
 		{
 		public:
+			enum class FormatType : uint8_t
+			{
+				Depth,
+				DepthStencil,
+				Value,
+				Color
+			};
+
 			enum class Format : uint8_t
 			{
 				//Depth
@@ -56,16 +62,39 @@ namespace Gogaman
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 
 			static inline constexpr auto GetNativeFormat(const Format format) { return ImplementationType::GetNativeFormat(format); }
-		private:
-			AbstractTexture(const Device &device, const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0, const uint8_t levelCount = 1)
-				: m_Width(width), m_Height(height), m_Depth(depth), m_LevelCount(levelCount)
+
+			static inline constexpr FormatType GetFormatType(const Format format)
 			{
-				#if GM_RHI_DEBUGGING_ENABLED
-						GM_ASSERT(m_Width  < device.GetTextureWidthLimit(),  "Failed to construct texture | Width exceeds device limit");
-						GM_ASSERT(m_Height < device.GetTextureHeightLimit(), "Failed to construct texture | Height exceeds device limit");
-						GM_ASSERT(m_Depth  < device.GetTextureDepthLimit(),  "Failed to construct texture | Depth exceeds device limit");
-				#endif
+				switch(format)
+				{
+				case Format::D16:
+				case Format::D32F:
+					return FormatType::Depth;
+				case Format::D24S8:
+					return FormatType::DepthStencil;
+				case Format::X8:
+				case Format::X16:
+				case Format::X16F:
+				case Format::X32F:
+				case Format::XY8:
+				case Format::XY16:
+				case Format::XY16F:
+				case Format::XY32F:
+				case Format::XYZW8:
+				case Format::XYZW16:
+				case Format::XYZW16F:
+				case Format::XYZW32F:
+					return FormatType::Value;
+				case Format::R8:
+				case Format::RG8:
+				case Format::RGBW8:
+					return FormatType::Color;
+				default:
+					GM_ASSERT(false, "Failed to get texture format type | Invalid format");
+				}
 			}
+		private:
+			AbstractTexture(const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0, const uint8_t levelCount = 1);
 
 			~AbstractTexture() = default;
 		protected:

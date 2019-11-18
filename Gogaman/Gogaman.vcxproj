@@ -16,6 +16,8 @@
     <ClCompile Include="src\Gogaman\ECS\World.cpp" />
     <ClCompile Include="src\Gogaman\Events\EventManager.cpp" />
     <ClCompile Include="src\Gogaman\Core\Application.cpp" />
+    <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
+    <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.cpp" />
     <ClCompile Include="src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -61,11 +63,8 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Device.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Context.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderHardwareInterface.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderSurface.h" />
     <ClInclude Include="src\Gogaman\Core\ResourceContainer.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderSurfaceResource.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\TextureResource.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\SpatialComponent.h" />

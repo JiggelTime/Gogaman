@@ -4,20 +4,21 @@
 
 #include "Gogaman/Core/Base.h"
 
-#include "Device.h"
-#include "TextureResource.h"
+#include "Gogaman/Core/ResourceContainer.h"
 
 namespace Gogaman
 {
 	namespace RHI
 	{
+		//using TextureID = ResourceContainer<Texture, uint8_t, 256>::ID;
+
 		template<typename ImplementationType>
 		class AbstractRenderSurface : public CRTP<ImplementationType, AbstractRenderSurface>
 		{
 		public:
 			struct Attachment
 			{
-				TextureID textureID = 0;
+				ResourceID<uint8_t> textureID;
 				uint8_t   mipLevel  = 1;
 			};
 
@@ -38,27 +39,11 @@ namespace Gogaman
 			inline constexpr uint16_t GetWidth()  const { return m_Width;  }
 			inline constexpr uint16_t GetHeight() const { return m_Height; }
 			inline constexpr uint16_t GetDepth()  const { return m_Depth;  }
-		protected:
-			inline void SetColorAttachment(const uint8_t attachmentIndex, const Attachment &attachment) { this->GetImplementation().SetColorAttachment(attachmentIndex, attachment); }
 
-			inline void SetDepthStencilAttachment(const Attachment &attachment) { this->GetImplementation().SetDepthStencilAttachment(attachment); }
+			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
+			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 		private:
-			AbstractRenderSurface(const Device &device, Attachments &&attachments, const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0)
-				: m_Attachments(std::move(attachments)), m_Width(width), m_Height(height), m_Depth(depth)
-			{
-				#if GM_RHI_DEBUGGING_ENABLED
-					GM_ASSERT(m_Attachments.colorAttachments.size() > 0,                                                  "Failed to construct render surface | Invalid attachments | Color attachment count is 0");
-					GM_ASSERT(m_Attachments.colorAttachments.size() < device.GetRenderSurfaceColorAttachmentCountLimit(), "Failed to construct render surface | Invalid attachments | Color attachment count exceeds device limit");
-					for(const Attachment &i : m_Attachments.colorAttachments)
-					{
-						GM_ASSERT(i.textureID.index != 0, "Failed to construct render surface | Invalid attachments | Invalid color attachment texture ID");
-					}
-
-					GM_ASSERT(m_Width  < device.GetRenderSurfaceWidthLimit(),  "Failed to construct render surface | Width exceeds device limit");
-					GM_ASSERT(m_Height < device.GetRenderSurfaceHeightLimit(), "Failed to construct render surface | Height exceeds device limit");
-					GM_ASSERT(m_Depth  < device.GetRenderSurfaceDepthLimit(),  "Failed to construct render surface | Depth exceeds device limit");
-				#endif
-			}
+			AbstractRenderSurface(Attachments &&attachments, const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0);
 
 			~AbstractRenderSurface() = default;
 		protected:

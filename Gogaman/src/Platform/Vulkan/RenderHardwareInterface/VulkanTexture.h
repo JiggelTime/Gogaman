@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Gogaman/RenderHardwareInterface/AbstractTexture.h"
 
 #include <vulkan/vulkan.h>
@@ -12,10 +14,11 @@ namespace Gogaman
 			struct NativeData
 			{
 				VkImage        vulkanImage;
+				VkImageView    vulkanImageView;
 				VkDeviceMemory vulkanDeviceMemory;
 			};
 		public:
-			Texture(const Device &device, const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0, const uint8_t levelCount = 1);
+			Texture(const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0, const uint8_t levelCount = 1);
 			Texture(const Texture &) = delete;
 			Texture(Texture &&other) = default;
 

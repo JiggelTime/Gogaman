@@ -2,7 +2,12 @@
 
 #include "Gogaman/Core/CRTP.h"
 
+#include "Gogaman/Core/ResourceContainer.h"
+
 #include "Context.h"
+
+#include "Texture.h"
+#include "RenderSurface.h"
 
 namespace Gogaman
 {
@@ -21,9 +26,21 @@ namespace Gogaman
 			Direct
 		};
 
+		//using TextureID        = TextureContainer::ID;
+		using TextureContainer = ResourceContainer<Texture, ResourceID<uint8_t>, 256>;
+
+		using RenderSurfaceContainer = ResourceContainer<RenderSurface, ResourceID<uint8_t>, 32>;
+		//using RenderSurfaceID        = RenderSurfaceContainer::ID;
+
 		template<typename ImplementationType>
 		class AbstractDevice : public CRTP<ImplementationType, AbstractDevice>
 		{
+		public:
+			struct Resources
+			{
+				TextureContainer       textures;
+				RenderSurfaceContainer renderSurfaces;
+			};
 		public:
 			AbstractDevice(const AbstractDevice &) = delete;
 			AbstractDevice(AbstractDevice &&other) = default;
@@ -38,8 +55,8 @@ namespace Gogaman
 			inline constexpr const Context &GetContext() const { return m_Context; }
 			inline constexpr       Context &GetContext()       { return m_Context; }
 
-			//inline constexpr const Resources &GetResources() const { return m_Resources; }
-		    //inline constexpr       Resources &GetResources()       { return m_Resources; }
+			inline constexpr const Resources &GetResources() const { return m_Resources; }
+		    inline constexpr       Resources &GetResources()       { return m_Resources; }
 
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
@@ -69,7 +86,7 @@ namespace Gogaman
 			~AbstractDevice() = default;
 		private:
 			Context   m_Context;
-			//Resources m_Resources;
+			Resources m_Resources;
 		private:
 			friend ImplementationType;
 		};

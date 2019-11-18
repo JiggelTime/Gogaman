@@ -6,27 +6,37 @@
 
 namespace Gogaman
 {
-	template<typename ResourceType, typename ResourceIndexType, uint32_t resourceCountLimit>
+	template<typename ResourceIndexType>
+	struct ResourceID
+	{
+		using Index      = ResourceIndexType;
+		using Generation = uint16_t;
+
+		Index      index = 0;
+		#if GM_RHI_DEBUGGING_ENABLED
+		Generation generation;
+		#endif
+	};
+
+	template<typename ResourceType, typename ResourceIdentifierType, uint32_t resourceCountLimit>
 	class ResourceContainer
 	{
 	private:
-		using Index      = ResourceIndexType;
-		using Generation = uint16_t;
-	public:
-		struct ID
-		{
-			Index          index = 0;
-			#if GM_RHI_DEBUGGING_ENABLED
-				Generation generation;
-			#endif
-		};
+		using ID         = ResourceIdentifierType;
+		using Index      = typename ID::Index;
+		using Generation = typename ID::Generation;
 	private:
 		struct Element
 		{
+			Element()
+			{}
+
+			~Element() {}
+
 			union
 			{
 				ResourceType resource;
-				Index        nextFreeIndex;
+				Index        nextFreeIndex = 0;
 			};
 
 			#if GM_RHI_DEBUGGING_ENABLED
@@ -35,7 +45,7 @@ namespace Gogaman
 		};
 	public:
 		ResourceContainer()
-			: m_ElementCount(0)
+			: m_ElementCount(1)
 		{}
 
 		~ResourceContainer() = default;
@@ -53,12 +63,13 @@ namespace Gogaman
 
 			if(identifier.index)
 			{
-				m_Elements[identifier.index].resource = std::move(ResourceType(constructorParameters));
+				m_Elements[identifier.index].resource = std::move(ResourceType(constructorParameters...));
+				m_ElementCount++;
 				return identifier;
 			}
 
 			identifier.index = m_ElementCount++;
-			m_Elements[identifier.index].resource = std::move(ResourceType(constructorParameters));
+			m_Elements[identifier.index].resource = std::move(ResourceType(constructorParameters...));
 			return identifier;
 		}
 
@@ -78,7 +89,7 @@ namespace Gogaman
 		{
 			ValidateID(identifier);
 
-			//m_Elements[identifier.index].resource.~ResourceType();
+			m_Elements[identifier.index].resource.~ResourceType();
 			m_Elements[identifier.index].nextFreeIndex = m_Elements[0].nextFreeIndex;
 
 			#if GM_RHI_DEBUGGING_ENABLED
@@ -86,13 +97,17 @@ namespace Gogaman
 			#endif
 
 			m_Elements[0].nextFreeIndex = identifier.index;
+
+			m_ElementCount--;
 		}
+
+		inline constexpr Index GetElementCount() const { return m_ElementCount; }
 	private:
 		inline void ValidateID(const ID identifier) const
 		{
 			#if GM_RHI_DEBUGGING_ENABLED
-				GM_ASSERT(identifier.index != 0 && identifier.index < m_ElementCount,       "Invalid resource ID | Invalid index");
-				GM_ASSERT(identifier.generation == m_Elements[identifier.index].generation, "Invalid resource ID | ID generation does not match current generation");
+				GM_ASSERT(identifier.index != GM_INVALID_ID && identifier.index < m_ElementCount, "Invalid resource ID | Invalid index");
+				GM_ASSERT(identifier.generation == m_Elements[identifier.index].generation,       "Invalid resource ID | ID generation does not match current generation");
 			#endif
 		}
 	private:

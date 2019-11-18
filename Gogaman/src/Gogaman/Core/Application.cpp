@@ -15,6 +15,8 @@
 #include "Gogaman/BoundingVolumeSystem.h"
 //#include "Rendering/RenderingSystem.h"
 
+#include "ResourceContainer.h"
+
 namespace Gogaman
 {
 	Application *Application::s_Instance = nullptr;

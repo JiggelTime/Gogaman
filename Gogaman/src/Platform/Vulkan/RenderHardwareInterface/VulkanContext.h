@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Gogaman/RenderHardwareInterface/AbstractContext.h"
 
 #include "Gogaman/Core/Base.h"
@@ -9,11 +11,11 @@ namespace Gogaman
 		GM_STATIC_CLASS_IMPLEMENTATION(Context, AbstractContext)
 		{
 		public:
-			Context();
+			Context()                = default;
 			Context(const Context &) = delete;
 			Context(Context &&other) = default;
 
-			~Context();
+			~Context() = default;
 
 			Context &operator=(const Context &) = delete;
 			Context &operator=(Context &&other) = default;

@@ -11,34 +11,58 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		Texture::Texture(const Device &device, const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t levelCount)
-			: AbstractTexture(device, width, height, depth, levelCount)
+		Texture::Texture(const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t levelCount)
+			: AbstractTexture(width, height, depth, levelCount)
 		{
-			VkImageCreateInfo textureDescriptor = {};
-			textureDescriptor.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			//textureDescriptor.flags = ;
-			//textureDescriptor.imageType             = m_Height == 0 ? VK_IMAGE_TYPE_1D : m_Depth == 0 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
-			//textureDescriptor.format                = GetNativeFormat(m_Format);
-			//textureDescriptor.extent.width          = m_Width;
-			//textureDescriptor.extent.height         = m_Height;
-			//textureDescriptor.extent.depth          = m_Depth;
-			//textureDescriptor.mipLevels             = m_LevelCount - 1;
-			//textureDescriptor.arrayLayers = ;
-			//textureDescriptor.samples = ;
-			//textureDescriptor.tiling = ;
-			//textureDescriptor.usage = ;
-			//textureDescriptor.sharingMode = ;
-			//textureDescriptor.queueFamilyIndexCount = ;
-			//textureDescriptor.pQueueFamilyIndices = ;
-			//textureDescriptor.initialLayout = ;
+			VkImageCreateInfo imageDescriptor = {};
+			imageDescriptor.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			//imageDescriptor.flags = ;
+			//imageDescriptor.imageType             = m_Height == 0 ? VK_IMAGE_TYPE_1D : m_Depth == 0 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
+			//imageDescriptor.format                = GetNativeFormat(m_Format);
+			//imageDescriptor.extent.width          = m_Width;
+			//imageDescriptor.extent.height         = m_Height;
+			//imageDescriptor.extent.depth          = m_Depth;
+			//imageDescriptor.mipLevels             = m_LevelCount - 1;
+			//imageDescriptor.arrayLayers = ;
+			//imageDescriptor.samples = ;
+			//imageDescriptor.tiling = ;
+			//imageDescriptor.usage = ;
+			//imageDescriptor.sharingMode = ;
+			//imageDescriptor.queueFamilyIndexCount = ;
+			//imageDescriptor.pQueueFamilyIndices = ;
+			//imageDescriptor.initialLayout = ;
 
-			const Device &device = Application::GetInstance().GetWindow().GetRHI_Device();
-			vkCreateImage(device.GetNativeData().vulkanDevice, &textureDescriptor, nullptr, &m_NativeData.vulkanImage);
+			const Device &device = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+			if(vkCreateImage(device.GetNativeData().vulkanDevice, &imageDescriptor, nullptr, &m_NativeData.vulkanImage) != VK_SUCCESS)
+				GM_ASSERT(false, "Failed to construct texture | Failed to create image");
+
+			FormatType formatType = Texture::GetFormatType(m_Format);
+
+			VkImageViewCreateInfo imageViewDescriptor = {};
+			imageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			imageViewDescriptor.image                           = m_NativeData.vulkanImage;
+			imageViewDescriptor.viewType                        = m_Height == 0 ? VK_IMAGE_VIEW_TYPE_1D : m_Depth == 0 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D;
+			imageViewDescriptor.format                          = Texture::GetNativeFormat(m_Format);
+			imageViewDescriptor.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewDescriptor.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewDescriptor.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewDescriptor.components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+			imageViewDescriptor.subresourceRange.aspectMask     = (formatType == FormatType::Value || formatType == FormatType::Color) ? VK_IMAGE_ASPECT_COLOR_BIT : formatType == FormatType::Depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+			imageViewDescriptor.subresourceRange.baseMipLevel   = 0;
+			imageViewDescriptor.subresourceRange.levelCount     = m_LevelCount;
+			imageViewDescriptor.subresourceRange.baseArrayLayer = 0;
+			imageViewDescriptor.subresourceRange.layerCount     = 1;
+
+			if(vkCreateImageView(device.GetNativeData().vulkanDevice, &imageViewDescriptor, nullptr, &m_NativeData.vulkanImageView) != VK_SUCCESS)
+				GM_ASSERT(false, "Failed to construct texture | Failed to create image view");
 		}
 
 		Texture::~Texture()
 		{
-			const Device &device = Application::GetInstance().GetWindow().GetRHI_Device();
+			const Device &device = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+
+			vkDestroyImageView(device.GetNativeData().vulkanDevice, m_NativeData.vulkanImageView, nullptr);
+
 			vkDestroyImage(device.GetNativeData().vulkanDevice, m_NativeData.vulkanImage, nullptr);
 		}
 
