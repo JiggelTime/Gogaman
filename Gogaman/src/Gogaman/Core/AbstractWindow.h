@@ -15,10 +15,10 @@ namespace Gogaman
 	{
 	public:
 		AbstractWindow(const AbstractWindow &) = delete;
-		AbstractWindow(AbstractWindow &&other) = default;
+		AbstractWindow(AbstractWindow &&) = default;
 
 		AbstractWindow &operator=(const AbstractWindow &) = delete;
-		AbstractWindow &operator=(AbstractWindow &&other) = default;
+		AbstractWindow &operator=(AbstractWindow &&) = default;
 
 		inline void Update() { this->GetImplementation().Update(); }
 

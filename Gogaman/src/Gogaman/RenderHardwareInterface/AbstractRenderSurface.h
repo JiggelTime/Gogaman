@@ -29,10 +29,10 @@ namespace Gogaman
 			};
 		public:
 			AbstractRenderSurface(const AbstractRenderSurface &) = delete;
-			AbstractRenderSurface(AbstractRenderSurface &&other) = default;
+			AbstractRenderSurface(AbstractRenderSurface &&)      = default;
 
 			AbstractRenderSurface &operator=(const AbstractRenderSurface &) = delete;
-			AbstractRenderSurface &operator=(AbstractRenderSurface &&other) = default;
+			AbstractRenderSurface &operator=(AbstractRenderSurface &&)      = default;
 
 			inline constexpr const Attachments &GetAttachments() const { return m_Attachments; }
 

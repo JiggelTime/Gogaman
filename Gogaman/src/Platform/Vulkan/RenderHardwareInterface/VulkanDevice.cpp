@@ -104,7 +104,7 @@ namespace Gogaman
 			#endif
 
 			if(vkCreateInstance(&renderingInstanceDescriptor, nullptr, &m_NativeData.vulkanInstance) != VK_SUCCESS)
-				GM_ASSERT(false, "Failed to initialize Vulkan | Failed to create Vulkan instance");
+				GM_DEBUG_ASSERT(false, "Failed to initialize Vulkan | Failed to create Vulkan instance");
 
 			#if GM_RHI_DEBUGGING_ENABLED
 				VkDebugUtilsMessengerCreateInfoEXT debugMessengerDescriptor = {};
@@ -120,7 +120,7 @@ namespace Gogaman
 			#endif
 
 			if(glfwCreateWindowSurface(m_NativeData.vulkanInstance, (GLFWwindow *)nativeWindow, nullptr, &m_NativeData.vulkanSurface) != VK_SUCCESS)
-				GM_ASSERT(false, "Failed to initialize Vulkan | Failed to create window surface");
+				GM_DEBUG_ASSERT(false, "Failed to initialize Vulkan | Failed to create window surface");
 
 			uint32_t physicalDeviceCount;
 			vkEnumeratePhysicalDevices(m_NativeData.vulkanInstance, &physicalDeviceCount, nullptr);
@@ -307,7 +307,7 @@ namespace Gogaman
 			deviceDescriptor.pEnabledFeatures        = &requiredDeviceFeatures;
 
 			if(vkCreateDevice(m_NativeData.vulkanPhysicalDevice, &deviceDescriptor, nullptr, &m_NativeData.vulkanDevice) != VK_SUCCESS)
-				GM_ASSERT(false, "Failed to initialize Vulkan | Failed to create logical device");
+				GM_DEBUG_ASSERT(false, "Failed to initialize Vulkan | Failed to create logical device");
 		}
 
 		Device::~Device()
@@ -419,7 +419,7 @@ namespace Gogaman
 			swapChainDescriptor.oldSwapchain     = VK_NULL_HANDLE;
 
 			if(vkCreateSwapchainKHR(m_NativeData.vulkanDevice, &swapChainDescriptor, nullptr, &m_NativeData.vulkanSwapChain) != VK_SUCCESS)
-				GM_ASSERT(false, "Failed to create swap chain");
+				GM_DEBUG_ASSERT(false, "Failed to create swap chain");
 		}
 		
 		void Device::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)

@@ -106,8 +106,8 @@ namespace Gogaman
 		inline void ValidateID(const ID identifier) const
 		{
 			#if GM_RHI_DEBUGGING_ENABLED
-				GM_ASSERT(identifier.index != GM_INVALID_ID && identifier.index < m_ElementCount, "Invalid resource ID | Invalid index");
-				GM_ASSERT(identifier.generation == m_Elements[identifier.index].generation,       "Invalid resource ID | ID generation does not match current generation");
+				GM_DEBUG_ASSERT(identifier.index != GM_INVALID_ID && identifier.index < m_ElementCount, "Invalid resource ID | Invalid index");
+				GM_DEBUG_ASSERT(identifier.generation == m_Elements[identifier.index].generation,       "Invalid resource ID | ID generation does not match current generation");
 			#endif
 		}
 	private:

@@ -80,7 +80,6 @@ namespace Gogaman
 			if(isDepthStencilAttachmentPresent)
 				subPassDescriptor.pDepthStencilAttachment = &attachmentReferenceDescriptors[colorAttachmentCount];
 
-
 			VkRenderPassCreateInfo renderPassDescriptor = {};
 			renderPassDescriptor.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			renderPassDescriptor.attachmentCount = attachmentCount;

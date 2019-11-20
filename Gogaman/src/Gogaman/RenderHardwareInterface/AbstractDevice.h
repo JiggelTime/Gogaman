@@ -43,10 +43,10 @@ namespace Gogaman
 			};
 		public:
 			AbstractDevice(const AbstractDevice &) = delete;
-			AbstractDevice(AbstractDevice &&other) = default;
+			AbstractDevice(AbstractDevice &&)      = default;
 
 			AbstractDevice &operator=(const AbstractDevice &) = delete;
-			AbstractDevice &operator=(AbstractDevice &&other) = default;
+			AbstractDevice &operator=(AbstractDevice &&)      = default;
 
 			inline void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().CreateSwapChain(width, height, verticalSynchronization); }
 
@@ -79,6 +79,8 @@ namespace Gogaman
 			inline constexpr uint32_t GetRenderSurfaceHeightLimit()               const { return this->GetImplementation().GetRenderSurfaceHeightLimit();               }
 			inline constexpr uint32_t GetRenderSurfaceDepthLimit()                const { return this->GetImplementation().GetRenderSurfaceDepthLimit();                }
 			inline constexpr uint32_t GetRenderSurfaceColorAttachmentCountLimit() const { return this->GetImplementation().GetRenderSurfaceColorAttachmentCountLimit(); }
+
+			inline constexpr uint32_t GetViewportCountLimit() const { return this->GetImplementation().GetViewportCountLimit(); }
 		private:
 			AbstractDevice(void *nativeWindow)
 			{}

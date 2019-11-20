@@ -30,12 +30,12 @@ namespace Gogaman
 		public:
 			Device(void *nativeWindow);
 			Device(const Device &) = delete;
-			Device(Device &&other) = default;
+			Device(Device &&)      = default;
 			
 			~Device();
 
 			Device &operator=(const Device &) = delete;
-			Device &operator=(Device &&other) = default;
+			Device &operator=(Device &&)      = default;
 
 			void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
@@ -50,6 +50,7 @@ namespace Gogaman
 			inline constexpr uint32_t GetTextureHeightLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension2D; }
 			inline constexpr uint32_t GetTextureDepthLimit()  const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension3D; }
 
+
 			inline constexpr uint32_t GetVertexShaderInputAttributeCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxVertexInputAttributes; }
 
 			inline constexpr uint32_t GetPixelShaderOutputAttachmentCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxFragmentOutputAttachments; }
@@ -62,6 +63,8 @@ namespace Gogaman
 			inline constexpr uint32_t GetRenderSurfaceHeightLimit()               const { return m_NativeData.vulkanPhysicalDeviceLimits.maxFramebufferHeight; }
 			inline constexpr uint32_t GetRenderSurfaceDepthLimit()                const { return m_NativeData.vulkanPhysicalDeviceLimits.maxFramebufferLayers; }
 			inline constexpr uint32_t GetRenderSurfaceColorAttachmentCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxColorAttachments;  }
+			
+			inline constexpr uint32_t GetViewportCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxViewports; }
 		private:
 			static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * callbackData, void *userData);
 		private:

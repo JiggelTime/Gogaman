@@ -13,12 +13,12 @@ namespace Gogaman
 		public:
 			Context()                = default;
 			Context(const Context &) = delete;
-			Context(Context &&other) = default;
+			Context(Context &&)      = default;
 
 			~Context() = default;
 
 			Context &operator=(const Context &) = delete;
-			Context &operator=(Context &&other) = default;
+			Context &operator=(Context &&)      = default;
 		private:
 			//friend AbstractContext;
 		};

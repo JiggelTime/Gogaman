@@ -15,33 +15,50 @@ namespace Gogaman
 			: AbstractTexture(width, height, depth, levelCount)
 		{
 			VkImageCreateInfo imageDescriptor = {};
-			imageDescriptor.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-			//imageDescriptor.flags = ;
-			//imageDescriptor.imageType             = m_Height == 0 ? VK_IMAGE_TYPE_1D : m_Depth == 0 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
-			//imageDescriptor.format                = GetNativeFormat(m_Format);
-			//imageDescriptor.extent.width          = m_Width;
-			//imageDescriptor.extent.height         = m_Height;
-			//imageDescriptor.extent.depth          = m_Depth;
-			//imageDescriptor.mipLevels             = m_LevelCount - 1;
-			//imageDescriptor.arrayLayers = ;
-			//imageDescriptor.samples = ;
-			//imageDescriptor.tiling = ;
-			//imageDescriptor.usage = ;
-			//imageDescriptor.sharingMode = ;
-			//imageDescriptor.queueFamilyIndexCount = ;
-			//imageDescriptor.pQueueFamilyIndices = ;
-			//imageDescriptor.initialLayout = ;
+			imageDescriptor.sType                 = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			imageDescriptor.imageType             = m_Height == 1 ? VK_IMAGE_TYPE_1D : m_Depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
+			imageDescriptor.format                = GetNativeFormat(m_Format);
+			imageDescriptor.extent.width          = m_Width;
+			imageDescriptor.extent.height         = m_Height;
+			imageDescriptor.extent.depth          = m_Depth;
+			imageDescriptor.mipLevels             = m_LevelCount;
+			imageDescriptor.arrayLayers           = 1;
+			imageDescriptor.samples               = VK_SAMPLE_COUNT_1_BIT;
+			imageDescriptor.tiling                = VK_IMAGE_TILING_OPTIMAL;
+			//TODO: Detect based on usage
+			imageDescriptor.usage                 = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			imageDescriptor.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
+			imageDescriptor.queueFamilyIndexCount = 0;
+			imageDescriptor.pQueueFamilyIndices   = nullptr;
+			//data ? VK_IMAGE_LAYOUT_PREINITIALIZED : VK_IMAGE_LAYOUT_UNDEFINED;
+			imageDescriptor.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED;
 
-			const Device &device = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
-			if(vkCreateImage(device.GetNativeData().vulkanDevice, &imageDescriptor, nullptr, &m_NativeData.vulkanImage) != VK_SUCCESS)
-				GM_ASSERT(false, "Failed to construct texture | Failed to create image");
+			const Device &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+			const auto   &vulkanDevice = device.GetNativeData().vulkanDevice;
+
+			if(vkCreateImage(vulkanDevice, &imageDescriptor, nullptr, &m_NativeData.vulkanImage) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create image");
+
+			//TODO: Use custom allocator
+			VkMemoryRequirements memoryRequirements;
+			vkGetImageMemoryRequirements(vulkanDevice, m_NativeData.vulkanImage, &memoryRequirements);
+
+			VkMemoryAllocateInfo memoryDescriptor = {};
+			memoryDescriptor.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+			memoryDescriptor.allocationSize  = memoryRequirements.size;
+			memoryDescriptor.memoryTypeIndex = ;
+
+			if(vkAllocateMemory(vulkanDevice, &memoryDescriptor, nullptr, &m_NativeData.vulkanDeviceMemory) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to allocate memory");
+
+			vkBindImageMemory(vulkanDevice, m_NativeData.vulkanImage, m_NativeData.vulkanDeviceMemory, 0);
 
 			FormatType formatType = Texture::GetFormatType(m_Format);
 
 			VkImageViewCreateInfo imageViewDescriptor = {};
 			imageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 			imageViewDescriptor.image                           = m_NativeData.vulkanImage;
-			imageViewDescriptor.viewType                        = m_Height == 0 ? VK_IMAGE_VIEW_TYPE_1D : m_Depth == 0 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D;
+			imageViewDescriptor.viewType                        = m_Height == 1 ? VK_IMAGE_VIEW_TYPE_1D : m_Depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D;
 			imageViewDescriptor.format                          = Texture::GetNativeFormat(m_Format);
 			imageViewDescriptor.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 			imageViewDescriptor.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -54,16 +71,19 @@ namespace Gogaman
 			imageViewDescriptor.subresourceRange.layerCount     = 1;
 
 			if(vkCreateImageView(device.GetNativeData().vulkanDevice, &imageViewDescriptor, nullptr, &m_NativeData.vulkanImageView) != VK_SUCCESS)
-				GM_ASSERT(false, "Failed to construct texture | Failed to create image view");
+				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create image view");
 		}
 
 		Texture::~Texture()
 		{
-			const Device &device = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+			const Device &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+			const auto   &vulkanDevice = device.GetNativeData().vulkanDevice;
 
-			vkDestroyImageView(device.GetNativeData().vulkanDevice, m_NativeData.vulkanImageView, nullptr);
+			vkDestroyImageView(vulkanDevice, m_NativeData.vulkanImageView, nullptr);
 
-			vkDestroyImage(device.GetNativeData().vulkanDevice, m_NativeData.vulkanImage, nullptr);
+			vkDestroyImage(vulkanDevice, m_NativeData.vulkanImage, nullptr);
+
+			vkFreeMemory(vulkanDevice, m_NativeData.vulkanDeviceMemory, nullptr);
 		}
 
 		constexpr VkFormat Texture::GetNativeFormat(const Format format)
@@ -112,7 +132,7 @@ namespace Gogaman
 			case Format::XYZW32F:
 				return VK_FORMAT_R32G32B32A32_SFLOAT;
 			default:
-				GM_ASSERT(false, "Failed to get native texture format | Invalid format");
+				GM_DEBUG_ASSERT(false, "Failed to get native texture format | Invalid format");
 			}
 		}
 	}

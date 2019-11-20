@@ -9,7 +9,7 @@
 
 //Debug vs release build features
 #if 1
-	#define GM_ASSERTIONS_ENABLED                 1
+	#define GM_DEBUG_ASSERTIONS_ENABLED           1
 	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED 1
 	#define GM_RHI_DEBUGGING_ENABLED              1
 #else
@@ -18,24 +18,27 @@
 	#define GM_RHI_DEBUGGING_ENABLED              0
 #endif
 
-#if GM_ASSERTIONS_ENABLED
-	#define GM_ASSERT(x, ...)\
-	if(!(x))\
-	{\
-		GM_LOG_CORE_ERROR("   _______ _________   __ ");\
-		GM_LOG_CORE_ERROR("  / __/ _ /_  __/ _ | / / ");\
-		GM_LOG_CORE_ERROR(" / _// __ |/ / / __ |/ /__");\
-		GM_LOG_CORE_ERROR("/_/ /_/ |_/_/ /_/ |_/____/");\
-		GM_LOG_CORE_ERROR("");\
-		GM_LOG_CORE_ERROR("Assertion failed at %s | Line: %d | Condition: %s", __FILE__, __LINE__, #x);\
-		GM_LOG_CORE_ERROR(__VA_ARGS__);\
-		abort();\
-	}
+#define GM_ASSERT(x, ...)\
+if(!(x))\
+{\
+	GM_LOG_CORE_ERROR("   _______ _________   __ ");\
+	GM_LOG_CORE_ERROR("  / __/ _ /_  __/ _ | / / ");\
+	GM_LOG_CORE_ERROR(" / _// __ |/ / / __ |/ /__");\
+	GM_LOG_CORE_ERROR("/_/ /_/ |_/_/ /_/ |_/____/");\
+	GM_LOG_CORE_ERROR("");\
+	GM_LOG_CORE_ERROR("Assertion failed at %s | Line: %d | Condition: %s", __FILE__, __LINE__, #x);\
+	GM_LOG_CORE_ERROR(__VA_ARGS__);\
+	abort();\
+}
 
-	#define GM_STATIC_ASSERT(x, message) static_assert(x, message);
+#define GM_STATIC_ASSERT(x, message) static_assert(x, message);
+
+#if GM_DEBUG_ASSERTIONS_ENABLED
+	#define GM_DEBUG_ASSERT(x, ...)            GM_ASSERT(x, __VA_ARGS__)
+	#define GM_DEBUG_STATIC_ASSERT(x, message) GM_STATIC_ASSERT(x, message)
 #else
-	#define GM_ASSERT(x, ...) ;
-	#define GM_STATIC_ASSERT(x, message)
+	#define GM_DEBUG_ASSERT(x, ...)
+	#define GM_DEBUG_STATIC_ASSERT(x, message)
 #endif
 
 #define KiB 1024

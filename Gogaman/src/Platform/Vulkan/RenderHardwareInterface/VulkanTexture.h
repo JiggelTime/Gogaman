@@ -18,14 +18,14 @@ namespace Gogaman
 				VkDeviceMemory vulkanDeviceMemory;
 			};
 		public:
-			Texture(const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0, const uint8_t levelCount = 1);
+			Texture(const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
 			Texture(const Texture &) = delete;
-			Texture(Texture &&other) = default;
+			Texture(Texture &&)      = default;
 
 			~Texture();
 
 			Texture &operator=(const Texture &) = delete;
-			Texture &operator=(Texture &&other) = default;
+			Texture &operator=(Texture &&)      = default;
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }

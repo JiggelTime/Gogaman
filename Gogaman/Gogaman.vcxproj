@@ -25,6 +25,8 @@
     </ClCompile>
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDevice.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderSurface.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
@@ -60,6 +62,8 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractDevice.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractContext.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractShader.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractState.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Device.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Context.h" />
@@ -91,6 +95,8 @@
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDevice.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanContext.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderSurface.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.h" />
     <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
     <ClInclude Include="vendor\stb_image.h" />

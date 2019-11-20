@@ -11,10 +11,10 @@ namespace Gogaman
 		{
 		public:
 			AbstractContext(const AbstractContext &) = delete;
-			AbstractContext(AbstractContext &&other) = default;
+			AbstractContext(AbstractContext &&)      = default;
 
 			AbstractContext &operator=(const AbstractContext &) = delete;
-			AbstractContext &operator=(AbstractContext &&other) = default;
+			AbstractContext &operator=(AbstractContext &&)      = default;
 		private:
 			AbstractContext()  = default;
 			~AbstractContext() = default;

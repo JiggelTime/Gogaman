@@ -21,12 +21,12 @@ namespace Gogaman
 		public:
 			RenderSurface(Attachments &&attachments, const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0);
 			RenderSurface(const RenderSurface &) = delete;
-			RenderSurface(RenderSurface &&other) = default;
+			RenderSurface(RenderSurface &&) = default;
 
 			~RenderSurface();
 
 			RenderSurface &operator=(const RenderSurface &) = delete;
-			RenderSurface &operator=(RenderSurface &&other) = default;
+			RenderSurface &operator=(RenderSurface &&) = default;
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }

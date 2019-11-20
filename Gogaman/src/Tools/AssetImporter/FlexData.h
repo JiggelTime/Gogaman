@@ -239,14 +239,11 @@ namespace FlexData
 			}
 
 			//Mesh data
-			//Read number of meshes
-			using meshCountType = uint32_t;
-			uint8_t meshCountData[sizeof(meshCountType)];
-			fread(meshCountData, 1, sizeof(meshCountType), file);
-			meshCountType meshCount = *(meshCountType *)meshCountData;
-			//meshCountType meshCount = *reinterpret_cast<meshCountType *>(meshCountData);
+			//Read mesh count
+			uint32_t meshCount;
+			fread(&meshCount, 1, sizeof(uint32_t), file);
 			dataPayload.meshes.reserve(meshCount);
-			for(meshCountType i = 0; i < meshCount; i++)
+			for(uint32_t i = 0; i < meshCount; i++)
 			{
 				FlexMeshData meshDataPayload;
 				//Read transform data

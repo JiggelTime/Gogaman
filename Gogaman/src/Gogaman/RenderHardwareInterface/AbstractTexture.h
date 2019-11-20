@@ -43,10 +43,10 @@ namespace Gogaman
 			};
 		public:
 			AbstractTexture(const AbstractTexture &) = delete;
-			AbstractTexture(AbstractTexture &&other) = default;
+			AbstractTexture(AbstractTexture &&)      = default;
 
 			AbstractTexture &operator=(const AbstractTexture &) = delete;
-			AbstractTexture &operator=(AbstractTexture &&other) = default;
+			AbstractTexture &operator=(AbstractTexture &&)      = default;
 
 			inline constexpr uint16_t GetWidth()  const { return m_Width;  }
 			inline constexpr uint16_t GetHeight() const { return m_Height; }
@@ -90,11 +90,11 @@ namespace Gogaman
 				case Format::RGBW8:
 					return FormatType::Color;
 				default:
-					GM_ASSERT(false, "Failed to get texture format type | Invalid format");
+					GM_DEBUG_ASSERT(false, "Failed to get texture format type | Invalid format");
 				}
 			}
 		private:
-			AbstractTexture(const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0, const uint8_t levelCount = 1);
+			AbstractTexture(const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
 
 			~AbstractTexture() = default;
 		protected:

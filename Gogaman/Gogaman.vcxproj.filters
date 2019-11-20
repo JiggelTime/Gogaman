@@ -14,6 +14,8 @@
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -82,6 +84,10 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.h" />
     <ClInclude Include="src\Gogaman\Core\ResourceContainer.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractShader.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractState.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />
