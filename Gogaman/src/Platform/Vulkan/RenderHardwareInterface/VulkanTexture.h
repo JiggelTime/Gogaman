@@ -2,23 +2,25 @@
 
 #include "Gogaman/RenderHardwareInterface/AbstractTexture.h"
 
+#include "VulkanMemory.h"
+
 #include <vulkan/vulkan.h>
 
 namespace Gogaman
 {
 	namespace RHI
 	{
-		GM_STATIC_CLASS_IMPLEMENTATION(Texture, AbstractTexture)
+		class Texture : public AbstractTexture<Texture>
 		{
 		private:
 			struct NativeData
 			{
-				VkImage        vulkanImage;
-				VkImageView    vulkanImageView;
-				VkDeviceMemory vulkanDeviceMemory;
+				VkImage            vulkanImage;
+				VkImageView        vulkanImageView;
+				Memory::Allocation vulkanMemory;
 			};
 		public:
-			Texture(const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
+			Texture(const Format format, const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
 			Texture(const Texture &) = delete;
 			Texture(Texture &&)      = default;
 
@@ -34,7 +36,7 @@ namespace Gogaman
 		private:
 			NativeData m_NativeData;
 		private:
-			friend AbstractTexture;
+			//friend AbstractTexture;
 		};
 	}
 }

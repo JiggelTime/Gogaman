@@ -4,28 +4,32 @@
 
 #include "Gogaman/Core/Base.h"
 
+#include "VulkanMemory.h"
+
 #include <vulkan/vulkan.h>
 
 namespace Gogaman
 {
 	namespace RHI
 	{
-		GM_STATIC_CLASS_IMPLEMENTATION(Device, AbstractDevice)
+		class Device : public AbstractDevice<Device>
 		{
 		private:
 			struct NativeData
 			{
-				VkInstance                   vulkanInstance;
+				VkInstance                       vulkanInstance;
 				#if GM_RHI_DEBUGGING_ENABLED
-					VkDebugUtilsMessengerEXT vulkanDebugMessenger;
+					VkDebugUtilsMessengerEXT     vulkanDebugMessenger;
 				#endif
-				VkSurfaceKHR                 vulkanSurface;
-				VkPhysicalDevice             vulkanPhysicalDevice;
-				VkPhysicalDeviceLimits       vulkanPhysicalDeviceLimits;
-				uint32_t                     vulkanCommandQueueTypeIndices[3];
-				std::vector<VkQueue>         vulkanCommandQueues[3];
-				VkDevice                     vulkanDevice;
-				VkSwapchainKHR               vulkanSwapChain;
+				VkSurfaceKHR                     vulkanSurface;
+				VkPhysicalDevice                 vulkanPhysicalDevice;
+				VkPhysicalDeviceLimits           vulkanPhysicalDeviceLimits;
+				uint32_t                         vulkanMemoryTypeFlags[3];
+				Memory::Allocator                vulkanMemoryAllocator;
+				uint32_t                         vulkanCommandQueueTypeIndices[3];
+				std::vector<VkQueue>             vulkanCommandQueues[3];
+				VkDevice                         vulkanDevice;
+				VkSwapchainKHR                   vulkanSwapChain;
 			};
 		public:
 			Device(void *nativeWindow);
@@ -50,6 +54,7 @@ namespace Gogaman
 			inline constexpr uint32_t GetTextureHeightLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension2D; }
 			inline constexpr uint32_t GetTextureDepthLimit()  const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension3D; }
 
+			inline constexpr uint32_t GetSamplerAnisotropyLimit() const { return (uint32_t)m_NativeData.vulkanPhysicalDeviceLimits.maxSamplerAnisotropy; }
 
 			inline constexpr uint32_t GetVertexShaderInputAttributeCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxVertexInputAttributes; }
 

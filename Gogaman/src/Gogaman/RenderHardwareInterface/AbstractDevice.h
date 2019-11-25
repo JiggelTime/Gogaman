@@ -22,7 +22,7 @@ namespace Gogaman
 		enum class CommandQueueType : uint8_t
 		{
 			Compute,
-			Copy,
+			Transfer,
 			Direct
 		};
 

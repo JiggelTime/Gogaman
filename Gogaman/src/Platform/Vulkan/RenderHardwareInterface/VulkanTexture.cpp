@@ -11,8 +11,8 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		Texture::Texture(const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t levelCount)
-			: AbstractTexture(width, height, depth, levelCount)
+		Texture::Texture(const Format format, const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t levelCount)
+			: AbstractTexture<Texture>(format, width, height, depth, levelCount)
 		{
 			VkImageCreateInfo imageDescriptor = {};
 			imageDescriptor.sType                 = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -33,33 +33,24 @@ namespace Gogaman
 			//data ? VK_IMAGE_LAYOUT_PREINITIALIZED : VK_IMAGE_LAYOUT_UNDEFINED;
 			imageDescriptor.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED;
 
-			const Device &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
-			const auto   &vulkanDevice = device.GetNativeData().vulkanDevice;
+			Device     &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+			const auto &vulkanDevice = device.GetNativeData().vulkanDevice;
 
 			if(vkCreateImage(vulkanDevice, &imageDescriptor, nullptr, &m_NativeData.vulkanImage) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create image");
 
-			//TODO: Use custom allocator
 			VkMemoryRequirements memoryRequirements;
 			vkGetImageMemoryRequirements(vulkanDevice, m_NativeData.vulkanImage, &memoryRequirements);
+			m_NativeData.vulkanMemory = device.GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size);
+			vkBindImageMemory(vulkanDevice, m_NativeData.vulkanImage, m_NativeData.vulkanMemory.vulkanDeviceMemory, m_NativeData.vulkanMemory.offset);
 
-			VkMemoryAllocateInfo memoryDescriptor = {};
-			memoryDescriptor.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-			memoryDescriptor.allocationSize  = memoryRequirements.size;
-			memoryDescriptor.memoryTypeIndex = ;
-
-			if(vkAllocateMemory(vulkanDevice, &memoryDescriptor, nullptr, &m_NativeData.vulkanDeviceMemory) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to allocate memory");
-
-			vkBindImageMemory(vulkanDevice, m_NativeData.vulkanImage, m_NativeData.vulkanDeviceMemory, 0);
-
-			FormatType formatType = Texture::GetFormatType(m_Format);
+			FormatType formatType = GetFormatType(m_Format);
 
 			VkImageViewCreateInfo imageViewDescriptor = {};
-			imageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+			imageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			imageViewDescriptor.image                           = m_NativeData.vulkanImage;
 			imageViewDescriptor.viewType                        = m_Height == 1 ? VK_IMAGE_VIEW_TYPE_1D : m_Depth == 1 ? VK_IMAGE_VIEW_TYPE_2D : VK_IMAGE_VIEW_TYPE_3D;
-			imageViewDescriptor.format                          = Texture::GetNativeFormat(m_Format);
+			imageViewDescriptor.format                          = GetNativeFormat(m_Format);
 			imageViewDescriptor.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 			imageViewDescriptor.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 			imageViewDescriptor.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -76,14 +67,14 @@ namespace Gogaman
 
 		Texture::~Texture()
 		{
-			const Device &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
-			const auto   &vulkanDevice = device.GetNativeData().vulkanDevice;
+			Device     &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
+			const auto &vulkanDevice = device.GetNativeData().vulkanDevice;
 
 			vkDestroyImageView(vulkanDevice, m_NativeData.vulkanImageView, nullptr);
 
 			vkDestroyImage(vulkanDevice, m_NativeData.vulkanImage, nullptr);
 
-			vkFreeMemory(vulkanDevice, m_NativeData.vulkanDeviceMemory, nullptr);
+			device.GetNativeData().vulkanMemoryAllocator.Deallocate(m_NativeData.vulkanMemory);
 		}
 
 		constexpr VkFormat Texture::GetNativeFormat(const Format format)

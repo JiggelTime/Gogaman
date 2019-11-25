@@ -16,11 +16,10 @@ namespace Gogaman
 		{
 			auto &device = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
 
-			uint32_t colorAttachmentCount = (uint32_t)m_Attachments.colorAttachments.size();
-
-			bool isDepthStencilAttachmentPresent = m_Attachments.depthStencilAttachment.textureID.index != GM_INVALID_ID;
+			uint32_t colorAttachmentCount            = (uint32_t)m_Attachments.colorAttachments.size();
+			bool     isDepthStencilAttachmentPresent = m_Attachments.depthStencilAttachment.textureID.index != GM_INVALID_ID;
+			uint32_t attachmentCount                 = isDepthStencilAttachmentPresent ? colorAttachmentCount + 1 : colorAttachmentCount;
 			
-			uint32_t attachmentCount = isDepthStencilAttachmentPresent ? colorAttachmentCount + 1 : colorAttachmentCount;
 			VkAttachmentDescription *attachmentDescriptors          = new VkAttachmentDescription[attachmentCount];
 			VkAttachmentReference   *attachmentReferenceDescriptors = new VkAttachmentReference[attachmentCount];
 

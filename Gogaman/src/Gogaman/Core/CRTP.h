@@ -16,5 +16,3 @@ namespace Gogaman
 		friend AbstractType<ImplementationType>;
 	};
 }
-
-#define GM_STATIC_CLASS_IMPLEMENTATION(x, y) class x : public y<x>

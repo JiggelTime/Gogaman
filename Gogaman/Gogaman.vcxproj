@@ -23,8 +23,11 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderOutputFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
     </ClCompile>
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDevice.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderSurface.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.cpp" />
@@ -59,14 +62,17 @@
     <ClInclude Include="src\Gogaman\Input\Input.h" />
     <ClInclude Include="src\Gogaman\Core\Logging\Logger.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeSystem.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractBuffer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractDevice.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractContext.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractSampler.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractShader.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractState.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Device.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Context.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\DeviceMemory.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderSurface.h" />
     <ClInclude Include="src\Gogaman\Core\ResourceContainer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
@@ -92,9 +98,12 @@
     <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
     <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\pch.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDevice.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanContext.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderSurface.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.h" />

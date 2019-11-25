@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "AbstractRenderSurface.h"
 
+#include "RenderSurface.h"
+
 #include "Device.h"
 #include "Gogaman/Core/Window.h"
 #include "Gogaman/Core/Application.h"
@@ -9,8 +11,7 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		template<typename ImplementationType>
-		AbstractRenderSurface<ImplementationType>::AbstractRenderSurface(Attachments &&attachments, const uint16_t width, const uint16_t height, const uint16_t depth)
+		AbstractRenderSurface<RenderSurface>::AbstractRenderSurface(Attachments &&attachments, const uint16_t width, const uint16_t height, const uint16_t depth)
 			: m_Attachments(std::move(attachments)), m_Width(width), m_Height(height), m_Depth(depth)
 		{
 			#if GM_RHI_DEBUGGING_ENABLED

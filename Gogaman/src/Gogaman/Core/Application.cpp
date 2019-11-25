@@ -15,7 +15,8 @@
 #include "Gogaman/BoundingVolumeSystem.h"
 //#include "Rendering/RenderingSystem.h"
 
-#include "ResourceContainer.h"
+//#include "Gogaman/RenderHardwareInterface/Device.h"
+#include "Gogaman/RenderHardwareInterface/Texture.h"
 
 namespace Gogaman
 {
@@ -47,6 +48,13 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
+		auto textureID = m_Window->GetRenderHardwareInterfaceDevice().GetResources().textures.Create(RHI::Texture::Format::XYZW8, 256, 256, 1, 1);
+
+		auto depth = m_Window->GetRenderHardwareInterfaceDevice().GetResources().textures.Get(textureID).GetDepth();
+
+		m_Window->GetRenderHardwareInterfaceDevice().GetResources().textures.Destroy(textureID);
+		//RHI::Texture test(256, 256, 1, 1);
+
 		while(m_IsRunning)
 		{
 			Time::Update();

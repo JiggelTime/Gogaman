@@ -33,14 +33,6 @@ namespace Gogaman
 				//Four channels
 				XYZW8, RGBW8, XYZW16, XYZW16F, XYZW32F
 			};
-
-			enum class Interpolation : uint8_t
-			{
-				Point,
-				Bilinear,
-				Trilinear,
-				Anisotropic
-			};
 		public:
 			AbstractTexture(const AbstractTexture &) = delete;
 			AbstractTexture(AbstractTexture &&)      = default;
@@ -53,8 +45,6 @@ namespace Gogaman
 			inline constexpr uint16_t GetDepth()  const { return m_Depth;  }
 
 			inline constexpr uint8_t GetLevelCount() const { return m_LevelCount; }
-
-			inline constexpr Interpolation GetInterpolation() const { return m_Interpolation; }
 
 			inline constexpr Format GetFormat() const { return m_Format; }
 
@@ -94,13 +84,12 @@ namespace Gogaman
 				}
 			}
 		private:
-			AbstractTexture(const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
+			AbstractTexture(const Format format, const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
 
 			~AbstractTexture() = default;
 		protected:
 			uint16_t      m_Width, m_Height, m_Depth;
 			uint8_t       m_LevelCount;
-			Interpolation m_Interpolation;
 			Format        m_Format;
 		private:
 			friend ImplementationType;

@@ -10,7 +10,7 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		GM_STATIC_CLASS_IMPLEMENTATION(RenderSurface, AbstractRenderSurface)
+		class RenderSurface : public AbstractRenderSurface<RenderSurface>
 		{
 		private:
 			struct NativeData

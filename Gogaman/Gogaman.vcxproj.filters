@@ -16,6 +16,9 @@
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -88,6 +91,12 @@
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractState.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanState.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractBuffer.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\DeviceMemory.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractSampler.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shadersOld\boxblurshader.fs" />

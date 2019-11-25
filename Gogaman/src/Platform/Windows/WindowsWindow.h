@@ -8,7 +8,7 @@ struct GLFWwindow;
 
 namespace Gogaman
 {
-	GM_STATIC_CLASS_IMPLEMENTATION(WindowsWindow, AbstractWindow)
+	class WindowsWindow : public AbstractWindow<WindowsWindow>
 	{
 	public:
 		WindowsWindow(const char *title, const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization = VerticalSynchronization::Disabled);

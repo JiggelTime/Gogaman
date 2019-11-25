@@ -8,7 +8,7 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		GM_STATIC_CLASS_IMPLEMENTATION(Context, AbstractContext)
+		class Context : public AbstractContext<Context>
 		{
 		public:
 			Context()                = default;
