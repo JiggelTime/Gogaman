@@ -19,21 +19,21 @@ namespace Gogaman
 				VkFramebuffer vulkanFramebuffer;
 			};
 		public:
-			RenderSurface(Attachments &&attachments, const uint16_t width = 0, const uint16_t height = 0, const uint16_t depth = 0);
+			RenderSurface(const uint8_t colorAttachmentCount, Attachment *colorAttachments, Attachment &&depthStencilAttachment, const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1);
 			RenderSurface(const RenderSurface &) = delete;
-			RenderSurface(RenderSurface &&) = default;
+			RenderSurface(RenderSurface &&)      = default;
 
 			~RenderSurface();
 
 			RenderSurface &operator=(const RenderSurface &) = delete;
-			RenderSurface &operator=(RenderSurface &&) = default;
+			RenderSurface &operator=(RenderSurface &&)      = default;
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }
 		private:
 			NativeData m_NativeData;
 		private:
-			friend AbstractRenderSurface;
+			//friend AbstractRenderSurface;
 		};
 	}
 }

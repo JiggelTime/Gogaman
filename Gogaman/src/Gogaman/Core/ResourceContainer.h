@@ -2,7 +2,9 @@
 
 #include "Gogaman/Core/Base.h"
 
-#define GM_INVALID_ID 0
+#define GM_INVALID_ID_INDEX 0
+#define GM_IS_VALID_ID(x)   (x.index != GM_INVALID_ID_INDEX)
+#define GM_IS_INVALID_ID(x) (x.index == GM_INVALID_ID_INDEX)
 
 namespace Gogaman
 {
@@ -28,9 +30,7 @@ namespace Gogaman
 	private:
 		struct Element
 		{
-			Element()
-			{}
-
+			Element()  {}
 			~Element() {}
 
 			union
@@ -54,22 +54,22 @@ namespace Gogaman
 		inline ID Create(ParameterTypes &&...constructorParameters)
 		{
 			ID identifier;
-			identifier.index            = m_Elements[0].nextFreeIndex;
+			identifier.index = m_Elements[0].nextFreeIndex;
 			m_Elements[0].nextFreeIndex = m_Elements[identifier.index].nextFreeIndex;
-			
+
 			#if GM_RHI_DEBUGGING_ENABLED
 				identifier.generation = m_Elements[identifier.index].generation;
 			#endif
 
 			if(identifier.index)
 			{
-				m_Elements[identifier.index].resource = std::move(ResourceType(constructorParameters...));
+				new (&m_Elements[identifier.index].resource)ResourceType(std::forward<ParameterTypes>(constructorParameters)...);
 				m_ElementCount++;
 				return identifier;
 			}
 
 			identifier.index = m_ElementCount++;
-			m_Elements[identifier.index].resource = std::move(ResourceType(constructorParameters...));
+			new (&m_Elements[identifier.index].resource)ResourceType(std::forward<ParameterTypes>(constructorParameters)...);
 			return identifier;
 		}
 
@@ -88,7 +88,7 @@ namespace Gogaman
 		inline void Destroy(const ID identifier)
 		{
 			ValidateID(identifier);
-
+			
 			m_Elements[identifier.index].resource.~ResourceType();
 			m_Elements[identifier.index].nextFreeIndex = m_Elements[0].nextFreeIndex;
 
@@ -106,8 +106,8 @@ namespace Gogaman
 		inline void ValidateID(const ID identifier) const
 		{
 			#if GM_RHI_DEBUGGING_ENABLED
-				GM_DEBUG_ASSERT(identifier.index != GM_INVALID_ID && identifier.index < m_ElementCount, "Invalid resource ID | Invalid index");
-				GM_DEBUG_ASSERT(identifier.generation == m_Elements[identifier.index].generation,       "Invalid resource ID | ID generation does not match current generation");
+				GM_DEBUG_ASSERT(identifier.index != GM_INVALID_ID_INDEX && identifier.index < m_ElementCount, "Invalid resource ID | Invalid index");
+				GM_DEBUG_ASSERT(identifier.generation == m_Elements[identifier.index].generation,             "Invalid resource ID | ID generation does not match current generation");
 			#endif
 		}
 	private:

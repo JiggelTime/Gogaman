@@ -4,10 +4,17 @@
 
 #include "Gogaman/Core/ResourceContainer.h"
 
+#include "Identifier.h"
+
 #include "Context.h"
 
 #include "Texture.h"
+#include "Buffer.h"
 #include "RenderSurface.h"
+#include "Shader.h"
+#include "ShaderProgram.h"
+
+#include "CommandHeap.h"
 
 namespace Gogaman
 {
@@ -19,18 +26,11 @@ namespace Gogaman
 
 	namespace RHI
 	{
-		enum class CommandQueueType : uint8_t
-		{
-			Compute,
-			Transfer,
-			Direct
-		};
-
-		//using TextureID        = TextureContainer::ID;
-		using TextureContainer = ResourceContainer<Texture, ResourceID<uint8_t>, 256>;
-
-		using RenderSurfaceContainer = ResourceContainer<RenderSurface, ResourceID<uint8_t>, 32>;
-		//using RenderSurfaceID        = RenderSurfaceContainer::ID;
+		using TextureContainer       = ResourceContainer<Texture,       TextureID,       1024>;
+		using BufferContainer        = ResourceContainer<Buffer,        BufferID,        1024>;
+		using RenderSurfaceContainer = ResourceContainer<RenderSurface, RenderSurfaceID, 32>;
+		using ShaderContainer        = ResourceContainer<Shader,        ShaderID,        128>;
+		using ShaderProgramContainer = ResourceContainer<ShaderProgram, ShaderProgramID, 32>;
 
 		template<typename ImplementationType>
 		class AbstractDevice : public CRTP<ImplementationType, AbstractDevice>
@@ -39,7 +39,10 @@ namespace Gogaman
 			struct Resources
 			{
 				TextureContainer       textures;
+				BufferContainer        buffers;
 				RenderSurfaceContainer renderSurfaces;
+				ShaderContainer        shaders;
+				ShaderProgramContainer shaderPrograms;
 			};
 		public:
 			AbstractDevice(const AbstractDevice &) = delete;
@@ -61,7 +64,7 @@ namespace Gogaman
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 
-			inline constexpr auto GetNativeCommandQueueType(const CommandQueueType type) const { return this->GetImplementation().GetNativeCommandQueueType(type); }
+			inline constexpr auto GetNativeCommandHeapType(const CommandHeap::Type type) const { return this->GetImplementation().GetNativeCommandHeapType(type); }
 
 			inline constexpr uint32_t GetTextureWidthLimit()  const { return this->GetImplementation().GetTextureWidthLimit();  }
 			inline constexpr uint32_t GetTextureHeightLimit() const { return this->GetImplementation().GetTextureHeightLimit(); }

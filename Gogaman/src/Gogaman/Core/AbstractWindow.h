@@ -39,9 +39,6 @@ namespace Gogaman
 		inline constexpr auto *GetNativeWindow() { return this->GetImplementation().GetNativeWindow(); }
 
 		inline constexpr const char *GetTitle() const { return m_Title; }
-
-		inline constexpr const RHI::Device &GetRenderHardwareInterfaceDevice() const { return *m_RenderHardwareInterfaceDevice.get(); }
-		inline constexpr       RHI::Device &GetRenderHardwareInterfaceDevice()       { return *m_RenderHardwareInterfaceDevice.get(); }
 		
 		inline constexpr uint16_t GetWidth()  const { return m_Width;  }
 		inline constexpr uint16_t GetHeight() const { return m_Height; }
@@ -58,7 +55,6 @@ namespace Gogaman
 		~AbstractWindow() = default;
 	protected:
 		const char                   *m_Title;
-		std::unique_ptr<RHI::Device>  m_RenderHardwareInterfaceDevice;
 		uint16_t                      m_Width, m_Height;
 		VerticalSynchronization       m_VerticalSynchronization;
 	private:

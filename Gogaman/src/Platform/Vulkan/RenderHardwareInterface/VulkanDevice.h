@@ -4,6 +4,8 @@
 
 #include "Gogaman/Core/Base.h"
 
+#include "Gogaman/RenderHardwareInterface/CommandHeap.h"
+
 #include "VulkanMemory.h"
 
 #include <vulkan/vulkan.h>
@@ -26,8 +28,8 @@ namespace Gogaman
 				VkPhysicalDeviceLimits           vulkanPhysicalDeviceLimits;
 				uint32_t                         vulkanMemoryTypeFlags[3];
 				Memory::Allocator                vulkanMemoryAllocator;
-				uint32_t                         vulkanCommandQueueTypeIndices[3];
-				std::vector<VkQueue>             vulkanCommandQueues[3];
+				uint32_t                         vulkanQueueFamilyIndices[3];
+				std::vector<VkQueue>             vulkanQueues[3];
 				VkDevice                         vulkanDevice;
 				VkSwapchainKHR                   vulkanSwapChain;
 			};
@@ -48,7 +50,7 @@ namespace Gogaman
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }
 
-			constexpr uint32_t GetNativeCommandQueueType(const CommandQueueType type) const;
+			inline constexpr uint32_t GetNativeCommandHeapType(const CommandHeap::Type type) const { return m_NativeData.vulkanQueueFamilyIndices[(uint8_t)type]; }
 
 			inline constexpr uint32_t GetTextureWidthLimit()  const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension1D; }
 			inline constexpr uint32_t GetTextureHeightLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension2D; }

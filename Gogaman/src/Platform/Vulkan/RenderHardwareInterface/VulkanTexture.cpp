@@ -4,8 +4,6 @@
 #include "Gogaman/Core/Base.h"
 
 #include "Gogaman/RenderHardwareInterface/Device.h"
-#include "Gogaman/Core/Window.h"
-#include "Gogaman/Core/Application.h"
 
 namespace Gogaman
 {
@@ -33,15 +31,14 @@ namespace Gogaman
 			//data ? VK_IMAGE_LAYOUT_PREINITIALIZED : VK_IMAGE_LAYOUT_UNDEFINED;
 			imageDescriptor.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED;
 
-			Device     &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
-			const auto &vulkanDevice = device.GetNativeData().vulkanDevice;
+			const auto &vulkanDevice = g_Device->GetNativeData().vulkanDevice;
 
 			if(vkCreateImage(vulkanDevice, &imageDescriptor, nullptr, &m_NativeData.vulkanImage) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create image");
+				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create Vulkan image");
 
 			VkMemoryRequirements memoryRequirements;
 			vkGetImageMemoryRequirements(vulkanDevice, m_NativeData.vulkanImage, &memoryRequirements);
-			m_NativeData.vulkanMemory = device.GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size);
+			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size);
 			vkBindImageMemory(vulkanDevice, m_NativeData.vulkanImage, m_NativeData.vulkanMemory.vulkanDeviceMemory, m_NativeData.vulkanMemory.offset);
 
 			FormatType formatType = GetFormatType(m_Format);
@@ -61,20 +58,19 @@ namespace Gogaman
 			imageViewDescriptor.subresourceRange.baseArrayLayer = 0;
 			imageViewDescriptor.subresourceRange.layerCount     = 1;
 
-			if(vkCreateImageView(device.GetNativeData().vulkanDevice, &imageViewDescriptor, nullptr, &m_NativeData.vulkanImageView) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create image view");
+			if(vkCreateImageView(vulkanDevice, &imageViewDescriptor, nullptr, &m_NativeData.vulkanImageView) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to construct texture | Failed to create Vulkan image view");
 		}
 
 		Texture::~Texture()
 		{
-			Device     &device       = Application::GetInstance().GetWindow().GetRenderHardwareInterfaceDevice();
-			const auto &vulkanDevice = device.GetNativeData().vulkanDevice;
+			const auto &vulkanDevice = g_Device->GetNativeData().vulkanDevice;
 
 			vkDestroyImageView(vulkanDevice, m_NativeData.vulkanImageView, nullptr);
 
 			vkDestroyImage(vulkanDevice, m_NativeData.vulkanImage, nullptr);
 
-			device.GetNativeData().vulkanMemoryAllocator.Deallocate(m_NativeData.vulkanMemory);
+			g_Device->GetNativeData().vulkanMemoryAllocator.Deallocate(m_NativeData.vulkanMemory);
 		}
 
 		constexpr VkFormat Texture::GetNativeFormat(const Format format)

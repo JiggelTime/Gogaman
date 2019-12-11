@@ -132,8 +132,7 @@ namespace Gogaman
 
 			const std::vector<const char *> requiredDeviceExtensionNames = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
-			VkPhysicalDeviceFeatures requiredPhysicalDeviceFeatures;
-			requiredPhysicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
+			VkPhysicalDeviceFeatures supportedPhysicalDeviceFeatures;
 
 			uint32_t presentQueueTypeIndex;
 			auto IsPhysicalDeviceSupported = [&](const VkPhysicalDevice &physicalDevice)
@@ -169,8 +168,7 @@ namespace Gogaman
 				delete[] supportedDeviceExtensionProperties;
 
 				//Ensure required Vulkan physical device features are supported
-				VkPhysicalDeviceFeatures supportedPhysicalDeviceFeatures;
-				vkGetPhysicalDeviceFeatures(m_NativeData.vulkanPhysicalDevice, &supportedPhysicalDeviceFeatures);
+				vkGetPhysicalDeviceFeatures(physicalDevice, &supportedPhysicalDeviceFeatures);
 				if(supportedPhysicalDeviceFeatures.samplerAnisotropy == VK_FALSE)
 					return false;
 
@@ -240,10 +238,10 @@ namespace Gogaman
 				if(supportedSurfacePresentModeCount == 0)
 					return false;
 
-				m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Direct]   = directQueueIndex.value();
-				m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Compute]  = computeQueueIndex.value();
-				m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)CommandQueueType::Transfer] = transferQueueIndex.value();
-				presentQueueTypeIndex                                                           = presentQueueIndex.value();
+				m_NativeData.vulkanQueueFamilyIndices[(uint8_t)CommandHeap::Type::Direct]   = directQueueIndex.value();
+				m_NativeData.vulkanQueueFamilyIndices[(uint8_t)CommandHeap::Type::Compute]  = computeQueueIndex.value();
+				m_NativeData.vulkanQueueFamilyIndices[(uint8_t)CommandHeap::Type::Transfer] = transferQueueIndex.value();
+				presentQueueTypeIndex                                                       = presentQueueIndex.value();
 
 				m_NativeData.vulkanPhysicalDeviceLimits = properties.limits;
 
@@ -285,7 +283,7 @@ namespace Gogaman
 
 			GM_ASSERT(m_NativeData.vulkanPhysicalDevice != VK_NULL_HANDLE, "Failed to initialize Vulkan | No supported physical device found");
 
-			std::unordered_set<uint32_t> uniqueQueueTypeIndices = { GetNativeCommandQueueType(CommandQueueType::Direct), GetNativeCommandQueueType(CommandQueueType::Compute), GetNativeCommandQueueType(CommandQueueType::Transfer), presentQueueTypeIndex };
+			std::unordered_set<uint32_t> uniqueQueueTypeIndices = { GetNativeCommandHeapType(CommandHeap::Type::Direct), GetNativeCommandHeapType(CommandHeap::Type::Compute), GetNativeCommandHeapType(CommandHeap::Type::Transfer), presentQueueTypeIndex };
 			std::vector<VkDeviceQueueCreateInfo> deviceQueueDescriptors;
 			deviceQueueDescriptors.reserve(uniqueQueueTypeIndices.size());
 			const float queuePriority = 1.0f;
@@ -312,7 +310,8 @@ namespace Gogaman
 			#endif
 			deviceDescriptor.enabledExtensionCount   = (uint32_t)requiredDeviceExtensionNames.size();
 			deviceDescriptor.ppEnabledExtensionNames = requiredDeviceExtensionNames.data();
-			deviceDescriptor.pEnabledFeatures        = &requiredPhysicalDeviceFeatures;
+			//TODO: Should this be required features only?
+			deviceDescriptor.pEnabledFeatures        = &supportedPhysicalDeviceFeatures;
 
 			if(vkCreateDevice(m_NativeData.vulkanPhysicalDevice, &deviceDescriptor, nullptr, &m_NativeData.vulkanDevice) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to initialize Vulkan | Failed to create logical device");
@@ -454,11 +453,6 @@ namespace Gogaman
 		{
 			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
 			CreateSwapChain(width, height, verticalSynchronization);
-		}
-		
-		constexpr uint32_t Device::GetNativeCommandQueueType(const CommandQueueType type) const
-		{
-			return m_NativeData.vulkanCommandQueueTypeIndices[(uint8_t)type];
 		}
 	}
 }
