@@ -44,7 +44,7 @@ namespace Gogaman
 			template<Shader::Stage stage>
 			inline constexpr ShaderID GetShader() const
 			{
-				GM_DEBUG_ASSERT(IsShaderPresent<stage>()), "Failed to get shader | No shader present at shader stage");
+				GM_DEBUG_ASSERT(IsShaderPresent<stage>(), "Failed to get shader | No shader present at shader stage");
 
 				return m_Shaders[(uint8_t)stage];
 			}

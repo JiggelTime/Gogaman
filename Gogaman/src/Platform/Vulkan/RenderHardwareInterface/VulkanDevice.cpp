@@ -4,9 +4,9 @@
 #include "Gogaman/Core/Config.h"
 #include "Gogaman/Core/Application.h"
 
-#include "Gogaman/RenderHardwareInterface/Texture.h"
+//#include "Gogaman/RenderHardwareInterface/Texture.h"
 //This has to be here for abstract device to compile
-#include "Gogaman/RenderHardwareInterface/RenderSurface.h"
+//#include "Gogaman/RenderHardwareInterface/RenderSurface.h"
 
 #include "VulkanMemory.h"
 
@@ -329,7 +329,7 @@ namespace Gogaman
 				flags = 0;
 				for(uint32_t j = 0; j < physicalDeviceMemoryProperties.memoryTypeCount; j++)
 				{
-					if(physicalDeviceMemoryProperties.memoryTypes[j].propertyFlags & memoryFlags[i] == memoryFlags[i])
+					if((physicalDeviceMemoryProperties.memoryTypes[j].propertyFlags & memoryFlags[i]) == memoryFlags[i])
 						flags |= 1 << j;
 				}
 

@@ -51,9 +51,7 @@ namespace Gogaman
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 
-			static inline constexpr auto GetNativeFormat(const Format format) { return ImplementationType::GetNativeFormat(format); }
-
-			static inline constexpr FormatType GetFormatType(const Format format)
+			static constexpr FormatType GetFormatType(const Format format)
 			{
 				switch(format)
 				{
@@ -83,6 +81,8 @@ namespace Gogaman
 					GM_DEBUG_ASSERT(false, "Failed to get texture format type | Invalid format");
 				}
 			}
+
+			static inline constexpr auto GetNativeFormat(const Format format) { return ImplementationType::GetNativeFormat(format); }
 		private:
 			AbstractTexture(const Format format, const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);
 

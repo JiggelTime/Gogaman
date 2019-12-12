@@ -16,7 +16,7 @@ namespace Gogaman
 				VkDescriptorSetLayout vulkanDescriptorSetLayout;
 			};
 		public:
-			DescriptorGroupLayout(std::vector<Binding> &&bindings, const Shader::StageFlags shaderVisibilityFlags);
+			DescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlags shaderVisibilityFlags);
 			DescriptorGroupLayout(const DescriptorGroupLayout &) = delete;
 			DescriptorGroupLayout(DescriptorGroupLayout &&)      = default;
 

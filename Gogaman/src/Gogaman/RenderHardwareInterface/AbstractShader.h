@@ -2,6 +2,8 @@
 
 #include "Gogaman/Core/CRTP.h"
 
+#include "Gogaman/Core/Base.h"
+
 #define GM_RHI_SHADER_STAGE_COUNT 3
 
 namespace Gogaman
@@ -41,7 +43,9 @@ namespace Gogaman
 			static inline constexpr auto GetNativeStageFlags(const StageFlags stageFlags) { return ImplementationType::GetNativeStageFlags(stageFlags); }
 		private:
 			AbstractShader(const uint32_t sourceDataSize, const uint8_t *sourceData)
-			{}
+			{
+				GM_DEBUG_ASSERT(sourceDataSize > 0, "Failed to construct shader | Invalid source data size");
+			}
 
 			~AbstractShader() = default;
 		private:

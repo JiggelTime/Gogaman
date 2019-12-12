@@ -37,13 +37,6 @@
     <ClInclude Include="src\Gogaman\ECS\EntityGroup.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
     <ClInclude Include="src\Gogaman\SpatialComponent.h" />
     <ClInclude Include="src\Gogaman\ECS\System.h" />
     <ClInclude Include="src\Gogaman\ECS\World.h" />
@@ -55,9 +48,6 @@
     <ClInclude Include="src\Gogaman\Events\MouseEvent.h" />
     <ClInclude Include="src\Gogaman\Events\WindowEvent.h" />
     <ClInclude Include="src\Gogaman.h" />
-    <ClInclude Include="src\Gogaman\EntryPoint.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
-    <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="vendor\stb_image.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
@@ -138,37 +128,6 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderCommandRecorder.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderCommandRecorder.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderCommandRecorder.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shadersOld\boxblurshader.fs" />
-    <None Include="shadersOld\boxblurshader.vs" />
-    <None Include="shadersOld\directPBR.fs" />
-    <None Include="shadersOld\directPBR.vs" />
-    <None Include="shadersOld\gbuffershader.fs" />
-    <None Include="shadersOld\gbuffershader.vs" />
-    <None Include="shadersOld\guassianblurshader.fs" />
-    <None Include="shadersOld\guassianblurshader.vs" />
-    <None Include="shadersOld\postprocess.fs" />
-    <None Include="shadersOld\postprocess.vs" />
-    <None Include="shadersOld\lampshader.fs" />
-    <None Include="shadersOld\lampshader.vs" />
-    <None Include="shadersOld\pbrdeferred.fs" />
-    <None Include="shadersOld\pbrdeferred.vs" />
-    <None Include="shadersOld\skyboxshader.fs" />
-    <None Include="shadersOld\skyboxshader.vs" />
-    <None Include="shadersOld\ssrshader.fs" />
-    <None Include="shadersOld\ssrshader.vs" />
-    <None Include="shadersOld\test.fs" />
-    <None Include="shadersOld\test.vs" />
-    <None Include="shadersOld\VCTshader.fs" />
-    <None Include="shadersOld\VCTshader.vs" />
-    <None Include="shadersOld\voxelConeTracing.vs" />
-    <None Include="shadersOld\voxelConeTracing2.fs" />
-    <None Include="shadersOld\voxelization.fs" />
-    <None Include="shadersOld\voxelization.gs" />
-    <None Include="shadersOld\voxelization.vs" />
-    <None Include="shadersOld\voxelInjectDirect.compute" />
-    <None Include="shadersOld\voxelInjectIndirect.compute" />
-    <None Include="shadersOld\voxelClearDynamic.compute" />
+    <ClInclude Include="src\Gogaman\EntryPoint.h" />
   </ItemGroup>
 </Project>

@@ -30,7 +30,7 @@ namespace Gogaman
 					continue;
 
 				shaderStateDescriptors[i].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-				shaderStateDescriptors[i].stage  = Shader::GetNativeStage(shaderStage);
+				//shaderStateDescriptors[i].stage  = Shader::GetNativeStage(shaderStage);
 				shaderStateDescriptors[i].module = g_Device->GetResources().shaders.Get(shaderProgram.GetShader(shaderStage)).GetNativeData().vulkanShaderModule;
 				shaderStateDescriptors[i].pName  = "main";
 

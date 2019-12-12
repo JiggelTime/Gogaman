@@ -58,13 +58,6 @@
     <ClInclude Include="src\Gogaman\ECS\EntityID.h" />
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
     <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Graphics\LightComponent.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderableComponent.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderCommand.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Renderer.h" />
-    <ClInclude Include="src\Gogaman\Graphics\RenderingSystem.h" />
-    <ClInclude Include="src\Gogaman\Graphics\AbstractRenderState.h" />
     <ClInclude Include="src\Gogaman\Geometry\BoundingBox3D.h" />
     <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
     <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
@@ -126,8 +119,6 @@
     <ClInclude Include="src\Gogaman\Core\Config.h" />
     <ClInclude Include="src\Gogaman\Core\Base.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
-    <ClInclude Include="src\Gogaman\Graphics\Camera.h" />
-    <ClInclude Include="src\Gogaman\Graphics\JitterSequences.h" />
     <ClInclude Include="src\pch.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\ShaderProgram.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.h" />
@@ -152,48 +143,6 @@
     <ClInclude Include="vendor\stb_image.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />
     <ClInclude Include="src\Platform\Windows\WindowsInput.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shadersOld\boxblurshader.fs" />
-    <None Include="shadersOld\boxblurshader.vs" />
-    <None Include="shadersOld\directPBR.fs" />
-    <None Include="shadersOld\directPBR.vs" />
-    <None Include="shadersOld\gbuffershader.fs" />
-    <None Include="shadersOld\gbuffershader.vs" />
-    <None Include="shadersOld\guassianblurshader.fs" />
-    <None Include="shadersOld\guassianblurshader.vs" />
-    <None Include="shadersOld\postprocess.fs" />
-    <None Include="shadersOld\postprocess.vs" />
-    <None Include="shadersOld\lampshader.fs" />
-    <None Include="shadersOld\lampshader.vs" />
-    <None Include="shadersOld\pbrdeferred.fs" />
-    <None Include="shadersOld\pbrdeferred.vs" />
-    <None Include="shadersOld\skyboxshader.fs" />
-    <None Include="shadersOld\skyboxshader.vs" />
-    <None Include="shadersOld\ssrshader.fs" />
-    <None Include="shadersOld\ssrshader.vs" />
-    <None Include="shadersOld\test.fs" />
-    <None Include="shadersOld\test.vs" />
-    <None Include="shadersOld\VCTshader.fs" />
-    <None Include="shadersOld\VCTshader.vs" />
-    <None Include="shadersOld\voxelConeTracing.vs" />
-    <None Include="shadersOld\voxelConeTracing2.fs" />
-    <None Include="shadersOld\voxelization.fs" />
-    <None Include="shadersOld\voxelization.gs" />
-    <None Include="shadersOld\voxelization.vs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shadersOld\voxelInjectDirect.compute">
-      <FileType>Document</FileType>
-    </None>
-    <None Include="shadersOld\voxelInjectIndirect.compute">
-      <FileType>Document</FileType>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="shadersOld\voxelClearDynamic.compute">
-      <FileType>Document</FileType>
-    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

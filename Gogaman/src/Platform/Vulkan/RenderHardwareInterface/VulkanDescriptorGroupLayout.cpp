@@ -7,33 +7,33 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		DescriptorGroupLayout::DescriptorGroupLayout(std::vector<Binding> &&bindings, const Shader::StageFlags shaderVisibilityFlags)
-			: AbstractDescriptorGroupLayout(std::move(bindings), shaderVisibilityFlags)
+		DescriptorGroupLayout::DescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlags shaderVisibilityFlags)
+			: AbstractDescriptorGroupLayout(bindingCount, bindings, shaderVisibilityFlags)
 		{
-			uint32_t bindingCount = (uint32_t)m_Bindings.size();
-			GM_DEBUG_ASSERT(bindingCount > 0, "Failed to construct descriptor group layout | Invalid bindings");
+			GM_DEBUG_ASSERT(m_BindingCount > 0, "Failed to construct descriptor group layout | Invalid bindings");
 
-			std::vector<VkDescriptorSetLayoutBinding> descriptorSetLayoutBindingDescriptors(bindingCount);
-			for(uint32_t i = 0; i < bindingCount; i++)
+			VkDescriptorSetLayoutBinding *descriptorSetLayoutBindingDescriptors = new VkDescriptorSetLayoutBinding[m_BindingCount];
+			for(uint32_t i = 0; i < m_BindingCount; i++)
 			{
 				const auto &binding = m_Bindings[i];
 
-				VkDescriptorSetLayoutBinding &descriptorSetLayoutBindingDescriptor = descriptorSetLayoutBindingDescriptors[i];
-				descriptorSetLayoutBindingDescriptor.binding            = binding.index;
-				descriptorSetLayoutBindingDescriptor.descriptorType     = DescriptorHeap::GetNativeType(binding.type);
-				descriptorSetLayoutBindingDescriptor.descriptorCount    = binding.descriptorCount;
-				descriptorSetLayoutBindingDescriptor.stageFlags         = Shader::GetNativeStageFlags(m_ShaderVisibilityFlags);
-				//descriptorSetLayoutBindingDescriptor.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-				descriptorSetLayoutBindingDescriptor.pImmutableSamplers = nullptr;
+				descriptorSetLayoutBindingDescriptors[i] = {};
+				descriptorSetLayoutBindingDescriptors[i].binding            = binding.index;
+				descriptorSetLayoutBindingDescriptors[i].descriptorType     = DescriptorHeap::GetNativeType(binding.type);
+				descriptorSetLayoutBindingDescriptors[i].descriptorCount    = binding.descriptorCount;
+				descriptorSetLayoutBindingDescriptors[i].stageFlags         = Shader::GetNativeStageFlags(m_ShaderVisibilityFlags);
+				descriptorSetLayoutBindingDescriptors[i].pImmutableSamplers = nullptr;
 			}
 
 			VkDescriptorSetLayoutCreateInfo descriptorSetLayoutDescriptor = {};
 			descriptorSetLayoutDescriptor.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-			descriptorSetLayoutDescriptor.bindingCount = bindingCount;
-			descriptorSetLayoutDescriptor.pBindings    = descriptorSetLayoutBindingDescriptors.data();
+			descriptorSetLayoutDescriptor.bindingCount = m_BindingCount;
+			descriptorSetLayoutDescriptor.pBindings    = descriptorSetLayoutBindingDescriptors;
 
 			if(vkCreateDescriptorSetLayout(g_Device->GetNativeData().vulkanDevice, &descriptorSetLayoutDescriptor, nullptr, &m_NativeData.vulkanDescriptorSetLayout) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to construct descriptor group layout | Failed to create Vulkan descriptor set");
+
+			delete[] descriptorSetLayoutBindingDescriptors;
 		}
 
 		DescriptorGroupLayout::~DescriptorGroupLayout()

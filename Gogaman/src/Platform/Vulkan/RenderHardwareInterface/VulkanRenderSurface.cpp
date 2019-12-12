@@ -13,7 +13,7 @@ namespace Gogaman
 			: AbstractRenderSurface(colorAttachmentCount, colorAttachments, std::move(depthStencilAttachment), width, height, depth)
 		{
 			const bool isDepthStencilAttachmentPresent = GM_IS_VALID_ID(m_DepthStencilAttachment.textureID);
-			//uint32_t attachmentCount                 = isDepthStencilAttachmentPresent ? m_ColorAttachmentCount + 1 : m_ColorAttachmentCount;
+			
 			const uint8_t attachmentCount = GetAttachmentCount();
 			
 			VkAttachmentDescription *attachmentDescriptors          = new VkAttachmentDescription[attachmentCount];

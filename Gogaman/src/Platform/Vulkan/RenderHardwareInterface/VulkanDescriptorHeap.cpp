@@ -1,8 +1,6 @@
 #include "pch.h"
 #include "VulkanDescriptorHeap.h"
 
-#include "Gogaman/Core/Base.h"
-
 #include "Gogaman/RenderHardwareInterface/Device.h"
 
 namespace Gogaman
@@ -41,36 +39,6 @@ namespace Gogaman
 		DescriptorHeap::~DescriptorHeap()
 		{
 			vkDestroyDescriptorPool(g_Device->GetNativeData().vulkanDevice, m_NativeData.vulkanDescriptorHeap, nullptr);
-		}
-
-		constexpr VkDescriptorType DescriptorHeap::GetNativeType(const Type type)
-		{
-			switch(type)
-			{
-			case Type::ShaderTexture:
-				return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-			case Type::StorageTexture:
-				return VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
-
-			case Type::ShaderTexelBuffer:
-				return VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER;
-			case Type::StorageTexelBuffer:
-				return VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER;
-
-			case Type::ShaderConstantBuffer:
-				return VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			case Type::StorageConstantBuffer:
-				return VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-
-			case Type::DepthStencilBuffer:
-			case Type::RenderTargetBuffer:
-				return VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
-
-			case Type::Sampler:
-				return VK_DESCRIPTOR_TYPE_SAMPLER;
-			default:
-				GM_DEBUG_ASSERT(false, "Failed to get native descriptor heap type | Invalid type");
-			}
 		}
 	}
 }

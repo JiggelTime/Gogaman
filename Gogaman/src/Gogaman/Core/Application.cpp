@@ -57,13 +57,13 @@ namespace Gogaman
 	{
 		{
 			using namespace RHI;
-
-			ShaderID sh0 = g_Device->GetResources().shaders.Create(0, nullptr);
-			ShaderID sh1 = g_Device->GetResources().shaders.Create(0, nullptr);
+			
+			ShaderID shv = g_Device->GetResources().shaders.Create(0, nullptr);
+			ShaderID shp = g_Device->GetResources().shaders.Create(0, nullptr);
 
 			ShaderProgramID shp0 = g_Device->GetResources().shaderPrograms.Create();
-			g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Vertex>(sh0);
-			g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Pixel>(sh1);
+			g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Vertex>(shv);
+			g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Pixel>(shp);
 
 			TextureID tx0 = g_Device->GetResources().textures.Create(Texture::Format::XYZW8, m_Window->GetWidth(), m_Window->GetHeight());
 
@@ -71,10 +71,9 @@ namespace Gogaman
 			bndg.descriptorCount = 1;
 			bndg.index = 0;
 			bndg.type = DescriptorHeap::Type::ShaderTexture;
-			std::vector<DescriptorGroupLayout::Binding> bndgs;
-			bndgs.emplace_back(bndg);
+
 			std::vector<DescriptorGroupLayout> dgls;
-			dgls.emplace_back(std::move(bndgs), Shader::StageFlags::Pixel);
+			dgls.emplace_back(1, &bndg, Shader::StageFlags::Pixel);
 
 			RenderSurface::Attachment ca = { tx0, 1 };
 			RenderSurfaceID rs0 = g_Device->GetResources().renderSurfaces.Create(1, &ca, RenderSurface::Attachment(), m_Window->GetWidth(), m_Window->GetHeight());
