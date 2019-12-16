@@ -11,10 +11,10 @@ namespace Gogaman
 		{
 		public:
 			AbstractCommandBuffer(const AbstractCommandBuffer &) = delete;
-			AbstractCommandBuffer(AbstractCommandBuffer &&)      = delete;
+			AbstractCommandBuffer(AbstractCommandBuffer &&)      = default;
 
 			AbstractCommandBuffer &operator=(const AbstractCommandBuffer &) = delete;
-			AbstractCommandBuffer &operator=(AbstractCommandBuffer &&)      = delete;
+			AbstractCommandBuffer &operator=(AbstractCommandBuffer &&)      = default;
 
 			inline void StartRecording() { this->GetImplementation().StartRecording(); }
 			inline void StopRecording()  { this->GetImplementation().StopRecording();  }

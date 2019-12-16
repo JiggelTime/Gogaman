@@ -21,20 +21,21 @@ namespace Gogaman
 		{
 			const ShaderProgram &shaderProgram = g_Device->GetResources().shaderPrograms.Get(shaderProgramID);
 
-			VkPipelineShaderStageCreateInfo shaderStateDescriptors[GM_RHI_SHADER_STAGE_COUNT] = {};
-			uint8_t                         presentShaderCount = 0;
+			std::vector<VkPipelineShaderStageCreateInfo> shaderStateDescriptors;
+			shaderStateDescriptors.reserve(GM_RHI_SHADER_STAGE_COUNT);
 			for(uint8_t i = 0; i < GM_RHI_SHADER_STAGE_COUNT; i++)
 			{
 				const Shader::Stage shaderStage = (Shader::Stage)i;
 				if(!shaderProgram.IsShaderPresent(shaderStage))
 					continue;
 
-				shaderStateDescriptors[i].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-				//shaderStateDescriptors[i].stage  = Shader::GetNativeStage(shaderStage);
-				shaderStateDescriptors[i].module = g_Device->GetResources().shaders.Get(shaderProgram.GetShader(shaderStage)).GetNativeData().vulkanShaderModule;
-				shaderStateDescriptors[i].pName  = "main";
+				VkPipelineShaderStageCreateInfo shaderStateDescriptor = {};
+				shaderStateDescriptor.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				shaderStateDescriptor.stage  = Shader::GetNativeStage(shaderStage);
+				shaderStateDescriptor.module = g_Device->GetResources().shaders.Get(shaderProgram.GetShader(shaderStage)).GetNativeData().vulkanShaderModule;
+				shaderStateDescriptor.pName  = "main";
 
-				presentShaderCount++;
+				shaderStateDescriptors.emplace_back(std::move(shaderStateDescriptor));
 			}
 
 			//TODO: Pass in a shader reflector to automate vertex attributes
@@ -120,7 +121,7 @@ namespace Gogaman
 			depthStencilStateDescriptor.front                 = frontStencilStateDescriptor;
 			depthStencilStateDescriptor.back                  = backStencilStateDescriptor;
 
-			const RenderSurface &renderSurface = g_Device->GetResources().renderSurfaces.Get(renderSurfaceID);
+			const RenderSurface &renderSurface = g_Device->GetResources().renderSurfaces.Get(m_RenderSurfaceID);
 
 			const uint8_t renderSurfaceAttachmentCount = renderSurface.GetAttachmentCount();
 			VkPipelineColorBlendAttachmentState *renderSurfaceAttachmentBlendStateDescriptors = new VkPipelineColorBlendAttachmentState[renderSurfaceAttachmentCount];
@@ -173,8 +174,8 @@ namespace Gogaman
 
 			VkGraphicsPipelineCreateInfo pipelineDescriptor = {};
 			pipelineDescriptor.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			pipelineDescriptor.stageCount          = (uint32_t)presentShaderCount;
-			pipelineDescriptor.pStages             = shaderStateDescriptors;
+			pipelineDescriptor.stageCount          = (uint32_t)shaderStateDescriptors.size();
+			pipelineDescriptor.pStages             = shaderStateDescriptors.data();
 			pipelineDescriptor.pVertexInputState   = &vertexStateDescriptor;
 			pipelineDescriptor.pInputAssemblyState = &assemblyStateDescriptor;
 			pipelineDescriptor.pViewportState      = &viewportStateDescriptor;

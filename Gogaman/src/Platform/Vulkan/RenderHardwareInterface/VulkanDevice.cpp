@@ -4,10 +4,6 @@
 #include "Gogaman/Core/Config.h"
 #include "Gogaman/Core/Application.h"
 
-//#include "Gogaman/RenderHardwareInterface/Texture.h"
-//This has to be here for abstract device to compile
-//#include "Gogaman/RenderHardwareInterface/RenderSurface.h"
-
 #include "VulkanMemory.h"
 
 #include <GLFW/glfw3.h>
@@ -287,10 +283,9 @@ namespace Gogaman
 			std::vector<VkDeviceQueueCreateInfo> deviceQueueDescriptors;
 			deviceQueueDescriptors.reserve(uniqueQueueTypeIndices.size());
 			const float queuePriority = 1.0f;
-			for(auto i : uniqueQueueTypeIndices)
+			for(const auto i : uniqueQueueTypeIndices)
 			{
-				VkDeviceQueueCreateInfo descriptor;
-				descriptor = {};
+				VkDeviceQueueCreateInfo descriptor = {};
 				descriptor.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 				descriptor.queueFamilyIndex = i;
 				descriptor.queueCount       = 1;
@@ -315,6 +310,11 @@ namespace Gogaman
 
 			if(vkCreateDevice(m_NativeData.vulkanPhysicalDevice, &deviceDescriptor, nullptr, &m_NativeData.vulkanDevice) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to initialize Vulkan | Failed to create logical device");
+
+			for(uint8_t i = 0; i < 3; i++)
+			{
+				vkGetDeviceQueue(m_NativeData.vulkanDevice, m_NativeData.vulkanQueueFamilyIndices[i], 0, &m_NativeData.vulkanQueues[i]);
+			}
 
 			VkMemoryPropertyFlagBits memoryFlags[3];
 			memoryFlags[(uint8_t)Memory::Type::Device]       = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
@@ -396,11 +396,11 @@ namespace Gogaman
 			else
 				swapChainExtent = supportedSurfaceCapabilities.currentExtent;
 
-			uint32_t swapChainImageCount;
+			uint32_t requiredSwapChainImageCount;
 			if(supportedSurfaceCapabilities.maxImageCount == 0)
-				swapChainImageCount = supportedSurfaceCapabilities.minImageCount + 1;
+				requiredSwapChainImageCount = supportedSurfaceCapabilities.minImageCount + 1;
 			else
-				swapChainImageCount = std::min(supportedSurfaceCapabilities.minImageCount + 1, supportedSurfaceCapabilities.maxImageCount);
+				requiredSwapChainImageCount = std::min(supportedSurfaceCapabilities.minImageCount + 1, supportedSurfaceCapabilities.maxImageCount);
 
 			VkPresentModeKHR swapChainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
 			if(verticalSynchronization == VerticalSynchronization::Disabled)
@@ -432,7 +432,7 @@ namespace Gogaman
 			VkSwapchainCreateInfoKHR swapChainDescriptor = {};
 			swapChainDescriptor.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 			swapChainDescriptor.surface          = m_NativeData.vulkanSurface;
-			swapChainDescriptor.minImageCount    = swapChainImageCount;
+			swapChainDescriptor.minImageCount    = requiredSwapChainImageCount;
 			swapChainDescriptor.imageFormat      = VK_FORMAT_B8G8R8A8_UNORM;
 			swapChainDescriptor.imageColorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 			swapChainDescriptor.imageExtent      = swapChainExtent;
@@ -447,6 +447,33 @@ namespace Gogaman
 
 			if(vkCreateSwapchainKHR(m_NativeData.vulkanDevice, &swapChainDescriptor, nullptr, &m_NativeData.vulkanSwapChain) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to create swap chain");
+
+			uint32_t swapChainImageCount;
+			vkGetSwapchainImagesKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, &swapChainImageCount, nullptr);
+			m_NativeData.vulkanSwapChainImages.resize(swapChainImageCount);
+			vkGetSwapchainImagesKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, &swapChainImageCount, m_NativeData.vulkanSwapChainImages.data());
+
+			m_NativeData.vulkanSwapChainImageViews.resize(swapChainImageCount);
+			for(uint32_t i = 0; i < swapChainImageCount; i++)
+			{
+				VkImageViewCreateInfo swapChainImageViewDescriptor = {};
+				swapChainImageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+				swapChainImageViewDescriptor.image                           = m_NativeData.vulkanSwapChainImages[i];
+				swapChainImageViewDescriptor.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
+				swapChainImageViewDescriptor.format                          = VK_FORMAT_B8G8R8A8_UNORM;
+				swapChainImageViewDescriptor.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+				swapChainImageViewDescriptor.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+				swapChainImageViewDescriptor.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+				swapChainImageViewDescriptor.components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY;
+				swapChainImageViewDescriptor.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+				swapChainImageViewDescriptor.subresourceRange.baseMipLevel   = 0;
+				swapChainImageViewDescriptor.subresourceRange.levelCount     = 1;
+				swapChainImageViewDescriptor.subresourceRange.baseArrayLayer = 0;
+				swapChainImageViewDescriptor.subresourceRange.layerCount     = 1;
+
+				if(vkCreateImageView(m_NativeData.vulkanDevice, &swapChainImageViewDescriptor, nullptr, &m_NativeData.vulkanSwapChainImageViews[i]) != VK_SUCCESS)
+					GM_DEBUG_ASSERT(false, "Failed to create swap chain | Failed to create Vulkan image view");
+			}
 		}
 		
 		void Device::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)

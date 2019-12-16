@@ -25,7 +25,7 @@ namespace Gogaman
 			AbstractCommandHeap &operator=(const AbstractCommandHeap &) = delete;
 			AbstractCommandHeap &operator=(AbstractCommandHeap &&)      = delete;
 
-			inline CommandBuffer &CreateCommandBuffer() const { this->GetImplementation().CreateCommandBuffer(); }
+			inline std::unique_ptr<CommandBuffer> CreateCommandBuffer() const { this->GetImplementation().CreateCommandBuffer(); }
 
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }

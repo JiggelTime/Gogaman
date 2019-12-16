@@ -29,9 +29,12 @@ namespace Gogaman
 				uint32_t                         vulkanMemoryTypeFlags[3];
 				Memory::Allocator                vulkanMemoryAllocator;
 				uint32_t                         vulkanQueueFamilyIndices[3];
-				std::vector<VkQueue>             vulkanQueues[3];
+				//std::vector<VkQueue>             vulkanQueues[3];
+				VkQueue                          vulkanQueues[3];
 				VkDevice                         vulkanDevice;
 				VkSwapchainKHR                   vulkanSwapChain;
+				std::vector<VkImage>             vulkanSwapChainImages;
+				std::vector<VkImageView>         vulkanSwapChainImageViews;
 			};
 		public:
 			Device(void *nativeWindow);

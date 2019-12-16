@@ -209,7 +209,7 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <PreprocessorDefinitions>GM_DEBUG=1;GM_PLATFORM_WINDOWS;GM_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GM_DEBUG=1;GM_PLATFORM_WINDOWS;GM_BUILD_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OmitFramePointers>false</OmitFramePointers>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -239,7 +239,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
-      <PreprocessorDefinitions>GM_PLATFORM_WINDOWS;GM_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>GM_PLATFORM_WINDOWS;GM_BUILD_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>

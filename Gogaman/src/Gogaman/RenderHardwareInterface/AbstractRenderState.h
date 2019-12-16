@@ -110,6 +110,8 @@ namespace Gogaman
 			AbstractRenderState &operator=(const AbstractRenderState &) = delete;
 			AbstractRenderState &operator=(AbstractRenderState &&)      = default;
 
+			inline constexpr RenderSurfaceID GetRenderSurfaceID() const { return m_RenderSurfaceID; }
+
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr       auto &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 
@@ -123,14 +125,16 @@ namespace Gogaman
 			static inline constexpr auto GetNativeBlendStateFactor(const typename BlendState::Factor factor)          { return ImplementationType::GetNativeBlendStateFactor(factor);       }
 		private:
 			AbstractRenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState = CullOperation::None)
+				: m_RenderSurfaceID(renderSurfaceID)
 			{
-				GM_ASSERT(GM_IS_VALID_ID(shaderProgramID), "Failed to construct render state | Invalid shader program");
-				GM_ASSERT(GM_IS_VALID_ID(renderSurfaceID), "Failed to construct render state | Invalid render surface");
+				GM_ASSERT(GM_IS_VALID_ID(shaderProgramID),   "Failed to construct render state | Invalid shader program");
+				GM_ASSERT(GM_IS_VALID_ID(m_RenderSurfaceID), "Failed to construct render state | Invalid render surface");
 			}
 
 			~AbstractRenderState() = default;
 		private:
-			//renderSurface
+			RenderSurfaceID m_RenderSurfaceID;
+
 			//vertexLayout
 			//shader
 			//rasterizerState

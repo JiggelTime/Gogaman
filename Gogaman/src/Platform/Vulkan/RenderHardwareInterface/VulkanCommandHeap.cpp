@@ -28,7 +28,7 @@ namespace Gogaman
 			vkDestroyCommandPool(g_Device->GetNativeData().vulkanDevice, m_NativeData.vulkanCommandPool, nullptr);
 		}
 
-		CommandBuffer &CommandHeap::CreateCommandBuffer() const
+		std::unique_ptr<CommandBuffer> CommandHeap::CreateCommandBuffer() const
 		{
 			VkCommandBufferAllocateInfo commandBufferAllocationDescriptor = {};
 			commandBufferAllocationDescriptor.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -40,7 +40,7 @@ namespace Gogaman
 			if(vkAllocateCommandBuffers(g_Device->GetNativeData().vulkanDevice, &commandBufferAllocationDescriptor, &commandBuffer.GetNativeData().vulkanCommandBuffer) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to create command buffer");
 
-			return commandBuffer;
+			return std::make_unique<CommandBuffer>(std::move(commandBuffer));
 		}
 	}
 }

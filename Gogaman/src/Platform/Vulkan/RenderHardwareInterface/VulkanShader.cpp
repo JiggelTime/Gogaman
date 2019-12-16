@@ -22,6 +22,8 @@ namespace Gogaman
 
 			if(vkCreateShaderModule(g_Device->GetNativeData().vulkanDevice, &shaderModuleDescriptor, nullptr, &m_NativeData.vulkanShaderModule) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to construct shader | Failed to create Vulkan shader module");
+
+			delete[] alignedSourceData;
 		}
 
 		Shader::~Shader()

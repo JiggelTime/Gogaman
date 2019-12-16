@@ -18,12 +18,12 @@ namespace Gogaman
 		public:
 			CommandBuffer()                      = default;
 			CommandBuffer(const CommandBuffer &) = delete;
-			CommandBuffer(CommandBuffer &&)      = delete;
+			CommandBuffer(CommandBuffer &&)      = default;
 
 			~CommandBuffer() = default;
 
 			CommandBuffer &operator=(const CommandBuffer &) = delete;
-			CommandBuffer &operator=(CommandBuffer &&)      = delete;
+			CommandBuffer &operator=(CommandBuffer &&)      = default;
 
 			void StartRecording();
 			void StopRecording();

@@ -27,15 +27,18 @@ namespace Gogaman
 
 				VkAttachmentDescription &attachmentDescriptor = attachmentDescriptors[i];
 				attachmentDescriptor = {};
-				attachmentDescriptor.format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
+				//attachmentDescriptor.format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
+				attachmentDescriptor.format = VK_FORMAT_B8G8R8A8_UNORM;
 				attachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
 				//TODO: Detect based on usage
-				attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
+				//attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
+				attachmentDescriptor.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				//TODO: Detect based on usage
 				attachmentDescriptor.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
 				attachmentDescriptor.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				attachmentDescriptor.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				attachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				//attachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				attachmentDescriptor.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 				//TODO: Detect based on usage
 				attachmentDescriptor.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
@@ -75,19 +78,30 @@ namespace Gogaman
 				attachmentImageViews[m_ColorAttachmentCount] = attachmentTexture.GetNativeData().vulkanImageView;
 			}
 
-			VkSubpassDescription subPassDescriptor = {};
-			subPassDescriptor.pipelineBindPoint           = VK_PIPELINE_BIND_POINT_GRAPHICS;
-			subPassDescriptor.colorAttachmentCount        = (uint32_t)m_ColorAttachmentCount;
-			subPassDescriptor.pColorAttachments           = attachmentReferenceDescriptors;
+			VkSubpassDescription subpassDescriptor = {};
+			subpassDescriptor.pipelineBindPoint           = VK_PIPELINE_BIND_POINT_GRAPHICS;
+			subpassDescriptor.colorAttachmentCount        = (uint32_t)m_ColorAttachmentCount;
+			subpassDescriptor.pColorAttachments           = attachmentReferenceDescriptors;
 			if(isDepthStencilAttachmentPresent)
-				subPassDescriptor.pDepthStencilAttachment = &attachmentReferenceDescriptors[m_ColorAttachmentCount];
+				subpassDescriptor.pDepthStencilAttachment = &attachmentReferenceDescriptors[m_ColorAttachmentCount];
+
+			//TODO: Fill based on usage
+			VkSubpassDependency subpassDependencyDescriptor = {};
+			subpassDependencyDescriptor.srcSubpass = VK_SUBPASS_EXTERNAL;
+			subpassDependencyDescriptor.dstSubpass = 0;
+			subpassDependencyDescriptor.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			subpassDependencyDescriptor.srcAccessMask = 0;
+			subpassDependencyDescriptor.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			subpassDependencyDescriptor.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 			VkRenderPassCreateInfo renderPassDescriptor = {};
 			renderPassDescriptor.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 			renderPassDescriptor.attachmentCount = (uint32_t)attachmentCount;
 			renderPassDescriptor.pAttachments    = attachmentDescriptors;
 			renderPassDescriptor.subpassCount    = 1;
-			renderPassDescriptor.pSubpasses      = &subPassDescriptor;
+			renderPassDescriptor.pSubpasses      = &subpassDescriptor;
+			renderPassDescriptor.dependencyCount = 1;
+			renderPassDescriptor.pDependencies   = &subpassDependencyDescriptor;
 
 			const VkDevice &vulkanDevice = g_Device->GetNativeData().vulkanDevice;
 
