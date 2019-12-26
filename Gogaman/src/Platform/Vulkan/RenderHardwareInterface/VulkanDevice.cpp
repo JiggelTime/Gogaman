@@ -2,9 +2,12 @@
 #include "VulkanDevice.h"
 
 #include "Gogaman/Core/Config.h"
+#include "Gogaman/Core/Time.h"
 #include "Gogaman/Core/Application.h"
 
 #include "VulkanMemory.h"
+
+#include "Gogaman/RenderHardwareInterface/CommandBuffer.h"
 
 #include <GLFW/glfw3.h>
 
@@ -325,20 +328,45 @@ namespace Gogaman
 			for(uint8_t i = 0; i < 3; i++)
 			{
 				uint32_t &flags = m_NativeData.vulkanMemoryTypeFlags[i];
-				
 				flags = 0;
+
 				for(uint32_t j = 0; j < physicalDeviceMemoryProperties.memoryTypeCount; j++)
 				{
 					if((physicalDeviceMemoryProperties.memoryTypes[j].propertyFlags & memoryFlags[i]) == memoryFlags[i])
 						flags |= 1 << j;
 				}
 
-				GM_ASSERT(flags != 0, "Failed to initialize Vulkan | Physical device does not support required memory type");
+				GM_ASSERT(flags != 0, "Failed to initialize Vulkan | Vulkan physical device does not support required memory type");
+			}
+
+			VkSemaphoreCreateInfo semaphoreDescriptor = {};
+			semaphoreDescriptor.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+			VkFenceCreateInfo fenceDescriptor = {};
+			fenceDescriptor.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceDescriptor.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			for(uint32_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			{
+				vkCreateSemaphore(m_NativeData.vulkanDevice, &semaphoreDescriptor, nullptr, &m_NativeData.vulkanSwapChainImageAvailableSemaphores[i]);
+				vkCreateSemaphore(m_NativeData.vulkanDevice, &semaphoreDescriptor, nullptr, &m_NativeData.vulkanRenderCompletedSemaphores[i]);
+
+				vkCreateFence(m_NativeData.vulkanDevice, &fenceDescriptor, nullptr, &m_NativeData.vulkanPresentFences[i]);
 			}
 		}
 
 		Device::~Device()
 		{
+			vkDeviceWaitIdle(m_NativeData.vulkanDevice);
+
+			for(uint32_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			{
+				vkDestroySemaphore(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChainImageAvailableSemaphores[i], nullptr);
+				vkDestroySemaphore(m_NativeData.vulkanDevice, m_NativeData.vulkanRenderCompletedSemaphores[i],         nullptr);
+				
+				vkDestroyFence(m_NativeData.vulkanDevice, m_NativeData.vulkanPresentFences[i], nullptr);
+			}
+
 			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
 
 			vkDestroyDevice(m_NativeData.vulkanDevice, nullptr);
@@ -396,12 +424,6 @@ namespace Gogaman
 			else
 				swapChainExtent = supportedSurfaceCapabilities.currentExtent;
 
-			uint32_t requiredSwapChainImageCount;
-			if(supportedSurfaceCapabilities.maxImageCount == 0)
-				requiredSwapChainImageCount = supportedSurfaceCapabilities.minImageCount + 1;
-			else
-				requiredSwapChainImageCount = std::min(supportedSurfaceCapabilities.minImageCount + 1, supportedSurfaceCapabilities.maxImageCount);
-
 			VkPresentModeKHR swapChainPresentMode = VK_PRESENT_MODE_FIFO_KHR;
 			if(verticalSynchronization == VerticalSynchronization::Disabled)
 			{
@@ -432,7 +454,7 @@ namespace Gogaman
 			VkSwapchainCreateInfoKHR swapChainDescriptor = {};
 			swapChainDescriptor.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 			swapChainDescriptor.surface          = m_NativeData.vulkanSurface;
-			swapChainDescriptor.minImageCount    = requiredSwapChainImageCount;
+			swapChainDescriptor.minImageCount    = supportedSurfaceCapabilities.maxImageCount ? std::clamp(GM_SWAP_CHAIN_BUFFER_COUNT, supportedSurfaceCapabilities.minImageCount, supportedSurfaceCapabilities.maxImageCount) : std::max(GM_SWAP_CHAIN_BUFFER_COUNT, supportedSurfaceCapabilities.minImageCount);
 			swapChainDescriptor.imageFormat      = VK_FORMAT_B8G8R8A8_UNORM;
 			swapChainDescriptor.imageColorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 			swapChainDescriptor.imageExtent      = swapChainExtent;
@@ -450,6 +472,8 @@ namespace Gogaman
 
 			uint32_t swapChainImageCount;
 			vkGetSwapchainImagesKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, &swapChainImageCount, nullptr);
+			GM_ASSERT(swapChainImageCount == GM_SWAP_CHAIN_BUFFER_COUNT, "Failed to create swap chain");
+
 			m_NativeData.vulkanSwapChainImages.resize(swapChainImageCount);
 			vkGetSwapchainImagesKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, &swapChainImageCount, m_NativeData.vulkanSwapChainImages.data());
 
@@ -474,12 +498,65 @@ namespace Gogaman
 				if(vkCreateImageView(m_NativeData.vulkanDevice, &swapChainImageViewDescriptor, nullptr, &m_NativeData.vulkanSwapChainImageViews[i]) != VK_SUCCESS)
 					GM_DEBUG_ASSERT(false, "Failed to create swap chain | Failed to create Vulkan image view");
 			}
+
+			vkResetFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]);
+
+			vkAcquireNextImageKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, UINT64_MAX, m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex], VK_NULL_HANDLE, &m_NativeData.vulkanSwapChainImageIndex);
 		}
 		
 		void Device::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
 		{
 			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
 			CreateSwapChain(width, height, verticalSynchronization);
+		}
+	
+		void Device::Submit(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers)
+		{
+			const VkSemaphore &swapChainImageAvailableSemaphore = m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex];
+			const VkSemaphore &renderCompletedSemaphore         = m_NativeData.vulkanRenderCompletedSemaphores[m_NativeData.vulkanPresentSynchronizationIndex];
+
+			VkCommandBuffer *vulkanCommandBuffers = new VkCommandBuffer[commandBufferCount];
+			for(uint8_t i = 0; i < commandBufferCount; i++)
+			{
+				vulkanCommandBuffers[i] = commandBuffers[i].GetNativeData().vulkanCommandBuffer;
+			}
+
+			VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			
+			VkSubmitInfo submitDescriptor = {};
+			submitDescriptor.sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submitDescriptor.waitSemaphoreCount     = 1;
+			submitDescriptor.pWaitSemaphores        = &swapChainImageAvailableSemaphore;
+			submitDescriptor.pWaitDstStageMask      = &pipelineStageFlags;
+			submitDescriptor.commandBufferCount     = commandBufferCount;
+			submitDescriptor.pCommandBuffers        = vulkanCommandBuffers;
+			submitDescriptor.signalSemaphoreCount   = 1;
+			submitDescriptor.pSignalSemaphores      = &renderCompletedSemaphore;
+
+			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)type], 1, &submitDescriptor, m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to submit command buffers");
+
+			delete[] vulkanCommandBuffers;
+		}
+
+		void Device::Present()
+		{
+			VkPresentInfoKHR presentDescriptor = {};
+			presentDescriptor.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+			presentDescriptor.waitSemaphoreCount = 1;
+			presentDescriptor.pWaitSemaphores    = &m_NativeData.vulkanRenderCompletedSemaphores[m_NativeData.vulkanPresentSynchronizationIndex];
+			presentDescriptor.swapchainCount     = 1;
+			presentDescriptor.pSwapchains        = &m_NativeData.vulkanSwapChain;
+			presentDescriptor.pImageIndices      = &m_NativeData.vulkanSwapChainImageIndex;
+
+			vkQueuePresentKHR(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Direct], &presentDescriptor);
+
+			m_NativeData.vulkanPresentSynchronizationIndex = (m_NativeData.vulkanPresentSynchronizationIndex + 1) % GM_SWAP_CHAIN_BUFFER_COUNT;
+			
+			vkWaitForFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex], VK_TRUE, UINT64_MAX);
+			vkResetFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]);
+
+			vkAcquireNextImageKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, UINT64_MAX, m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex], VK_NULL_HANDLE, &m_NativeData.vulkanSwapChainImageIndex);
 		}
 	}
 }

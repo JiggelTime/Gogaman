@@ -11,16 +11,15 @@ namespace Gogaman
 	{
 		namespace Memory
 		{
-			Allocation &Allocator::Allocate(const uint32_t memoryTypeFlags, const uint32_t size)
+			Allocation &Allocator::Allocate(const uint32_t typeFlags, const uint32_t size, const VkMemoryPropertyFlags propertyFlags)
 			{
-				uint32_t memoryTypeIndex;
-				if(!FindMemoryTypeIndex(memoryTypeFlags, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, memoryTypeIndex))
-					FindMemoryTypeIndex(memoryTypeFlags, 0, memoryTypeIndex);
+				uint32_t typeIndex;
+				FindMemoryTypeIndex(typeFlags, propertyFlags, typeIndex);
 
 				VkMemoryAllocateInfo allocationDescriptor = {};
 				allocationDescriptor.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 				allocationDescriptor.allocationSize  = size;
-				allocationDescriptor.memoryTypeIndex = memoryTypeIndex;
+				allocationDescriptor.memoryTypeIndex = typeIndex;
 				
 				Allocation allocation;
 				if(vkAllocateMemory(g_Device->GetNativeData().vulkanDevice, &allocationDescriptor, nullptr, &allocation.vulkanDeviceMemory) != VK_SUCCESS)
@@ -35,16 +34,16 @@ namespace Gogaman
 				vkFreeMemory(g_Device->GetNativeData().vulkanDevice, allocation.vulkanDeviceMemory, nullptr);
 			}
 
-			bool Allocator::FindMemoryTypeIndex(const uint32_t memoryTypeFlags, const VkMemoryPropertyFlags properties, uint32_t &memoryTypeIndex)
+			bool Allocator::FindMemoryTypeIndex(const uint32_t typeFlags, const VkMemoryPropertyFlags properties, uint32_t &typeIndex)
 			{
 				VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
 				vkGetPhysicalDeviceMemoryProperties(g_Device->GetNativeData().vulkanPhysicalDevice, &physicalDeviceMemoryProperties);
 
 				for(uint32_t i = 0; i < physicalDeviceMemoryProperties.memoryTypeCount; i++)
 				{
-					if(memoryTypeFlags & (1 << i) && ((physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties))
+					if((typeFlags & (1 << i)) && ((physicalDeviceMemoryProperties.memoryTypes[i].propertyFlags & properties) == properties))
 					{
-						memoryTypeIndex = i;
+						typeIndex = i;
 						return true;
 					}
 				}

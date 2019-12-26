@@ -18,7 +18,7 @@ namespace Gogaman
 				const auto &binding = m_Bindings[i];
 
 				descriptorSetLayoutBindingDescriptors[i] = {};
-				descriptorSetLayoutBindingDescriptors[i].binding            = binding.index;
+				descriptorSetLayoutBindingDescriptors[i].binding            = i;
 				descriptorSetLayoutBindingDescriptors[i].descriptorType     = DescriptorHeap::GetNativeType(binding.type);
 				descriptorSetLayoutBindingDescriptors[i].descriptorCount    = binding.descriptorCount;
 				descriptorSetLayoutBindingDescriptors[i].stageFlags         = Shader::GetNativeStageFlags(m_ShaderVisibilityFlags);

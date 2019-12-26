@@ -16,7 +16,6 @@ namespace Gogaman
 		public:
 			struct Binding
 			{
-				uint32_t             index;
 				uint32_t             descriptorCount;
 				DescriptorHeap::Type type;
 			};
@@ -27,7 +26,7 @@ namespace Gogaman
 			AbstractDescriptorGroupLayout &operator=(const AbstractDescriptorGroupLayout &) = delete;
 			AbstractDescriptorGroupLayout &operator=(AbstractDescriptorGroupLayout &&)      = default;
 
-			inline constexpr const Binding *GetBindings() const { return m_Bindings; }
+			inline constexpr const Binding &GetBinding(const uint32_t index) const { return m_Bindings[index]; }
 
 			inline constexpr uint32_t GetBindingCount() const { return m_BindingCount; }
 

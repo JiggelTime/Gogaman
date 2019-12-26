@@ -4,7 +4,7 @@
 
 #include "Identifier.h"
 
-#include "CommandBuffer.h"
+#include "TransferCommandRecorder.h"
 
 namespace Gogaman
 {
@@ -14,8 +14,10 @@ namespace Gogaman
 
 		class ComputeState;
 
+		class DescriptorGroup;
+
 		template<typename ImplementationType>
-		class AbstractComputeCommandRecorder : public CRTP<ImplementationType, AbstractComputeCommandRecorder>
+		class AbstractComputeCommandRecorder : public CRTP<ImplementationType, AbstractComputeCommandRecorder>, public TransferCommandRecorder
 		{
 		public:
 			AbstractComputeCommandRecorder(const AbstractComputeCommandRecorder &) = delete;
@@ -24,22 +26,19 @@ namespace Gogaman
 			AbstractComputeCommandRecorder &operator=(const AbstractComputeCommandRecorder &) = delete;
 			AbstractComputeCommandRecorder &operator=(AbstractComputeCommandRecorder &&)      = delete;
 
+			inline void BindDescriptorGroup(const uint32_t bindingIndex, const DescriptorGroup &descriptorGroup) { this->GetImplementation().BindDescriptorGroup(bindingIndex, descriptorGroup); }
+
 			inline void Dispatch(const uint32_t workGroupSizeXYZ[3]) const { this->GetImplementation().Dispatch(workGroupSizeXYZ); }
 
 			inline void IndirectDispatch(const BufferID parameterBuffer, const uint64_t parameterBufferOffset = 0) const { this->GetImplementation().IndirectDispatch(parameterBuffer, parameterBufferOffset); }
-
-			inline void StopRecording() { m_CommandBuffer->StopRecording(); }
 		private:
 			AbstractComputeCommandRecorder(CommandBuffer *commandBuffer, ComputeState *state)
-				: m_CommandBuffer(commandBuffer), m_State(state)
-			{
-				m_CommandBuffer->StartRecording();
-			}
+				: TransferCommandRecorder(commandBuffer), m_State(state)
+			{}
 
 			~AbstractComputeCommandRecorder() = default;
 		protected:
-			CommandBuffer *m_CommandBuffer;
-			ComputeState  *m_State;
+			ComputeState *m_State;
 		private:
 			friend ImplementationType;
 		};

@@ -39,7 +39,7 @@
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferEngine.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferCommandRecorder.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsWindow.cpp" />
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
@@ -80,7 +80,7 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractShader.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderState.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTransferEngine.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTransferCommandRecorder.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Buffer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\CommandBuffer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\CommandHeap.h" />
@@ -99,7 +99,8 @@
     <ClInclude Include="src\Gogaman\Core\ResourceContainer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Shader.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\TransferEngine.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\TransferCommandRecorder.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\VertexLayout.h" />
     <ClInclude Include="src\Gogaman\Sorting\RadixSort.h" />
     <ClInclude Include="src\Gogaman\SpatialComponent.h" />
     <ClInclude Include="src\Gogaman\ECS\System.h" />
@@ -138,7 +139,7 @@
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderState.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.h" />
-    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferEngine.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferCommandRecorder.h" />
     <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
     <ClInclude Include="vendor\stb_image.h" />
     <ClInclude Include="src\Platform\Windows\WindowsWindow.h" />

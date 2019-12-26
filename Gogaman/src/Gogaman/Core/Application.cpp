@@ -18,10 +18,14 @@
 //TEST INCLUDES
 #include "Gogaman/RenderHardwareInterface/Identifier.h"
 #include "Gogaman/RenderHardwareInterface/Texture.h"
+#include "Gogaman/RenderHardwareInterface/Buffer.h"
 #include "Gogaman/RenderHardwareInterface/Shader.h"
 #include "Gogaman/RenderHardwareInterface/ShaderProgram.h"
+#include "Gogaman/RenderHardwareInterface/VertexLayout.h"
 #include "Gogaman/RenderHardwareInterface/RenderSurface.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorGroupLayout.h"
+#include "Gogaman/RenderHardwareInterface/DescriptorHeap.h"
+#include "Gogaman/RenderHardwareInterface/DescriptorGroup.h"
 #include "Gogaman/RenderHardwareInterface/RenderState.h"
 #include "Gogaman/RenderHardwareInterface/CommandBuffer.h"
 #include "Gogaman/RenderHardwareInterface/CommandHeap.h"
@@ -58,100 +62,111 @@ namespace Gogaman
 	
 	void Application::Run()
 	{
+		using namespace RHI;
+		
+		auto LoadShader = [](const char *filepath)
 		{
-			using namespace RHI;
-			
-			auto LoadShader = [](const char *filepath)
-			{
-				FILE *file = fopen(filepath, "rb");
-				fseek(file, 0, SEEK_END);
-				uint32_t size = ftell(file);
-				fseek(file, 0, SEEK_SET);
-				uint8_t *buffer = new uint8_t[size];
-				fread(buffer, size, 1, file);
-				fclose(file);
+			FILE *file = fopen(filepath, "rb");
+			fseek(file, 0, SEEK_END);
+			uint32_t size = ftell(file);
+			fseek(file, 0, SEEK_SET);
+			uint8_t *buffer = new uint8_t[size];
+			fread(buffer, size, 1, file);
+			fclose(file);
 
-				return std::pair<uint32_t, uint8_t *>(size, buffer);
-			};
+			return std::pair<uint32_t, uint8_t *>(size, buffer);
+		};
 
-			auto shvdata = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/vert.spv");
-			ShaderID shv = g_Device->GetResources().shaders.Create(shvdata.first, shvdata.second);
+		auto shvdata = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/vert.spv");
+		ShaderID shv = g_Device->GetResources().shaders.Create(shvdata.first, shvdata.second);
 
-			auto shpdata = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/frag.spv");
-			ShaderID shp = g_Device->GetResources().shaders.Create(shpdata.first, shpdata.second);
+		auto shpdata = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/frag.spv");
+		ShaderID shp = g_Device->GetResources().shaders.Create(shpdata.first, shpdata.second);
 
-			ShaderProgramID shp0 = g_Device->GetResources().shaderPrograms.Create();
-			g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Vertex>(shv);
-			g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Pixel>(shp);
+		ShaderProgramID shp0 = g_Device->GetResources().shaderPrograms.Create();
+		g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Vertex>(shv);
+		g_Device->GetResources().shaderPrograms.Get(shp0).SetShader<Shader::Stage::Pixel>(shp);
 
-			//DescriptorGroupLayout::Binding *bndg = new DescriptorGroupLayout::Binding;
-			//bndg->descriptorCount = 1;
-			//bndg->index = 0;
-			//bndg->type = DescriptorHeap::Type::ShaderTexture;
+		VertexLayout vertexLayout({ { Shader::DataType::Float2 }, { Shader::DataType::Float3 } });
+		
+		float vertexData[3][5];
+		//V0
+		vertexData[0][0] =  0.0f;
+		vertexData[0][1] = -0.5f;
 
-			std::vector<DescriptorGroupLayout> dgls;
-			//dgls.emplace_back(1, bndg, Shader::StageFlags::Pixel);
+		vertexData[0][2] = 1.0f;
+		vertexData[0][3] = 0.0f;
+		vertexData[0][4] = 0.0f;
+		//V1
+		vertexData[1][0] =  0.5f;
+		vertexData[1][1] =  0.5f;
 
-			std::vector<RenderSurfaceID> rss;
-			for(const auto &i : g_Device->GetNativeData().vulkanSwapChainImageViews)
-			{
-				TextureID tx0 = g_Device->GetResources().textures.Create(Texture::Format::XYZW8, m_Window->GetWidth(), m_Window->GetHeight());
-				g_Device->GetResources().textures.Get(tx0).GetNativeData().vulkanImageView = i;
-				RenderSurface::Attachment ca = { tx0, 1 };
+		vertexData[1][2] = 0.0f;
+		vertexData[1][3] = 1.0f;
+		vertexData[1][4] = 0.0f;
+		//V2
+		vertexData[2][0] = -0.5f;
+		vertexData[2][1] =  0.5f;
 
-				rss.emplace_back(g_Device->GetResources().renderSurfaces.Create(1, &ca, RenderSurface::Attachment(), m_Window->GetWidth(), m_Window->GetHeight()));
-			}
+		vertexData[2][2] = 0.0f;
+		vertexData[2][3] = 0.0f;
+		vertexData[2][4] = 1.0f;
 
-			RenderState::DepthStencilState dss;
-			RenderState::BlendState        bs;
-			RenderState state(dgls, shp0, rss[0], dss, bs, m_Window->GetWidth(), m_Window->GetHeight());
+		BufferID vertexBufferID = g_Device->GetResources().buffers.Create(sizeof(vertexData), Buffer::BindFlags::Vertex);
+		auto &vertexBuffer = g_Device->GetResources().buffers.Get(vertexBufferID);
+		vertexBuffer.SetData(&vertexData, vertexBuffer.GetSize());
 
-			CommandHeap   cmdh(CommandHeap::Type::Direct);
-			std::unique_ptr<CommandBuffer> cmdb = cmdh.CreateCommandBuffer();
+		DescriptorGroupLayout::Binding *bndg = new DescriptorGroupLayout::Binding;
+		bndg->descriptorCount = 1;
+		bndg->type            = DescriptorHeap::Type::ShaderConstantBuffer;
 
-			RenderCommandRecorder cmdr(cmdb.get(), &state);
-			cmdr.Render(3, 0);
-			cmdr.StopRecording();
+		std::vector<DescriptorGroupLayout> dgls;
+		dgls.emplace_back(1, bndg, Shader::StageFlags::Pixel);
 
-			const auto &vulkanDevice = g_Device->GetNativeData().vulkanDevice;
+		std::vector<RenderSurfaceID> rss;
+		for(const auto &i : g_Device->GetNativeData().vulkanSwapChainImageViews)
+		{
+			TextureID tx0 = g_Device->GetResources().textures.Create(Texture::Format::XYZW8, m_Window->GetWidth(), m_Window->GetHeight());
+			g_Device->GetResources().textures.Get(tx0).GetNativeData().vulkanImageView = i;
+			RenderSurface::Attachment ca = { tx0, 1 };
 
-			VkSemaphoreCreateInfo semaphoreDescriptor = {};
-			semaphoreDescriptor.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-			VkSemaphore startSemaphore, stopSemaphore;
-			vkCreateSemaphore(vulkanDevice, &semaphoreDescriptor, nullptr, &startSemaphore);
-			vkCreateSemaphore(vulkanDevice, &semaphoreDescriptor, nullptr, &stopSemaphore);
+			rss.emplace_back(g_Device->GetResources().renderSurfaces.Create(1, &ca, RenderSurface::Attachment(), m_Window->GetWidth(), m_Window->GetHeight()));
+		}
 
-			uint32_t vulkanImageIndex;
-			vkAcquireNextImageKHR(vulkanDevice, g_Device->GetNativeData().vulkanSwapChain, UINT64_MAX, startSemaphore, VK_NULL_HANDLE, &vulkanImageIndex);
+		RenderState::DepthStencilState dss;
+		RenderState::BlendState        bs;
 
-			VkSubmitInfo submitDescriptor = {};
-			submitDescriptor.sType                  = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			submitDescriptor.waitSemaphoreCount     = 1;
-			submitDescriptor.pWaitSemaphores        = &startSemaphore;
-			VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-			submitDescriptor.pWaitDstStageMask      = &pipelineStageFlags;
-			submitDescriptor.commandBufferCount     = 1;
-			submitDescriptor.pCommandBuffers        = &cmdb->GetNativeData().vulkanCommandBuffer;
-			submitDescriptor.signalSemaphoreCount   = 1;
-			submitDescriptor.pSignalSemaphores      = &stopSemaphore;
+		std::vector<RenderState> states;
+		states.reserve(GM_SWAP_CHAIN_BUFFER_COUNT);
+		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		{
+			states.emplace_back(dgls, vertexLayout, shp0, rss[i], dss, bs, m_Window->GetWidth(), m_Window->GetHeight());
+		}
 
-			//const VkQueue &queue = g_Device->GetNativeData().vulkanQueues[g_Device->GetNativeCommandHeapType(CommandHeap::Type::Direct)];
-			const VkQueue &queue = g_Device->GetNativeData().vulkanQueues[2];
+		DescriptorHeap::DescriptorCounts dschc;
+		dschc.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_SWAP_CHAIN_BUFFER_COUNT);
+		DescriptorHeap dsch(std::move(dschc));
 
-			vkQueueSubmit(queue, 1, &submitDescriptor, VK_NULL_HANDLE);
+		struct PerFrameData
+		{
+			float color[3];
+		};
 
-			VkPresentInfoKHR presentDescriptor = {};
-			presentDescriptor.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-			presentDescriptor.waitSemaphoreCount = 1;
-			presentDescriptor.pWaitSemaphores    = &stopSemaphore;
-			presentDescriptor.swapchainCount     = 1;
-			presentDescriptor.pSwapchains        = &g_Device->GetNativeData().vulkanSwapChain;
-			presentDescriptor.pImageIndices      = &vulkanImageIndex;
+		PerFrameData data;
 
-			vkQueuePresentKHR(queue, &presentDescriptor);
+		BufferID shaderConstantBufferID = g_Device->GetResources().buffers.Create(sizeof(PerFrameData), Buffer::BindFlags::ShaderConstants);
+		Buffer &shaderConstantBuffer = g_Device->GetResources().buffers.Get(shaderConstantBufferID);
 
-			vkDestroySemaphore(vulkanDevice, startSemaphore, nullptr);
-			vkDestroySemaphore(vulkanDevice, stopSemaphore, nullptr);
+		std::unique_ptr<DescriptorGroup> descriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
+
+		CommandHeap cmdh(CommandHeap::Type::Direct);
+
+		std::unique_ptr<CommandBuffer> cmdbs[GM_SWAP_CHAIN_BUFFER_COUNT];
+		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		{
+			descriptorGroups[i] = std::make_unique<DescriptorGroup>(&dsch, &dgls[0]);
+
+			cmdbs[i] = cmdh.CreateCommandBuffer();
 		}
 
 		while(m_IsRunning)
@@ -161,8 +176,26 @@ namespace Gogaman
 
 			m_World.Update();
 			m_World.Render();
+
+			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
+
+			data.color[0] = cos(Input::GetMousePosition().x / 100.0f);
+			data.color[1] = sin(Input::GetMousePosition().y / 100.0f);
+			data.color[2] = sin(Time::GetTime() * 3.0f);
+			shaderConstantBuffer.SetData(&data, shaderConstantBuffer.GetSize());
+			descriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderConstantBufferID);
+
+			RenderCommandRecorder cmdr(cmdbs[swapChainImageIndex].get(), &states[swapChainImageIndex]);
+			cmdr.BindDescriptorGroup(0, *descriptorGroups[swapChainImageIndex].get());
+
+			cmdr.BindBuffer(0, vertexBuffer);
+
+			cmdr.Render(3, 0);
+			cmdr.StopRecording();
+
+			g_Device->Submit(CommandHeap::Type::Direct, 1, cmdbs[swapChainImageIndex].get());
 			
-			//m_Window->Update();
+			m_Window->Update();
 
 			EventManager::GetInstance().DispatchEvents();
 		}

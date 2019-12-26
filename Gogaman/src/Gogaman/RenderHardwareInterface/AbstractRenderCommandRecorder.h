@@ -2,7 +2,7 @@
 
 #include "Gogaman/Core/CRTP.h"
 
-#include "CommandBuffer.h"
+#include "TransferCommandRecorder.h"
 
 namespace Gogaman
 {
@@ -12,8 +12,12 @@ namespace Gogaman
 
 		class RenderState;
 
+		class DescriptorGroup;
+
+		class Buffer;
+
 		template<typename ImplementationType>
-		class AbstractRenderCommandRecorder : public CRTP<ImplementationType, AbstractRenderCommandRecorder>
+		class AbstractRenderCommandRecorder : public CRTP<ImplementationType, AbstractRenderCommandRecorder>, public TransferCommandRecorder
 		{
 		public:
 			AbstractRenderCommandRecorder(const AbstractRenderCommandRecorder &) = delete;
@@ -21,6 +25,10 @@ namespace Gogaman
 
 			AbstractRenderCommandRecorder &operator=(const AbstractRenderCommandRecorder &) = delete;
 			AbstractRenderCommandRecorder &operator=(AbstractRenderCommandRecorder &&)      = delete;
+
+			inline void BindDescriptorGroup(const uint32_t bindingIndex, const DescriptorGroup &descriptorGroup) { this->GetImplementation().BindDescriptorGroup(bindingIndex, descriptorGroup); }
+
+			inline void BindBuffer(const uint32_t bindingIndex, const Buffer &buffer) { this->GetImplementation().BindBuffer(bindingIndex, buffer); }
 
 			inline void Render(const uint32_t vertexCount, const uint32_t startVertexOffset) { this->GetImplementation().Render(vertexCount, startVertexOffset); }
 			
@@ -33,15 +41,12 @@ namespace Gogaman
 			inline void StopRecording() { this->GetImplementation().StopRecording(); }
 		private:
 			AbstractRenderCommandRecorder(CommandBuffer *commandBuffer, RenderState *state)
-				: m_CommandBuffer(commandBuffer), m_State(state)
-			{
-				m_CommandBuffer->StartRecording();
-			}
+				: TransferCommandRecorder(commandBuffer), m_State(state)
+			{}
 
 			~AbstractRenderCommandRecorder() = default;
 		protected:
-			CommandBuffer *m_CommandBuffer;
-			RenderState   *m_State;
+			RenderState *m_State;
 		private:
 			friend ImplementationType;
 		};

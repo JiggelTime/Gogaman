@@ -26,15 +26,19 @@ namespace Gogaman
 				VkSurfaceKHR                     vulkanSurface;
 				VkPhysicalDevice                 vulkanPhysicalDevice;
 				VkPhysicalDeviceLimits           vulkanPhysicalDeviceLimits;
-				uint32_t                         vulkanMemoryTypeFlags[3];
 				Memory::Allocator                vulkanMemoryAllocator;
-				uint32_t                         vulkanQueueFamilyIndices[3];
 				//std::vector<VkQueue>             vulkanQueues[3];
 				VkQueue                          vulkanQueues[3];
 				VkDevice                         vulkanDevice;
 				VkSwapchainKHR                   vulkanSwapChain;
 				std::vector<VkImage>             vulkanSwapChainImages;
 				std::vector<VkImageView>         vulkanSwapChainImageViews;
+				VkSemaphore                      vulkanSwapChainImageAvailableSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT], vulkanRenderCompletedSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT];
+				VkFence                          vulkanPresentFences[GM_SWAP_CHAIN_BUFFER_COUNT];
+				uint32_t                         vulkanMemoryTypeFlags[3];
+				uint32_t                         vulkanQueueFamilyIndices[3];
+				uint32_t                         vulkanSwapChainImageIndex;
+				uint32_t                         vulkanPresentSynchronizationIndex = 0;
 			};
 		public:
 			Device(void *nativeWindow);
@@ -49,6 +53,10 @@ namespace Gogaman
 			void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
 			void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
+
+			void Submit(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
+
+			void Present();
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }

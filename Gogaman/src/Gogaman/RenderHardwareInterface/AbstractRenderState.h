@@ -11,7 +11,8 @@ namespace Gogaman
 	namespace RHI
 	{
 		class DescriptorGroupLayout;
-		//typename std::vector<DescriptorGroupLayout>;
+
+		class VertexLayout;
 
 		template<typename ImplementationType>
 		class AbstractRenderState : public CRTP<ImplementationType, AbstractRenderState>
@@ -124,7 +125,7 @@ namespace Gogaman
 			static inline constexpr auto GetNativeBlendStateOperation(const typename BlendState::Operation operation) { return ImplementationType::GetNativeBlendStateOperation(operation); }
 			static inline constexpr auto GetNativeBlendStateFactor(const typename BlendState::Factor factor)          { return ImplementationType::GetNativeBlendStateFactor(factor);       }
 		private:
-			AbstractRenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState = CullOperation::None)
+			AbstractRenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const VertexLayout &vertexLayout, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState = CullOperation::None)
 				: m_RenderSurfaceID(renderSurfaceID)
 			{
 				GM_ASSERT(GM_IS_VALID_ID(shaderProgramID),   "Failed to construct render state | Invalid shader program");

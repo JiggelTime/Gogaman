@@ -27,34 +27,26 @@ namespace Gogaman
 
 			VkMemoryRequirements memoryRequirements;
 			vkGetBufferMemoryRequirements(vulkanDevice, m_NativeData.vulkanBuffer, &memoryRequirements);
-			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size);
+
+			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			vkBindBufferMemory(vulkanDevice, m_NativeData.vulkanBuffer, m_NativeData.vulkanMemory.vulkanDeviceMemory, m_NativeData.vulkanMemory.offset);
 		}
 
 		Buffer::~Buffer()
 		{
+			vkDestroyBuffer(g_Device->GetNativeData().vulkanDevice, m_NativeData.vulkanBuffer, nullptr);
+
 			g_Device->GetNativeData().vulkanMemoryAllocator.Deallocate(m_NativeData.vulkanMemory);
 		}
 
-		constexpr VkBufferUsageFlags Buffer::GetNativeBindFlags(const BindFlags bindFlags)
+		void Buffer::SetData(const void *data, const uint32_t size, const uint32_t offset)
 		{
-			VkBufferUsageFlags nativeBindFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+			const auto &vulkanDevice = g_Device->GetNativeData().vulkanDevice;
 
-			switch(bindFlags)
-			{
-			case BindFlags::Vertex:
-				return nativeBindFlags | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-			case BindFlags::Index:
-				return nativeBindFlags | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-			case BindFlags::Indirect:
-				return nativeBindFlags | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-			case BindFlags::UnorderedAccess:
-				return nativeBindFlags | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-			case BindFlags::ShaderResource:
-				return nativeBindFlags | VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-			case BindFlags::ShaderConstants:
-				return nativeBindFlags | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-			}
+			void *memory;
+			vkMapMemory(vulkanDevice, m_NativeData.vulkanMemory.vulkanDeviceMemory, 0, size, 0, &memory);
+			memcpy((uint8_t *)memory + offset, data, size);
+			vkUnmapMemory(vulkanDevice, m_NativeData.vulkanMemory.vulkanDeviceMemory);
 		}
 	}
 }

@@ -16,12 +16,14 @@ namespace Gogaman
 			{
 				ShaderTexture,
 				StorageTexture,
+
 				ShaderTexelBuffer,
 				StorageTexelBuffer,
 				ShaderConstantBuffer,
 				StorageConstantBuffer,
 				DepthStencilBuffer,
 				RenderTargetBuffer,
+
 				Sampler
 			};
 
@@ -30,17 +32,17 @@ namespace Gogaman
 				template<Type type>
 				inline void SetDescriptorCount(const uint32_t count)
 				{
-					uint32_t &descriptorCount = m_DescriptorCounts[(uint8_t)type];
+					uint32_t &descriptorCount = descriptorCounts[(uint8_t)type];
 
 					totalDescriptorCount += count - descriptorCount;
 					descriptorCount = count;
 				}
 
 				template<Type type>
-				inline constexpr uint32_t GetDescriptorCount() const { return m_DescriptorCounts[(uint8_t)type]; }
+				inline constexpr uint32_t GetDescriptorCount() const { return descriptorCounts[(uint8_t)type]; }
 
-				uint32_t descriptorCounts[GM_DESCRIPTOR_HEAP_TYPE_COUNT];
-				uint32_t totalDescriptorCount;
+				uint32_t descriptorCounts[GM_DESCRIPTOR_HEAP_TYPE_COUNT] = {};
+				uint32_t totalDescriptorCount                            = 0;
 			};
 		public:
 			AbstractDescriptorHeap(const AbstractDescriptorHeap &) = delete;

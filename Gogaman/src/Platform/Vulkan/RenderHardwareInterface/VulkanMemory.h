@@ -27,11 +27,11 @@ namespace Gogaman
 				Allocator()  = default;
 				~Allocator() = default;
 
-				Allocation &Allocate(const uint32_t memoryTypeFlags, const uint32_t size);
+				Allocation &Allocate(const uint32_t typeFlags, const uint32_t size, const VkMemoryPropertyFlags propertyFlags);
 				
 				void Deallocate(const Allocation allocation);
 			private:
-				bool FindMemoryTypeIndex(const uint32_t memoryTypeFlags, const VkMemoryPropertyFlags properties, uint32_t &memoryTypeIndex);
+				bool FindMemoryTypeIndex(const uint32_t typeFlags, const VkMemoryPropertyFlags properties, uint32_t &typeIndex);
 			};
 		}
 	}

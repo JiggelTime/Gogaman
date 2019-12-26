@@ -10,41 +10,61 @@
 
 #include "Gogaman/RenderHardwareInterface/DescriptorGroupLayout.h"
 
+#include "Gogaman/RenderHardwareInterface/VertexLayout.h"
+
 #include "Gogaman/RenderHardwareInterface/Device.h"
 
 namespace Gogaman
 {
 	namespace RHI
 	{
-		RenderState::RenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState)
-			: AbstractRenderState(descriptorGroupLayouts, shaderProgramID, renderSurfaceID, depthStencilState, blendState, viewportWidth, viewportHeight, cullState)
+		RenderState::RenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const VertexLayout &vertexLayout, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState)
+			: AbstractRenderState(descriptorGroupLayouts, vertexLayout, shaderProgramID, renderSurfaceID, depthStencilState, blendState, viewportWidth, viewportHeight, cullState)
 		{
 			const ShaderProgram &shaderProgram = g_Device->GetResources().shaderPrograms.Get(shaderProgramID);
 
-			std::vector<VkPipelineShaderStageCreateInfo> shaderStateDescriptors;
-			shaderStateDescriptors.reserve(GM_RHI_SHADER_STAGE_COUNT);
+			VkPipelineShaderStageCreateInfo shaderStateDescriptors[GM_RHI_SHADER_STAGE_COUNT];
+			uint8_t                         usedShaderStageCount = 0;
 			for(uint8_t i = 0; i < GM_RHI_SHADER_STAGE_COUNT; i++)
 			{
 				const Shader::Stage shaderStage = (Shader::Stage)i;
 				if(!shaderProgram.IsShaderPresent(shaderStage))
 					continue;
 
-				VkPipelineShaderStageCreateInfo shaderStateDescriptor = {};
-				shaderStateDescriptor.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-				shaderStateDescriptor.stage  = Shader::GetNativeStage(shaderStage);
-				shaderStateDescriptor.module = g_Device->GetResources().shaders.Get(shaderProgram.GetShader(shaderStage)).GetNativeData().vulkanShaderModule;
-				shaderStateDescriptor.pName  = "main";
+				shaderStateDescriptors[usedShaderStageCount] = {};
+				shaderStateDescriptors[usedShaderStageCount].sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+				shaderStateDescriptors[usedShaderStageCount].stage  = Shader::GetNativeStage(shaderStage);
+				shaderStateDescriptors[usedShaderStageCount].module = g_Device->GetResources().shaders.Get(shaderProgram.GetShader(shaderStage)).GetNativeData().vulkanShaderModule;
+				shaderStateDescriptors[usedShaderStageCount].pName  = "main";
 
-				shaderStateDescriptors.emplace_back(std::move(shaderStateDescriptor));
+				usedShaderStageCount++;
+			}
+
+			VkVertexInputBindingDescription vertexBindingDescriptor = {};
+			vertexBindingDescriptor.binding   = 0;
+			vertexBindingDescriptor.stride    = vertexLayout.GetStride();
+			vertexBindingDescriptor.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+			VkVertexInputAttributeDescription *vertexAttributeDescriptors = new VkVertexInputAttributeDescription[vertexLayout.GetAttributes().size()];
+			for(uint8_t i = 0; i < vertexLayout.GetAttributes().size(); i++)
+			{
+				const VertexLayout::Attribute &attribute = vertexLayout.GetAttributes()[i];
+
+				vertexAttributeDescriptors[i] = {};
+				vertexAttributeDescriptors[i].location = i;
+				//TODO: Should binding be the vertex buffer's bind index?
+				vertexAttributeDescriptors[i].binding  = 0;
+				vertexAttributeDescriptors[i].format   = Shader::GetNativeDataType(attribute.dataType);
+				vertexAttributeDescriptors[i].offset   = (uint32_t)attribute.offset;
 			}
 
 			//TODO: Pass in a shader reflector to automate vertex attributes
 			VkPipelineVertexInputStateCreateInfo vertexStateDescriptor = {};
 			vertexStateDescriptor.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-			vertexStateDescriptor.vertexBindingDescriptionCount   = 0;
-			vertexStateDescriptor.pVertexBindingDescriptions      = nullptr;
-			vertexStateDescriptor.vertexAttributeDescriptionCount = 0;
-			vertexStateDescriptor.pVertexAttributeDescriptions    = nullptr;
+			vertexStateDescriptor.vertexBindingDescriptionCount   = 1;
+			vertexStateDescriptor.pVertexBindingDescriptions      = &vertexBindingDescriptor;
+			vertexStateDescriptor.vertexAttributeDescriptionCount = (uint32_t)vertexLayout.GetAttributes().size();
+			vertexStateDescriptor.pVertexAttributeDescriptions    = vertexAttributeDescriptors;
 
 			VkPipelineInputAssemblyStateCreateInfo assemblyStateDescriptor = {};
 			assemblyStateDescriptor.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -174,8 +194,8 @@ namespace Gogaman
 
 			VkGraphicsPipelineCreateInfo pipelineDescriptor = {};
 			pipelineDescriptor.sType               = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-			pipelineDescriptor.stageCount          = (uint32_t)shaderStateDescriptors.size();
-			pipelineDescriptor.pStages             = shaderStateDescriptors.data();
+			pipelineDescriptor.stageCount          = (uint32_t)usedShaderStageCount;
+			pipelineDescriptor.pStages             = shaderStateDescriptors;
 			pipelineDescriptor.pVertexInputState   = &vertexStateDescriptor;
 			pipelineDescriptor.pInputAssemblyState = &assemblyStateDescriptor;
 			pipelineDescriptor.pViewportState      = &viewportStateDescriptor;
@@ -190,6 +210,8 @@ namespace Gogaman
 
 			if(vkCreateGraphicsPipelines(vulkanDevice, VK_NULL_HANDLE, 1, &pipelineDescriptor, nullptr, &m_NativeData.vulkanPipeline) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to construct render state | Failed to create Vulkan graphics pipeline");
+
+			delete[] vertexAttributeDescriptors;
 
 			delete[] renderSurfaceAttachmentBlendStateDescriptors;
 		}

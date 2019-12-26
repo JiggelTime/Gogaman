@@ -16,6 +16,8 @@
 
 #include "CommandHeap.h"
 
+#define GM_SWAP_CHAIN_BUFFER_COUNT 2u
+
 namespace Gogaman
 {
 	enum class VerticalSynchronization : uint8_t
@@ -26,6 +28,8 @@ namespace Gogaman
 
 	namespace RHI
 	{
+		class CommandBuffer;
+
 		using TextureContainer       = ResourceContainer<Texture,       TextureID,       1024>;
 		using BufferContainer        = ResourceContainer<Buffer,        BufferID,        1024>;
 		using RenderSurfaceContainer = ResourceContainer<RenderSurface, RenderSurfaceID, 32>;
@@ -54,6 +58,10 @@ namespace Gogaman
 			inline void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().CreateSwapChain(width, height, verticalSynchronization); }
 
 			inline void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().RecreateSwapChain(width, height, verticalSynchronization); }
+
+			inline void Submit(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().Submit(commandBufferCount, commandBuffers); }
+
+			inline void Present() { this->GetImplementation().Present(); }
 
 			inline constexpr const Context &GetContext() const { return m_Context; }
 			inline constexpr       Context &GetContext()       { return m_Context; }

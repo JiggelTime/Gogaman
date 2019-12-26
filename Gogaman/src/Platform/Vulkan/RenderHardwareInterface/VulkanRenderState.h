@@ -17,7 +17,7 @@ namespace Gogaman
 				VkPipeline       vulkanPipeline;
 			};
 		public:
-			RenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState = CullOperation::None);
+			RenderState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const VertexLayout &vertexLayout, const ShaderProgramID shaderProgramID, const RenderSurfaceID renderSurfaceID, const DepthStencilState &depthStencilState, const BlendState &blendState, const uint16_t viewportWidth, const uint16_t viewportHeight, const CullOperation cullState = CullOperation::None);
 			RenderState(const RenderState &) = delete;
 			RenderState(RenderState &&)      = default;
 

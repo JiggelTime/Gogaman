@@ -18,7 +18,7 @@ namespace Gogaman
 				VkDescriptorSet vulkanDescriptorSet;
 			};
 		public:
-			DescriptorGroup(DescriptorHeap *heap, const DescriptorGroupLayout &layout);
+			DescriptorGroup(DescriptorHeap *heap, DescriptorGroupLayout *layout);
 			DescriptorGroup(const DescriptorGroup &) = delete;
 			DescriptorGroup(DescriptorGroup &&)      = default;
 
@@ -27,9 +27,9 @@ namespace Gogaman
 			DescriptorGroup &operator=(const DescriptorGroup &) = delete;
 			DescriptorGroup &operator=(DescriptorGroup &&)      = default;
 
-			void SetShaderResource(const uint32_t index);
-			void SetStorageResource(const uint32_t index);
-			void SetSampler(const uint32_t index);
+			void SetShaderConstantBuffer(const uint32_t bindingIndex, const BufferID bufferID);
+			void SetStorageResource(const uint32_t bindingIndex);
+			void SetSampler(const uint32_t bindingIndex);
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }

@@ -95,7 +95,7 @@ namespace Gogaman
 	void WindowsWindow::Update()
 	{
 		glfwPollEvents();
-		//m_RenderingContext->SwapBuffers();
+		g_Device->Present();
 	}
 
 	void WindowsWindow::Resize(const uint16_t width, const uint16_t height)

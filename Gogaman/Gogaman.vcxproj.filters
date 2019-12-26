@@ -18,7 +18,6 @@
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferEngine.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDescriptorGroup.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDescriptorHeap.cpp" />
@@ -28,6 +27,7 @@
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanComputeCommandRecorder.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanComputeState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderCommandRecorder.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferCommandRecorder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -94,8 +94,6 @@
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractSampler.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTransferEngine.h" />
-    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferEngine.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderState.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderState.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractComputeState.h" />
@@ -106,7 +104,6 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\DescriptorHeap.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDescriptorHeap.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Shader.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\TransferEngine.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Buffer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\ShaderProgram.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Identifier.h" />
@@ -129,5 +126,9 @@
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderCommandRecorder.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderCommandRecorder.h" />
     <ClInclude Include="src\Gogaman\EntryPoint.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferCommandRecorder.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\TransferCommandRecorder.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTransferCommandRecorder.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\VertexLayout.h" />
   </ItemGroup>
 </Project>

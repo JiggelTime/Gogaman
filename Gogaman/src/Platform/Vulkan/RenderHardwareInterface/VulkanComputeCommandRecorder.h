@@ -8,8 +8,6 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		class ComputeState;
-
 		class ComputeCommandRecorder : public AbstractComputeCommandRecorder<ComputeCommandRecorder>
 		{
 		public:
@@ -21,6 +19,8 @@ namespace Gogaman
 
 			ComputeCommandRecorder &operator=(const ComputeCommandRecorder &) = delete;
 			ComputeCommandRecorder &operator=(ComputeCommandRecorder &&)      = delete;
+
+			void BindDescriptorGroup(const uint32_t bindingIndex, const DescriptorGroup &descriptorGroup);
 
 			void Dispatch(const uint32_t workGroupSizeXYZ[3]) const;
 

@@ -9,8 +9,11 @@ namespace Gogaman
 	class EventManager
 	{
 	public:
-		EventManager(const EventManager &)            = delete;
+		EventManager(const EventManager &) = delete;
+		EventManager(EventManager &&)      = delete;
+
 		EventManager &operator=(const EventManager &) = delete;
+		EventManager &operator=(EventManager &&)      = delete;
 
 		inline void Send(std::unique_ptr<Event> &&event) { m_Events.emplace(std::move(event)); }
 
@@ -26,6 +29,7 @@ namespace Gogaman
 		static EventManager &GetInstance() { return *s_Instance; }
 	private:
 		EventManager();
+
 		~EventManager() = default;
 	private:
 		std::vector<EventListener *>       m_Listeners;

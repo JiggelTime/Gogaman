@@ -5,6 +5,8 @@
 
 #include "Gogaman/RenderHardwareInterface/ComputeState.h"
 
+#include "Gogaman/RenderHardwareInterface/DescriptorGroup.h"
+
 #include "Gogaman/RenderHardwareInterface/Device.h"
 
 namespace Gogaman
@@ -15,6 +17,11 @@ namespace Gogaman
 			: AbstractComputeCommandRecorder(commandBuffer, state)
 		{
 			vkCmdBindPipeline(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_State->GetNativeData().vulkanPipeline);
+		}
+
+		void ComputeCommandRecorder::BindDescriptorGroup(const uint32_t bindingIndex, const DescriptorGroup &descriptorGroup)
+		{
+			vkCmdBindDescriptorSets(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, m_State->GetNativeData().vulkanPipelineLayout, bindingIndex, 1, &descriptorGroup.GetNativeData().vulkanDescriptorSet, 0, nullptr);
 		}
 
 		void ComputeCommandRecorder::Dispatch(const uint32_t workGroupSizeXYZ[3]) const

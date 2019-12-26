@@ -36,11 +36,11 @@ namespace Gogaman
 			commandBufferAllocationDescriptor.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			commandBufferAllocationDescriptor.commandBufferCount = 1;
 
-			CommandBuffer commandBuffer;
-			if(vkAllocateCommandBuffers(g_Device->GetNativeData().vulkanDevice, &commandBufferAllocationDescriptor, &commandBuffer.GetNativeData().vulkanCommandBuffer) != VK_SUCCESS)
+			std::unique_ptr<CommandBuffer> commandBuffer = std::make_unique<CommandBuffer>();
+			if(vkAllocateCommandBuffers(g_Device->GetNativeData().vulkanDevice, &commandBufferAllocationDescriptor, &commandBuffer->GetNativeData().vulkanCommandBuffer) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to create command buffer");
 
-			return std::make_unique<CommandBuffer>(std::move(commandBuffer));
+			return commandBuffer;
 		}
 	}
 }
