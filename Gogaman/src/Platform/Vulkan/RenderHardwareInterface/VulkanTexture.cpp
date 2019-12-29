@@ -28,7 +28,6 @@ namespace Gogaman
 			imageDescriptor.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
 			imageDescriptor.queueFamilyIndexCount = 0;
 			imageDescriptor.pQueueFamilyIndices   = nullptr;
-			//data ? VK_IMAGE_LAYOUT_PREINITIALIZED : VK_IMAGE_LAYOUT_UNDEFINED;
 			imageDescriptor.initialLayout         = VK_IMAGE_LAYOUT_UNDEFINED;
 
 			const auto &vulkanDevice = g_Device->GetNativeData().vulkanDevice;
@@ -38,11 +37,11 @@ namespace Gogaman
 
 			VkMemoryRequirements memoryRequirements;
 			vkGetImageMemoryRequirements(vulkanDevice, m_NativeData.vulkanImage, &memoryRequirements);
+			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(DeviceMemory::Type::Device, memoryRequirements.memoryTypeBits, memoryRequirements.size);
 
-			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 			vkBindImageMemory(vulkanDevice, m_NativeData.vulkanImage, m_NativeData.vulkanMemory.vulkanDeviceMemory, m_NativeData.vulkanMemory.offset);
 
-			FormatType formatType = GetFormatType(m_Format);
+			const BaseFormat baseFormat = GetBaseFormat(m_Format);
 
 			VkImageViewCreateInfo imageViewDescriptor = {};
 			imageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -53,7 +52,7 @@ namespace Gogaman
 			imageViewDescriptor.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 			imageViewDescriptor.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 			imageViewDescriptor.components.a                    = VK_COMPONENT_SWIZZLE_IDENTITY;
-			imageViewDescriptor.subresourceRange.aspectMask     = (formatType == FormatType::Value || formatType == FormatType::Color) ? VK_IMAGE_ASPECT_COLOR_BIT : formatType == FormatType::Depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
+			imageViewDescriptor.subresourceRange.aspectMask     = (baseFormat == BaseFormat::Value || baseFormat == BaseFormat::Color) ? VK_IMAGE_ASPECT_COLOR_BIT : baseFormat == BaseFormat::Depth ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT;
 			imageViewDescriptor.subresourceRange.baseMipLevel   = 0;
 			imageViewDescriptor.subresourceRange.levelCount     = m_LevelCount;
 			imageViewDescriptor.subresourceRange.baseArrayLayer = 0;

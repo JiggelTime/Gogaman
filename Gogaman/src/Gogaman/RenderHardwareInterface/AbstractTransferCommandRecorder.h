@@ -10,6 +10,10 @@ namespace Gogaman
 	{
 		class CommandBuffer;
 
+		class Texture;
+
+		class Buffer;
+
 		template<typename ImplementationType>
 		class AbstractTransferCommandRecorder : public CRTP<ImplementationType, AbstractTransferCommandRecorder>
 		{
@@ -19,6 +23,9 @@ namespace Gogaman
 
 			AbstractTransferCommandRecorder &operator=(const AbstractTransferCommandRecorder &) = delete;
 			AbstractTransferCommandRecorder &operator=(AbstractTransferCommandRecorder &&)      = delete;
+
+			inline void CopyData(Buffer &source, Buffer &destination) { this->GetImplementation().CopyData(source, destination); }
+			inline void CopyData(Buffer &source, Texture &destination) { this->GetImplementation().CopyData(source, destination); }
 
 			inline void StopRecording() { m_CommandBuffer->StopRecording(); }
 		private:

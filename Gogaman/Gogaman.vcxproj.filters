@@ -16,7 +16,6 @@
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.cpp" />
-    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDescriptorGroup.cpp" />
@@ -28,6 +27,9 @@
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanComputeState.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderCommandRecorder.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTransferCommandRecorder.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDeviceMemory.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -91,7 +93,6 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractBuffer.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanBuffer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\DeviceMemory.h" />
-    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanMemory.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractSampler.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanSampler.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderState.h" />
@@ -130,5 +131,13 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\TransferCommandRecorder.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTransferCommandRecorder.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\VertexLayout.h" />
+    <ClInclude Include="src\Gogaman\Rendering\LightComponent.h" />
+    <ClInclude Include="src\Gogaman\Rendering\ModelMatrixSystem.h" />
+    <ClInclude Include="src\Gogaman\Rendering\PBR_Material.h" />
+    <ClInclude Include="src\Gogaman\Rendering\PerspectiveCamera.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderableComponent.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderingSystem.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractDeviceMemory.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDeviceMemory.h" />
   </ItemGroup>
 </Project>

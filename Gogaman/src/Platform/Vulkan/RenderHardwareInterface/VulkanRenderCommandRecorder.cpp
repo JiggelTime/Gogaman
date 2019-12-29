@@ -57,6 +57,9 @@ namespace Gogaman
 			case Buffer::BindFlags::Vertex:
 				vkCmdBindVertexBuffers(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, 0, 1, &buffer.GetNativeData().vulkanBuffer, &offset);
 				break;
+			case Buffer::BindFlags::Index:
+				vkCmdBindIndexBuffer(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, buffer.GetNativeData().vulkanBuffer, 0, VK_INDEX_TYPE_UINT16);
+				break;
 			default:
 				GM_DEBUG_ASSERT(false, "Failed to bind buffer | Invalid buffer");
 			}

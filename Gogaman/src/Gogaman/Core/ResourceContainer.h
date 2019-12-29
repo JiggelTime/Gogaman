@@ -73,6 +73,30 @@ namespace Gogaman
 			return identifier;
 		}
 
+		template<typename ...ParameterTypes>
+		inline ResourceType &Create(ID &identifier, ParameterTypes &&...constructorParameters)
+		{
+			GM_DEBUG_ASSERT(GM_IS_INVALID_ID(identifier), "Failed to create resource | Identifier is valid");
+
+			identifier.index = m_Elements[0].nextFreeIndex;
+			m_Elements[0].nextFreeIndex = m_Elements[identifier.index].nextFreeIndex;
+
+			#if GM_RHI_DEBUGGING_ENABLED
+				identifier.generation = m_Elements[identifier.index].generation;
+			#endif
+
+			if(identifier.index)
+			{
+				new (&m_Elements[identifier.index].resource)ResourceType(std::forward<ParameterTypes>(constructorParameters)...);
+				m_ElementCount++;
+				return m_Elements[identifier.index].resource;
+			}
+
+			identifier.index = m_ElementCount++;
+			new (&m_Elements[identifier.index].resource)ResourceType(std::forward<ParameterTypes>(constructorParameters)...);
+			return m_Elements[identifier.index].resource;
+		}
+
 		inline constexpr const ResourceType &Get(const ID identifier) const
 		{
 			ValidateID(identifier);

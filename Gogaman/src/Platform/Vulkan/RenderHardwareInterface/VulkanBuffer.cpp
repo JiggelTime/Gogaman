@@ -9,13 +9,13 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		Buffer::Buffer(const uint32_t size, const BindFlags bindFlags)
-			: AbstractBuffer(size, bindFlags)
+		Buffer::Buffer(const DeviceMemory::Type memoryType, const uint32_t size, const BindFlags bindFlags)
+			: AbstractBuffer(memoryType, size, bindFlags)
 		{
 			VkBufferCreateInfo bufferDescriptor = {};
 			bufferDescriptor.sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-			bufferDescriptor.size                  = size;
-			bufferDescriptor.usage                 = GetNativeBindFlags(bindFlags);
+			bufferDescriptor.size                  = m_Size;
+			bufferDescriptor.usage                 = GetNativeBindFlags(m_BindFlags);
 			bufferDescriptor.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
 			bufferDescriptor.queueFamilyIndexCount = 0;
 			bufferDescriptor.pQueueFamilyIndices   = nullptr;
@@ -27,8 +27,8 @@ namespace Gogaman
 
 			VkMemoryRequirements memoryRequirements;
 			vkGetBufferMemoryRequirements(vulkanDevice, m_NativeData.vulkanBuffer, &memoryRequirements);
+			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(memoryType, memoryRequirements.memoryTypeBits, memoryRequirements.size);
 
-			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(memoryRequirements.memoryTypeBits, memoryRequirements.size, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			vkBindBufferMemory(vulkanDevice, m_NativeData.vulkanBuffer, m_NativeData.vulkanMemory.vulkanDeviceMemory, m_NativeData.vulkanMemory.offset);
 		}
 

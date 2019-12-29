@@ -6,7 +6,7 @@
 
 #include "Gogaman/RenderHardwareInterface/CommandHeap.h"
 
-#include "VulkanMemory.h"
+#include "Gogaman/RenderHardwareInterface/DeviceMemory.h"
 
 #include <vulkan/vulkan.h>
 
@@ -26,7 +26,7 @@ namespace Gogaman
 				VkSurfaceKHR                     vulkanSurface;
 				VkPhysicalDevice                 vulkanPhysicalDevice;
 				VkPhysicalDeviceLimits           vulkanPhysicalDeviceLimits;
-				Memory::Allocator                vulkanMemoryAllocator;
+				DeviceMemory::Allocator          vulkanMemoryAllocator;
 				//std::vector<VkQueue>             vulkanQueues[3];
 				VkQueue                          vulkanQueues[3];
 				VkDevice                         vulkanDevice;
@@ -35,33 +35,23 @@ namespace Gogaman
 				std::vector<VkImageView>         vulkanSwapChainImageViews;
 				VkSemaphore                      vulkanSwapChainImageAvailableSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT], vulkanRenderCompletedSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT];
 				VkFence                          vulkanPresentFences[GM_SWAP_CHAIN_BUFFER_COUNT];
-				uint32_t                         vulkanMemoryTypeFlags[3];
 				uint32_t                         vulkanQueueFamilyIndices[3];
 				uint32_t                         vulkanSwapChainImageIndex;
 				uint32_t                         vulkanPresentSynchronizationIndex = 0;
 			};
 		public:
 			Device(void *nativeWindow);
-			Device(const Device &) = delete;
-			Device(Device &&)      = default;
 			
 			~Device();
-
-			Device &operator=(const Device &) = delete;
-			Device &operator=(Device &&)      = default;
 
 			void CreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
 			void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
-			void Submit(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
+			void SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
+			void SubmitRenderCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
 
 			void Present();
-
-			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
-			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }
-
-			inline constexpr uint32_t GetNativeCommandHeapType(const CommandHeap::Type type) const { return m_NativeData.vulkanQueueFamilyIndices[(uint8_t)type]; }
 
 			inline constexpr uint32_t GetTextureWidthLimit()  const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension1D; }
 			inline constexpr uint32_t GetTextureHeightLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxImageDimension2D; }
@@ -83,7 +73,18 @@ namespace Gogaman
 			inline constexpr uint32_t GetRenderSurfaceColorAttachmentCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxColorAttachments;  }
 			
 			inline constexpr uint32_t GetViewportCountLimit() const { return m_NativeData.vulkanPhysicalDeviceLimits.maxViewports; }
+
+			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
+			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }
+
+			inline constexpr uint32_t GetNativeCommandHeapType(const CommandHeap::Type type) const { return m_NativeData.vulkanQueueFamilyIndices[(uint8_t)type]; }
 		private:
+			Device(const Device &) = delete;
+			Device(Device &&)      = delete;
+
+			Device &operator=(const Device &) = delete;
+			Device &operator=(Device &&)      = delete;
+
 			static VKAPI_ATTR VkBool32 VKAPI_CALL VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT * callbackData, void *userData);
 		private:
 			NativeData m_NativeData;

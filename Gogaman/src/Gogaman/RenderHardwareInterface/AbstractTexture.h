@@ -12,7 +12,7 @@ namespace Gogaman
 		class AbstractTexture : public CRTP<ImplementationType, AbstractTexture>
 		{
 		public:
-			enum class FormatType : uint8_t
+			enum class BaseFormat : uint8_t
 			{
 				Depth,
 				DepthStencil,
@@ -51,15 +51,57 @@ namespace Gogaman
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 
-			static constexpr FormatType GetFormatType(const Format format)
+			static inline constexpr uint8_t GetFormatDataSize(const Format format)
+			{
+				switch(format)
+				{
+				case Format::D16:
+					return 2;
+				case Format::D32F:
+					return 4;
+				case Format::D24S8:
+					return 4;
+				case Format::X8:
+					return 1;
+				case Format::X16:
+				case Format::X16F:
+					return 2;
+				case Format::X32F:
+					return 4;
+				case Format::XY8:
+					return 2;
+				case Format::XY16:
+				case Format::XY16F:
+					return 4;
+				case Format::XY32F:
+					return 8;
+				case Format::XYZW8:
+					return 4;
+				case Format::XYZW16:
+				case Format::XYZW16F:
+					return 8;
+				case Format::XYZW32F:
+					return 16;
+				case Format::R8:
+					return 1;
+				case Format::RG8:
+					return 2;
+				case Format::RGBW8:
+					return 4;
+				default:
+					GM_DEBUG_ASSERT(false, "Failed to get texture format data size | Invalid format");
+				}
+			}
+
+			static inline constexpr BaseFormat GetBaseFormat(const Format format)
 			{
 				switch(format)
 				{
 				case Format::D16:
 				case Format::D32F:
-					return FormatType::Depth;
+					return BaseFormat::Depth;
 				case Format::D24S8:
-					return FormatType::DepthStencil;
+					return BaseFormat::DepthStencil;
 				case Format::X8:
 				case Format::X16:
 				case Format::X16F:
@@ -72,13 +114,13 @@ namespace Gogaman
 				case Format::XYZW16:
 				case Format::XYZW16F:
 				case Format::XYZW32F:
-					return FormatType::Value;
+					return BaseFormat::Value;
 				case Format::R8:
 				case Format::RG8:
 				case Format::RGBW8:
-					return FormatType::Color;
+					return BaseFormat::Color;
 				default:
-					GM_DEBUG_ASSERT(false, "Failed to get texture format type | Invalid format");
+					GM_DEBUG_ASSERT(false, "Failed to get texture base format | Invalid format");
 				}
 			}
 

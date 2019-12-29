@@ -22,58 +22,51 @@ namespace Gogaman
 
 			for(uint8_t i = 0; i < m_ColorAttachmentCount; i++)
 			{
-				const Attachment &attachment        = m_ColorAttachments[i];
-				const Texture    &attachmentTexture = g_Device->GetResources().textures.Get(attachment.textureID);
+				const Texture &attachmentTexture = g_Device->GetResources().textures.Get(m_ColorAttachments[i].textureID);
 
-				VkAttachmentDescription &attachmentDescriptor = attachmentDescriptors[i];
-				attachmentDescriptor = {};
-				//attachmentDescriptor.format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
-				attachmentDescriptor.format = VK_FORMAT_B8G8R8A8_UNORM;
-				attachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
+				attachmentDescriptors[i] = {};
+				attachmentDescriptors[i].format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
+				attachmentDescriptors[i].samples        = VK_SAMPLE_COUNT_1_BIT;
 				//TODO: Detect based on usage
 				//attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
-				attachmentDescriptor.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				attachmentDescriptors[i].loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				//TODO: Detect based on usage
-				attachmentDescriptor.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
-				attachmentDescriptor.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				attachmentDescriptor.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				attachmentDescriptors[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+				attachmentDescriptors[i].stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				attachmentDescriptors[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 				//attachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-				attachmentDescriptor.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-				//TODO: Detect based on usage
-				attachmentDescriptor.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+				attachmentDescriptors[i].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachmentDescriptors[i].finalLayout    = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-				VkAttachmentReference &attachmentReferenceDescriptor = attachmentReferenceDescriptors[i];
-				attachmentReferenceDescriptor.attachment = (uint32_t)i;
-				attachmentReferenceDescriptor.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				attachmentReferenceDescriptors[i] = {};
+				attachmentReferenceDescriptors[i].attachment = (uint32_t)i;
+				attachmentReferenceDescriptors[i].layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
 				attachmentImageViews[i] = attachmentTexture.GetNativeData().vulkanImageView;
 			}
 
 			if(isDepthStencilAttachmentPresent)
 			{
-				const Attachment &attachment        = m_DepthStencilAttachment;
-				const Texture    &attachmentTexture = g_Device->GetResources().textures.Get(attachment.textureID);
+				const Texture &attachmentTexture = g_Device->GetResources().textures.Get(m_DepthStencilAttachment.textureID);
 
-				bool isFormatTypeDepthStencil = Texture::GetFormatType(attachmentTexture.GetFormat()) == Texture::FormatType::DepthStencil;
+				bool isFormatTypeDepthStencil = Texture::GetBaseFormat(attachmentTexture.GetFormat()) == Texture::BaseFormat::DepthStencil;
 
-				VkAttachmentDescription &attachmentDescriptor = attachmentDescriptors[m_ColorAttachmentCount];
-				attachmentDescriptor = {};
-				attachmentDescriptor.format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
-				attachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
+				attachmentDescriptors[m_ColorAttachmentCount] = {};
+				attachmentDescriptors[m_ColorAttachmentCount].format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
+				attachmentDescriptors[m_ColorAttachmentCount].samples        = VK_SAMPLE_COUNT_1_BIT;
 				//TODO: Detect based on usage
-				attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
+				attachmentDescriptors[m_ColorAttachmentCount].loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
 				//TODO: Detect based on usage
-				attachmentDescriptor.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+				attachmentDescriptors[m_ColorAttachmentCount].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
 				//TODO: Detect based on usage
-				attachmentDescriptor.stencilLoadOp  = isFormatTypeDepthStencil ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				attachmentDescriptors[m_ColorAttachmentCount].stencilLoadOp  = isFormatTypeDepthStencil ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				//TODO: Detect based on usage
-				attachmentDescriptor.stencilStoreOp = isFormatTypeDepthStencil ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				attachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
-				attachmentDescriptor.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				attachmentDescriptors[m_ColorAttachmentCount].stencilStoreOp = isFormatTypeDepthStencil ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				attachmentDescriptors[m_ColorAttachmentCount].initialLayout  = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				attachmentDescriptors[m_ColorAttachmentCount].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
-				VkAttachmentReference &attachmentReferenceDescriptor = attachmentReferenceDescriptors[m_ColorAttachmentCount];
-				attachmentReferenceDescriptor.attachment = (uint32_t)m_ColorAttachmentCount;
-				attachmentReferenceDescriptor.layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				attachmentReferenceDescriptors[m_ColorAttachmentCount].attachment = (uint32_t)m_ColorAttachmentCount;
+				attachmentReferenceDescriptors[m_ColorAttachmentCount].layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 				attachmentImageViews[m_ColorAttachmentCount] = attachmentTexture.GetNativeData().vulkanImageView;
 			}
@@ -87,11 +80,11 @@ namespace Gogaman
 
 			//TODO: Fill based on usage
 			VkSubpassDependency subpassDependencyDescriptor = {};
-			subpassDependencyDescriptor.srcSubpass = VK_SUBPASS_EXTERNAL;
-			subpassDependencyDescriptor.dstSubpass = 0;
-			subpassDependencyDescriptor.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			subpassDependencyDescriptor.srcSubpass    = VK_SUBPASS_EXTERNAL;
+			subpassDependencyDescriptor.dstSubpass    = 0;
+			subpassDependencyDescriptor.srcStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			subpassDependencyDescriptor.srcAccessMask = 0;
-			subpassDependencyDescriptor.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			subpassDependencyDescriptor.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 			subpassDependencyDescriptor.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
 			VkRenderPassCreateInfo renderPassDescriptor = {};

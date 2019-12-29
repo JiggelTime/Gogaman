@@ -19,6 +19,9 @@ namespace Gogaman
 
 			TransferCommandRecorder &operator=(const TransferCommandRecorder &) = delete;
 			TransferCommandRecorder &operator=(TransferCommandRecorder &&)      = delete;
+
+			void CopyData(Buffer &source, Buffer &destination);
+			void CopyData(Buffer &source, Texture &destination);
 		private:
 			//friend AbstractTransferCommandRecorder;
 		};

@@ -38,7 +38,7 @@ namespace FlexData
 		//TODO: Use S3 texture compression (DXT1 format)
 		uint16_t  width;
 		uint16_t  height;
-		uint8_t  *data;
+		uint8_t   *data;
 	};
 
 	struct FlexMaterialData

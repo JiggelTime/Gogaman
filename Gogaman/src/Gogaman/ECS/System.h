@@ -19,7 +19,7 @@ namespace Gogaman
 		System &operator=(System &&)      = default;
 
 		
-		void Initialize() {}
+		inline virtual void Initialize() {}
 
 		inline virtual void Update()     {}
 

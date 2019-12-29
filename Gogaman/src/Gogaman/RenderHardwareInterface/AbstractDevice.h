@@ -59,7 +59,8 @@ namespace Gogaman
 
 			inline void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().RecreateSwapChain(width, height, verticalSynchronization); }
 
-			inline void Submit(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().Submit(commandBufferCount, commandBuffers); }
+			inline void SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitTransferCommands(commandBufferCount, commandBuffers); }
+			inline void SubmitDirectCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitDirectCommands(commandBufferCount, commandBuffers); }
 
 			inline void Present() { this->GetImplementation().Present(); }
 
@@ -69,10 +70,7 @@ namespace Gogaman
 			inline constexpr const Resources &GetResources() const { return m_Resources; }
 		    inline constexpr       Resources &GetResources()       { return m_Resources; }
 
-			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
-			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
-
-			inline constexpr auto GetNativeCommandHeapType(const CommandHeap::Type type) const { return this->GetImplementation().GetNativeCommandHeapType(type); }
+		    inline constexpr const RenderSurfaceID *GetSwapChainRenderSurfaceIDs() const { return m_SwapChainRenderSurfaceIDs; }
 
 			inline constexpr uint32_t GetTextureWidthLimit()  const { return this->GetImplementation().GetTextureWidthLimit();  }
 			inline constexpr uint32_t GetTextureHeightLimit() const { return this->GetImplementation().GetTextureHeightLimit(); }
@@ -92,14 +90,20 @@ namespace Gogaman
 			inline constexpr uint32_t GetRenderSurfaceColorAttachmentCountLimit() const { return this->GetImplementation().GetRenderSurfaceColorAttachmentCountLimit(); }
 
 			inline constexpr uint32_t GetViewportCountLimit() const { return this->GetImplementation().GetViewportCountLimit(); }
+
+			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
+			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
+
+			inline constexpr auto GetNativeCommandHeapType(const CommandHeap::Type type) const { return this->GetImplementation().GetNativeCommandHeapType(type); }
 		private:
 			AbstractDevice(void *nativeWindow)
 			{}
 
 			~AbstractDevice() = default;
 		private:
-			Context   m_Context;
-			Resources m_Resources;
+			Context         m_Context;
+			Resources       m_Resources;
+			RenderSurfaceID m_SwapChainRenderSurfaceIDs[GM_SWAP_CHAIN_BUFFER_COUNT];
 		private:
 			friend ImplementationType;
 		};

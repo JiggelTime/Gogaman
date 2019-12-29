@@ -2,7 +2,7 @@
 
 #include "Gogaman/RenderHardwareInterface/AbstractTexture.h"
 
-#include "VulkanMemory.h"
+#include "Gogaman/RenderHardwareInterface/DeviceMemory.h"
 
 #include <vulkan/vulkan.h>
 
@@ -15,9 +15,9 @@ namespace Gogaman
 		private:
 			struct NativeData
 			{
-				VkImage            vulkanImage;
-				VkImageView        vulkanImageView;
-				Memory::Allocation vulkanMemory;
+				VkImage                  vulkanImage;
+				VkImageView              vulkanImageView;
+				DeviceMemory::Allocation vulkanMemory;
 			};
 		public:
 			Texture(const Format format, const uint16_t width = 1, const uint16_t height = 1, const uint16_t depth = 1, const uint8_t levelCount = 1);

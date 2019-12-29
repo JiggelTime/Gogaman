@@ -14,9 +14,9 @@ namespace Gogaman
 		public:
 			enum class Type : uint8_t
 			{
-				Compute,
 				Transfer,
-				Direct
+				Compute,
+				Render
 			};
 		public:
 			AbstractCommandHeap(const AbstractCommandHeap &) = delete;
