@@ -11,6 +11,10 @@ namespace Gogaman
 {
 	namespace RHI
 	{
+		class Sampler;
+
+		class Texture;
+
 		template<typename ImplementationType>
 		class AbstractDescriptorGroup : public CRTP<ImplementationType, AbstractDescriptorGroup>
 		{
@@ -21,9 +25,10 @@ namespace Gogaman
 			AbstractDescriptorGroup &operator=(const AbstractDescriptorGroup &) = delete;
 			AbstractDescriptorGroup &operator=(AbstractDescriptorGroup &&)      = default;
 
+			inline void SetShaderTexture(const uint32_t bindingIndex, const Texture &texture) { this->GetImplementation().SetShaderTexture(bindingIndex, texture); }
 			inline void SetShaderConstantBuffer(const uint32_t bindingIndex, const BufferID bufferID) { this->GetImplementation().SetShaderResource(bindingIndex, bufferID); }
 			inline void SetStorageResource(const uint32_t bindingIndex) { this->GetImplementation().SetStorageResource(bindingIndex); }
-			inline void SetSampler(const uint32_t bindingIndex) { this->GetImplementation().SetSampler(bindingIndex); }
+			inline void SetSampler(const uint32_t bindingIndex, const Sampler &sampler) { this->GetImplementation().SetSampler(bindingIndex, sampler); }
 
 			inline constexpr const DescriptorGroupLayout *GetLayout() const { return m_Layout; }
 

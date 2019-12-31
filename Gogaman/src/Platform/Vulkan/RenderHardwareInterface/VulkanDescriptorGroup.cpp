@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "VulkanDescriptorGroup.h"
 
+#include "Gogaman/RenderHardwareInterface/Sampler.h"
+#include "Gogaman/RenderHardwareInterface/Texture.h"
 #include "Gogaman/RenderHardwareInterface/Buffer.h"
 
 #include "Gogaman/RenderHardwareInterface/Device.h"
@@ -27,10 +29,31 @@ namespace Gogaman
 			vkFreeDescriptorSets(g_Device->GetNativeData().vulkanDevice, m_Heap->GetNativeData().vulkanDescriptorHeap, 1, &m_NativeData.vulkanDescriptorSet);
 		}
 
+		void DescriptorGroup::SetShaderTexture(const uint32_t bindingIndex, const Texture &texture)
+		{
+			const DescriptorGroupLayout::Binding &binding = m_Layout->GetBinding(bindingIndex);
+
+			VkDescriptorImageInfo descriptorImageDescriptor = {};
+			descriptorImageDescriptor.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			descriptorImageDescriptor.imageView   = texture.GetNativeData().vulkanImageView;
+
+			VkWriteDescriptorSet writeDescriptorGroupDescriptor = {};
+			writeDescriptorGroupDescriptor.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			writeDescriptorGroupDescriptor.dstSet          = m_NativeData.vulkanDescriptorSet;
+			writeDescriptorGroupDescriptor.dstBinding      = bindingIndex;
+			writeDescriptorGroupDescriptor.dstArrayElement = 0;
+			//Number of descriptors to update, should this be binding.descriptorCount?
+			writeDescriptorGroupDescriptor.descriptorCount = 1;
+			writeDescriptorGroupDescriptor.descriptorType  = DescriptorHeap::GetNativeType(m_Layout->GetBinding(bindingIndex).type);
+			writeDescriptorGroupDescriptor.pImageInfo      = &descriptorImageDescriptor;
+
+			vkUpdateDescriptorSets(g_Device->GetNativeData().vulkanDevice, 1, &writeDescriptorGroupDescriptor, 0, nullptr);
+		}
+
 		//TODO: Rename to SetBuffer()?
 		void DescriptorGroup::SetShaderConstantBuffer(const uint32_t bindingIndex, const BufferID bufferID)
 		{
-			//TODO: debug assert in abstract class that the index is less than the layout binding count
+			//TODO: Debug assert in abstract class that the index is less than the layout binding count
 
 			const DescriptorGroupLayout::Binding &binding = m_Layout->GetBinding(bindingIndex);
 
@@ -59,9 +82,26 @@ namespace Gogaman
 
 		}
 
-		void DescriptorGroup::SetSampler(const uint32_t bindingIndex)
+		void DescriptorGroup::SetSampler(const uint32_t bindingIndex, const Sampler &sampler)
 		{
+			//TODO: Debug assert in abstract class that binding type == sampler
 
+			const DescriptorGroupLayout::Binding &binding = m_Layout->GetBinding(bindingIndex);
+
+			VkDescriptorImageInfo descriptorImageDescriptor = {};
+			descriptorImageDescriptor.sampler = sampler.GetNativeData().vulkanSampler;
+
+			VkWriteDescriptorSet writeDescriptorGroupDescriptor = {};
+			writeDescriptorGroupDescriptor.sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			writeDescriptorGroupDescriptor.dstSet          = m_NativeData.vulkanDescriptorSet;
+			writeDescriptorGroupDescriptor.dstBinding      = bindingIndex;
+			writeDescriptorGroupDescriptor.dstArrayElement = 0;
+			//Number of descriptors to update, should this be binding.descriptorCount?
+			writeDescriptorGroupDescriptor.descriptorCount = 1;
+			writeDescriptorGroupDescriptor.descriptorType  = DescriptorHeap::GetNativeType(m_Layout->GetBinding(bindingIndex).type);
+			writeDescriptorGroupDescriptor.pImageInfo      = &descriptorImageDescriptor;
+
+			vkUpdateDescriptorSets(g_Device->GetNativeData().vulkanDevice, 1, &writeDescriptorGroupDescriptor, 0, nullptr);
 		}
 	}
 }

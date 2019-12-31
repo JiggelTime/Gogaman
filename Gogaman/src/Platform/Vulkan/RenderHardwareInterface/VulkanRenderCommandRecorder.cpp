@@ -32,6 +32,14 @@ namespace Gogaman
 			renderPassBeginDescriptor.renderArea.extent.width  = renderSurface.GetWidth();
 			renderPassBeginDescriptor.renderArea.extent.height = renderSurface.GetHeight();
 
+			//TEMP CLEAR STUFF
+			VkClearValue clearValues[2];
+			clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f };
+			clearValues[1].depthStencil.depth = 1.0f;
+			clearValues[1].depthStencil.stencil = UINT32_MAX;
+			renderPassBeginDescriptor.clearValueCount = 2;
+			renderPassBeginDescriptor.pClearValues = clearValues;
+
 			vkCmdBeginRenderPass(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, &renderPassBeginDescriptor, VK_SUBPASS_CONTENTS_INLINE);
 		}
 

@@ -12,8 +12,7 @@ namespace Gogaman
 			struct Attribute
 			{
 				Shader::DataType dataType;
-				uint8_t          offset       = 0;
-				bool             isNormalized = false;
+				uint8_t          offset = 0;
 			};
 		public:
 			VertexLayout(std::vector<Attribute> &&attributes)

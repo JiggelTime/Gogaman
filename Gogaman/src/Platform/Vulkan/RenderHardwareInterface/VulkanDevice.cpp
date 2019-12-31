@@ -438,7 +438,7 @@ namespace Gogaman
 			swapChainDescriptor.imageColorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
 			swapChainDescriptor.imageExtent      = swapChainExtent;
 			swapChainDescriptor.imageArrayLayers = 1;
-			swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+			swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 			swapChainDescriptor.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			swapChainDescriptor.preTransform     = supportedSurfaceCapabilities.currentTransform;
 			swapChainDescriptor.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
@@ -482,39 +482,59 @@ namespace Gogaman
 
 			vkAcquireNextImageKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, UINT64_MAX, m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex], VK_NULL_HANDLE, &m_NativeData.vulkanSwapChainImageIndex);
 		
+			//Create depth texture
+			TextureID depthTextureID;
+			Texture &depthTexture = g_Device->GetResources().textures.Create(depthTextureID, Texture::Format::D32F, swapChainExtent.width, swapChainExtent.height);
+
 			//Create render surfaces
 			for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
 			{
-				TextureID textureID;
-				Texture &texture = g_Device->GetResources().textures.Create(textureID, Texture::Format::XYZW8, swapChainExtent.width, swapChainExtent.height);
-				texture.GetNativeData().vulkanImage     = m_NativeData.vulkanSwapChainImages[i];
-				texture.GetNativeData().vulkanImageView = m_NativeData.vulkanSwapChainImageViews[i];
+				TextureID colorTextureID;
+				Texture &colorTexture = g_Device->GetResources().textures.Create(colorTextureID, Texture::Format::XYZW8, swapChainExtent.width, swapChainExtent.height);
+				colorTexture.GetNativeData().vulkanImage     = m_NativeData.vulkanSwapChainImages[i];
+				colorTexture.GetNativeData().vulkanImageView = m_NativeData.vulkanSwapChainImageViews[i];
 
-				RenderSurface::Attachment attachment = { textureID, 1 };
-				RenderSurface &renderSurface = m_Resources.renderSurfaces.Create(m_SwapChainRenderSurfaceIDs[i], 1, &attachment, RenderSurface::Attachment(), swapChainExtent.width, swapChainExtent.height);
+				RenderSurface::Attachment colorAttachment = { colorTextureID, 1 };
+				RenderSurface::Attachment depthAttachment = { depthTextureID, 1 };
+				RenderSurface &renderSurface = m_Resources.renderSurfaces.Create(m_SwapChainRenderSurfaceIDs[i], 1, &colorAttachment, std::move(depthAttachment), swapChainExtent.width, swapChainExtent.height);
 
 				vkDestroyRenderPass(m_NativeData.vulkanDevice, renderSurface.GetNativeData().vulkanRenderPass, nullptr);
 				vkDestroyFramebuffer(m_NativeData.vulkanDevice, renderSurface.GetNativeData().vulkanFramebuffer, nullptr);
 
-				VkAttachmentDescription attachmentDescriptor = {};
-				attachmentDescriptor.format         = VK_FORMAT_B8G8R8A8_UNORM;
-				attachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
-				attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				//attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
-				attachmentDescriptor.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
-				attachmentDescriptor.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-				attachmentDescriptor.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				attachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-				attachmentDescriptor.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+				VkAttachmentDescription colorAttachmentDescriptor = {};
+				colorAttachmentDescriptor.format         = VK_FORMAT_B8G8R8A8_UNORM;
+				colorAttachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
+				//attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				colorAttachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+				colorAttachmentDescriptor.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+				colorAttachmentDescriptor.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				colorAttachmentDescriptor.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				colorAttachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+				colorAttachmentDescriptor.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-				VkAttachmentReference attachmentReferenceDescriptor = {};
-				attachmentReferenceDescriptor.attachment = 0;
-				attachmentReferenceDescriptor.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				VkAttachmentReference colorAttachmentReferenceDescriptor = {};
+				colorAttachmentReferenceDescriptor.attachment = 0;
+				colorAttachmentReferenceDescriptor.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+				VkAttachmentDescription depthAttachmentDescriptor = {};
+				depthAttachmentDescriptor.format         = Texture::GetNativeFormat(depthTexture.GetFormat());
+				depthAttachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
+				depthAttachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+				depthAttachmentDescriptor.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
+				depthAttachmentDescriptor.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				depthAttachmentDescriptor.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				depthAttachmentDescriptor.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+				depthAttachmentDescriptor.finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+				VkAttachmentReference depthAttachmentReferenceDescriptor = {};
+				depthAttachmentReferenceDescriptor.attachment = 1;
+				depthAttachmentReferenceDescriptor.layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
 				VkSubpassDescription subpassDescriptor = {};
-				subpassDescriptor.pipelineBindPoint           = VK_PIPELINE_BIND_POINT_GRAPHICS;
-				subpassDescriptor.colorAttachmentCount        = 1;
-				subpassDescriptor.pColorAttachments           = &attachmentReferenceDescriptor;
+				subpassDescriptor.pipelineBindPoint       = VK_PIPELINE_BIND_POINT_GRAPHICS;
+				subpassDescriptor.colorAttachmentCount    = 1;
+				subpassDescriptor.pColorAttachments       = &colorAttachmentReferenceDescriptor;
+				subpassDescriptor.pDepthStencilAttachment = &depthAttachmentReferenceDescriptor;
 
 				VkSubpassDependency subpassDependencyDescriptor = {};
 				subpassDependencyDescriptor.srcSubpass    = VK_SUBPASS_EXTERNAL;
@@ -524,10 +544,12 @@ namespace Gogaman
 				subpassDependencyDescriptor.dstStageMask  = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 				subpassDependencyDescriptor.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
+				const VkAttachmentDescription attachmentDescriptors[] = { colorAttachmentDescriptor, depthAttachmentDescriptor };
+
 				VkRenderPassCreateInfo renderPassDescriptor = {};
 				renderPassDescriptor.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-				renderPassDescriptor.attachmentCount = 1;
-				renderPassDescriptor.pAttachments    = &attachmentDescriptor;
+				renderPassDescriptor.attachmentCount = 2;
+				renderPassDescriptor.pAttachments    = attachmentDescriptors;
 				renderPassDescriptor.subpassCount    = 1;
 				renderPassDescriptor.pSubpasses      = &subpassDescriptor;
 				renderPassDescriptor.dependencyCount = 1;
@@ -536,11 +558,13 @@ namespace Gogaman
 				if(vkCreateRenderPass(m_NativeData.vulkanDevice, &renderPassDescriptor, nullptr, &renderSurface.GetNativeData().vulkanRenderPass) != VK_SUCCESS)
 					GM_ASSERT(false, "Failed to create swap chain | Failed to create Vulkan render pass");
 
+				VkImageView imageViews[2] = { colorTexture.GetNativeData().vulkanImageView, depthTexture.GetNativeData().vulkanImageView };
+
 				VkFramebufferCreateInfo framebufferDescriptor = {};
 				framebufferDescriptor.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 				framebufferDescriptor.renderPass      = renderSurface.GetNativeData().vulkanRenderPass;
-				framebufferDescriptor.attachmentCount = 1;
-				framebufferDescriptor.pAttachments    = &texture.GetNativeData().vulkanImageView;
+				framebufferDescriptor.attachmentCount = 2;
+				framebufferDescriptor.pAttachments    = imageViews;
 				framebufferDescriptor.width           = swapChainExtent.width;
 				framebufferDescriptor.height          = swapChainExtent.height;
 				framebufferDescriptor.layers          = 1;
@@ -552,7 +576,13 @@ namespace Gogaman
 		
 		void Device::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
 		{
+			for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			{
+				m_Resources.renderSurfaces.Destroy(m_SwapChainRenderSurfaceIDs[i]);
+			}
+
 			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
+
 			CreateSwapChain(width, height, verticalSynchronization);
 		}
 	

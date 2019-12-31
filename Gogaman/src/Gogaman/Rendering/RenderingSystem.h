@@ -9,6 +9,7 @@
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 
+#include "Gogaman/RenderHardwareInterface/Identifier.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorGroupLayout.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorHeap.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorGroup.h"
@@ -54,8 +55,10 @@ namespace Gogaman
 
 		virtual void OnEvent(Event &event) override;
 	private:
-		void InitializeRenderSurfaces();
-		void InitializeShaders();
+		void CreateRenderSurfaces();
+
+		void CreateShaders();
+		void RecreateShaders();
 
 		void ImportFlexData();
 
@@ -65,7 +68,8 @@ namespace Gogaman
 
 		//std::vector<RHI::RenderSurfaceID> m_RenderSurfaceIDs;
 
-		RHI::ShaderProgramID m_ShaderID;
+		RHI::ShaderID        m_VertexShaderID, m_PixelShaderID;
+		RHI::ShaderProgramID m_ShaderProgramID;
 
 		std::vector<RHI::DescriptorGroupLayout> m_DescriptorGroupLayouts;
 
@@ -73,13 +77,17 @@ namespace Gogaman
 
 		std::unique_ptr<RHI::DescriptorHeap> m_DescriptorHeap;
 
-		RHI::BufferID                         m_FrameDataBuffer;
 		std::unique_ptr<RHI::DescriptorGroup> m_FrameDataDescriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
+		RHI::BufferID                         m_FrameDataBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
 		
+		std::vector<RHI::DescriptorGroup> m_MaterialDataDescriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
+
 		std::vector<RHI::DescriptorGroup> m_MeshDataDescriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
 
 		std::unique_ptr<RHI::CommandHeap>   m_TransferCommandHeap, m_RenderCommandHeap;
 		std::unique_ptr<RHI::CommandBuffer> m_CommandBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+
+		RHI::SamplerID m_PointSampler, m_AnisotropicSampler;
 
 		std::vector<PBR_Material> m_Materials;
 

@@ -13,7 +13,7 @@ namespace Gogaman
 		glm::mat4 meshMatrix;
 		glm::mat4 previousMeshMatrix;
 
-		//uint32_t      materialIndex;
+		uint32_t materialIndex;
 
 		RHI::BufferID vertexBufferID;
 		RHI::BufferID indexBufferID;

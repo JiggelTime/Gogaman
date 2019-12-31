@@ -16,7 +16,7 @@ namespace Gogaman
 		public:
 			struct Binding
 			{
-				uint32_t             descriptorCount;
+				uint32_t             descriptorCount = 1;
 				DescriptorHeap::Type type;
 			};
 		public:

@@ -139,5 +139,6 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderingSystem.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractDeviceMemory.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDeviceMemory.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\Sampler.h" />
   </ItemGroup>
 </Project>

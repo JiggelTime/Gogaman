@@ -96,7 +96,7 @@
   <ItemGroup>
     <ClInclude Include="FBX_Importer.h" />
     <ClInclude Include="FlexData.h" />
-    <ClInclude Include="Importer.h" />
+    <ClInclude Include="TextureImporter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

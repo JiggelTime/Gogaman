@@ -15,21 +15,21 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FBX_Importer.cpp">
+    <ClCompile Include="AssetSerializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AssetSerializer.cpp">
+    <ClCompile Include="FBX_Importer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="FBX_Importer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Importer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="FlexData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureImporter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FBX_Importer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

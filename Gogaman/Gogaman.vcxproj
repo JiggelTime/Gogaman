@@ -100,6 +100,7 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderState.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderSurface.h" />
     <ClInclude Include="src\Gogaman\Core\ResourceContainer.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\Sampler.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Shader.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\TransferCommandRecorder.h" />

@@ -62,9 +62,10 @@ namespace Gogaman
 				attachmentDescriptors[m_ColorAttachmentCount].stencilLoadOp  = isFormatTypeDepthStencil ? VK_ATTACHMENT_LOAD_OP_LOAD : VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				//TODO: Detect based on usage
 				attachmentDescriptors[m_ColorAttachmentCount].stencilStoreOp = isFormatTypeDepthStencil ? VK_ATTACHMENT_STORE_OP_STORE : VK_ATTACHMENT_STORE_OP_DONT_CARE;
-				attachmentDescriptors[m_ColorAttachmentCount].initialLayout  = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+				attachmentDescriptors[m_ColorAttachmentCount].initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
 				attachmentDescriptors[m_ColorAttachmentCount].finalLayout    = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+				attachmentReferenceDescriptors[m_ColorAttachmentCount] = {};
 				attachmentReferenceDescriptors[m_ColorAttachmentCount].attachment = (uint32_t)m_ColorAttachmentCount;
 				attachmentReferenceDescriptors[m_ColorAttachmentCount].layout     = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 

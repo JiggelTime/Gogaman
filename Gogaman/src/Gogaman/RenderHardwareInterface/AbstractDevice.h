@@ -6,8 +6,7 @@
 
 #include "Identifier.h"
 
-#include "Context.h"
-
+#include "Sampler.h"
 #include "Texture.h"
 #include "Buffer.h"
 #include "RenderSurface.h"
@@ -30,6 +29,7 @@ namespace Gogaman
 	{
 		class CommandBuffer;
 
+		using SamplerContainer       = ResourceContainer<Sampler,       SamplerID,       128>;
 		using TextureContainer       = ResourceContainer<Texture,       TextureID,       1024>;
 		using BufferContainer        = ResourceContainer<Buffer,        BufferID,        1024>;
 		using RenderSurfaceContainer = ResourceContainer<RenderSurface, RenderSurfaceID, 32>;
@@ -42,6 +42,7 @@ namespace Gogaman
 		public:
 			struct Resources
 			{
+				SamplerContainer       samplers;
 				TextureContainer       textures;
 				BufferContainer        buffers;
 				RenderSurfaceContainer renderSurfaces;
@@ -63,9 +64,6 @@ namespace Gogaman
 			inline void SubmitDirectCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitDirectCommands(commandBufferCount, commandBuffers); }
 
 			inline void Present() { this->GetImplementation().Present(); }
-
-			inline constexpr const Context &GetContext() const { return m_Context; }
-			inline constexpr       Context &GetContext()       { return m_Context; }
 
 			inline constexpr const Resources &GetResources() const { return m_Resources; }
 		    inline constexpr       Resources &GetResources()       { return m_Resources; }
@@ -100,8 +98,7 @@ namespace Gogaman
 			{}
 
 			~AbstractDevice() = default;
-		private:
-			Context         m_Context;
+		protected:
 			Resources       m_Resources;
 			RenderSurfaceID m_SwapChainRenderSurfaceIDs[GM_SWAP_CHAIN_BUFFER_COUNT];
 		private:

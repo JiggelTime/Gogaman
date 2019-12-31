@@ -10,6 +10,8 @@
 		application->Run();
 
 		delete application;
+
+		return EXIT_SUCCESS;
 	}
 #else
 	#error
