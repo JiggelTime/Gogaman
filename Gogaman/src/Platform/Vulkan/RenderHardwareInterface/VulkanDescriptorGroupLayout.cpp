@@ -7,7 +7,7 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		DescriptorGroupLayout::DescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlags shaderVisibilityFlags)
+		DescriptorGroupLayout::DescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlag shaderVisibilityFlags)
 			: AbstractDescriptorGroupLayout(bindingCount, bindings, shaderVisibilityFlags)
 		{
 			GM_DEBUG_ASSERT(m_BindingCount > 0, "Failed to construct descriptor group layout | Invalid bindings");

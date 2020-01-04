@@ -7,7 +7,7 @@ namespace Gogaman
 	class MouseEvent : public Event
 	{
 	public:
-		inline virtual EventCategory GetCategory() const override { return EventCategory::Mouse; }
+		inline virtual EventCategoryFlag GetCategory() const override { return EventCategoryFlag::Mouse; }
 	protected:
 		MouseEvent()
 		{}
@@ -20,8 +20,8 @@ namespace Gogaman
 			: m_PositionX(positionX), m_PositionY(positionY)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::MouseMove; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::MouseMove; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 
 		inline constexpr float GetPositionX() const { return m_PositionX; }
 		inline constexpr float GetPositionY() const { return m_PositionY; }
@@ -37,8 +37,8 @@ namespace Gogaman
 			: m_OffsetX(offsetX), m_OffsetY(offsetY)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::MouseScroll; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::MouseScroll; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 
 		inline constexpr float GetOffsetX() const { return m_OffsetX; }
 		inline constexpr float GetOffsetY() const { return m_OffsetY; }
@@ -54,8 +54,8 @@ namespace Gogaman
 			: m_Scancode(scancode)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::MouseButtonPress; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::MouseButtonPress; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 
 		inline constexpr int GetButton() const { return m_Scancode; }
 	private:
@@ -69,8 +69,8 @@ namespace Gogaman
 			: m_Scancode(scancode)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::MouseButtonRelease; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::MouseButtonRelease; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 
 		inline constexpr int GetButton() const { return m_Scancode; }
 	private:

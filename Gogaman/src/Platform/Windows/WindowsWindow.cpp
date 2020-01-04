@@ -25,7 +25,7 @@ namespace Gogaman
 			glfwSetErrorCallback(GLFW_ErrorCallback);
 
 			bool glfwSuccess = glfwInit();
-			GM_ASSERT(glfwSuccess, "Failed to intitialize GLFW");
+			GM_ASSERT(glfwSuccess, "Failed to construct Window | Failed to intitialize GLFW");
 
 			glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 			glfwWindowHint(GLFW_RESIZABLE,  GLFW_FALSE);
@@ -34,7 +34,7 @@ namespace Gogaman
 		}
 		
 		m_Window = glfwCreateWindow((int)m_Width, (int)m_Height, m_Title, nullptr, nullptr);
-		GM_ASSERT(m_Window, "Failed to create GLFW window");
+		GM_ASSERT(m_Window, "Failed to construct Window | Failed to create GLFW window");
 
 		g_Device = std::make_unique<RHI::Device>(m_Window);
 		g_Device->CreateSwapChain(width, height, verticalSynchronization);
@@ -43,40 +43,50 @@ namespace Gogaman
 		
 		//Set GLFW callback functions
 		//Window
-		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width, int height) { WindowResizeEvent event(width, height); });
-
-		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow *window) { WindowCloseEvent event; });
+		glfwSetWindowSizeCallback(m_Window, [](GLFWwindow *window, int width, int height) { EventManager::GetInstance().Send(std::make_unique<WindowResizeEvent>((uint16_t)width, (uint16_t)height)); });
+		glfwSetWindowCloseCallback(m_Window, [](GLFWwindow *window) { EventManager::GetInstance().Send(std::make_unique<WindowCloseEvent>()); });
 
 		glfwSetCursorEnterCallback(m_Window, [](GLFWwindow *window, int entered)
 		{
 			if(entered)
-				EventManager::GetInstance().Send(std::move(std::make_unique<WindowFocusEvent>()));
+				EventManager::GetInstance().Send(std::make_unique<WindowFocusEvent>());
 			else
-				EventManager::GetInstance().Send(std::move(std::make_unique<WindowUnfocusEvent>()));
+				EventManager::GetInstance().Send(std::make_unique<WindowUnfocusEvent>());
+		});
+
+		glfwSetDropCallback(m_Window, [](GLFWwindow *window, int filepathCount, const char **filepaths)
+		{
+			std::vector<std::string> filepathStrings;
+			for(auto i = 0; i < filepathCount; i++)
+			{
+				filepathStrings.emplace_back(filepaths[i]);
+			}
+
+			EventManager::GetInstance().Send(std::make_unique<WindowFileDropEvent>(std::move(filepathStrings)));
 		});
 
 		//Keyboard
 		glfwSetKeyCallback(m_Window, [](GLFWwindow *window, int key, int scancode, int action, int mods)
 		{
 			if(action == GLFW_PRESS)
-				EventManager::GetInstance().Send(std::move(std::make_unique<KeyPressEvent>(key, 0)));
+				EventManager::GetInstance().Send(std::make_unique<KeyPressEvent>(key, 0));
 			else if(action == GLFW_REPEAT)
-				EventManager::GetInstance().Send(std::move(std::make_unique<KeyPressEvent>(key, 1)));
+				EventManager::GetInstance().Send(std::make_unique<KeyPressEvent>(key, 1));
 			else
-				EventManager::GetInstance().Send(std::move(std::make_unique<KeyReleaseEvent>(key)));
+				EventManager::GetInstance().Send(std::make_unique<KeyReleaseEvent>(key));
 		});
 
 		//Mouse
-		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos) { EventManager::GetInstance().Send(std::move(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos))); });
+		glfwSetCursorPosCallback(m_Window, [](GLFWwindow *window, double xpos, double ypos) { EventManager::GetInstance().Send(std::make_unique<MouseMoveEvent>((float)xpos, (float)ypos)); });
 		
-		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventManager::GetInstance().Send(std::move(std::make_unique<MouseScrollEvent>((float)xoffset, (float)yoffset))); });
+		glfwSetScrollCallback(m_Window, [](GLFWwindow *window, double xoffset, double yoffset) { EventManager::GetInstance().Send(std::make_unique<MouseScrollEvent>((float)xoffset, (float)yoffset)); });
 		
 		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow *window, int button, int action, int mods)
 		{
 			if(action == GLFW_PRESS)
-				EventManager::GetInstance().Send(std::move(std::make_unique<MouseButtonPressEvent>(button)));
+				EventManager::GetInstance().Send(std::make_unique<MouseButtonPressEvent>(button));
 			else
-				EventManager::GetInstance().Send(std::move(std::make_unique<MouseButtonReleaseEvent>(button)));
+				EventManager::GetInstance().Send(std::make_unique<MouseButtonReleaseEvent>(button));
 		});
 	}
 

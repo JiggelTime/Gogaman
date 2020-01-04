@@ -1,0 +1,149 @@
+#pragma once
+
+#include "Gogaman/Core/Base.h"
+
+namespace Gogaman
+{
+	template<typename VertexIndexType>
+	class DirectedGraph
+	{
+	public:
+		DirectedGraph()  = default;
+		~DirectedGraph() = default;
+
+		inline VertexIndexType CreateVertex()
+		{
+			GM_DEBUG_ASSERT(m_AdjacencyMatrix.size() < std::numeric_limits<VertexIndexType>::max(), "Failed to create vertex | Graph size exceeds %d", std::numeric_limits<VertexIndexType>::max() - 1);
+
+			const VertexIndexType index = m_AdjacencyMatrix.size();
+
+			for(VertexIndexType i = 0; i < m_AdjacencyMatrix.size(); i++)
+			{
+				m_AdjacencyMatrix[i].emplace_back(false);
+			}
+
+			m_AdjacencyMatrix.emplace_back().assign(m_AdjacencyMatrix.size(), false);
+
+			return index;
+		}
+
+		//Does not work | Indices get shifted when vertex is deleted | Needs stable array
+		inline void RemoveVertex(const VertexIndexType index)
+		{
+			for(VertexIndexType i = 0; i < m_AdjacencyMatrix.size(); i++)
+			{
+				m_AdjacencyMatrix[i].erase(m_AdjacencyMatrix[i].begin() + index);
+			}
+
+			m_AdjacencyMatrix[index].clear();
+		}
+
+		inline void CreateEdge(const VertexIndexType source, const VertexIndexType destination) { m_AdjacencyMatrix[source][destination] = true; }
+		inline bool IsEdge(const VertexIndexType source, const VertexIndexType destination) const { return m_AdjacencyMatrix[source][destination]; }
+		inline void RemoveEdge(const VertexIndexType source, const VertexIndexType destination) { m_AdjacencyMatrix[source][destination] = false; }
+
+		inline std::vector<VertexIndexType> IncomingConnections(const VertexIndexType vertexIndex) const
+		{
+			std::vector<VertexIndexType> incomingEdges;
+			for(VertexIndexType i = 0; i < m_AdjacencyMatrix.size(); i++)
+			{
+				if(m_AdjacencyMatrix[i][vertexIndex])
+					incomingEdges.emplace_back(i);
+			}
+
+			return incomingEdges;
+		}
+
+		inline std::vector<VertexIndexType> OutgoingConnections(const VertexIndexType vertexIndex) const
+		{
+			std::vector<VertexIndexType> outgoingEdges;
+			for(VertexIndexType i = 0; i < m_AdjacencyMatrix.size(); i++)
+			{
+				if(m_AdjacencyMatrix[vertexIndex][i])
+					outgoingEdges.emplace_back(i);
+			}
+
+			return outgoingEdges;
+		}
+
+		inline VertexIndexType GetIncomingEdgeCount(const VertexIndexType vertexIndex) const
+		{
+			VertexIndexType count = 0;
+			for(const auto &i : m_AdjacencyMatrix)
+			{
+				if(i[vertexIndex])
+					count++;
+			}
+
+			return count;
+		}
+
+		inline VertexIndexType GetOutgoingEdgeCount(const VertexIndexType vertexIndex) const
+		{
+			VertexIndexType count = 0;
+			for(const bool i : m_AdjacencyMatrix[vertexIndex])
+			{
+				if(i)
+					count++;
+			}
+
+			return count;
+		}
+
+		inline constexpr VertexIndexType GetVertexCount() const { return m_AdjacencyMatrix.size(); }
+	private:
+		std::vector<std::vector<bool>> m_AdjacencyMatrix;
+	};
+
+	template<typename VertexIndexType>
+	class DirectedAcyclicGraph : public DirectedGraph<VertexIndexType>
+	{
+	public:
+		DirectedAcyclicGraph()  = default;
+		~DirectedAcyclicGraph() = default;
+
+		inline bool Validate(const VertexIndexType rootIndex) const
+		{
+			std::stack<VertexIndexType> vertices;
+			vertices.emplace(rootIndex);
+
+			while(!vertices.empty())
+			{
+				const VertexIndexType vertex = vertices.top();
+
+				vertices.pop();
+
+				const std::vector<VertexIndexType> adjacentVertices = DirectedGraph<VertexIndexType>::OutgoingConnections(vertex);
+				for(const VertexIndexType &i : adjacentVertices)
+					vertices.emplace(i);
+
+				if(!vertices.empty() && vertices.top() == rootIndex)
+					return false;
+			}
+
+			return true;
+		}
+
+		template<bool isReversed = false>
+		inline void DepthFirstTraversal(const VertexIndexType rootIndex, std::function<void(const VertexIndexType)> callback) const
+		{
+			GM_DEBUG_ASSERT(Validate(rootIndex), "Depth first traversal failed | Graph is not acyclic");
+
+			std::stack<VertexIndexType> vertices;
+			vertices.emplace(rootIndex);
+
+			while(!vertices.empty())
+			{
+				const VertexIndexType vertex = vertices.top();
+
+				callback(vertex);
+
+				vertices.pop();
+
+				const std::vector<VertexIndexType> adjacentVertices = isReversed ? DirectedGraph<VertexIndexType>::IncomingConnections(vertex) : DirectedGraph<VertexIndexType>::OutgoingConnections(vertex);
+				for(const VertexIndexType &i : adjacentVertices)
+					vertices.emplace(i);
+			}
+		}
+	};
+}

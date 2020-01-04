@@ -15,6 +15,8 @@
 #include "Gogaman/Rendering/ModelMatrixSystem.h"
 #include "Gogaman/Rendering/RenderingSystem.h"
 
+#include "Gogaman/Utilities/Algorithm/DirectedGraph.h"
+
 namespace Gogaman
 {
 	Application *Application::s_Instance = nullptr;

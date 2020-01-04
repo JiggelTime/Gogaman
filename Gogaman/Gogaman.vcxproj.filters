@@ -30,6 +30,9 @@
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDeviceMemory.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Compiler.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\StageBuilder.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Graph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -58,10 +61,6 @@
     <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
     <ClInclude Include="src\Gogaman\Core\Time.h" />
     <ClInclude Include="src\Platform\Windows\WindowsTime.h" />
-    <ClInclude Include="src\Gogaman\Geometry\BoundingBox3D.h" />
-    <ClInclude Include="src\Gogaman\Geometry\Plane.h" />
-    <ClInclude Include="src\Gogaman\Geometry\RectangularFrustum.h" />
-    <ClInclude Include="src\Gogaman\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Core\Base.h" />
     <ClInclude Include="src\Gogaman\Core\CRTP.h" />
     <ClInclude Include="src\Gogaman\Core\Config.h" />
@@ -87,7 +86,6 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.h" />
-    <ClInclude Include="src\Gogaman\Core\ResourceContainer.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractShader.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanShader.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractBuffer.h" />
@@ -140,5 +138,17 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractDeviceMemory.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDeviceMemory.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Sampler.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Compiler.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Stage.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Container\ResourceContainer.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Geometry\BoundingBox3D.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Geometry\Plane.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Geometry\RectangularFrustum.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Geometry\Sphere.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Algorithm\DirectedGraph.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Graph.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Resource.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\StageBuilder.h" />
   </ItemGroup>
 </Project>

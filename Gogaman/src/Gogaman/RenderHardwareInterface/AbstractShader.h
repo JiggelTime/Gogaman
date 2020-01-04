@@ -21,7 +21,7 @@ namespace Gogaman
 				Pixel
 			};
 
-			enum class StageFlags : uint8_t
+			enum class StageFlag : uint8_t
 			{
 				Compute = 1 << 0,
 				Vertex  = 1 << 1,
@@ -56,7 +56,7 @@ namespace Gogaman
 
 			static inline constexpr auto GetNativeStage(const Stage stage) { return ImplementationType::GetNativeStage(stage); }
 
-			static inline constexpr auto GetNativeStageFlags(const StageFlags stageFlags) { return ImplementationType::GetNativeStageFlags(stageFlags); }
+			static inline constexpr auto GetNativeStageFlags(const StageFlag stageFlag) { return ImplementationType::GetNativeStageFlags(stageFlag); }
 
 			static inline constexpr uint8_t GetDataTypeSize(const DataType type)
 			{

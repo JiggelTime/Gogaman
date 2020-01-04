@@ -9,7 +9,7 @@ namespace Gogaman
 {
 	namespace RHI
 	{
-		Buffer::Buffer(const DeviceMemory::Type memoryType, const uint32_t size, const BindFlags bindFlags)
+		Buffer::Buffer(const DeviceMemory::Type memoryType, const uint32_t size, const BindFlag bindFlags)
 			: AbstractBuffer(memoryType, size, bindFlags)
 		{
 			VkBufferCreateInfo bufferDescriptor = {};

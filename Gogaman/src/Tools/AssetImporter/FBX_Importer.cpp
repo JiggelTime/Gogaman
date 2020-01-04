@@ -5,7 +5,7 @@
 #include <limits>
 #include <unordered_map>
 
-#define GM_FLIP_UV 1
+#define GM_FLIP_UV 0
 
 namespace Gogaman
 {

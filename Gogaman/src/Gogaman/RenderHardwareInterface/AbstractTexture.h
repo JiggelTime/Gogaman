@@ -4,6 +4,8 @@
 
 #include "Gogaman/Core/Base.h"
 
+#define GM_FULL_LEVEL_COUNT 0
+
 namespace Gogaman
 {
 	namespace RHI
@@ -130,9 +132,9 @@ namespace Gogaman
 
 			~AbstractTexture() = default;
 		protected:
-			uint16_t      m_Width, m_Height, m_Depth;
-			uint8_t       m_LevelCount;
-			Format        m_Format;
+			uint16_t m_Width, m_Height, m_Depth;
+			uint8_t  m_LevelCount;
+			Format   m_Format;
 		private:
 			friend ImplementationType;
 		};

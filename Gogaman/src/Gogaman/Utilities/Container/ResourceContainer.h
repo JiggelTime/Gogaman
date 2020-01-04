@@ -76,8 +76,6 @@ namespace Gogaman
 		template<typename ...ParameterTypes>
 		inline ResourceType &Create(ID &identifier, ParameterTypes &&...constructorParameters)
 		{
-			GM_DEBUG_ASSERT(GM_IS_INVALID_ID(identifier), "Failed to create resource | Identifier is valid");
-
 			identifier.index = m_Elements[0].nextFreeIndex;
 			m_Elements[0].nextFreeIndex = m_Elements[identifier.index].nextFreeIndex;
 
@@ -130,8 +128,8 @@ namespace Gogaman
 		inline void ValidateID(const ID identifier) const
 		{
 			#if GM_RHI_DEBUGGING_ENABLED
-				GM_DEBUG_ASSERT(identifier.index != GM_INVALID_ID_INDEX && identifier.index < m_ElementCount, "Invalid resource ID | Invalid index");
-				GM_DEBUG_ASSERT(identifier.generation == m_Elements[identifier.index].generation,             "Invalid resource ID | ID generation does not match current generation");
+				GM_DEBUG_ASSERT(identifier.index != GM_INVALID_ID_INDEX,                          "Invalid resource ID | Invalid index");
+				GM_DEBUG_ASSERT(identifier.generation == m_Elements[identifier.index].generation, "Invalid resource ID | ID generation does not match current generation");
 			#endif
 		}
 	private:

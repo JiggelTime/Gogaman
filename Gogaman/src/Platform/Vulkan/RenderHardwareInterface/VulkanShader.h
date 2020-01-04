@@ -43,14 +43,14 @@ namespace Gogaman
 				}
 			}
 
-			static inline constexpr VkShaderStageFlags GetNativeStageFlags(const StageFlags stageFlags)
+			static inline constexpr VkShaderStageFlags GetNativeStageFlags(const StageFlag stageFlag)
 			{
 				VkShaderStageFlags nativeStageFlags = 0;
-				if((uint8_t)stageFlags & (uint8_t)StageFlags::Compute)
+				if((uint8_t)stageFlag & (uint8_t)StageFlag::Compute)
 					nativeStageFlags |= VK_SHADER_STAGE_COMPUTE_BIT;
-				if((uint8_t)stageFlags & (uint8_t)StageFlags::Vertex)
+				if((uint8_t)stageFlag & (uint8_t)StageFlag::Vertex)
 					nativeStageFlags |= VK_SHADER_STAGE_VERTEX_BIT;
-				if((uint8_t)stageFlags & (uint8_t)StageFlags::Pixel)
+				if((uint8_t)stageFlag & (uint8_t)StageFlag::Pixel)
 					nativeStageFlags |= VK_SHADER_STAGE_FRAGMENT_BIT;
 
 				return nativeStageFlags;

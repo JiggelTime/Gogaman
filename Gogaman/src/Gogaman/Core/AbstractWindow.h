@@ -21,6 +21,8 @@ namespace Gogaman
 		AbstractWindow &operator=(AbstractWindow &&) = default;
 
 		inline void Update() { this->GetImplementation().Update(); }
+		
+		inline void Resize(const uint16_t width, const uint16_t height) { this->GetImplementation().Resize(width, height); }
 
 		inline virtual void OnEvent(Event &event) override
 		{
@@ -33,8 +35,6 @@ namespace Gogaman
 			Resize(event.GetWidth(), event.GetHeight());
 			return true;
 		}
-		
-		inline void Resize(const uint16_t width, const uint16_t height) { this->GetImplementation().Resize(width, height); }
 
 		inline constexpr auto *GetNativeWindow() { return this->GetImplementation().GetNativeWindow(); }
 

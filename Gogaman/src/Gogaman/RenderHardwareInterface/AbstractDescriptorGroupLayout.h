@@ -30,12 +30,12 @@ namespace Gogaman
 
 			inline constexpr uint32_t GetBindingCount() const { return m_BindingCount; }
 
-			inline constexpr Shader::StageFlags GetShaderVisibilityFlags() const { return m_ShaderVisibilityFlags; }
+			inline constexpr Shader::StageFlag GetShaderVisibilityFlags() const { return m_ShaderVisibilityFlags; }
 
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 		private:
-			AbstractDescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlags shaderVisibilityFlags)
+			AbstractDescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlag shaderVisibilityFlags)
 				: m_BindingCount(bindingCount), m_Bindings(bindings), m_ShaderVisibilityFlags(shaderVisibilityFlags)
 			{}
 
@@ -44,9 +44,9 @@ namespace Gogaman
 				delete[] m_Bindings;
 			}
 		protected:
-			Binding            *m_Bindings;
-			uint32_t            m_BindingCount;
-			Shader::StageFlags  m_ShaderVisibilityFlags;
+			Binding           *m_Bindings;
+			uint32_t           m_BindingCount;
+			Shader::StageFlag  m_ShaderVisibilityFlags;
 		private:
 			friend ImplementationType;
 		};

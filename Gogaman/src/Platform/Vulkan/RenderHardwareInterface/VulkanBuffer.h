@@ -19,7 +19,7 @@ namespace Gogaman
 				DeviceMemory::Allocation vulkanMemory;
 			};
 		public:
-			Buffer(const DeviceMemory::Type memoryType, const uint32_t size, const BindFlags bindFlags = BindFlags::None);
+			Buffer(const DeviceMemory::Type memoryType, const uint32_t size, const BindFlag bindFlags = BindFlag::None);
 			Buffer(const Buffer &) = delete;
 			Buffer(Buffer &&)      = default;
 
@@ -34,24 +34,24 @@ namespace Gogaman
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }
 
-			static inline constexpr VkBufferUsageFlags GetNativeBindFlags(const BindFlags bindFlags)
+			static inline constexpr VkBufferUsageFlags GetNativeBindFlags(const BindFlag bindFlags)
 			{
 				VkBufferUsageFlags nativeBindFlags = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 				switch(bindFlags)
 				{
-				case BindFlags::None:
+				case BindFlag::None:
 					return nativeBindFlags;
-				case BindFlags::Vertex:
+				case BindFlag::Vertex:
 					return nativeBindFlags | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-				case BindFlags::Index:
+				case BindFlag::Index:
 					return nativeBindFlags | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
-				case BindFlags::Indirect:
+				case BindFlag::Indirect:
 					return nativeBindFlags | VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT;
-				case BindFlags::UnorderedAccess:
+				case BindFlag::UnorderedAccess:
 					return nativeBindFlags | VK_BUFFER_USAGE_STORAGE_TEXEL_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-				case BindFlags::ShaderResource:
+				case BindFlag::ShaderResource:
 					return nativeBindFlags | VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT;
-				case BindFlags::ShaderConstants:
+				case BindFlag::ShaderConstants:
 					return nativeBindFlags | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
 				default:
 					GM_DEBUG_ASSERT(false, "Failed to get native buffer bind flags | Invalid bind flags");

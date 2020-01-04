@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Gogaman/Core/ResourceContainer.h"
+#include "Gogaman/Utilities/Container/ResourceContainer.h"
 
 namespace Gogaman
 {

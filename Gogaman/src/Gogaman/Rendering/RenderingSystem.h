@@ -18,9 +18,6 @@
 #include "Gogaman/RenderHardwareInterface/CommandHeap.h"
 #include "Gogaman/RenderHardwareInterface/Device.h"
 
-#include "Gogaman/Geometry/Sphere.h"
-#include "Gogaman/Geometry/RectangularFrustum.h"
-
 #include "PerspectiveCamera.h"
 
 #include "PBR_Material.h"
@@ -39,6 +36,7 @@ namespace Gogaman
 			glm::mat4 cameraViewMatrix;
 			glm::mat4 cameraProjectionMatrix;
 			glm::mat4 cameraViewProjectionMatrix;
+			glm::vec3 cameraPosition;
 		};
 
 		struct MeshData
@@ -60,9 +58,11 @@ namespace Gogaman
 		void CreateShaders();
 		void RecreateShaders();
 
-		void ImportFlexData();
+		void CreateRenderState();
 
-		bool OnWindowResize(WindowResizeEvent &event);
+		void ImportFlexData(const std::string &filepath);
+
+		bool OnWindowFileDrop(WindowFileDropEvent &event);
 	private:
 		PerspectiveCamera m_Camera;
 

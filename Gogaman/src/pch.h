@@ -19,6 +19,7 @@
 #include <bitset>
 #include <array>
 #include <vector>
+#include <stack>
 #include <queue>
 #include <set>
 #include <unordered_set>

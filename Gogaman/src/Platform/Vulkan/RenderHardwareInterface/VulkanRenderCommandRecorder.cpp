@@ -62,10 +62,10 @@ namespace Gogaman
 
 			switch(buffer.GetBindFlags())
 			{
-			case Buffer::BindFlags::Vertex:
+			case Buffer::BindFlag::Vertex:
 				vkCmdBindVertexBuffers(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, 0, 1, &buffer.GetNativeData().vulkanBuffer, &offset);
 				break;
-			case Buffer::BindFlags::Index:
+			case Buffer::BindFlag::Index:
 				vkCmdBindIndexBuffer(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, buffer.GetNativeData().vulkanBuffer, 0, VK_INDEX_TYPE_UINT16);
 				break;
 			default:

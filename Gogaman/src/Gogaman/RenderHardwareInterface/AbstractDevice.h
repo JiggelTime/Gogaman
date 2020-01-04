@@ -2,7 +2,7 @@
 
 #include "Gogaman/Core/CRTP.h"
 
-#include "Gogaman/Core/ResourceContainer.h"
+#include "Gogaman/Utilities/Container/ResourceContainer.h"
 
 #include "Identifier.h"
 

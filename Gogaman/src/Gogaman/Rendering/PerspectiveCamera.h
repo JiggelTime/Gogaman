@@ -4,7 +4,7 @@
 #include "Gogaman/Events/KeyboardEvent.h"
 #include "Gogaman/Events/MouseEvent.h"
 
-#include "Gogaman/Geometry/RectangularFrustum.h"
+#include "Gogaman/Utilities/Geometry/RectangularFrustum.h"
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm.hpp>

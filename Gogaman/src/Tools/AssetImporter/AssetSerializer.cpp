@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
 	//const char *directory = argv[1];
 	//const char *exportFilename = argv[2];
 
-	const char *directory = "D:/dev/TestAssetGroup";
+	const char *directory = "D:/dev/TestAssetGroup/Human";
 
-	const char *exportFilename = "D:/dev/TestAssetGroup/TestData.flex";
+	const char *exportFilename = "D:/dev/TestAssetGroup/Human/Human.flex";
 
 	std::vector<std::string> geometryFBX_Filepaths, albedoTextureFilepaths, normalTextureFilepaths, roughnessTextureFilepaths, metalnessTextureFilepaths, emissivityTextureFilepaths;
 	for(const auto &i : std::filesystem::directory_iterator(directory))

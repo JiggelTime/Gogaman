@@ -7,7 +7,7 @@ namespace Gogaman
 	class WindowEvent : public Event
 	{
 	public:
-		inline virtual EventCategory GetCategory() const override { return EventCategory::Window; }
+		inline virtual EventCategoryFlag GetCategory() const override { return EventCategoryFlag::Window; }
 	protected:
 		WindowEvent()
 		{}
@@ -19,24 +19,24 @@ namespace Gogaman
 		WindowCloseEvent()
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::WindowClose; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::WindowClose; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 	};
 
 	class WindowResizeEvent : public WindowEvent
 	{
 	public:
-		WindowResizeEvent(const int width, const int height)
+		WindowResizeEvent(const uint16_t width, const uint16_t height)
 			: m_Width(width), m_Height(height)
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::WindowResize; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::WindowResize; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 
-		inline constexpr int GetWidth()  const { return m_Width; }
-		inline constexpr int GetHeight() const { return m_Height; }
+		inline constexpr uint16_t GetWidth()  const { return m_Width;  }
+		inline constexpr uint16_t GetHeight() const { return m_Height; }
 	private:
-		int m_Width, m_Height;
+		uint16_t m_Width, m_Height;
 	};
 
 	class WindowFocusEvent : public WindowEvent
@@ -45,8 +45,8 @@ namespace Gogaman
 		WindowFocusEvent()
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::WindowFocus; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::WindowFocus; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
 	};
 
 	class WindowUnfocusEvent : public WindowEvent
@@ -55,7 +55,22 @@ namespace Gogaman
 		WindowUnfocusEvent()
 		{}
 
-		static constexpr EventType GetTypeStatic() { return EventType::WindowUnfocus; }
-		inline virtual   EventType GetType() const override { return GetTypeStatic(); }
+		static inline constexpr EventType GetTypeStatic() { return EventType::WindowUnfocus; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
+	};
+
+	class WindowFileDropEvent : public WindowEvent
+	{
+	public:
+		WindowFileDropEvent(std::vector<std::string> &&filepaths)
+			: m_Filepaths(std::move(filepaths))
+		{}
+
+		static inline constexpr EventType GetTypeStatic() { return EventType::WindowFileDrop; }
+		inline virtual EventType GetType() const override { return GetTypeStatic(); }
+
+		inline constexpr const std::vector<std::string> &GetFilepaths() const { return m_Filepaths; }
+	private:
+		std::vector<std::string> m_Filepaths;
 	};
 }

@@ -12,6 +12,9 @@
 #include "Gogaman/ECS/Entity.h"
 #include "Gogaman/ECS/World.h"
 
+#include "Gogaman/Utilities/Geometry/Sphere.h"
+#include "Gogaman/Utilities/Geometry/RectangularFrustum.h"
+
 #include "Gogaman/RenderHardwareInterface/DeviceMemory.h"
 #include "Gogaman/RenderHardwareInterface/Sampler.h"
 #include "Gogaman/RenderHardwareInterface/Texture.h"
@@ -66,25 +69,13 @@ namespace Gogaman
 		CreateRenderSurfaces();
 		CreateShaders();
 
-		const VertexLayout vertexLayout(
-		{
-			//Position
-			{ Shader::DataType::Float3 },
-			//UV
-			{ Shader::DataType::Float2 },
-			//Normal
-			{ Shader::DataType::Float3 },
-			//Tangent
-			{ Shader::DataType::Float3 }
-		});
-
 		m_DescriptorGroupLayouts.reserve(3);
 		//Frame data
 		DescriptorGroupLayout::Binding *frameDataDescriptorBindings = new DescriptorGroupLayout::Binding[3];
 		frameDataDescriptorBindings[0].type = DescriptorHeap::Type::ShaderConstantBuffer;
 		frameDataDescriptorBindings[1].type = DescriptorHeap::Type::Sampler;
 		frameDataDescriptorBindings[2].type = DescriptorHeap::Type::Sampler;
-		m_DescriptorGroupLayouts.emplace_back(3, frameDataDescriptorBindings, Shader::StageFlags::All);
+		m_DescriptorGroupLayouts.emplace_back(3, frameDataDescriptorBindings, Shader::StageFlag::All);
 		//Material data
 		DescriptorGroupLayout::Binding *materialDataDescriptorBindings = new DescriptorGroupLayout::Binding[5];
 		materialDataDescriptorBindings[0].type = DescriptorHeap::Type::ShaderTexture;
@@ -92,24 +83,13 @@ namespace Gogaman
 		materialDataDescriptorBindings[2].type = DescriptorHeap::Type::ShaderTexture;
 		materialDataDescriptorBindings[3].type = DescriptorHeap::Type::ShaderTexture;
 		materialDataDescriptorBindings[4].type = DescriptorHeap::Type::ShaderTexture;
-		m_DescriptorGroupLayouts.emplace_back(5, materialDataDescriptorBindings, Shader::StageFlags::Pixel);
+		m_DescriptorGroupLayouts.emplace_back(5, materialDataDescriptorBindings, Shader::StageFlag::Pixel);
 		//Mesh data
 		DescriptorGroupLayout::Binding *meshDataDescriptorBinding = new DescriptorGroupLayout::Binding;
 		meshDataDescriptorBinding->type = DescriptorHeap::Type::ShaderConstantBuffer;
-		m_DescriptorGroupLayouts.emplace_back(1, meshDataDescriptorBinding, Shader::StageFlags::Vertex);
+		m_DescriptorGroupLayouts.emplace_back(1, meshDataDescriptorBinding, Shader::StageFlag::Vertex);
 
-		RenderState::DepthStencilState depthStencilState;
-		depthStencilState.depthComparisonOperation = RenderState::ComparisonOperation::Less;
-		depthStencilState.isDepthTestEnabled       = true;
-		depthStencilState.isDepthWriteEnabled      = true;
-
-		RenderState::BlendState blendState;
-
-		m_RenderStates.reserve(GM_SWAP_CHAIN_BUFFER_COUNT);
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
-		{
-			m_RenderStates.emplace_back(m_DescriptorGroupLayouts, vertexLayout, m_ShaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, m_RenderResolutionWidth, m_RenderResolutionHeight, RenderState::CullOperation::None);
-		}
+		CreateRenderState();
 
 		DescriptorHeap::DescriptorCounts descriptorCounts;
 		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_SWAP_CHAIN_BUFFER_COUNT * 17);
@@ -117,20 +97,69 @@ namespace Gogaman
 		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderTexture>(GM_SWAP_CHAIN_BUFFER_COUNT * 5 * 16);
 		m_DescriptorHeap = std::make_unique<DescriptorHeap>(std::move(descriptorCounts));
 
-		m_RenderCommandHeap = std::make_unique<CommandHeap>(CommandHeap::Type::Render);
+		m_TransferCommandHeap = std::make_unique<CommandHeap>(CommandHeap::Type::Transfer);
+		m_RenderCommandHeap   = std::make_unique<CommandHeap>(CommandHeap::Type::Render);
+
 		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
 		{
 			m_CommandBuffers[i] = m_RenderCommandHeap->CreateCommandBuffer();
 
 			m_FrameDataDescriptorGroups[i] = std::make_unique<DescriptorGroup>(m_DescriptorHeap.get(), &m_DescriptorGroupLayouts[0]);
 			
-			m_FrameDataBuffers[i] = g_Device->GetResources().buffers.Create(DeviceMemory::Type::DeviceUpload, sizeof(FrameData), Buffer::BindFlags::ShaderConstants);
+			m_FrameDataBuffers[i] = g_Device->GetResources().buffers.Create(DeviceMemory::Type::DeviceUpload, sizeof(FrameData), Buffer::BindFlag::ShaderConstants);
 		}
 
 		m_PointSampler       = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Point);
 		m_AnisotropicSampler = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Anisotropic);
 
-		ImportFlexData();
+		/*
+		RenderGraph::Graph graph;
+
+		auto initializeGeometryStage = [](StageBuilder &&builder)
+		{
+			RenderGraph::Texture albedo;
+			albedo.name   = "Albedo";
+			albedo.format = RHI::Texture::Format::RGBA8;
+			albedo.width  = 1920;
+			albedo.height = 1080;
+			builder.AddTextureOutput(albedo);
+		};
+
+		auto executeGeometryStage = []()
+		{
+			//Stuff...
+		}
+
+		graph.CreateStage(initializeGeometryStage, executeGeometryStage);
+
+		auto initializeDeferredStage = [](StageBuilder &&builder)
+		{
+			builder.AddTextureInput("Albedo");
+
+			RenderGraph::Texture deferredOutput;
+			deferredOutput.name   = "DeferredOutput";
+			deferredOutput.format = RHI::Texture::Format::RGBA8;
+			deferredOutput.width  = 1920;
+			deferredOutput.height = 1080;
+			builder.AddTextureOutput(deferredOutput);
+		};
+
+		auto executeDeferredStage = []()
+		{
+			//Stuff...
+		}
+
+		graph.CreateStage(initializeDeferredStage, executeDeferredStage);
+
+		auto initializePostProcessStage = [](StageBuilder &&builder)
+		{
+			builder.AddTextureModify("deferredOutput", "postProcessOutput");
+		}
+
+		graph.CreateStage(initializePostProcessStage, [](){});
+
+		graph.SetOutputTexture("postProcessOutput");
+		*/
 	}
 
 	void RenderingSystem::CreateRenderSurfaces()
@@ -168,28 +197,66 @@ namespace Gogaman
 
 	void RenderingSystem::RecreateShaders()
 	{
+		vkDeviceWaitIdle(g_Device->GetNativeData().vulkanDevice);
+
+		const auto renderStateCount = m_RenderStates.size();
+		for(auto i = 0; i < renderStateCount; i++)
+		{
+			m_RenderStates.pop_back();
+		}
+
 		g_Device->GetResources().shaders.Destroy(m_VertexShaderID);
 		g_Device->GetResources().shaders.Destroy(m_PixelShaderID);
 
 		g_Device->GetResources().shaderPrograms.Destroy(m_ShaderProgramID);
 
 		CreateShaders();
+
+		CreateRenderState();
 	}
 
-	//TODO: OnEvent FlexDataImportEvent
-	void RenderingSystem::ImportFlexData()
+	void RenderingSystem::CreateRenderState()
+	{
+		using namespace RHI;
+
+		const VertexLayout vertexLayout(
+		{
+			//Position
+			{ Shader::DataType::Float3 },
+			//UV
+			{ Shader::DataType::Float2 },
+			//Normal
+			{ Shader::DataType::Float3 },
+			//Tangent
+			{ Shader::DataType::Float3 }
+		});
+
+		RenderState::DepthStencilState depthStencilState;
+		depthStencilState.depthComparisonOperation = RenderState::ComparisonOperation::Less;
+		depthStencilState.isDepthTestEnabled       = true;
+		depthStencilState.isDepthWriteEnabled      = true;
+
+		RenderState::BlendState blendState;
+
+		m_RenderStates.reserve(GM_SWAP_CHAIN_BUFFER_COUNT);
+		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		{
+			m_RenderStates.emplace_back(m_DescriptorGroupLayouts, vertexLayout, m_ShaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, m_RenderResolutionWidth, m_RenderResolutionHeight, RenderState::CullOperation::None);
+		}
+	}
+
+	void RenderingSystem::ImportFlexData(const std::string &filepath)
 	{
 		using namespace RHI;
 
 		World &world = Application::GetInstance().GetWorld();
 		
 		FlexData::FlexData flexData;
-		if(!FlexData::Import(flexData, "D:/dev/TestAssetGroup/TestData.flex"))
+		if(!FlexData::Import(flexData, filepath.c_str()))
 			GM_ASSERT(false, "Failed to import FlexData");
 
 		FlexData::Print(flexData);
 
-		m_TransferCommandHeap = std::make_unique<CommandHeap>(CommandHeap::Type::Transfer);
 		std::unique_ptr<CommandBuffer> transferCommandBuffer = m_TransferCommandHeap->CreateCommandBuffer();
 		TransferCommandRecorder        transferCommandRecorder(transferCommandBuffer.get());
 
@@ -216,11 +283,30 @@ namespace Gogaman
 			return textureID;
 		};
 
-		material.albedo     = ImportFlexTexture(Texture::Format::RGBW8, flexData.albedoTextures[0]);
-		material.normal     = ImportFlexTexture(Texture::Format::XYZW8, flexData.normalTextures[0]);
-		material.roughness  = ImportFlexTexture(Texture::Format::X8,    flexData.roughnessTextures[0]);
-		material.metalness  = ImportFlexTexture(Texture::Format::X8,    flexData.metalnessTextures[0]);
-		material.emissivity = ImportFlexTexture(Texture::Format::X8,    flexData.emissivityTextures[0]);
+		if(flexData.albedoTextures.size())
+			material.albedo = ImportFlexTexture(Texture::Format::RGBW8, flexData.albedoTextures[0]);
+		else
+			material.albedo = ImportFlexTexture(Texture::Format::RGBW8, FlexData::GetDefaultAlbedoTexture());
+
+		if(flexData.normalTextures.size())
+			material.normal = ImportFlexTexture(Texture::Format::XYZW8, flexData.normalTextures[0]);
+		else
+			material.normal = ImportFlexTexture(Texture::Format::XYZW8, FlexData::GetDefaultNormalTexture());
+
+		if(flexData.roughnessTextures.size())
+			material.roughness = ImportFlexTexture(Texture::Format::X8, flexData.roughnessTextures[0]);
+		else
+			material.roughness = ImportFlexTexture(Texture::Format::X8, FlexData::GetDefaultRoughnessTexture());
+
+		if(flexData.metalnessTextures.size())
+			material.metalness = ImportFlexTexture(Texture::Format::X8, flexData.metalnessTextures[0]);
+		else
+			material.metalness = ImportFlexTexture(Texture::Format::X8, FlexData::GetDefaultMetalnessTexture());
+
+		if(flexData.emissivityTextures.size())
+			material.emissivity = ImportFlexTexture(Texture::Format::X8, flexData.emissivityTextures[0]);
+		else
+			material.emissivity = ImportFlexTexture(Texture::Format::X8, FlexData::GetDefaultEmissivityTexture());
 
 		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
 		{
@@ -260,25 +346,25 @@ namespace Gogaman
 			renderableComponent.materialIndex = 0;
 
 			//Vertex buffer
-			Buffer &vertexBuffer = g_Device->GetResources().buffers.Create(renderableComponent.vertexBufferID, DeviceMemory::Type::Device, FLEX_VERTEX_DATA_SIZE * (uint32_t)i.vertexBuffer.size(), Buffer::BindFlags::Vertex);
+			Buffer &vertexBuffer = g_Device->GetResources().buffers.Create(renderableComponent.vertexBufferID, DeviceMemory::Type::Device, FLEX_VERTEX_DATA_SIZE * (uint32_t)i.vertexBuffer.size(), Buffer::BindFlag::Vertex);
 
 			BufferID vertexStagingBufferID;
-			Buffer &vertexStagingBuffer = g_Device->GetResources().buffers.Create(vertexStagingBufferID, DeviceMemory::Type::DeviceUpload, FLEX_VERTEX_DATA_SIZE * (uint32_t)i.vertexBuffer.size(), Buffer::BindFlags::Vertex);
+			Buffer &vertexStagingBuffer = g_Device->GetResources().buffers.Create(vertexStagingBufferID, DeviceMemory::Type::DeviceUpload, FLEX_VERTEX_DATA_SIZE * (uint32_t)i.vertexBuffer.size(), Buffer::BindFlag::Vertex);
 			vertexStagingBuffer.SetData(i.vertexBuffer.data());
 
 			transferCommandRecorder.CopyData(vertexStagingBuffer, vertexBuffer);
 
 			//Index buffer
-			Buffer &indexBuffer = g_Device->GetResources().buffers.Create(renderableComponent.indexBufferID, DeviceMemory::Type::Device, sizeof(uint16_t) * i.indexBuffer.size(), Buffer::BindFlags::Index);
+			Buffer &indexBuffer = g_Device->GetResources().buffers.Create(renderableComponent.indexBufferID, DeviceMemory::Type::Device, sizeof(uint16_t) * i.indexBuffer.size(), Buffer::BindFlag::Index);
 			
 			BufferID indexStagingBufferID;
-			Buffer &indexStagingBuffer = g_Device->GetResources().buffers.Create(indexStagingBufferID, DeviceMemory::Type::DeviceUpload, sizeof(uint16_t) * i.indexBuffer.size(), Buffer::BindFlags::Index);
+			Buffer &indexStagingBuffer = g_Device->GetResources().buffers.Create(indexStagingBufferID, DeviceMemory::Type::DeviceUpload, sizeof(uint16_t) * i.indexBuffer.size(), Buffer::BindFlag::Index);
 			indexStagingBuffer.SetData(i.indexBuffer.data());
 
 			transferCommandRecorder.CopyData(indexStagingBuffer, indexBuffer);
 
 			//Shader data buffer
-			renderableComponent.shaderDataBufferID = g_Device->GetResources().buffers.Create(DeviceMemory::Type::DeviceUpload, sizeof(MeshData), Buffer::BindFlags::ShaderConstants);
+			renderableComponent.shaderDataBufferID = g_Device->GetResources().buffers.Create(DeviceMemory::Type::DeviceUpload, sizeof(MeshData), Buffer::BindFlag::ShaderConstants);
 
 			world.AddComponent(meshEntity, std::move(renderableComponent));
 
@@ -358,6 +444,7 @@ namespace Gogaman
 		frameData.cameraViewMatrix           = m_Camera.GetViewMatrix();
 		frameData.cameraProjectionMatrix     = m_Camera.GetProjectionMatrix();
 		frameData.cameraViewProjectionMatrix = m_Camera.GetViewProjectionMatrix();
+		frameData.cameraPosition             = m_Camera.GetPosition();
 		g_Device->GetResources().buffers.Get(m_FrameDataBuffers[swapChainImageIndex]).SetData(&frameData);
 		//Move to initialize?
 		m_FrameDataDescriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, m_FrameDataBuffers[swapChainImageIndex]);
@@ -449,11 +536,23 @@ namespace Gogaman
 	void RenderingSystem::OnEvent(Event &event)
 	{
 		EventDispatcher dispatcher(event);
-		dispatcher.Dispatch<WindowResizeEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnWindowResize));
+		dispatcher.Dispatch<WindowFileDropEvent>(GM_BIND_EVENT_CALLBACK(RenderingSystem::OnWindowFileDrop));
 	}
 
-	bool RenderingSystem::OnWindowResize(WindowResizeEvent &event)
+	bool RenderingSystem::OnWindowFileDrop(WindowFileDropEvent &event)
 	{
+		for(const std::string &i : event.GetFilepaths())
+		{
+			auto GetExtension = [](const std::string &filepath)
+			{
+				const auto periodIndex = filepath.find_last_of('.');
+				return filepath.substr(periodIndex);
+			};
+
+			if(GetExtension(i) == ".flex")
+				ImportFlexData(i);
+		}
+
 		return true;
 	}
 }
