@@ -18,6 +18,8 @@
 #include "Gogaman/RenderHardwareInterface/CommandHeap.h"
 #include "Gogaman/RenderHardwareInterface/Device.h"
 
+#include "RenderGraph/ExecutableGraph.h"
+
 #include "PerspectiveCamera.h"
 
 #include "PBR_Material.h"
@@ -30,6 +32,41 @@ namespace Gogaman
 
 	class RenderingSystem : public System, public EventListener
 	{
+	private:
+		struct MandelbrotStage
+		{
+			struct ShaderData
+			{
+				glm::vec3 positionAndZoom;
+			};
+
+			void Initialize();
+			void CreateShaders();
+			void CreateRenderState();
+			void CreateRenderGraph();
+			void Render();
+
+			RHI::ShaderID        vertexShaderID, pixelShaderID;
+			RHI::ShaderProgramID shaderProgramID;
+
+			std::vector<RHI::RenderState> renderStates;
+
+			std::unique_ptr<RHI::DescriptorHeap>    descriptorHeap;
+			std::vector<RHI::DescriptorGroupLayout> descriptorGroupLayouts;
+			std::unique_ptr<RHI::DescriptorGroup>   descriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
+
+			RHI::BufferID shaderDataBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+
+			std::unique_ptr<RHI::CommandHeap>   commandHeap;
+			std::unique_ptr<RHI::CommandBuffer> commandBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+
+			std::unique_ptr<RenderGraph::ExecutableGraph> renderGraph;
+
+			glm::vec2 position;
+			glm::vec2 smoothPosition;
+			float     zoom;
+			float     smoothZoom;
+		};
 	private:
 		struct FrameData
 		{
@@ -59,6 +96,8 @@ namespace Gogaman
 		void RecreateShaders();
 
 		void CreateRenderState();
+
+		void CreateRenderGraph();
 
 		void ImportFlexData(const std::string &filepath);
 
@@ -90,6 +129,10 @@ namespace Gogaman
 		RHI::SamplerID m_PointSampler, m_AnisotropicSampler;
 
 		std::vector<PBR_Material> m_Materials;
+
+		RenderGraph::ExecutableGraph m_RenderGraph;
+
+		MandelbrotStage m_MandelbrotStage;
 
 		uint16_t m_RenderResolutionWidth, m_RenderResolutionHeight;
 	};

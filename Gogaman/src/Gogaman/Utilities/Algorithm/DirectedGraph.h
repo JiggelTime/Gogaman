@@ -66,28 +66,28 @@ namespace Gogaman
 			return outgoingEdges;
 		}
 
-		inline VertexIndexType GetIncomingEdgeCount(const VertexIndexType vertexIndex) const
+		inline VertexIndexType IncomingDegree(const VertexIndexType vertexIndex) const
 		{
-			VertexIndexType count = 0;
+			VertexIndexType incomingDegree = 0;
 			for(const auto &i : m_AdjacencyMatrix)
 			{
 				if(i[vertexIndex])
-					count++;
+					incomingDegree++;
 			}
 
-			return count;
+			return incomingDegree;
 		}
 
-		inline VertexIndexType GetOutgoingEdgeCount(const VertexIndexType vertexIndex) const
+		inline VertexIndexType OutgoingDegree(const VertexIndexType vertexIndex) const
 		{
-			VertexIndexType count = 0;
+			VertexIndexType outgoingDegree = 0;
 			for(const bool i : m_AdjacencyMatrix[vertexIndex])
 			{
 				if(i)
-					count++;
+					outgoingDegree++;
 			}
 
-			return count;
+			return outgoingDegree;
 		}
 
 		inline constexpr VertexIndexType GetVertexCount() const { return m_AdjacencyMatrix.size(); }
@@ -144,6 +144,64 @@ namespace Gogaman
 				for(const VertexIndexType &i : adjacentVertices)
 					vertices.emplace(i);
 			}
+		}
+
+		template<bool isReversed = false>
+		inline void BreadthFirstTraversal(const VertexIndexType rootIndex, std::function<void(const VertexIndexType)> callback) const
+		{
+			GM_DEBUG_ASSERT(Validate(rootIndex), "Breadth first traversal failed | Graph is not acyclic");
+
+			std::queue<VertexIndexType> vertices;
+			vertices.emplace(rootIndex);
+
+			while(!vertices.empty())
+			{
+				const VertexIndexType vertex = vertices.front();
+
+				callback(vertex);
+
+				vertices.pop();
+
+				const std::vector<VertexIndexType> adjacentVertices = isReversed ? DirectedGraph<VertexIndexType>::IncomingConnections(vertex) : DirectedGraph<VertexIndexType>::OutgoingConnections(vertex);
+				for(const VertexIndexType &i : adjacentVertices)
+					vertices.emplace(i);
+			}
+		}
+	
+		//Kahn's algorithm
+		inline std::vector<VertexIndexType> TopologicalSort() const
+		{
+			std::vector<VertexIndexType> vertexIncomingDegrees(DirectedGraph<VertexIndexType>::GetVertexCount(), 0);
+			std::queue<VertexIndexType>  zeroIncomingDegreeVertices;
+			for(VertexIndexType i = 0; i < DirectedGraph<VertexIndexType>::GetVertexCount(); i++)
+			{
+				vertexIncomingDegrees[i] = DirectedGraph<VertexIndexType>::IncomingDegree(i);
+
+				if(vertexIncomingDegrees[i] == 0)
+					zeroIncomingDegreeVertices.emplace(i);
+			}
+
+			VertexIndexType              visitedVertexCount = 0;
+			std::vector<VertexIndexType> topologicalOrder;
+			while(!zeroIncomingDegreeVertices.empty())
+			{
+				VertexIndexType index = zeroIncomingDegreeVertices.front();
+				topologicalOrder.emplace_back(index);
+
+				zeroIncomingDegreeVertices.pop();
+
+				for(const VertexIndexType i : DirectedGraph<VertexIndexType>::OutgoingConnections(index))
+				{
+					if(!--vertexIncomingDegrees[i])
+						zeroIncomingDegreeVertices.emplace(i);
+				}
+				
+				visitedVertexCount++;
+			}
+
+			GM_DEBUG_ASSERT(visitedVertexCount == DirectedGraph<VertexIndexType>::GetVertexCount(), "Topological sort failed | Graph is not acyclic");
+
+			return topologicalOrder;
 		}
 	};
 }

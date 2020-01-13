@@ -20,6 +20,8 @@ namespace Gogaman
 			TransferCommandRecorder &operator=(const TransferCommandRecorder &) = delete;
 			TransferCommandRecorder &operator=(TransferCommandRecorder &&)      = delete;
 
+			void UpdateState(Texture &texture, const Texture::State state);
+
 			void CopyData(Buffer &source, Buffer &destination);
 			void CopyData(Buffer &source, Texture &destination);
 		private:

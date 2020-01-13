@@ -11,7 +11,7 @@ namespace Gogaman
 		static bool IsKeyPressed(const int scancode);
 		//Mouse
 		static bool IsMouseButtonPressed(const int scancode);
-		static const glm::vec2 &GetMousePosition();
+		static const glm::vec2 GetMousePosition();
 	private:
 		WindowsInput()  = delete;
 		~WindowsInput() = delete;

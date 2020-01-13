@@ -16,7 +16,7 @@ namespace Gogaman
 				VkCommandBuffer vulkanCommandBuffer;
 			};
 		public:
-			CommandBuffer()                      = default;
+			CommandBuffer(bool isReusable);
 			CommandBuffer(const CommandBuffer &) = delete;
 			CommandBuffer(CommandBuffer &&)      = default;
 

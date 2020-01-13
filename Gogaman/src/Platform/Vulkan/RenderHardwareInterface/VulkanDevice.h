@@ -33,6 +33,7 @@ namespace Gogaman
 				VkSwapchainKHR                   vulkanSwapChain;
 				std::vector<VkImage>             vulkanSwapChainImages;
 				std::vector<VkImageView>         vulkanSwapChainImageViews;
+				VkSurfaceFormatKHR               vulkanSwapChainSurfaceFormat;
 				VkSemaphore                      vulkanSwapChainImageAvailableSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT], vulkanRenderCompletedSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT];
 				VkFence                          vulkanPresentFences[GM_SWAP_CHAIN_BUFFER_COUNT];
 				uint32_t                         vulkanQueueFamilyIndices[3];
@@ -49,6 +50,7 @@ namespace Gogaman
 			void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
 			void SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
+			void SubmitComputeCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
 			void SubmitRenderCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
 
 			void Present();

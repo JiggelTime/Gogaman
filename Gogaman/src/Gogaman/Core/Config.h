@@ -14,10 +14,6 @@ namespace Gogaman
 			return instance;
 		}
 
-		//Logging
-			const bool        logToFile   = true;
-			const std::string logFilepath = "Gogaman.log";
-
 		//Window
 			//Rendering resolution scale
 			const float resScale        = 1.0f;

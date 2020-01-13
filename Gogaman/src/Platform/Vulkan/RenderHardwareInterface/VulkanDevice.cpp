@@ -131,6 +131,9 @@ namespace Gogaman
 
 			VkPhysicalDeviceFeatures supportedPhysicalDeviceFeatures;
 
+			bool isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportFound          = false;
+			bool isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportCurrentlyFound = false;
+
 			auto IsPhysicalDeviceSupported = [&](const VkPhysicalDevice &physicalDevice)
 			{
 				//Ensure Vulkan API version is supported
@@ -210,19 +213,27 @@ namespace Gogaman
 				VkSurfaceFormatKHR *supportedSurfaceFormats = new VkSurfaceFormatKHR[supportedSurfaceFormatCount];
 				vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, m_NativeData.vulkanSurface, &supportedSurfaceFormatCount, supportedSurfaceFormats);
 
-				bool isSwapChainSurfaceFormatSupported = false;
+				isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportCurrentlyFound = false;
+				bool isRequiredSwapChainSurfaceFormatSupported = false;
+				VkSurfaceFormatKHR swapChainSurfaceFormat;
 				for(uint32_t i = 0; i < supportedSurfaceFormatCount; i++)
 				{
-					if(supportedSurfaceFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM && supportedSurfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+					if((supportedSurfaceFormats[i].format == VK_FORMAT_R8G8B8A8_UNORM) || (supportedSurfaceFormats[i].format == VK_FORMAT_B8G8R8A8_UNORM))
 					{
-						isSwapChainSurfaceFormatSupported = true;
-						break;
+						isRequiredSwapChainSurfaceFormatSupported = true;
+						swapChainSurfaceFormat = supportedSurfaceFormats[i];
+						
+						if(supportedSurfaceFormats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR)
+						{
+							isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportCurrentlyFound = true;
+							break;
+						}
 					}
 				}
 
 				delete[] supportedSurfaceFormats;
-
-				if(!isSwapChainSurfaceFormatSupported)
+				
+				if(!isRequiredSwapChainSurfaceFormatSupported)
 					return false;
 
 				//Ensure swap chain image usage is supported
@@ -237,16 +248,21 @@ namespace Gogaman
 				if(supportedSurfacePresentModeCount == 0)
 					return false;
 
+				if(isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportCurrentlyFound)
+					isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportFound = true;
+
 				m_NativeData.vulkanQueueFamilyIndices[(uint8_t)CommandHeap::Type::Transfer] = transferQueueIndex.value();
 				m_NativeData.vulkanQueueFamilyIndices[(uint8_t)CommandHeap::Type::Compute]  = computeQueueIndex.value();
 				m_NativeData.vulkanQueueFamilyIndices[(uint8_t)CommandHeap::Type::Render]   = renderQueueIndex.value();
 
 				m_NativeData.vulkanPhysicalDeviceLimits = properties.limits;
 
+				m_NativeData.vulkanSwapChainSurfaceFormat = swapChainSurfaceFormat;
+
 				return true;
 			};
 
-			//Select a physical device | Heuristic: most local memory
+			//Select a physical device | Heuristic: preferred swap chain surface format and most memory
 			m_NativeData.vulkanPhysicalDevice = VK_NULL_HANDLE;
 			uint64_t mostPhysicalDeviceMemory = 0;
 			VkPhysicalDeviceMemoryProperties physicalDeviceMemoryProperties;
@@ -254,6 +270,9 @@ namespace Gogaman
 			{
 				const VkPhysicalDevice &physicalDevice = physicalDevices[i];
 				if(!IsPhysicalDeviceSupported(physicalDevice))
+					continue;
+
+				if(isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportFound && !isPreferredPhysicalDeviceSwapChainSurfaceFormatSupportCurrentlyFound)
 					continue;
 
 				vkGetPhysicalDeviceMemoryProperties(physicalDevice, &physicalDeviceMemoryProperties);
@@ -434,8 +453,8 @@ namespace Gogaman
 			swapChainDescriptor.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 			swapChainDescriptor.surface          = m_NativeData.vulkanSurface;
 			swapChainDescriptor.minImageCount    = supportedSurfaceCapabilities.maxImageCount ? std::clamp(GM_SWAP_CHAIN_BUFFER_COUNT, supportedSurfaceCapabilities.minImageCount, supportedSurfaceCapabilities.maxImageCount) : std::max(GM_SWAP_CHAIN_BUFFER_COUNT, supportedSurfaceCapabilities.minImageCount);
-			swapChainDescriptor.imageFormat      = VK_FORMAT_B8G8R8A8_UNORM;
-			swapChainDescriptor.imageColorSpace  = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
+			swapChainDescriptor.imageFormat      = m_NativeData.vulkanSwapChainSurfaceFormat.format;
+			swapChainDescriptor.imageColorSpace  = m_NativeData.vulkanSwapChainSurfaceFormat.colorSpace;
 			swapChainDescriptor.imageExtent      = swapChainExtent;
 			swapChainDescriptor.imageArrayLayers = 1;
 			swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -463,7 +482,7 @@ namespace Gogaman
 				swapChainImageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 				swapChainImageViewDescriptor.image                           = m_NativeData.vulkanSwapChainImages[i];
 				swapChainImageViewDescriptor.viewType                        = VK_IMAGE_VIEW_TYPE_2D;
-				swapChainImageViewDescriptor.format                          = VK_FORMAT_B8G8R8A8_UNORM;
+				swapChainImageViewDescriptor.format                          = m_NativeData.vulkanSwapChainSurfaceFormat.format;
 				swapChainImageViewDescriptor.components.r                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 				swapChainImageViewDescriptor.components.g                    = VK_COMPONENT_SWIZZLE_IDENTITY;
 				swapChainImageViewDescriptor.components.b                    = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -502,7 +521,7 @@ namespace Gogaman
 				vkDestroyFramebuffer(m_NativeData.vulkanDevice, renderSurface.GetNativeData().vulkanFramebuffer, nullptr);
 
 				VkAttachmentDescription colorAttachmentDescriptor = {};
-				colorAttachmentDescriptor.format         = VK_FORMAT_B8G8R8A8_UNORM;
+				colorAttachmentDescriptor.format         = m_NativeData.vulkanSwapChainSurfaceFormat.format;
 				colorAttachmentDescriptor.samples        = VK_SAMPLE_COUNT_1_BIT;
 				//attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				colorAttachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -600,6 +619,25 @@ namespace Gogaman
 			submitDescriptor.pCommandBuffers    = vulkanCommandBuffers;
 
 			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Transfer], 1, &submitDescriptor, nullptr) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to submit transfer commands");
+
+			delete[] vulkanCommandBuffers;
+		}
+
+		void Device::SubmitComputeCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers)
+		{
+			VkCommandBuffer *vulkanCommandBuffers = new VkCommandBuffer[commandBufferCount];
+			for(uint8_t i = 0; i < commandBufferCount; i++)
+			{
+				vulkanCommandBuffers[i] = commandBuffers[i].GetNativeData().vulkanCommandBuffer;
+			}
+
+			VkSubmitInfo submitDescriptor = {};
+			submitDescriptor.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submitDescriptor.commandBufferCount = commandBufferCount;
+			submitDescriptor.pCommandBuffers    = vulkanCommandBuffers;
+
+			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Compute], 1, &submitDescriptor, nullptr) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to submit transfer commands");
 
 			delete[] vulkanCommandBuffers;

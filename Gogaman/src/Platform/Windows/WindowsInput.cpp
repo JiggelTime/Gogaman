@@ -23,7 +23,7 @@ namespace Gogaman
 		return buttonState == GLFW_PRESS;
 	}
 
-	const glm::vec2 &WindowsInput::GetMousePosition()
+	const glm::vec2 WindowsInput::GetMousePosition()
 	{
 		auto window = static_cast<GLFWwindow *>(Application::GetInstance().GetWindow().GetNativeWindow());
 

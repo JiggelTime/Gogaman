@@ -10,7 +10,7 @@ namespace Gogaman
 	namespace RHI
 	{
 		AbstractTexture<Texture>::AbstractTexture(const Format format, const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t levelCount)
-			: m_Width(width), m_Height(height), m_Depth(depth), m_Format(format)
+			: m_Width(width), m_Height(height), m_Depth(depth), m_Format(format), m_State(State::Undefined)
 		{
 			#if GM_RHI_DEBUGGING_ENABLED
 				GM_DEBUG_ASSERT(m_Width  > 0, "Failed to construct texture | Width is 0");

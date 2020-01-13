@@ -27,9 +27,9 @@ namespace Gogaman
 		//Mouse
 		static inline bool IsMouseButtonPressed(const int scancode) { return ImplementationType::IsMouseButtonPressed(scancode); }
 
-		static inline const glm::vec2 &GetMousePosition()         { return ImplementationType::GetMousePosition(); }
-		static inline const glm::vec2 &GetPreviousMousePosition() { return m_PreviousMousePosition;                }
-		static inline const glm::vec2 &GetDeltaMousePosition()    { return m_DeltaMousePosition;                   }
+		static inline const glm::vec2 GetMousePosition() { return ImplementationType::GetMousePosition(); }
+		static inline const glm::vec2 &GetPreviousMousePosition() { return m_PreviousMousePosition; }
+		static inline const glm::vec2 &GetDeltaMousePosition() { return m_DeltaMousePosition; }
 	private:
 		friend ImplementationType;
 	private:

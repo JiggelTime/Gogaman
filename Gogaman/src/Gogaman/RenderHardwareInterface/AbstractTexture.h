@@ -10,6 +10,8 @@ namespace Gogaman
 {
 	namespace RHI
 	{
+		class TransferCommandRecorder;
+
 		template<typename ImplementationType>
 		class AbstractTexture : public CRTP<ImplementationType, AbstractTexture>
 		{
@@ -35,6 +37,16 @@ namespace Gogaman
 				//Four channels
 				XYZW8, RGBW8, XYZW16, XYZW16F, XYZW32F
 			};
+
+			enum class State : uint8_t
+			{
+				Undefined,
+				PreInitialized,
+				TransferSource,
+				TransferDestination,
+				RenderSurfaceAttachment,
+				ShaderResource
+			};
 		public:
 			AbstractTexture(const AbstractTexture &) = delete;
 			AbstractTexture(AbstractTexture &&)      = default;
@@ -49,6 +61,8 @@ namespace Gogaman
 			inline constexpr uint8_t GetLevelCount() const { return m_LevelCount; }
 
 			inline constexpr Format GetFormat() const { return m_Format; }
+
+			inline constexpr State GetState() const { return m_State; }
 
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
@@ -135,8 +149,12 @@ namespace Gogaman
 			uint16_t m_Width, m_Height, m_Depth;
 			uint8_t  m_LevelCount;
 			Format   m_Format;
+			State    m_State;
 		private:
 			friend ImplementationType;
+
+			//TODO: Replace with: friend TransferCommandRecorder::UpdateState(Texture &texture);
+			friend TransferCommandRecorder;
 		};
 	}
 }

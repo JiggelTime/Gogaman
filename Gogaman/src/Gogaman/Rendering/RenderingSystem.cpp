@@ -26,6 +26,10 @@
 #include "Gogaman/RenderHardwareInterface/TransferCommandRecorder.h"
 #include "Gogaman/RenderHardwareInterface/RenderCommandRecorder.h"
 
+#include "RenderGraph/Stage.h"
+#include "RenderGraph/Graph.h"
+#include "RenderGraph/Compiler.h"
+
 #include "Gogaman/SpatialComponent.h"
 #include "Gogaman/BoundingVolumeComponent.h"
 #include "RenderableComponent.h"
@@ -62,6 +66,7 @@ namespace Gogaman
 		m_RenderResolutionWidth  = (uint16_t)(Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale);
 		m_RenderResolutionHeight = (uint16_t)(Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale);
 
+		/*
 		m_Camera.SetFocalLength(20.0f);
 		m_Camera.SetSensorHeight(24.0f);
 		m_Camera.SetAspectRatio(GM_CONFIG.aspectRatio);
@@ -110,56 +115,9 @@ namespace Gogaman
 		}
 
 		m_PointSampler       = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Point);
-		m_AnisotropicSampler = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Anisotropic);
+		m_AnisotropicSampler = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Anisotropic);*/
 
-		/*
-		RenderGraph::Graph graph;
-
-		auto initializeGeometryStage = [](StageBuilder &&builder)
-		{
-			RenderGraph::Texture albedo;
-			albedo.name   = "Albedo";
-			albedo.format = RHI::Texture::Format::RGBA8;
-			albedo.width  = 1920;
-			albedo.height = 1080;
-			builder.AddTextureOutput(albedo);
-		};
-
-		auto executeGeometryStage = []()
-		{
-			//Stuff...
-		}
-
-		graph.CreateStage(initializeGeometryStage, executeGeometryStage);
-
-		auto initializeDeferredStage = [](StageBuilder &&builder)
-		{
-			builder.AddTextureInput("Albedo");
-
-			RenderGraph::Texture deferredOutput;
-			deferredOutput.name   = "DeferredOutput";
-			deferredOutput.format = RHI::Texture::Format::RGBA8;
-			deferredOutput.width  = 1920;
-			deferredOutput.height = 1080;
-			builder.AddTextureOutput(deferredOutput);
-		};
-
-		auto executeDeferredStage = []()
-		{
-			//Stuff...
-		}
-
-		graph.CreateStage(initializeDeferredStage, executeDeferredStage);
-
-		auto initializePostProcessStage = [](StageBuilder &&builder)
-		{
-			builder.AddTextureModify("deferredOutput", "postProcessOutput");
-		}
-
-		graph.CreateStage(initializePostProcessStage, [](){});
-
-		graph.SetOutputTexture("postProcessOutput");
-		*/
+		m_MandelbrotStage.Initialize();
 	}
 
 	void RenderingSystem::CreateRenderSurfaces()
@@ -199,6 +157,21 @@ namespace Gogaman
 	{
 		vkDeviceWaitIdle(g_Device->GetNativeData().vulkanDevice);
 
+		const auto renderStateCount = m_MandelbrotStage.renderStates.size();
+		for(auto i = 0; i < renderStateCount; i++)
+		{
+			m_MandelbrotStage.renderStates.pop_back();
+		}
+
+		g_Device->GetResources().shaders.Destroy(m_MandelbrotStage.vertexShaderID);
+		g_Device->GetResources().shaders.Destroy(m_MandelbrotStage.pixelShaderID);
+
+		g_Device->GetResources().shaderPrograms.Destroy(m_MandelbrotStage.shaderProgramID);
+
+		m_MandelbrotStage.CreateShaders();
+		m_MandelbrotStage.CreateRenderState();
+
+		/*
 		const auto renderStateCount = m_RenderStates.size();
 		for(auto i = 0; i < renderStateCount; i++)
 		{
@@ -213,6 +186,7 @@ namespace Gogaman
 		CreateShaders();
 
 		CreateRenderState();
+		*/
 	}
 
 	void RenderingSystem::CreateRenderState()
@@ -243,6 +217,13 @@ namespace Gogaman
 		{
 			m_RenderStates.emplace_back(m_DescriptorGroupLayouts, vertexLayout, m_ShaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, m_RenderResolutionWidth, m_RenderResolutionHeight, RenderState::CullOperation::None);
 		}
+	}
+
+	void RenderingSystem::CreateRenderGraph()
+	{
+		//RenderGraph::Graph graph;
+
+		//m_RenderGraph = RenderGraph::Compiler::Compile(std::move(graph));
 	}
 
 	void RenderingSystem::ImportFlexData(const std::string &filepath)
@@ -399,7 +380,7 @@ namespace Gogaman
 			world.AddComponent(directionalLightEntity, std::move(directionalLightComponent));
 		}
 	}
-
+	
 	void RenderingSystem::Update()
 	{
 		//Render resolution
@@ -434,6 +415,7 @@ namespace Gogaman
 
 	void RenderingSystem::Render()
 	{
+		/*
 		using namespace RHI;
 
 		m_Camera.Update();
@@ -493,41 +475,9 @@ namespace Gogaman
 		//Copy gBuffer depth to HDR FBO
 		//RenderSurface &finalBuffer = GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_FinalBuffer);
 		//finalBuffer.CopyDepthBuffer(GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolation::Point);
-
-		/*
-		//Forward rendering
-		//glEnable(GL_DEPTH_TEST);
-
-		//Lights
-		m_ShaderManager->Get(m_LightShader).Bind();
-		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("projection", projectionMatrix);
-		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("view",       viewMatrix);
-		//Light 0
-		m_ShaderManager->Get(m_LightShader).UploadUniformMat4("M",          glm::mat4());
-		m_ShaderManager->Get(m_LightShader).UploadUniformVec3("lightColor", pointLight0.GetColor());
-		
-		RenderFullscreenQuad();
-		
-			//Skybox
-		glDepthFunc(GL_LEQUAL);
-		skyboxShader.Bind();
-		glm::mat4 cubemapView(glm::mat3(camera.GetViewMatrix()));
-		skyboxShader.UploadUniformMat4("projection", projectionMatrix);
-		skyboxShader.UploadUniformMat4("view", cubemapView);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glBindVertexArray(skyboxVAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		glDepthFunc(GL_LESS);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		
-		glDisable(GL_DEPTH_TEST);
 		*/
 
-		//GM_RENDERING_CONTEXT.SetViewport(Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight());
-		
-		//PostProcessPass();
+		m_MandelbrotStage.Render();
 	}
 
 	void RenderingSystem::Shutdown()
@@ -554,5 +504,192 @@ namespace Gogaman
 		}
 
 		return true;
+	}
+
+	void RenderingSystem::MandelbrotStage::Initialize()
+	{
+		using namespace RHI;
+
+		CreateShaders();
+
+		DescriptorGroupLayout::Binding *descriptorBindings = new DescriptorGroupLayout::Binding[1];
+		descriptorBindings[0].type = DescriptorHeap::Type::ShaderConstantBuffer;
+		descriptorGroupLayouts.emplace_back(1, descriptorBindings, Shader::StageFlag::Pixel);
+
+		//CreateRenderState();
+
+		DescriptorHeap::DescriptorCounts descriptorCounts;
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_SWAP_CHAIN_BUFFER_COUNT);
+		descriptorHeap = std::make_unique<DescriptorHeap>(std::move(descriptorCounts));
+
+		commandHeap = std::make_unique<CommandHeap>(CommandHeap::Type::Render);
+
+		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		{
+			commandBuffers[i] = commandHeap->CreateCommandBuffer();
+
+			descriptorGroups[i] = std::make_unique<DescriptorGroup>(descriptorHeap.get(), &descriptorGroupLayouts[0]);
+
+			shaderDataBuffers[i] = g_Device->GetResources().buffers.Create(DeviceMemory::Type::DeviceUpload, sizeof(ShaderData), Buffer::BindFlag::ShaderConstants);
+		}
+
+		CreateRenderGraph();
+
+		smoothPosition = glm::vec2(0.0f);
+		zoom           = 1.0f;
+		smoothZoom     = zoom;
+	}
+
+	void RenderingSystem::MandelbrotStage::CreateShaders()
+	{
+		using namespace RHI;
+
+		auto LoadShader = [](const char *filepath)
+		{
+			FILE *file = fopen(filepath, "rb");
+			fseek(file, 0, SEEK_END);
+			uint32_t size = ftell(file);
+			fseek(file, 0, SEEK_SET);
+			uint8_t *buffer = new uint8_t[size];
+			fread(buffer, size, 1, file);
+			fclose(file);
+
+			return std::pair<uint32_t, uint8_t *>(size, buffer);
+		};
+
+		auto vertexShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/v_Mandelbrot.spv");
+		vertexShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
+
+		auto pixelShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/p_Mandelbrot.spv");
+		pixelShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
+
+		auto &shaderProgram = g_Device->GetResources().shaderPrograms.Create(shaderProgramID);
+		shaderProgram.SetShader<Shader::Stage::Vertex>(vertexShaderID);
+		shaderProgram.SetShader<Shader::Stage::Pixel>(pixelShaderID);
+	}
+
+	void RenderingSystem::MandelbrotStage::CreateRenderState()
+	{
+		using namespace RHI;
+
+		const VertexLayout vertexLayout({});
+
+		RenderState::DepthStencilState depthStencilState;
+
+		RenderState::BlendState blendState;
+
+		renderStates.reserve(GM_SWAP_CHAIN_BUFFER_COUNT);
+		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		{
+			renderStates.emplace_back(descriptorGroupLayouts, vertexLayout, shaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight(), RenderState::CullOperation::None);
+		}
+	}
+
+	void RenderingSystem::MandelbrotStage::CreateRenderGraph()
+	{
+		RenderGraph::Graph graph;
+
+		RenderGraph::RenderStage::StateData state;
+		//state.descriptorGroupLayouts;
+		state.vertexLayout    = std::make_unique<RHI::VertexLayout>(std::vector<RHI::VertexLayout::Attribute>());
+		state.shaderProgramID = shaderProgramID;
+		state.viewportWidth   = Application::GetInstance().GetWindow().GetWidth();
+		state.viewportHeight  = Application::GetInstance().GetWindow().GetHeight();
+
+		auto &stage = graph.CreatePrerecordedRenderStage(std::move(state));
+
+		RenderGraph::Texture raw;
+		raw.format = RHI::Texture::Format::RGBW8;
+		raw.width  = 1920;
+		raw.height = 1080;
+		stage.CreateTexture("RAW", raw, RHI::Texture::State::RenderSurfaceAttachment);
+
+		//TODO: Change name to SetExecuteCallback()
+		stage.SetExecuteFunction([this](const RenderGraph::ResourceManager &resourceManager)
+		{
+			GM_LOG_CORE_INFO("Executing mandelbrot stage! :D");
+
+			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
+
+			if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_1))
+				zoom += 0.8f * zoom * Time::GetDeltaTime();
+			if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_2))
+				zoom -= 0.8f * zoom * Time::GetDeltaTime();
+
+			if(Input::IsKeyPressed(GM_KEY_W))
+				position.y -= 1.8f * zoom * Time::GetDeltaTime();
+			else if(Input::IsKeyPressed(GM_KEY_S))
+				position.y += 1.8f * zoom * Time::GetDeltaTime();
+			if(Input::IsKeyPressed(GM_KEY_A))
+				position.x += 1.8f * zoom * Time::GetDeltaTime();
+			else if(Input::IsKeyPressed(GM_KEY_D))
+				position.x -= 1.8f * zoom * Time::GetDeltaTime();
+
+			smoothPosition = glm::mix(smoothPosition, position, 0.04f);
+			smoothZoom = glm::mix(smoothZoom, zoom, 0.02f);
+
+			ShaderData shaderData;
+			shaderData.positionAndZoom.x = smoothPosition.x;
+			shaderData.positionAndZoom.y = smoothPosition.y;
+			shaderData.positionAndZoom.z = smoothZoom;
+
+			g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
+			descriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
+		});
+
+		stage.SetRecordCommandsFunction([this](RHI::RenderCommandRecorder &commandRecorder, const RenderGraph::RenderStage::StateData &state)
+		{
+			//commandRecorder.BindDescriptorGroup(0, discriptorGrouSPE);
+			commandRecorder.Render(3, 0);
+		});
+
+		graph.SetOutputTextureName("RAW");
+
+		renderGraph = std::move(RenderGraph::Compiler::Compile(std::move(graph)));
+
+		renderGraph->Initialize();
+	}
+
+	void RenderingSystem::MandelbrotStage::Render()
+	{
+		renderGraph->Execute();
+		/*
+		using namespace RHI;
+
+		const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
+
+		RenderCommandRecorder commandRecorder(commandBuffers[swapChainImageIndex].get(), &renderStates[swapChainImageIndex]);
+
+		if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_1))
+			zoom += 0.8f * zoom * Time::GetDeltaTime();
+		if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_2))
+			zoom -= 0.8f * zoom * Time::GetDeltaTime();
+
+		if(Input::IsKeyPressed(GM_KEY_W))
+			position.y -= 1.8f * zoom * Time::GetDeltaTime();
+		else if(Input::IsKeyPressed(GM_KEY_S))
+			position.y += 1.8f * zoom * Time::GetDeltaTime();
+		if(Input::IsKeyPressed(GM_KEY_A))
+			position.x += 1.8f * zoom * Time::GetDeltaTime();
+		else if(Input::IsKeyPressed(GM_KEY_D))
+			position.x -= 1.8f * zoom * Time::GetDeltaTime();
+
+		smoothPosition = glm::mix(smoothPosition, position, 0.04f);
+		smoothZoom = glm::mix(smoothZoom, zoom, 0.02f);
+
+		ShaderData shaderData;
+		shaderData.positionAndZoom.x = smoothPosition.x;
+		shaderData.positionAndZoom.y = smoothPosition.y;
+		shaderData.positionAndZoom.z = smoothZoom;
+
+		g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
+		descriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
+
+		commandRecorder.BindDescriptorGroup(0, *descriptorGroups[swapChainImageIndex].get());
+		commandRecorder.Render(3, 0);
+
+		commandRecorder.StopRecording();
+
+		g_Device->SubmitRenderCommands(1, commandBuffers[swapChainImageIndex].get());*/
 	}
 }

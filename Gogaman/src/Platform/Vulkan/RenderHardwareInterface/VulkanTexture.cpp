@@ -12,6 +12,8 @@ namespace Gogaman
 		Texture::Texture(const Format format, const uint16_t width, const uint16_t height, const uint16_t depth, const uint8_t levelCount)
 			: AbstractTexture<Texture>(format, width, height, depth, levelCount)
 		{
+			const BaseFormat baseFormat = GetBaseFormat(m_Format);
+
 			VkImageCreateInfo imageDescriptor = {};
 			imageDescriptor.sType                 = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 			imageDescriptor.imageType             = m_Height == 1 ? VK_IMAGE_TYPE_1D : m_Depth == 1 ? VK_IMAGE_TYPE_2D : VK_IMAGE_TYPE_3D;
@@ -24,7 +26,8 @@ namespace Gogaman
 			imageDescriptor.samples               = VK_SAMPLE_COUNT_1_BIT;
 			imageDescriptor.tiling                = VK_IMAGE_TILING_OPTIMAL;
 			//TODO: Detect based on usage
-			imageDescriptor.usage                 = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			imageDescriptor.usage                 = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			imageDescriptor.usage                |= (baseFormat == BaseFormat::Value || baseFormat == BaseFormat::Color) ? VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT : VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
 			imageDescriptor.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
 			imageDescriptor.queueFamilyIndexCount = 0;
 			imageDescriptor.pQueueFamilyIndices   = nullptr;
@@ -40,8 +43,6 @@ namespace Gogaman
 			m_NativeData.vulkanMemory = g_Device->GetNativeData().vulkanMemoryAllocator.Allocate(DeviceMemory::Type::Device, memoryRequirements.memoryTypeBits, memoryRequirements.size);
 
 			vkBindImageMemory(vulkanDevice, m_NativeData.vulkanImage, m_NativeData.vulkanMemory.vulkanDeviceMemory, m_NativeData.vulkanMemory.offset);
-
-			const BaseFormat baseFormat = GetBaseFormat(m_Format);
 
 			VkImageViewCreateInfo imageViewDescriptor = {};
 			imageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

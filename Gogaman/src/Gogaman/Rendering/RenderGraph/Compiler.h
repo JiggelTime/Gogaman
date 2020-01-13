@@ -8,11 +8,10 @@ namespace Gogaman
 
 		class ExecutableGraph;
 
-		//Change to global function?
 		class Compiler
 		{
 		public:
-			static const ExecutableGraph &Compile(Graph &&graph);
+			static std::unique_ptr<ExecutableGraph> Compile(Graph &&graph);
 		private:
 			Compiler()  = delete;
 			~Compiler() = delete;

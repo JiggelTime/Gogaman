@@ -18,11 +18,13 @@
     <ClCompile Include="src\Gogaman\Core\Application.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Compiler.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Graph.cpp" />
-    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\StageBuilder.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Stage.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanCommandBuffer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanCommandHeap.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanComputeState.cpp" />
@@ -64,7 +66,7 @@
     <ClInclude Include="src\Gogaman\ECS\EntityManager.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Graph.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Resource.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\StageBuilder.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.h" />
     <ClInclude Include="src\Gogaman\Utilities\Algorithm\DirectedGraph.h" />
     <ClInclude Include="src\Gogaman\Utilities\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Utilities\Geometry\BoundingBox3D.h" />

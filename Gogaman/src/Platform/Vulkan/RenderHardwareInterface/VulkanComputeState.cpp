@@ -16,12 +16,12 @@ namespace Gogaman
 		ComputeState::ComputeState(const std::vector<DescriptorGroupLayout> &descriptorGroupLayouts, const ShaderProgramID shaderProgramID)
 			: AbstractComputeState(descriptorGroupLayouts, shaderProgramID)
 		{
-			const auto &shader = g_Device->GetResources().shaders.Get(g_Device->GetResources().shaderPrograms.Get(m_ShaderProgramID).GetShader<Shader::Stage::Compute>());
+			const auto &shaderProgram = g_Device->GetResources().shaders.Get(g_Device->GetResources().shaderPrograms.Get(m_ShaderProgramID).GetShader<Shader::Stage::Compute>());
 
 			VkPipelineShaderStageCreateInfo pipelineShaderStageDescriptor = {};
 			pipelineShaderStageDescriptor.sType  = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			pipelineShaderStageDescriptor.stage  = Shader::GetNativeStage(Shader::Stage::Compute);
-			pipelineShaderStageDescriptor.module = shader.GetNativeData().vulkanShaderModule;
+			pipelineShaderStageDescriptor.module = shaderProgram.GetNativeData().vulkanShaderModule;
 			pipelineShaderStageDescriptor.pName  = "main";
 
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;

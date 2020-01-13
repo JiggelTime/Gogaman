@@ -13,17 +13,29 @@ namespace Gogaman
 		class Graph
 		{
 		public:
-			Graph()  = default;
+			using StageIndex = uint8_t;
+		public:
+			Graph()
+				: m_OutputTextureName("")
+			{}
+
 			~Graph() = default;
 
-			void CreateStage(const Stage::InitializeFunction &initialize, const Stage::ExecuteFunction &execute);
+			inline ComputeStage            &CreateComputeStage(ComputeStage::StateData &&state)            { return m_ComputeStages.emplace_back(std::move(state));            }
+			inline PrerecordedComputeStage &CreatePrerecordedComputeStage(ComputeStage::StateData &&state) { return m_PrerecordedComputeStages.emplace_back(std::move(state)); }
+			inline RenderStage             &CreateRenderStage(RenderStage::StateData &&state)              { return m_RenderStages.emplace_back(std::move(state));             }
+			inline PrerecordedRenderStage  &CreatePrerecordedRenderStage(RenderStage::StateData &&state)   { return m_PrerecordedRenderStages.emplace_back(std::move(state));  }
 
-			inline void SetOutputTexture(const std::string &name) { m_OutputTextureName = name; }
+			void SetOutputTextureName(const std::string &name);
 			inline constexpr const std::string &GetOutputTextureName() const { return m_OutputTextureName; }
 		private:
-			DirectedGraph<Stage::Index> m_DirectedGraph;
-
-			std::vector<Stage> m_Stages;
+			std::pair<Stage::Type, StageIndex> StageIndexData(const StageIndex vertexIndex) const;
+			StageIndex VertexIndex(const Stage::Type stageType, const StageIndex stageIndex) const;
+		private:
+			std::vector<ComputeStage>            m_ComputeStages;
+			std::vector<PrerecordedComputeStage> m_PrerecordedComputeStages;
+			std::vector<RenderStage>             m_RenderStages;
+			std::vector<PrerecordedRenderStage>  m_PrerecordedRenderStages;
 
 			std::string m_OutputTextureName;
 		private:

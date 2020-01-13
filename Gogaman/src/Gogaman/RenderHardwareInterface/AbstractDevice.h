@@ -61,7 +61,8 @@ namespace Gogaman
 			inline void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().RecreateSwapChain(width, height, verticalSynchronization); }
 
 			inline void SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitTransferCommands(commandBufferCount, commandBuffers); }
-			inline void SubmitDirectCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitDirectCommands(commandBufferCount, commandBuffers); }
+			inline void SubmitComputeCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitComputeCommands(commandBufferCount, commandBuffers); }
+			inline void SubmitRenderCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitRenderCommands(commandBufferCount, commandBuffers); }
 
 			inline void Present() { this->GetImplementation().Present(); }
 

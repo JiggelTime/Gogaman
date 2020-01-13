@@ -135,16 +135,6 @@ namespace Gogaman
 			~AbstractRenderState() = default;
 		private:
 			RenderSurfaceID m_RenderSurfaceID;
-
-			//vertexLayout
-			//shader
-			//rasterizerState
-			//depthStencilState
-			//BlendState
-			//sampleMask
-			//rootSignature
-
-			//StateGraph<GBO>
 		private:
 			friend ImplementationType;
 		};

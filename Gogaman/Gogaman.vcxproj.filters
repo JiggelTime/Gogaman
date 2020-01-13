@@ -31,8 +31,10 @@
     <ClCompile Include="src\Gogaman\Rendering\RenderingSystem.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanDeviceMemory.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Compiler.cpp" />
-    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\StageBuilder.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Graph.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Stage.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -149,6 +151,6 @@
     <ClInclude Include="src\Gogaman\Utilities\Algorithm\DirectedGraph.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Graph.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Resource.h" />
-    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\StageBuilder.h" />
+    <ClInclude Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.h" />
   </ItemGroup>
 </Project>

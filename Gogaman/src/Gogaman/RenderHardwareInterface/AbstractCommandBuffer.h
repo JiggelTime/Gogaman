@@ -22,8 +22,13 @@ namespace Gogaman
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
 		private:
-			AbstractCommandBuffer()  = default;
+			AbstractCommandBuffer(bool isReusable)
+				: m_IsReusable(isReusable)
+			{}
+
 			~AbstractCommandBuffer() = default;
+		protected:
+			bool m_IsReusable;
 		private:
 			friend ImplementationType;
 		};

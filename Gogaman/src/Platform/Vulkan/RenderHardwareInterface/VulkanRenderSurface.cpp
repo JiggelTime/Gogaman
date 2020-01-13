@@ -28,7 +28,7 @@ namespace Gogaman
 				attachmentDescriptors[i].format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
 				attachmentDescriptors[i].samples        = VK_SAMPLE_COUNT_1_BIT;
 				//TODO: Detect based on usage
-				//attachmentDescriptor.loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
+				//attachmentDescriptors[i].loadOp         = attachmentTexture.GetState() == Texture::State::Undefined ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD;
 				attachmentDescriptors[i].loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				//TODO: Detect based on usage
 				attachmentDescriptors[i].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
@@ -55,7 +55,8 @@ namespace Gogaman
 				attachmentDescriptors[m_ColorAttachmentCount].format         = Texture::GetNativeFormat(attachmentTexture.GetFormat());
 				attachmentDescriptors[m_ColorAttachmentCount].samples        = VK_SAMPLE_COUNT_1_BIT;
 				//TODO: Detect based on usage
-				attachmentDescriptors[m_ColorAttachmentCount].loadOp         = VK_ATTACHMENT_LOAD_OP_LOAD;
+				//attachmentDescriptors[m_ColorAttachmentCount].loadOp         = attachmentTexture.GetState() == Texture::State::Undefined ? VK_ATTACHMENT_LOAD_OP_DONT_CARE : VK_ATTACHMENT_LOAD_OP_LOAD;
+				attachmentDescriptors[m_ColorAttachmentCount].loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 				//TODO: Detect based on usage
 				attachmentDescriptors[m_ColorAttachmentCount].storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
 				//TODO: Detect based on usage
