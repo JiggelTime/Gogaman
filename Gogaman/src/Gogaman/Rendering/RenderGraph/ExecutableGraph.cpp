@@ -1,9 +1,12 @@
 #include "pch.h"
 #include "ExecutableGraph.h"
 
+#include "Gogaman/RenderhardwareInterface/RenderSurface.h"
 #include "Gogaman/RenderHardwareInterface/ComputeCommandRecorder.h"
 #include "Gogaman/RenderHardwareInterface/RenderCommandRecorder.h"
 #include "Gogaman/RenderhardwareInterface/Device.h"
+
+#include "Gogaman/Rendering/FrameContext.h"
 
 namespace Gogaman
 {
@@ -21,49 +24,15 @@ namespace Gogaman
 				g_Device->GetResources().renderSurfaces.Destroy(i.renderSurfaceID);
 				i.state.reset();
 			}
-
-			for(auto &i : m_PrerecordedComputeStages)
-			{
-				i.commandBuffer.reset();
-
-				i.state.reset();
-			}
-
-			for(auto &i : m_PrerecordedRenderStages)
-			{
-				i.commandBuffer.reset();
-
-				g_Device->GetResources().renderSurfaces.Destroy(i.renderSurfaceID);
-				i.state.reset();
-			}
-
-			m_ComputeCommandHeap.reset();
-			m_RenderCommandHeap.reset();
 		}
 
 		void ExecutableGraph::Initialize()
 		{
 			m_ResourceManager.Initialize();
 
-			m_ComputeCommandHeap = std::make_unique<RHI::CommandHeap>(RHI::CommandHeap::Type::Compute);
-			m_RenderCommandHeap  = std::make_unique<RHI::CommandHeap>(RHI::CommandHeap::Type::Render);
-
 			auto InitializeComputeStage = [this](auto &stage)
 			{
 				stage.state = std::make_unique<RHI::ComputeState>(stage.stateData.descriptorGroupLayouts, stage.stateData.shaderProgramID);
-			};
-
-			auto InitializePrerecordedComputeStage = [&](ExecutablePrerecordedComputeStage &stage)
-			{
-				InitializeComputeStage(stage);
-
-				stage.commandBuffer = m_ComputeCommandHeap->CreateReusableCommandBuffer();
-
-				RHI::ComputeCommandRecorder commandRecorder(stage.commandBuffer.get(), stage.state.get());
-
-				stage.recordCommands(commandRecorder, stage.stateData);
-				//Inject barriers here?
-				commandRecorder.StopRecording();
 			};
 
 			auto InitializeRenderStage = [&](auto &stage)
@@ -87,85 +56,68 @@ namespace Gogaman
 
 				stage.renderSurfaceID = g_Device->GetResources().renderSurfaces.Create(colorAttachments.size(), colorAttachments.data(), std::move(depthStencilAttachment), stage.stateData.viewportWidth, stage.stateData.viewportHeight, 1);
 
-				stage.state = std::make_unique<RHI::RenderState>(stage.stateData.descriptorGroupLayouts, stage.stateData.vertexLayout, stage.stateData.shaderProgramID, stage.renderSurfaceID, stage.stateData.depthStencilState, stage.stateData.blendState, stage.stateData.viewportWidth, stage.stateData.viewportHeight, stage.stateData.cullState);
-			};
-
-			auto InitializePrerecordedRenderStage = [&](ExecutablePrerecordedRenderStage &stage)
-			{
-				InitializeRenderStage(stage);
-
-				stage.commandBuffer = m_RenderCommandHeap->CreateReusableCommandBuffer();
-
-				RHI::RenderCommandRecorder commandRecorder(stage.commandBuffer.get(), stage.state.get());
-
-				stage.recordCommands(commandRecorder, stage.stateData);
-				//Inject barriers here?
-				commandRecorder.StopRecording();
+				stage.state = std::make_unique<RHI::RenderState>(stage.stateData.descriptorGroupLayouts, *stage.stateData.vertexLayout.get(), stage.stateData.shaderProgramID, stage.renderSurfaceID, stage.stateData.depthStencilState, stage.stateData.blendState, stage.stateData.viewportWidth, stage.stateData.viewportHeight, stage.stateData.cullState);
 			};
 
 			for(const auto i : m_ExecutionOrder)
 			{
-				switch(i.stageType)
-				{
-				case Stage::Type::Compute:
+				if(i.stageType == Stage::Type::Compute)
 					InitializeComputeStage(m_ComputeStages[i.stageIndex]);
-					break;
-				case Stage::Type::Render:
+				else
 					InitializeRenderStage(m_RenderStages[i.stageIndex]);
-					break;
-				case Stage::Type::PrerecordedCompute:
-					InitializePrerecordedComputeStage(m_PrerecordedComputeStages[i.stageIndex]);
-					break;
-				case Stage::Type::PrerecordedRender:
-					InitializePrerecordedRenderStage(m_PrerecordedRenderStages[i.stageIndex]);
-					break;
-				}
 			}
 		}
 	
-		void ExecutableGraph::Execute()
+		void ExecutableGraph::Execute(FrameContext &frameContext)
 		{
-			auto ExecuteComputeStage = [this](ExecutableComputeStage &stage)
+			auto ExecuteComputeStage = [&](ExecutableComputeStage &stage)
 			{
-				//Submit a command buffer that has the stage's barriers?
-				stage.execute(m_ResourceManager);
+				//Cmd buffer is on compute queue so that the submission is batched with the stage's submissions during execute()
+				RHI::CommandBufferID commandBufferID = frameContext.GetComputeQueue().AvailableCommandBuffer();
+				RHI::CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
+
+				RHI::TransferCommandRecorder commandRecorder(commandBuffer);
+				for(const auto &i : stage.textureStateUpdates)
+				{
+					GM_LOG_CORE_INFO("Updating state for texture %s", i.first.c_str());
+					commandRecorder.UpdateState(m_ResourceManager.GetTexture(i.first), i.second);
+				}
+
+				commandRecorder.StopRecording();
+				frameContext.GetComputeQueue().Submit(commandBufferID);
+				//MAKE EXECUTION FUNCTION FOR COMPUTE TAKE A COMPUTESTATE, TEMPORARY NULLPTR BECAUSE CAN'T BE BOTHERED RN
+				stage.execute(frameContext, m_ResourceManager, nullptr);
 			};
 
-			auto ExecuteRenderStage = [this](ExecutableRenderStage &stage)
+			auto ExecuteRenderStage = [&](ExecutableRenderStage &stage)
 			{
-				//Submit a command buffer that has the stage's barriers?
-				stage.execute(m_ResourceManager);
-			};
+				//Cmd buffer is on render queue so that the submission is batched with the stage's submissions during execute()
+				RHI::CommandBufferID commandBufferID = frameContext.GetRenderQueue().AvailableCommandBuffer();
+				RHI::CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
 
-			auto ExecutePrerecordedComputeStage = [this](ExecutablePrerecordedComputeStage &stage)
-			{
-				stage.execute(m_ResourceManager);
-				g_Device->SubmitComputeCommands(1, stage.commandBuffer.get());
-			};
+				RHI::TransferCommandRecorder commandRecorder(commandBuffer);
+				for(const auto &i : stage.textureStateUpdates)
+				{
+					auto &texture = m_ResourceManager.GetTexture(i.first);
+					if(texture.GetState() != i.second)
+					{
+						//GM_LOG_CORE_INFO("Updating state for texture %s", i.first.c_str());
+						commandRecorder.UpdateState(texture, i.second);
+					}
+				}
 
-			auto ExecutePrerecordedRenderStage = [this](ExecutablePrerecordedRenderStage &stage)
-			{
-				stage.execute(m_ResourceManager);
-				g_Device->SubmitRenderCommands(1, stage.commandBuffer.get());
+				commandRecorder.StopRecording();
+				frameContext.GetRenderQueue().Submit(commandBufferID);
+
+				stage.execute(frameContext, m_ResourceManager, stage.state.get());
 			};
 
 			for(ExecutionData i : m_ExecutionOrder)
 			{
-				switch(i.stageType)
-				{
-				case Stage::Type::Compute:
+				if(i.stageType == Stage::Type::Compute)
 					ExecuteComputeStage(m_ComputeStages[i.stageIndex]);
-					break;
-				case Stage::Type::Render:
+				else
 					ExecuteRenderStage(m_RenderStages[i.stageIndex]);
-					break;
-				case Stage::Type::PrerecordedCompute:
-					ExecutePrerecordedComputeStage(m_PrerecordedComputeStages[i.stageIndex]);
-					break;
-				case Stage::Type::PrerecordedRender:
-					ExecutePrerecordedRenderStage(m_PrerecordedRenderStages[i.stageIndex]);
-					break;
-				}
 			}
 		}
 	}

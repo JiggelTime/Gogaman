@@ -41,11 +41,6 @@ if(!(x))\
 	#define GM_DEBUG_STATIC_ASSERT(x, message)
 #endif
 
-#define GM_KiB 1024
-#define GM_MiB (1024 * KiB)
-#define GM_GiB (1024 * MiB)
-#define GM_TiB (1024 * GiB)
-
 #define GM_FORCE_INLINE __forceinline
 
 /*

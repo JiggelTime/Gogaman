@@ -5,7 +5,7 @@
 #include "Gogaman/Core/Time.h"
 #include "Gogaman/Core/Application.h"
 
-#include "Gogaman/RenderHardwareInterface/CommandBuffer.h"
+#include "Gogaman/RenderHardwareInterface/Fence.h"
 
 #include <GLFW/glfw3.h>
 
@@ -239,7 +239,8 @@ namespace Gogaman
 				//Ensure swap chain image usage is supported
 				VkSurfaceCapabilitiesKHR supportedSurfaceCapabilities;
 				vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, m_NativeData.vulkanSurface, &supportedSurfaceCapabilities);
-				if(!(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) || !(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
+				//if(!(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT) || !(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_TRANSFER_DST_BIT))
+				if(!(supportedSurfaceCapabilities.supportedUsageFlags & VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT))
 					return false;
 
 				//Ensure at least 1 surface present mode is supported
@@ -340,16 +341,16 @@ namespace Gogaman
 			VkSemaphoreCreateInfo semaphoreDescriptor = {};
 			semaphoreDescriptor.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-			VkFenceCreateInfo fenceDescriptor = {};
-			fenceDescriptor.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceDescriptor.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+			//VkFenceCreateInfo fenceDescriptor = {};
+			//fenceDescriptor.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			//fenceDescriptor.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-			for(uint32_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			for(uint32_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 			{
 				vkCreateSemaphore(m_NativeData.vulkanDevice, &semaphoreDescriptor, nullptr, &m_NativeData.vulkanSwapChainImageAvailableSemaphores[i]);
 				vkCreateSemaphore(m_NativeData.vulkanDevice, &semaphoreDescriptor, nullptr, &m_NativeData.vulkanRenderCompletedSemaphores[i]);
 
-				vkCreateFence(m_NativeData.vulkanDevice, &fenceDescriptor, nullptr, &m_NativeData.vulkanPresentFences[i]);
+				//vkCreateFence(m_NativeData.vulkanDevice, &fenceDescriptor, nullptr, &m_NativeData.vulkanPresentFences[i]);
 			}
 		}
 
@@ -357,12 +358,12 @@ namespace Gogaman
 		{
 			vkDeviceWaitIdle(m_NativeData.vulkanDevice);
 
-			for(uint32_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			for(uint32_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 			{
 				vkDestroySemaphore(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChainImageAvailableSemaphores[i], nullptr);
 				vkDestroySemaphore(m_NativeData.vulkanDevice, m_NativeData.vulkanRenderCompletedSemaphores[i],         nullptr);
 				
-				vkDestroyFence(m_NativeData.vulkanDevice, m_NativeData.vulkanPresentFences[i], nullptr);
+				//vkDestroyFence(m_NativeData.vulkanDevice, m_NativeData.vulkanPresentFences[i], nullptr);
 			}
 
 			vkDestroySwapchainKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, nullptr);
@@ -452,12 +453,14 @@ namespace Gogaman
 			VkSwapchainCreateInfoKHR swapChainDescriptor = {};
 			swapChainDescriptor.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 			swapChainDescriptor.surface          = m_NativeData.vulkanSurface;
-			swapChainDescriptor.minImageCount    = supportedSurfaceCapabilities.maxImageCount ? std::clamp(GM_SWAP_CHAIN_BUFFER_COUNT, supportedSurfaceCapabilities.minImageCount, supportedSurfaceCapabilities.maxImageCount) : std::max(GM_SWAP_CHAIN_BUFFER_COUNT, supportedSurfaceCapabilities.minImageCount);
+			swapChainDescriptor.minImageCount    = supportedSurfaceCapabilities.maxImageCount ? std::clamp(GM_RHI_CONCURRENT_FRAME_COUNT, supportedSurfaceCapabilities.minImageCount, supportedSurfaceCapabilities.maxImageCount) : std::max(GM_RHI_CONCURRENT_FRAME_COUNT, supportedSurfaceCapabilities.minImageCount);
 			swapChainDescriptor.imageFormat      = m_NativeData.vulkanSwapChainSurfaceFormat.format;
 			swapChainDescriptor.imageColorSpace  = m_NativeData.vulkanSwapChainSurfaceFormat.colorSpace;
 			swapChainDescriptor.imageExtent      = swapChainExtent;
 			swapChainDescriptor.imageArrayLayers = 1;
-			swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			//Might not need TRANSFER_DST_BIT
+			//swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+			swapChainDescriptor.imageUsage       = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 			swapChainDescriptor.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 			swapChainDescriptor.preTransform     = supportedSurfaceCapabilities.currentTransform;
 			swapChainDescriptor.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
@@ -470,13 +473,13 @@ namespace Gogaman
 
 			uint32_t swapChainImageCount;
 			vkGetSwapchainImagesKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, &swapChainImageCount, nullptr);
-			GM_ASSERT(swapChainImageCount == GM_SWAP_CHAIN_BUFFER_COUNT, "Failed to create swap chain");
+			GM_ASSERT(swapChainImageCount == GM_RHI_CONCURRENT_FRAME_COUNT, "Failed to create swap chain");
 
-			m_NativeData.vulkanSwapChainImages.resize(GM_SWAP_CHAIN_BUFFER_COUNT);
+			m_NativeData.vulkanSwapChainImages.resize(GM_RHI_CONCURRENT_FRAME_COUNT);
 			vkGetSwapchainImagesKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, &swapChainImageCount, m_NativeData.vulkanSwapChainImages.data());
 
-			m_NativeData.vulkanSwapChainImageViews.resize(GM_SWAP_CHAIN_BUFFER_COUNT);
-			for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			m_NativeData.vulkanSwapChainImageViews.resize(GM_RHI_CONCURRENT_FRAME_COUNT);
+			for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 			{
 				VkImageViewCreateInfo swapChainImageViewDescriptor = {};
 				swapChainImageViewDescriptor.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -497,16 +500,18 @@ namespace Gogaman
 					GM_DEBUG_ASSERT(false, "Failed to create swap chain | Failed to create Vulkan image view");
 			}
 
-			vkResetFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]);
+			//vkResetFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]);
 
 			vkAcquireNextImageKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, UINT64_MAX, m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex], VK_NULL_HANDLE, &m_NativeData.vulkanSwapChainImageIndex);
 		
+			//m_NativeData.vulkanSwapChainImageIndex = 0;
+
 			//Create depth texture
 			TextureID depthTextureID;
 			Texture &depthTexture = g_Device->GetResources().textures.Create(depthTextureID, Texture::Format::D32F, swapChainExtent.width, swapChainExtent.height);
 
 			//Create render surfaces
-			for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 			{
 				TextureID colorTextureID;
 				Texture &colorTexture = g_Device->GetResources().textures.Create(colorTextureID, Texture::Format::XYZW8, swapChainExtent.width, swapChainExtent.height);
@@ -595,7 +600,7 @@ namespace Gogaman
 		
 		void Device::RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization)
 		{
-			for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 			{
 				m_Resources.renderSurfaces.Destroy(m_SwapChainRenderSurfaceIDs[i]);
 			}
@@ -604,9 +609,12 @@ namespace Gogaman
 
 			CreateSwapChain(width, height, verticalSynchronization);
 		}
-	
-		void Device::SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers)
+
+		void Device::SubmitCommands(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers, Fence *fence)
 		{
+			//TEMPORARY
+			vkDeviceWaitIdle(m_NativeData.vulkanDevice);
+
 			VkCommandBuffer *vulkanCommandBuffers = new VkCommandBuffer[commandBufferCount];
 			for(uint8_t i = 0; i < commandBufferCount; i++)
 			{
@@ -618,32 +626,35 @@ namespace Gogaman
 			submitDescriptor.commandBufferCount = commandBufferCount;
 			submitDescriptor.pCommandBuffers    = vulkanCommandBuffers;
 
-			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Transfer], 1, &submitDescriptor, nullptr) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to submit transfer commands");
+			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)type], 1, &submitDescriptor, VK_NULL_HANDLE) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to submit commands");
 
 			delete[] vulkanCommandBuffers;
 		}
 
-		void Device::SubmitComputeCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers)
+		void Device::SubmitCommands(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBufferID *commandBufferIDs, Fence *fence)
 		{
+			//TEMPORARY
+			vkDeviceWaitIdle(m_NativeData.vulkanDevice);
+
 			VkCommandBuffer *vulkanCommandBuffers = new VkCommandBuffer[commandBufferCount];
 			for(uint8_t i = 0; i < commandBufferCount; i++)
 			{
-				vulkanCommandBuffers[i] = commandBuffers[i].GetNativeData().vulkanCommandBuffer;
+				vulkanCommandBuffers[i] = m_Resources.commandBuffers.Get(commandBufferIDs[i]).GetNativeData().vulkanCommandBuffer;
 			}
-
+			
 			VkSubmitInfo submitDescriptor = {};
 			submitDescriptor.sType              = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 			submitDescriptor.commandBufferCount = commandBufferCount;
 			submitDescriptor.pCommandBuffers    = vulkanCommandBuffers;
 
-			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Compute], 1, &submitDescriptor, nullptr) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to submit transfer commands");
+			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)type], 1, &submitDescriptor, VK_NULL_HANDLE) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to submit commands");
 
 			delete[] vulkanCommandBuffers;
 		}
 
-		void Device::SubmitRenderCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers)
+		void Device::SubmitRenderCommands(const uint8_t commandBufferCount, CommandBufferID *commandBufferIDs, Fence *fence)
 		{
 			const VkSemaphore &swapChainImageAvailableSemaphore = m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex];
 			const VkSemaphore &renderCompletedSemaphore         = m_NativeData.vulkanRenderCompletedSemaphores[m_NativeData.vulkanPresentSynchronizationIndex];
@@ -651,7 +662,7 @@ namespace Gogaman
 			VkCommandBuffer *vulkanCommandBuffers = new VkCommandBuffer[commandBufferCount];
 			for(uint8_t i = 0; i < commandBufferCount; i++)
 			{
-				vulkanCommandBuffers[i] = commandBuffers[i].GetNativeData().vulkanCommandBuffer;
+				vulkanCommandBuffers[i] = m_Resources.commandBuffers.Get(commandBufferIDs[i]).GetNativeData().vulkanCommandBuffer;
 			}
 
 			VkPipelineStageFlags pipelineStageFlags = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
@@ -666,7 +677,7 @@ namespace Gogaman
 			submitDescriptor.signalSemaphoreCount   = 1;
 			submitDescriptor.pSignalSemaphores      = &renderCompletedSemaphore;
 
-			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Render], 1, &submitDescriptor, m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]) != VK_SUCCESS)
+			if(vkQueueSubmit(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Render], 1, &submitDescriptor, VK_NULL_HANDLE) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to submit render commands");
 
 			delete[] vulkanCommandBuffers;
@@ -674,6 +685,9 @@ namespace Gogaman
 
 		void Device::Present()
 		{
+			//TEMPORARY
+			vkDeviceWaitIdle(m_NativeData.vulkanDevice);
+
 			VkPresentInfoKHR presentDescriptor = {};
 			presentDescriptor.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 			presentDescriptor.waitSemaphoreCount = 1;
@@ -684,12 +698,12 @@ namespace Gogaman
 
 			vkQueuePresentKHR(m_NativeData.vulkanQueues[(uint8_t)CommandHeap::Type::Render], &presentDescriptor);
 
-			m_NativeData.vulkanPresentSynchronizationIndex = (m_NativeData.vulkanPresentSynchronizationIndex + 1) % GM_SWAP_CHAIN_BUFFER_COUNT;
+			m_NativeData.vulkanPresentSynchronizationIndex = (m_NativeData.vulkanPresentSynchronizationIndex + 1) % GM_RHI_CONCURRENT_FRAME_COUNT;
 			
-			vkWaitForFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex], VK_TRUE, UINT64_MAX);
-			vkResetFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]);
-
 			vkAcquireNextImageKHR(m_NativeData.vulkanDevice, m_NativeData.vulkanSwapChain, UINT64_MAX, m_NativeData.vulkanSwapChainImageAvailableSemaphores[m_NativeData.vulkanPresentSynchronizationIndex], VK_NULL_HANDLE, &m_NativeData.vulkanSwapChainImageIndex);
+			
+			//vkWaitForFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex], VK_TRUE, UINT64_MAX);
+			//vkResetFences(m_NativeData.vulkanDevice, 1, &m_NativeData.vulkanPresentFences[m_NativeData.vulkanPresentSynchronizationIndex]);
 		}
 	}
 }

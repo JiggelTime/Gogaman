@@ -14,6 +14,7 @@ namespace Gogaman
 {
 	namespace RenderGraph
 	{
+		//TODO: Rename to ResourceRegistry
 		class ResourceManager
 		{
 		private:
@@ -61,10 +62,12 @@ namespace Gogaman
 			void DeallocateBuffer(const std::string &name);
 
 			RHI::TextureID GetTextureID(const std::string &name);
-			const RHI::Texture &GetTexture(const std::string &name);
+
+			RHI::Texture &GetTexture(const std::string &name);
 
 			RHI::BufferID GetBufferID(const std::string &name);
-			const RHI::Buffer &GetBuffer(const std::string &name);
+
+			RHI::Buffer &GetBuffer(const std::string &name);
 		private:
 			std::unordered_map<std::string, ResourceIndex> m_ResourceNameIndices;
 

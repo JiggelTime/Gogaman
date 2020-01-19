@@ -66,6 +66,13 @@ namespace Gogaman
 		m_RenderResolutionWidth  = (uint16_t)(Application::GetInstance().GetWindow().GetWidth()  * GM_CONFIG.resScale);
 		m_RenderResolutionHeight = (uint16_t)(Application::GetInstance().GetWindow().GetHeight() * GM_CONFIG.resScale);
 
+		m_FrameFence = std::make_unique<LinearFence>(GM_RHI_CONCURRENT_FRAME_COUNT);
+
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
+		{
+			m_FrameContexts[i] = std::make_unique<FrameContext>();
+		}
+
 		/*
 		m_Camera.SetFocalLength(20.0f);
 		m_Camera.SetSensorHeight(24.0f);
@@ -97,15 +104,15 @@ namespace Gogaman
 		CreateRenderState();
 
 		DescriptorHeap::DescriptorCounts descriptorCounts;
-		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_SWAP_CHAIN_BUFFER_COUNT * 17);
-		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::Sampler>(GM_SWAP_CHAIN_BUFFER_COUNT * 2);
-		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderTexture>(GM_SWAP_CHAIN_BUFFER_COUNT * 5 * 16);
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_RHI_CONCURRENT_FRAME_COUNT * 17);
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::Sampler>(GM_RHI_CONCURRENT_FRAME_COUNT * 2);
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderTexture>(GM_RHI_CONCURRENT_FRAME_COUNT * 5 * 16);
 		m_DescriptorHeap = std::make_unique<DescriptorHeap>(std::move(descriptorCounts));
 
 		m_TransferCommandHeap = std::make_unique<CommandHeap>(CommandHeap::Type::Transfer);
 		m_RenderCommandHeap   = std::make_unique<CommandHeap>(CommandHeap::Type::Render);
 
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
 			m_CommandBuffers[i] = m_RenderCommandHeap->CreateCommandBuffer();
 
@@ -117,7 +124,7 @@ namespace Gogaman
 		m_PointSampler       = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Point);
 		m_AnisotropicSampler = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Anisotropic);*/
 
-		m_MandelbrotStage.Initialize();
+		m_Mandelbrot.Initialize();
 	}
 
 	void RenderingSystem::CreateRenderSurfaces()
@@ -157,19 +164,24 @@ namespace Gogaman
 	{
 		vkDeviceWaitIdle(g_Device->GetNativeData().vulkanDevice);
 
-		const auto renderStateCount = m_MandelbrotStage.renderStates.size();
+		const auto renderStateCount = m_Mandelbrot.renderStates.size();
 		for(auto i = 0; i < renderStateCount; i++)
 		{
-			m_MandelbrotStage.renderStates.pop_back();
+			m_Mandelbrot.renderStates.pop_back();
 		}
 
-		g_Device->GetResources().shaders.Destroy(m_MandelbrotStage.vertexShaderID);
-		g_Device->GetResources().shaders.Destroy(m_MandelbrotStage.pixelShaderID);
+		g_Device->GetResources().shaders.Destroy(m_Mandelbrot.v_MandelbrotShaderID);
+		g_Device->GetResources().shaders.Destroy(m_Mandelbrot.p_MandebrotShaderID);
 
-		g_Device->GetResources().shaderPrograms.Destroy(m_MandelbrotStage.shaderProgramID);
+		g_Device->GetResources().shaderPrograms.Destroy(m_Mandelbrot.mandelbrotShaderProgramID);
 
-		m_MandelbrotStage.CreateShaders();
-		m_MandelbrotStage.CreateRenderState();
+		g_Device->GetResources().shaders.Destroy(m_Mandelbrot.v_PostprocessShaderID);
+		g_Device->GetResources().shaders.Destroy(m_Mandelbrot.p_PostprocessShaderID);
+
+		g_Device->GetResources().shaderPrograms.Destroy(m_Mandelbrot.postprocessShaderProgramID);
+
+		m_Mandelbrot.CreateShaders();
+		m_Mandelbrot.CreateRenderState();
 
 		/*
 		const auto renderStateCount = m_RenderStates.size();
@@ -212,8 +224,8 @@ namespace Gogaman
 
 		RenderState::BlendState blendState;
 
-		m_RenderStates.reserve(GM_SWAP_CHAIN_BUFFER_COUNT);
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		m_RenderStates.reserve(GM_RHI_CONCURRENT_FRAME_COUNT);
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
 			m_RenderStates.emplace_back(m_DescriptorGroupLayouts, vertexLayout, m_ShaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, m_RenderResolutionWidth, m_RenderResolutionHeight, RenderState::CullOperation::None);
 		}
@@ -238,11 +250,13 @@ namespace Gogaman
 
 		FlexData::Print(flexData);
 
-		std::unique_ptr<CommandBuffer> transferCommandBuffer = m_TransferCommandHeap->CreateCommandBuffer();
+		//std::unique_ptr<CommandBuffer> transferCommandBuffer = m_TransferCommandHeap->CreateCommandBuffer();
+		//TEMPORARY JUST SO THAT IT COMPILES | THIS WILL NOT WORK | CHANGE IT TO AQUIRE AN AVAILABLE COMMAND BUFFER FROM FRAME CONTEXT
+		std::unique_ptr<CommandBuffer> transferCommandBuffer = std::make_unique<CommandBuffer>();
 		TransferCommandRecorder        transferCommandRecorder(transferCommandBuffer.get());
 
 		//Import materials
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
 			m_MaterialDataDescriptorGroups[i].reserve(1);
 		}
@@ -289,13 +303,13 @@ namespace Gogaman
 		else
 			material.emissivity = ImportFlexTexture(Texture::Format::X8, FlexData::GetDefaultEmissivityTexture());
 
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
 			m_MaterialDataDescriptorGroups[i].emplace_back(m_DescriptorHeap.get(), &m_DescriptorGroupLayouts[1]);
 		}
 
 		//Import meshes
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
 			m_MeshDataDescriptorGroups[i].reserve(flexData.meshes.size());
 		}
@@ -349,14 +363,14 @@ namespace Gogaman
 
 			world.AddComponent(meshEntity, std::move(renderableComponent));
 
-			for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+			for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 			{
 				m_MeshDataDescriptorGroups[i].emplace_back(m_DescriptorHeap.get(), &m_DescriptorGroupLayouts[2]);
 			}
 		}
 
 		transferCommandRecorder.StopRecording();
-		g_Device->SubmitTransferCommands(1, transferCommandBuffer.get());
+		//g_Device->SubmitTransferCommands(1, transferCommandBuffer.get());
 
 		//Import point lights
 		for(const auto &i : flexData.pointLights)
@@ -477,7 +491,25 @@ namespace Gogaman
 		//finalBuffer.CopyDepthBuffer(GM_RENDERING_CONTEXT.GetRenderSurfaces().Get(m_G_Buffer), m_RenderResolutionWidth, m_RenderResolutionHeight, TextureInterpolation::Point);
 		*/
 
-		m_MandelbrotStage.Render();
+		m_Mandelbrot.Render(GetCurrentFrameContext());
+
+		Present();
+	}
+
+	void RenderingSystem::Present()
+	{
+		//TODO: Make a RHI::Device GetCurrentFrameIndex() function
+
+		GetCurrentFrameContext().GetRenderQueue().Submit(m_FrameFence.get());
+
+		//Submit any remaining work (in transfer or compute queue)
+		//GetCurrentFrameContext().Flush();
+
+		g_Device->Present();
+
+		//m_FrameFence->Next();
+
+		GetCurrentFrameContext().Reset();
 	}
 
 	void RenderingSystem::Shutdown()
@@ -506,41 +538,51 @@ namespace Gogaman
 		return true;
 	}
 
-	void RenderingSystem::MandelbrotStage::Initialize()
+	void RenderingSystem::Mandelbrot::Initialize()
 	{
 		using namespace RHI;
 
 		CreateShaders();
 
-		DescriptorGroupLayout::Binding *descriptorBindings = new DescriptorGroupLayout::Binding[1];
-		descriptorBindings[0].type = DescriptorHeap::Type::ShaderConstantBuffer;
-		descriptorGroupLayouts.emplace_back(1, descriptorBindings, Shader::StageFlag::Pixel);
+		CreateRenderGraph();
 
-		//CreateRenderState();
+		//DescriptorGroupLayout::Binding *descriptorBindings = new DescriptorGroupLayout::Binding[1];
+		//descriptorBindings[0].type = DescriptorHeap::Type::ShaderConstantBuffer;
+
+		//descriptorGroupLayouts.emplace_back(1, descriptorBindings, Shader::StageFlag::Pixel);
+
+		CreateRenderState();
 
 		DescriptorHeap::DescriptorCounts descriptorCounts;
-		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_SWAP_CHAIN_BUFFER_COUNT);
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderConstantBuffer>(GM_RHI_CONCURRENT_FRAME_COUNT);
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::Sampler>(1);
+		descriptorCounts.SetDescriptorCount<DescriptorHeap::Type::ShaderTexture>(GM_RHI_CONCURRENT_FRAME_COUNT);
 		descriptorHeap = std::make_unique<DescriptorHeap>(std::move(descriptorCounts));
+
+		//descriptorGroup = std::make_unique<DescriptorGroup>(descriptorHeap.get(), &descriptorGroupLayouts[0]);
 
 		commandHeap = std::make_unique<CommandHeap>(CommandHeap::Type::Render);
 
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
-			commandBuffers[i] = commandHeap->CreateCommandBuffer();
+			//commandBuffers[i] = commandHeap->CreateCommandBuffer();
 
-			descriptorGroups[i] = std::make_unique<DescriptorGroup>(descriptorHeap.get(), &descriptorGroupLayouts[0]);
+			mandelbulbDescriptorGroups[i]  = std::make_unique<DescriptorGroup>(descriptorHeap.get(), &mandelbulbDescriptorGroupLayouts[0]);
+			postprocessDescriptorGroups[i] = std::make_unique<DescriptorGroup>(descriptorHeap.get(), &postprocessDescriptorGroupLayouts[0]);
 
 			shaderDataBuffers[i] = g_Device->GetResources().buffers.Create(DeviceMemory::Type::DeviceUpload, sizeof(ShaderData), Buffer::BindFlag::ShaderConstants);
 		}
 
-		CreateRenderGraph();
+		pointSampler = g_Device->GetResources().samplers.Create(Sampler::Interpolation::Point);
+
+		renderGraph->Initialize();
 
 		smoothPosition = glm::vec2(0.0f);
 		zoom           = 1.0f;
 		smoothZoom     = zoom;
 	}
 
-	void RenderingSystem::MandelbrotStage::CreateShaders()
+	void RenderingSystem::Mandelbrot::CreateShaders()
 	{
 		using namespace RHI;
 
@@ -557,18 +599,30 @@ namespace Gogaman
 			return std::pair<uint32_t, uint8_t *>(size, buffer);
 		};
 
+		//Mandelbrot shader
 		auto vertexShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/v_Mandelbrot.spv");
-		vertexShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
+		v_MandelbrotShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
 
 		auto pixelShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/p_Mandelbrot.spv");
-		pixelShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
+		p_MandebrotShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
 
-		auto &shaderProgram = g_Device->GetResources().shaderPrograms.Create(shaderProgramID);
-		shaderProgram.SetShader<Shader::Stage::Vertex>(vertexShaderID);
-		shaderProgram.SetShader<Shader::Stage::Pixel>(pixelShaderID);
+		auto &mandelbrotShaderProgram = g_Device->GetResources().shaderPrograms.Create(mandelbrotShaderProgramID);
+		mandelbrotShaderProgram.SetShader<Shader::Stage::Vertex>(v_MandelbrotShaderID);
+		mandelbrotShaderProgram.SetShader<Shader::Stage::Pixel>(p_MandebrotShaderID);
+
+		//Postprocess shader
+		auto v_PostProcessShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/v_Postprocess.spv");
+		v_PostprocessShaderID = g_Device->GetResources().shaders.Create(v_PostProcessShaderData.first, v_PostProcessShaderData.second);
+
+		auto p_PostProcessShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/p_Postprocess.spv");
+		p_PostprocessShaderID = g_Device->GetResources().shaders.Create(p_PostProcessShaderData.first, p_PostProcessShaderData.second);
+
+		auto &shaderProgram = g_Device->GetResources().shaderPrograms.Create(postprocessShaderProgramID);
+		shaderProgram.SetShader<Shader::Stage::Vertex>(v_PostprocessShaderID);
+		shaderProgram.SetShader<Shader::Stage::Pixel>(p_PostprocessShaderID);
 	}
 
-	void RenderingSystem::MandelbrotStage::CreateRenderState()
+	void RenderingSystem::Mandelbrot::CreateRenderState()
 	{
 		using namespace RHI;
 
@@ -577,39 +631,42 @@ namespace Gogaman
 		RenderState::DepthStencilState depthStencilState;
 
 		RenderState::BlendState blendState;
-
-		renderStates.reserve(GM_SWAP_CHAIN_BUFFER_COUNT);
-		for(uint8_t i = 0; i < GM_SWAP_CHAIN_BUFFER_COUNT; i++)
+		
+		renderStates.reserve(GM_RHI_CONCURRENT_FRAME_COUNT);
+		for(uint8_t i = 0; i < GM_RHI_CONCURRENT_FRAME_COUNT; i++)
 		{
-			renderStates.emplace_back(descriptorGroupLayouts, vertexLayout, shaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight(), RenderState::CullOperation::None);
+			renderStates.emplace_back(postprocessDescriptorGroupLayouts, vertexLayout, postprocessShaderProgramID, g_Device->GetSwapChainRenderSurfaceIDs()[i], depthStencilState, blendState, Application::GetInstance().GetWindow().GetWidth(), Application::GetInstance().GetWindow().GetHeight(), RenderState::CullOperation::None);
 		}
 	}
 
-	void RenderingSystem::MandelbrotStage::CreateRenderGraph()
+	void RenderingSystem::Mandelbrot::CreateRenderGraph()
 	{
 		RenderGraph::Graph graph;
 
-		RenderGraph::RenderStage::StateData state;
-		//state.descriptorGroupLayouts;
-		state.vertexLayout    = std::make_unique<RHI::VertexLayout>(std::vector<RHI::VertexLayout::Attribute>());
-		state.shaderProgramID = shaderProgramID;
-		state.viewportWidth   = Application::GetInstance().GetWindow().GetWidth();
-		state.viewportHeight  = Application::GetInstance().GetWindow().GetHeight();
+		//Mandelbulb stage
+		RHI::DescriptorGroupLayout::Binding *mandelbulbDescriptorBindings = new RHI::DescriptorGroupLayout::Binding[1];
+		mandelbulbDescriptorBindings[0].type = RHI::DescriptorHeap::Type::ShaderConstantBuffer;
 
-		auto &stage = graph.CreatePrerecordedRenderStage(std::move(state));
+		mandelbulbDescriptorGroupLayouts.emplace_back(1, mandelbulbDescriptorBindings, RHI::Shader::StageFlag::Pixel);
+		
+		RenderGraph::RenderStage::StateData mandelbulbState;
+		mandelbulbState.descriptorGroupLayouts.emplace_back(1, mandelbulbDescriptorBindings, RHI::Shader::StageFlag::Pixel);
+		mandelbulbState.vertexLayout    = std::make_unique<RHI::VertexLayout>(std::vector<RHI::VertexLayout::Attribute>());
+		mandelbulbState.shaderProgramID = mandelbrotShaderProgramID;
+		mandelbulbState.viewportWidth   = Application::GetInstance().GetWindow().GetWidth();
+		mandelbulbState.viewportHeight  = Application::GetInstance().GetWindow().GetHeight();
+
+		auto &mandelbulbStage = graph.CreateRenderStage(std::move(mandelbulbState));
 
 		RenderGraph::Texture raw;
 		raw.format = RHI::Texture::Format::RGBW8;
-		raw.width  = 1920;
-		raw.height = 1080;
-		stage.CreateTexture("RAW", raw, RHI::Texture::State::RenderSurfaceAttachment);
+		raw.width  = Application::GetInstance().GetWindow().GetWidth();
+		raw.height = Application::GetInstance().GetWindow().GetHeight();
+		mandelbulbStage.CreateTexture("RAW", raw, RHI::Texture::State::RenderSurfaceAttachment);
 
-		//TODO: Change name to SetExecuteCallback()
-		stage.SetExecuteFunction([this](const RenderGraph::ResourceManager &resourceManager)
+		mandelbulbStage.SetExecuteCallback([this](FrameContext &frameContext, const RenderGraph::ResourceManager &resourceManager, RHI::RenderState *state)
 		{
-			GM_LOG_CORE_INFO("Executing mandelbrot stage! :D");
-
-			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
+			//GM_LOG_CORE_INFO("Executing mandelbrot stage! :D");
 
 			if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_1))
 				zoom += 0.8f * zoom * Time::GetDeltaTime();
@@ -617,9 +674,9 @@ namespace Gogaman
 				zoom -= 0.8f * zoom * Time::GetDeltaTime();
 
 			if(Input::IsKeyPressed(GM_KEY_W))
-				position.y -= 1.8f * zoom * Time::GetDeltaTime();
-			else if(Input::IsKeyPressed(GM_KEY_S))
 				position.y += 1.8f * zoom * Time::GetDeltaTime();
+			else if(Input::IsKeyPressed(GM_KEY_S))
+				position.y -= 1.8f * zoom * Time::GetDeltaTime();
 			if(Input::IsKeyPressed(GM_KEY_A))
 				position.x += 1.8f * zoom * Time::GetDeltaTime();
 			else if(Input::IsKeyPressed(GM_KEY_D))
@@ -632,33 +689,88 @@ namespace Gogaman
 			shaderData.positionAndZoom.x = smoothPosition.x;
 			shaderData.positionAndZoom.y = smoothPosition.y;
 			shaderData.positionAndZoom.z = smoothZoom;
+			
+			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
 
 			g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
-			descriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
-		});
+			mandelbulbDescriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
 
-		stage.SetRecordCommandsFunction([this](RHI::RenderCommandRecorder &commandRecorder, const RenderGraph::RenderStage::StateData &state)
-		{
-			//commandRecorder.BindDescriptorGroup(0, discriptorGrouSPE);
+			RHI::CommandBufferID commandBufferID = frameContext.GetRenderQueue().AvailableCommandBuffer();
+			RHI::CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
+
+			RHI::RenderCommandRecorder commandRecorder(commandBuffer, state);
+
+			commandRecorder.BindDescriptorGroup(0, *mandelbulbDescriptorGroups[swapChainImageIndex].get());
 			commandRecorder.Render(3, 0);
+
+			commandRecorder.StopRecording();
+
+			frameContext.GetRenderQueue().Submit(commandBufferID);
 		});
 
-		graph.SetOutputTextureName("RAW");
+		//Post process stage
+		RHI::DescriptorGroupLayout::Binding *postprocessDescriptorBindings = new RHI::DescriptorGroupLayout::Binding[2];
+		postprocessDescriptorBindings[0].type = RHI::DescriptorHeap::Type::Sampler;
+		postprocessDescriptorBindings[1].type = RHI::DescriptorHeap::Type::ShaderTexture;
+
+		postprocessDescriptorGroupLayouts.emplace_back(2, postprocessDescriptorBindings, RHI::Shader::StageFlag::Pixel);
+
+		RenderGraph::RenderStage::StateData postprocessState;
+		postprocessState.descriptorGroupLayouts.emplace_back(2, postprocessDescriptorBindings, RHI::Shader::StageFlag::Pixel);
+		postprocessState.vertexLayout    = std::make_unique<RHI::VertexLayout>(std::vector<RHI::VertexLayout::Attribute>());
+		postprocessState.shaderProgramID = postprocessShaderProgramID;
+		postprocessState.viewportWidth   = Application::GetInstance().GetWindow().GetWidth();
+		postprocessState.viewportHeight  = Application::GetInstance().GetWindow().GetHeight();
+
+		auto &postprocessStage = graph.CreateRenderStage(std::move(postprocessState));
+
+		postprocessStage.ReadTexture("RAW", RHI::Texture::State::ShaderResource);
+
+		RenderGraph::Texture output;
+		output.format = RHI::Texture::Format::RGBW8;
+		output.width  = Application::GetInstance().GetWindow().GetWidth();
+		output.height = Application::GetInstance().GetWindow().GetHeight();
+		postprocessStage.CreateTexture("Output", output, RHI::Texture::State::RenderSurfaceAttachment);
+
+		postprocessStage.SetExecuteCallback([this](FrameContext &frameContext, RenderGraph::ResourceManager &resourceManager, RHI::RenderState *state)
+		{
+			//GM_LOG_CORE_INFO("Executing post process stage! :D");
+
+			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
+
+			postprocessDescriptorGroups[swapChainImageIndex]->SetSampler(0, g_Device->GetResources().samplers.Get(pointSampler));
+			postprocessDescriptorGroups[swapChainImageIndex]->SetShaderTexture(1, resourceManager.GetTexture("RAW"));
+
+			RHI::CommandBufferID commandBufferID = frameContext.GetRenderQueue().AvailableCommandBuffer();
+			RHI::CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
+
+			RHI::RenderCommandRecorder commandRecorder(commandBuffer, &renderStates[swapChainImageIndex]);
+
+			commandRecorder.BindDescriptorGroup(0, *postprocessDescriptorGroups[swapChainImageIndex].get());
+			commandRecorder.Render(3, 0);
+
+			commandRecorder.StopRecording();
+
+			frameContext.GetRenderQueue().Submit(commandBufferID);
+		});
+
+		graph.SetOutputTextureName("Output");
 
 		renderGraph = std::move(RenderGraph::Compiler::Compile(std::move(graph)));
-
-		renderGraph->Initialize();
 	}
 
-	void RenderingSystem::MandelbrotStage::Render()
+	void RenderingSystem::Mandelbrot::Render(FrameContext &frameContext)
 	{
-		renderGraph->Execute();
+		renderGraph->Execute(frameContext);
 		/*
 		using namespace RHI;
 
 		const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
 
-		RenderCommandRecorder commandRecorder(commandBuffers[swapChainImageIndex].get(), &renderStates[swapChainImageIndex]);
+		CommandBufferID commandBufferID = frameContext.GetRenderQueue().AvailableCommandBuffer();
+		CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
+
+		RenderCommandRecorder commandRecorder(commandBuffer, &renderStates[swapChainImageIndex]);
 
 		if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_1))
 			zoom += 0.8f * zoom * Time::GetDeltaTime();
@@ -690,6 +802,7 @@ namespace Gogaman
 
 		commandRecorder.StopRecording();
 
-		g_Device->SubmitRenderCommands(1, commandBuffers[swapChainImageIndex].get());*/
+		//g_Device->SubmitRenderCommands(1, commandBuffers[swapChainImageIndex].get());
+		frameContext.GetRenderQueue().Submit(commandBufferID);*/
 	}
 }

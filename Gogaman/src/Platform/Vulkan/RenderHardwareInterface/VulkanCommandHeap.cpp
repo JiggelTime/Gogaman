@@ -16,8 +16,7 @@ namespace Gogaman
 		{
 			VkCommandPoolCreateInfo commandPoolDescriptor = {};
 			commandPoolDescriptor.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-			//TODO: Add flags to constructor and set based on them
-			commandPoolDescriptor.flags            = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+			commandPoolDescriptor.flags            = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
 			commandPoolDescriptor.queueFamilyIndex = g_Device->GetNativeCommandHeapType(type);
 
 			if(vkCreateCommandPool(g_Device->GetNativeData().vulkanDevice, &commandPoolDescriptor, nullptr, &m_NativeData.vulkanCommandPool) != VK_SUCCESS)
@@ -29,7 +28,7 @@ namespace Gogaman
 			vkDestroyCommandPool(g_Device->GetNativeData().vulkanDevice, m_NativeData.vulkanCommandPool, nullptr);
 		}
 
-		std::unique_ptr<CommandBuffer> CommandHeap::CreateCommandBuffer() const
+		CommandBufferID CommandHeap::CreateCommandBuffer() const
 		{
 			VkCommandBufferAllocateInfo commandBufferAllocationDescriptor = {};
 			commandBufferAllocationDescriptor.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -37,26 +36,18 @@ namespace Gogaman
 			commandBufferAllocationDescriptor.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 			commandBufferAllocationDescriptor.commandBufferCount = 1;
 
-			std::unique_ptr<CommandBuffer> commandBuffer = std::make_unique<CommandBuffer>(false);
-			if(vkAllocateCommandBuffers(g_Device->GetNativeData().vulkanDevice, &commandBufferAllocationDescriptor, &commandBuffer->GetNativeData().vulkanCommandBuffer) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to create command buffer");
+			CommandBufferID commandBufferID;
+			CommandBuffer &commandBuffer = g_Device->GetResources().commandBuffers.Create(commandBufferID);
+			if(vkAllocateCommandBuffers(g_Device->GetNativeData().vulkanDevice, &commandBufferAllocationDescriptor, &commandBuffer.GetNativeData().vulkanCommandBuffer) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to create command buffer | Failed to allocate Vulkan command buffer");
 
-			return commandBuffer;
+			return commandBufferID;
 		}
 
-		std::unique_ptr<CommandBuffer> CommandHeap::CreateReusableCommandBuffer() const
+		void CommandHeap::Reset()
 		{
-			VkCommandBufferAllocateInfo commandBufferAllocationDescriptor = {};
-			commandBufferAllocationDescriptor.sType              = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			commandBufferAllocationDescriptor.commandPool        = m_NativeData.vulkanCommandPool;
-			commandBufferAllocationDescriptor.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			commandBufferAllocationDescriptor.commandBufferCount = 1;
-
-			std::unique_ptr<CommandBuffer> commandBuffer = std::make_unique<CommandBuffer>(true);
-			if(vkAllocateCommandBuffers(g_Device->GetNativeData().vulkanDevice, &commandBufferAllocationDescriptor, &commandBuffer->GetNativeData().vulkanCommandBuffer) != VK_SUCCESS)
-				GM_DEBUG_ASSERT(false, "Failed to create command buffer");
-
-			return commandBuffer;
+			if(vkResetCommandPool(g_Device->GetNativeData().vulkanDevice, m_NativeData.vulkanCommandPool, 0) != VK_SUCCESS)
+				GM_DEBUG_ASSERT(false, "Failed to reset command heap | Failed to reset Vulkan command pool");
 		}
 	}
 }

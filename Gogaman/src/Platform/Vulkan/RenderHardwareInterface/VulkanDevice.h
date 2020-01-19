@@ -19,26 +19,26 @@ namespace Gogaman
 		private:
 			struct NativeData
 			{
-				VkInstance                       vulkanInstance;
+				VkInstance                   vulkanInstance;
 				#if GM_RHI_DEBUGGING_ENABLED
-					VkDebugUtilsMessengerEXT     vulkanDebugMessenger;
+					VkDebugUtilsMessengerEXT vulkanDebugMessenger;
 				#endif
-				VkSurfaceKHR                     vulkanSurface;
-				VkPhysicalDevice                 vulkanPhysicalDevice;
-				VkPhysicalDeviceLimits           vulkanPhysicalDeviceLimits;
-				DeviceMemory::Allocator          vulkanMemoryAllocator;
-				//std::vector<VkQueue>             vulkanQueues[3];
-				VkQueue                          vulkanQueues[3];
-				VkDevice                         vulkanDevice;
-				VkSwapchainKHR                   vulkanSwapChain;
-				std::vector<VkImage>             vulkanSwapChainImages;
-				std::vector<VkImageView>         vulkanSwapChainImageViews;
-				VkSurfaceFormatKHR               vulkanSwapChainSurfaceFormat;
-				VkSemaphore                      vulkanSwapChainImageAvailableSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT], vulkanRenderCompletedSemaphores[GM_SWAP_CHAIN_BUFFER_COUNT];
-				VkFence                          vulkanPresentFences[GM_SWAP_CHAIN_BUFFER_COUNT];
-				uint32_t                         vulkanQueueFamilyIndices[3];
-				uint32_t                         vulkanSwapChainImageIndex;
-				uint32_t                         vulkanPresentSynchronizationIndex = 0;
+				VkSurfaceKHR                 vulkanSurface;
+				VkPhysicalDevice             vulkanPhysicalDevice;
+				VkPhysicalDeviceLimits       vulkanPhysicalDeviceLimits;
+				DeviceMemory::Allocator      vulkanMemoryAllocator;
+				//std::vector<VkQueue>         vulkanQueues[3];
+				VkQueue                      vulkanQueues[3];
+				VkDevice                     vulkanDevice;
+				VkSwapchainKHR               vulkanSwapChain;
+				std::vector<VkImage>         vulkanSwapChainImages;
+				std::vector<VkImageView>     vulkanSwapChainImageViews;
+				VkSurfaceFormatKHR           vulkanSwapChainSurfaceFormat;
+				VkSemaphore                  vulkanSwapChainImageAvailableSemaphores[GM_RHI_CONCURRENT_FRAME_COUNT], vulkanRenderCompletedSemaphores[GM_RHI_CONCURRENT_FRAME_COUNT];
+				//VkFence                      vulkanPresentFences[GM_RHI_CONCURRENT_FRAME_COUNT];
+				uint32_t                     vulkanQueueFamilyIndices[3];
+				uint32_t                     vulkanSwapChainImageIndex;
+				uint32_t                     vulkanPresentSynchronizationIndex = 0;
 			};
 		public:
 			Device(void *nativeWindow);
@@ -49,9 +49,10 @@ namespace Gogaman
 
 			void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization);
 
-			void SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
-			void SubmitComputeCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
-			void SubmitRenderCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers);
+			void SubmitCommands(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers, Fence *fence = nullptr);
+			void SubmitCommands(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBufferID *commandBufferIDs, Fence *fence = nullptr);
+			//TEMPORARY
+			void SubmitRenderCommands(const uint8_t commandBufferCount, CommandBufferID *commandBufferIDs, Fence *fence);
 
 			void Present();
 

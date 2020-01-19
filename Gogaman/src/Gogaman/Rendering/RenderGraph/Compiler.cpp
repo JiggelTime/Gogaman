@@ -45,17 +45,7 @@ namespace Gogaman
 				CreateVertex(i);
 			}
 
-			for(const auto &i : graph.m_PrerecordedComputeStages)
-			{
-				CreateVertex(i);
-			}
-
 			for(const auto &i : graph.m_RenderStages)
-			{
-				CreateVertex(i);
-			}
-
-			for(const auto &i : graph.m_PrerecordedRenderStages)
 			{
 				CreateVertex(i);
 			}
@@ -81,14 +71,6 @@ namespace Gogaman
 				FindLastStage(graph.m_ComputeStages[i], graph.VertexIndex(Stage::Type::Compute, i));
 			}
 
-			for(StageIndex i = 0; i < graph.m_PrerecordedComputeStages.size(); i++)
-			{
-				if(lastStageVertexIndex.has_value())
-					break;
-
-				FindLastStage(graph.m_PrerecordedComputeStages[i], graph.VertexIndex(Stage::Type::PrerecordedCompute, i));
-			}
-
 			for(StageIndex i = 0; i < graph.m_RenderStages.size(); i++)
 			{
 				if(lastStageVertexIndex.has_value())
@@ -97,24 +79,18 @@ namespace Gogaman
 				FindLastStage(graph.m_RenderStages[i], graph.VertexIndex(Stage::Type::Render, i));
 			}
 
-			for(StageIndex i = 0; i < graph.m_PrerecordedRenderStages.size(); i++)
-			{
-				if(lastStageVertexIndex.has_value())
-					break;
-
-				FindLastStage(graph.m_PrerecordedRenderStages[i], graph.VertexIndex(Stage::Type::PrerecordedRender, i));
-			}
-
 			GM_DEBUG_ASSERT(lastStageVertexIndex.has_value(), "Failed to compile graph | Output texture \"%s\" is not created by any stages", graph.m_OutputTextureName.c_str());
 			
 			//Process stage inputs/outputs
 			std::unordered_map<std::string, StageIndex> resourceEdgeSourceVertexIndices;
 
-			auto ProcessComputeStageOutputs = [&](const auto &stage, const StageIndex vertexIndex)
+			auto ProcessComputeStageOutputs = [&](auto &stage, const StageIndex vertexIndex)
 			{
 				for(const auto &i : stage.m_CreateTextureData)
 				{
 					resourceEdgeSourceVertexIndices.emplace(i.name, vertexIndex);
+
+					stage.m_TextureStateUpdates.emplace_back(i.name, i.state);
 				}
 
 				for(const auto &i : stage.m_WriteTextureData)
@@ -138,6 +114,9 @@ namespace Gogaman
 				for(const auto &i : stage.m_CreateTextureData)
 				{
 					resourceEdgeSourceVertexIndices.emplace(i.name, vertexIndex);
+
+					stage.m_TextureStateUpdates.emplace_back(i.name, i.state);
+
 					if(i.state == RHI::Texture::State::RenderSurfaceAttachment)
 						stage.m_RenderSurfaceAttachmentNames.emplace_back(i.name);
 				}
@@ -164,23 +143,13 @@ namespace Gogaman
 			{
 				ProcessComputeStageOutputs(graph.m_ComputeStages[i], graph.VertexIndex(Stage::Type::Compute, i));
 			}
-			
-			for(StageIndex i = 0; i < graph.m_PrerecordedComputeStages.size(); i++)
-			{
-				ProcessComputeStageOutputs(graph.m_PrerecordedComputeStages[i], graph.VertexIndex(Stage::Type::PrerecordedCompute, i));
-			}
 
 			for(StageIndex i = 0; i < graph.m_RenderStages.size(); i++)
 			{
 				ProcessRenderStageOutputs(graph.m_RenderStages[i], graph.VertexIndex(Stage::Type::Render, i));
 			}
 
-			for(StageIndex i = 0; i < graph.m_PrerecordedRenderStages.size(); i++)
-			{
-				ProcessRenderStageOutputs(graph.m_PrerecordedRenderStages[i], graph.VertexIndex(Stage::Type::PrerecordedRender, i));
-			}
-
-			auto ProcessStageInputs = [&](const auto &stage, const StageIndex vertexIndex)
+			auto ProcessStageInputs = [&](auto &stage, const StageIndex vertexIndex)
 			{
 				for(const auto &i : stage.m_ReadTextureData)
 				{
@@ -190,19 +159,7 @@ namespace Gogaman
 
 					directedAcyclicGraph.CreateEdge(sourceVertexIndex, vertexIndex);
 
-					const auto [sourceStageType, sourceStageIndex] = graph.StageIndexData(sourceVertexIndex);
-
-					switch(sourceStageType)
-					{
-					case Stage::Type::Compute:
-						graph.m_ComputeStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.name);
-					case Stage::Type::PrerecordedCompute:
-						graph.m_PrerecordedComputeStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.name);
-					case Stage::Type::Render:
-						graph.m_RenderStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.name);
-					case Stage::Type::PrerecordedRender:
-						graph.m_PrerecordedRenderStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.name);
-					}
+					stage.m_TextureStateUpdates.emplace_back(i.name, i.state);
 				}
 
 				for(const auto &i : stage.m_WriteTextureData)
@@ -213,19 +170,7 @@ namespace Gogaman
 
 					directedAcyclicGraph.CreateEdge(sourceVertexIndex, vertexIndex);
 
-					const auto [sourceStageType, sourceStageIndex] = graph.StageIndexData(sourceVertexIndex);
-
-					switch(sourceStageType)
-					{
-					case Stage::Type::Compute:
-						graph.m_ComputeStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.inputName);
-					case Stage::Type::PrerecordedCompute:
-						graph.m_PrerecordedComputeStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.inputName);
-					case Stage::Type::Render:
-						graph.m_RenderStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.inputName);
-					case Stage::Type::PrerecordedRender:
-						graph.m_PrerecordedRenderStages[sourceStageIndex].m_StateUpdateTextureNames.emplace_back(i.inputName);
-					}
+					stage.m_TextureStateUpdates.emplace_back(i.inputName, i.state);
 				}
 
 				for(const std::string &i : stage.m_ReadBufferNames)
@@ -248,19 +193,9 @@ namespace Gogaman
 				ProcessStageInputs(graph.m_ComputeStages[i], graph.VertexIndex(Stage::Type::Compute, i));
 			}
 
-			for(StageIndex i = 0; i < graph.m_PrerecordedComputeStages.size(); i++)
-			{
-				ProcessStageInputs(graph.m_PrerecordedComputeStages[i], graph.VertexIndex(Stage::Type::PrerecordedCompute, i));
-			}
-
 			for(StageIndex i = 0; i < graph.m_RenderStages.size(); i++)
 			{
 				ProcessStageInputs(graph.m_RenderStages[i], graph.VertexIndex(Stage::Type::Render, i));
-			}
-
-			for(StageIndex i = 0; i < graph.m_PrerecordedRenderStages.size(); i++)
-			{
-				ProcessStageInputs(graph.m_PrerecordedRenderStages[i], graph.VertexIndex(Stage::Type::PrerecordedRender, i));
 			}
 
 			//Generate contributing vertex indices
@@ -335,9 +270,9 @@ namespace Gogaman
 						executable->m_ResourceManager.AddAlias(inputName, outputName);
 					}
 
-					for(const std::string &i : stage.m_StateUpdateTextureNames)
+					for(const auto &i : stage.m_TextureStateUpdates)
 					{
-						executableStage.stateUpdateTextureNames.emplace_back(i);
+						executableStage.textureStateUpdates.emplace_back(i);
 					}
 
 					executableStage.execute = std::move(stage.m_Execute);
@@ -360,41 +295,12 @@ namespace Gogaman
 					}
 				};
 
-				auto CreateExecutablePrerecordedComputeStage = [&CreateExecutableStage](ExecutableGraph::ExecutablePrerecordedComputeStage &executableStage, PrerecordedComputeStage &stage, const StageIndex executionIndex)
-				{
-					CreateExecutableStage(executableStage, stage, executionIndex);
-
-					executableStage.recordCommands = std::move(stage.m_RecordCommands);
-				};
-
-				auto CreateExecutablePrerecordedRenderStage = [&CreateExecutableStage](ExecutableGraph::ExecutablePrerecordedRenderStage &executableStage, PrerecordedRenderStage &stage, const StageIndex executionIndex)
-				{
-					CreateExecutableStage(executableStage, stage, executionIndex);
-
-					for(const std::string &i : stage.m_RenderSurfaceAttachmentNames)
-					{
-						executableStage.renderSurfaceAttachmentNames.emplace_back(i);
-					}
-
-					executableStage.recordCommands = std::move(stage.m_RecordCommands);
-				};
-
 				const auto [stageType, stageIndex] = graph.StageIndexData(i);
-				switch(stageType)
-				{
-				case Stage::Type::Compute:
+
+				if(stageType == Stage::Type::Compute)
 					CreateExecutableComputeStage(executable->m_ComputeStages.emplace_back(), graph.m_ComputeStages[stageIndex], i);
-					break;
-				case Stage::Type::Render:
+				else
 					CreateExecutableRenderStage(executable->m_RenderStages.emplace_back(), graph.m_RenderStages[stageIndex], i);
-					break;
-				case Stage::Type::PrerecordedCompute:
-					CreateExecutablePrerecordedComputeStage(executable->m_PrerecordedComputeStages.emplace_back(), graph.m_PrerecordedComputeStages[stageIndex], i);
-					break;
-				case Stage::Type::PrerecordedRender:
-					CreateExecutablePrerecordedRenderStage(executable->m_PrerecordedRenderStages.emplace_back(), graph.m_PrerecordedRenderStages[stageIndex], i);
-					break;
-				}
 
 				ExecutableGraph::ExecutionData &executionData = executable->m_ExecutionOrder.emplace_back();
 				executionData.stageType  = stageType;

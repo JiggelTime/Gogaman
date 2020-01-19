@@ -35,6 +35,7 @@
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Stage.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
+    <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanFence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -82,9 +83,7 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\RenderSurface.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanRenderSurface.h" />
-    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractContext.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Context.h" />
-    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanContext.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Texture.h" />
     <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanTexture.h" />
@@ -152,5 +151,10 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Graph.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Resource.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractFence.h" />
+    <ClInclude Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanFence.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FrameContext.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\Fence.h" />
+    <ClInclude Include="src\Gogaman\RenderHardwareInterface\LinearFence.h" />
   </ItemGroup>
 </Project>

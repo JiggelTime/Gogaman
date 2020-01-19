@@ -40,31 +40,36 @@ namespace Gogaman
 				usedShaderStageCount++;
 			}
 
-			VkVertexInputBindingDescription vertexBindingDescriptor = {};
-			vertexBindingDescriptor.binding   = 0;
-			vertexBindingDescriptor.stride    = vertexLayout.GetStride();
-			vertexBindingDescriptor.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-
 			VkVertexInputAttributeDescription *vertexAttributeDescriptors = new VkVertexInputAttributeDescription[vertexLayout.GetAttributes().size()];
-			for(uint8_t i = 0; i < vertexLayout.GetAttributes().size(); i++)
-			{
-				const VertexLayout::Attribute &attribute = vertexLayout.GetAttributes()[i];
 
-				vertexAttributeDescriptors[i] = {};
-				vertexAttributeDescriptors[i].location = i;
-				//TODO: Should binding be the vertex buffer's bind index?
-				vertexAttributeDescriptors[i].binding  = 0;
-				vertexAttributeDescriptors[i].format   = Shader::GetNativeDataType(attribute.dataType);
-				vertexAttributeDescriptors[i].offset   = (uint32_t)attribute.offset;
-			}
-
-			//TODO: Pass in a shader reflector to automate vertex attributes
 			VkPipelineVertexInputStateCreateInfo vertexStateDescriptor = {};
 			vertexStateDescriptor.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-			vertexStateDescriptor.vertexBindingDescriptionCount   = 1;
-			vertexStateDescriptor.pVertexBindingDescriptions      = &vertexBindingDescriptor;
 			vertexStateDescriptor.vertexAttributeDescriptionCount = (uint32_t)vertexLayout.GetAttributes().size();
-			vertexStateDescriptor.pVertexAttributeDescriptions    = vertexAttributeDescriptors;
+			if(vertexLayout.GetAttributes().size())
+			{
+				VkVertexInputBindingDescription vertexBindingDescriptor = {};
+				vertexBindingDescriptor.binding   = 0;
+				vertexBindingDescriptor.stride    = vertexLayout.GetStride();
+				vertexBindingDescriptor.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+				for(uint8_t i = 0; i < vertexLayout.GetAttributes().size(); i++)
+				{
+					const VertexLayout::Attribute &attribute = vertexLayout.GetAttributes()[i];
+
+					vertexAttributeDescriptors[i] = {};
+					vertexAttributeDescriptors[i].location = i;
+					//TODO: Should binding be the vertex buffer's bind index?
+					vertexAttributeDescriptors[i].binding  = 0;
+					vertexAttributeDescriptors[i].format   = Shader::GetNativeDataType(attribute.dataType);
+					vertexAttributeDescriptors[i].offset   = (uint32_t)attribute.offset;
+				}
+
+				vertexStateDescriptor.vertexBindingDescriptionCount = 1;
+				vertexStateDescriptor.pVertexBindingDescriptions    = &vertexBindingDescriptor;
+				vertexStateDescriptor.pVertexAttributeDescriptions  = vertexAttributeDescriptors;
+			}
+			else
+				vertexStateDescriptor.vertexBindingDescriptionCount = 0;
 
 			VkPipelineInputAssemblyStateCreateInfo assemblyStateDescriptor = {};
 			assemblyStateDescriptor.sType                  = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -143,12 +148,11 @@ namespace Gogaman
 
 			const RenderSurface &renderSurface = g_Device->GetResources().renderSurfaces.Get(m_RenderSurfaceID);
 
-			const uint8_t renderSurfaceAttachmentCount = renderSurface.GetAttachmentCount();
-			VkPipelineColorBlendAttachmentState *renderSurfaceAttachmentBlendStateDescriptors = new VkPipelineColorBlendAttachmentState[renderSurfaceAttachmentCount];
-			for(uint8_t i = 0; i < renderSurfaceAttachmentCount; i++)
+			VkPipelineColorBlendAttachmentState *renderSurfaceAttachmentBlendStateDescriptors = new VkPipelineColorBlendAttachmentState[renderSurface.GetColorAttachmentCount()];
+			for(uint8_t i = 0; i < renderSurface.GetColorAttachmentCount(); i++)
 			{
 				VkPipelineColorBlendAttachmentState &renderSurfaceAttachmentBlendStateDescriptor = renderSurfaceAttachmentBlendStateDescriptors[i];
-				renderSurfaceAttachmentBlendStateDescriptor.blendEnable = blendState.isBlendingEnabled;
+				renderSurfaceAttachmentBlendStateDescriptor.blendEnable         = blendState.isBlendingEnabled;
 				renderSurfaceAttachmentBlendStateDescriptor.srcColorBlendFactor = GetNativeBlendStateFactor(blendState.sourceFactor);
 				renderSurfaceAttachmentBlendStateDescriptor.dstColorBlendFactor = GetNativeBlendStateFactor(blendState.destinationFactor);
 				renderSurfaceAttachmentBlendStateDescriptor.colorBlendOp        = GetNativeBlendStateOperation(blendState.operation);
@@ -161,7 +165,7 @@ namespace Gogaman
 			VkPipelineColorBlendStateCreateInfo blendStateDescriptor = {};
 			blendStateDescriptor.sType             = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 			blendStateDescriptor.logicOpEnable     = VK_FALSE;
-			blendStateDescriptor.attachmentCount   = (uint32_t)renderSurfaceAttachmentCount;
+			blendStateDescriptor.attachmentCount   = (uint32_t)renderSurface.GetColorAttachmentCount();
 			blendStateDescriptor.pAttachments      = renderSurfaceAttachmentBlendStateDescriptors;
 			blendStateDescriptor.blendConstants[0] = 0.0f;
 			blendStateDescriptor.blendConstants[1] = 0.0f;
@@ -172,6 +176,8 @@ namespace Gogaman
 			dynamicStateDescriptor.sType             = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
 			dynamicStateDescriptor.dynamicStateCount = 0;
 			dynamicStateDescriptor.pDynamicStates    = nullptr;
+
+			printf("descriptor layout count: %d\n\n\n", descriptorGroupLayouts.size());
 
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 			descriptorSetLayouts.reserve(descriptorGroupLayouts.size());

@@ -141,7 +141,7 @@ namespace Gogaman
 			return m_TextureResources[m_ResourceNameIndices[name]].identifier;
 		}
 
-		const RHI::Texture &ResourceManager::GetTexture(const std::string &name)
+		RHI::Texture &ResourceManager::GetTexture(const std::string &name)
 		{
 			GM_DEBUG_ASSERT(m_ResourceNameIndices.count(name), "Failed to get texture | Name \"%s\" is invalid", name.c_str());
 
@@ -155,7 +155,7 @@ namespace Gogaman
 			return m_BufferResources[m_ResourceNameIndices[name]].identifier;
 		}
 
-		const RHI::Buffer &ResourceManager::GetBuffer(const std::string &name)
+		RHI::Buffer &ResourceManager::GetBuffer(const std::string &name)
 		{
 			GM_DEBUG_ASSERT(m_ResourceNameIndices.count(name), "Failed to get buffer | Name \"%s\" is invalid", name.c_str());
 

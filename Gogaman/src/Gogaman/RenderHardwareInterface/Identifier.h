@@ -12,5 +12,6 @@ namespace Gogaman
 		using RenderSurfaceID = ResourceID<uint8_t>;
 		using ShaderID        = ResourceID<uint8_t>;
 		using ShaderProgramID = ResourceID<uint8_t>;
+		using CommandBufferID = ResourceID<uint8_t>;
 	}
 }

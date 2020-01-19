@@ -12,10 +12,12 @@
 #include "RenderSurface.h"
 #include "Shader.h"
 #include "ShaderProgram.h"
+#include "CommandBuffer.h"
 
 #include "CommandHeap.h"
 
-#define GM_SWAP_CHAIN_BUFFER_COUNT 2u
+//On Android this should be 3 because of heavier pipelining
+#define GM_RHI_CONCURRENT_FRAME_COUNT 2u
 
 namespace Gogaman
 {
@@ -27,7 +29,7 @@ namespace Gogaman
 
 	namespace RHI
 	{
-		class CommandBuffer;
+		class Fence;
 
 		using SamplerContainer       = ResourceContainer<Sampler,       SamplerID,       128>;
 		using TextureContainer       = ResourceContainer<Texture,       TextureID,       1024>;
@@ -35,6 +37,7 @@ namespace Gogaman
 		using RenderSurfaceContainer = ResourceContainer<RenderSurface, RenderSurfaceID, 32>;
 		using ShaderContainer        = ResourceContainer<Shader,        ShaderID,        128>;
 		using ShaderProgramContainer = ResourceContainer<ShaderProgram, ShaderProgramID, 32>;
+		using CommandBufferContainer = ResourceContainer<CommandBuffer, CommandBufferID, 256>;
 
 		template<typename ImplementationType>
 		class AbstractDevice : public CRTP<ImplementationType, AbstractDevice>
@@ -48,6 +51,7 @@ namespace Gogaman
 				RenderSurfaceContainer renderSurfaces;
 				ShaderContainer        shaders;
 				ShaderProgramContainer shaderPrograms;
+				CommandBufferContainer commandBuffers;
 			};
 		public:
 			AbstractDevice(const AbstractDevice &) = delete;
@@ -60,9 +64,8 @@ namespace Gogaman
 
 			inline void RecreateSwapChain(const uint16_t width, const uint16_t height, const VerticalSynchronization verticalSynchronization) { this->GetImplementation().RecreateSwapChain(width, height, verticalSynchronization); }
 
-			inline void SubmitTransferCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitTransferCommands(commandBufferCount, commandBuffers); }
-			inline void SubmitComputeCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitComputeCommands(commandBufferCount, commandBuffers); }
-			inline void SubmitRenderCommands(const uint8_t commandBufferCount, CommandBuffer *commandBuffers) { this->GetImplementation().SubmitRenderCommands(commandBufferCount, commandBuffers); }
+			inline void SubmitCommands(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBuffer *commandBuffers, Fence *fence = nullptr) { this->GetImplementation().SubmitCommands(type, commandBufferCount, commandBuffers, fence); }
+			inline void SubmitCommands(const CommandHeap::Type type, const uint8_t commandBufferCount, CommandBufferID *commandBufferIDs, Fence *fence = nullptr) { this->GetImplementation().SubmitCommands(type, commandBufferCount, commandBufferIDs, fence); }
 
 			inline void Present() { this->GetImplementation().Present(); }
 
@@ -101,7 +104,7 @@ namespace Gogaman
 			~AbstractDevice() = default;
 		protected:
 			Resources       m_Resources;
-			RenderSurfaceID m_SwapChainRenderSurfaceIDs[GM_SWAP_CHAIN_BUFFER_COUNT];
+			RenderSurfaceID m_SwapChainRenderSurfaceIDs[GM_RHI_CONCURRENT_FRAME_COUNT];
 		private:
 			friend ImplementationType;
 		};

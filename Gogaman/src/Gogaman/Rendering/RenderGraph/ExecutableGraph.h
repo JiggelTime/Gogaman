@@ -6,14 +6,15 @@
 
 #include "ResourceManager.h"
 
-#include "Gogaman/RenderhardwareInterface/RenderSurface.h"
+#include "Gogaman/RenderhardwareInterface/Identifier.h"
 #include "Gogaman/RenderhardwareInterface/ComputeState.h"
 #include "Gogaman/RenderhardwareInterface/RenderState.h"
 #include "Gogaman/RenderHardwareInterface/CommandBuffer.h"
-#include "Gogaman/RenderHardwareInterface/CommandHeap.h"
 
 namespace Gogaman
 {
+	class FrameContext;
+
 	namespace RenderGraph
 	{
 		class Compiler;
@@ -35,7 +36,7 @@ namespace Gogaman
 				std::vector<std::string> inputBufferNames;
 				std::vector<std::string> outputBufferNames;
 
-				std::vector<std::string> stateUpdateTextureNames;
+				std::vector<std::pair<std::string, RHI::Texture::State>> textureStateUpdates;
 
 				Stage::ExecuteFunction execute;
 			};
@@ -45,13 +46,6 @@ namespace Gogaman
 				ComputeStage::StateData stateData;
 
 				std::unique_ptr<RHI::ComputeState> state;
-			};
-
-			struct ExecutablePrerecordedComputeStage : public ExecutableComputeStage
-			{
-				std::unique_ptr<RHI::CommandBuffer> commandBuffer;
-
-				PrerecordedComputeStage::RecordCommandsFunction recordCommands;
 			};
 
 			struct ExecutableRenderStage : public ExecutableStage
@@ -64,13 +58,6 @@ namespace Gogaman
 
 				std::unique_ptr<RHI::RenderState> state;
 			};
-
-			struct ExecutablePrerecordedRenderStage : public ExecutableRenderStage
-			{
-				std::unique_ptr<RHI::CommandBuffer> commandBuffer;
-
-				PrerecordedRenderStage::RecordCommandsFunction recordCommands;
-			};
 		public:
 			ExecutableGraph()                   = default;
 			ExecutableGraph(ExecutableGraph &&) = default;
@@ -81,16 +68,12 @@ namespace Gogaman
 
 			void Initialize();
 
-			void Execute();
+			void Execute(FrameContext &frameContext);
 		private:
 			std::vector<ExecutionData> m_ExecutionOrder;
 
-			std::vector<ExecutableComputeStage>            m_ComputeStages;
-			std::vector<ExecutablePrerecordedComputeStage> m_PrerecordedComputeStages;
-			std::vector<ExecutableRenderStage>             m_RenderStages;
-			std::vector<ExecutablePrerecordedRenderStage>  m_PrerecordedRenderStages;
-
-			std::unique_ptr<RHI::CommandHeap> m_ComputeCommandHeap, m_RenderCommandHeap;
+			std::vector<ExecutableComputeStage> m_ComputeStages;
+			std::vector<ExecutableRenderStage>  m_RenderStages;
 
 			ResourceManager m_ResourceManager;
 

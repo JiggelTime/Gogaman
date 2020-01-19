@@ -27,8 +27,9 @@ namespace Gogaman
 			CommandHeap &operator=(const CommandHeap &) = delete;
 			CommandHeap &operator=(CommandHeap &&)      = delete;
 
-			std::unique_ptr<CommandBuffer> CreateCommandBuffer()         const;
-			std::unique_ptr<CommandBuffer> CreateReusableCommandBuffer() const;
+			CommandBufferID CreateCommandBuffer() const;
+
+			void Reset();
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }

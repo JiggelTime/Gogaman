@@ -10,6 +10,7 @@
 #include "Gogaman/Events/MouseEvent.h"
 
 #include "Gogaman/RenderHardwareInterface/Identifier.h"
+#include "Gogaman/RenderHardwareInterface/LinearFence.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorGroupLayout.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorHeap.h"
 #include "Gogaman/RenderHardwareInterface/DescriptorGroup.h"
@@ -17,6 +18,8 @@
 #include "Gogaman/RenderHardwareInterface/CommandBuffer.h"
 #include "Gogaman/RenderHardwareInterface/CommandHeap.h"
 #include "Gogaman/RenderHardwareInterface/Device.h"
+
+#include "FrameContext.h"
 
 #include "RenderGraph/ExecutableGraph.h"
 
@@ -33,7 +36,7 @@ namespace Gogaman
 	class RenderingSystem : public System, public EventListener
 	{
 	private:
-		struct MandelbrotStage
+		struct Mandelbrot
 		{
 			struct ShaderData
 			{
@@ -44,21 +47,31 @@ namespace Gogaman
 			void CreateShaders();
 			void CreateRenderState();
 			void CreateRenderGraph();
-			void Render();
+			void Render(FrameContext &frameContext);
 
-			RHI::ShaderID        vertexShaderID, pixelShaderID;
-			RHI::ShaderProgramID shaderProgramID;
+			RHI::ShaderID        v_MandelbrotShaderID, p_MandebrotShaderID;
+			RHI::ShaderProgramID mandelbrotShaderProgramID;
 
+			RHI::ShaderID        v_PostprocessShaderID, p_PostprocessShaderID;
+			RHI::ShaderProgramID postprocessShaderProgramID;
+			
 			std::vector<RHI::RenderState> renderStates;
 
 			std::unique_ptr<RHI::DescriptorHeap>    descriptorHeap;
-			std::vector<RHI::DescriptorGroupLayout> descriptorGroupLayouts;
-			std::unique_ptr<RHI::DescriptorGroup>   descriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
 
-			RHI::BufferID shaderDataBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+			std::vector<RHI::DescriptorGroupLayout> mandelbulbDescriptorGroupLayouts;
+			std::unique_ptr<RHI::DescriptorGroup>   mandelbulbDescriptorGroups[GM_RHI_CONCURRENT_FRAME_COUNT];
+
+			std::vector<RHI::DescriptorGroupLayout> postprocessDescriptorGroupLayouts;
+			std::unique_ptr<RHI::DescriptorGroup>   postprocessDescriptorGroups[GM_RHI_CONCURRENT_FRAME_COUNT];
+			//std::unique_ptr<RHI::DescriptorGroup>   descriptorGroup;
+
+			RHI::BufferID shaderDataBuffers[GM_RHI_CONCURRENT_FRAME_COUNT];
 
 			std::unique_ptr<RHI::CommandHeap>   commandHeap;
-			std::unique_ptr<RHI::CommandBuffer> commandBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+			std::unique_ptr<RHI::CommandBuffer> commandBuffers[GM_RHI_CONCURRENT_FRAME_COUNT];
+
+			RHI::SamplerID pointSampler;
 
 			std::unique_ptr<RenderGraph::ExecutableGraph> renderGraph;
 
@@ -101,8 +114,16 @@ namespace Gogaman
 
 		void ImportFlexData(const std::string &filepath);
 
+		void Present();
+
 		bool OnWindowFileDrop(WindowFileDropEvent &event);
+
+		inline const FrameContext &GetCurrentFrameContext() const { return *m_FrameContexts[g_Device->GetNativeData().vulkanSwapChainImageIndex].get(); }
+		inline       FrameContext &GetCurrentFrameContext()       { return *m_FrameContexts[g_Device->GetNativeData().vulkanSwapChainImageIndex].get(); }
 	private:
+		std::unique_ptr<RHI::LinearFence> m_FrameFence;
+		std::unique_ptr<FrameContext>     m_FrameContexts[GM_RHI_CONCURRENT_FRAME_COUNT];
+
 		PerspectiveCamera m_Camera;
 
 		//std::vector<RHI::RenderSurfaceID> m_RenderSurfaceIDs;
@@ -116,15 +137,15 @@ namespace Gogaman
 
 		std::unique_ptr<RHI::DescriptorHeap> m_DescriptorHeap;
 
-		std::unique_ptr<RHI::DescriptorGroup> m_FrameDataDescriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
-		RHI::BufferID                         m_FrameDataBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+		std::unique_ptr<RHI::DescriptorGroup> m_FrameDataDescriptorGroups[GM_RHI_CONCURRENT_FRAME_COUNT];
+		RHI::BufferID                         m_FrameDataBuffers[GM_RHI_CONCURRENT_FRAME_COUNT];
 		
-		std::vector<RHI::DescriptorGroup> m_MaterialDataDescriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
+		std::vector<RHI::DescriptorGroup> m_MaterialDataDescriptorGroups[GM_RHI_CONCURRENT_FRAME_COUNT];
 
-		std::vector<RHI::DescriptorGroup> m_MeshDataDescriptorGroups[GM_SWAP_CHAIN_BUFFER_COUNT];
+		std::vector<RHI::DescriptorGroup> m_MeshDataDescriptorGroups[GM_RHI_CONCURRENT_FRAME_COUNT];
 
-		std::unique_ptr<RHI::CommandHeap>   m_TransferCommandHeap, m_RenderCommandHeap;
-		std::unique_ptr<RHI::CommandBuffer> m_CommandBuffers[GM_SWAP_CHAIN_BUFFER_COUNT];
+		//std::unique_ptr<RHI::CommandHeap>   m_TransferCommandHeap, m_RenderCommandHeap;
+		//std::unique_ptr<RHI::CommandBuffer> m_CommandBuffers[GM_RHI_CONCURRENT_FRAME_COUNT];
 
 		RHI::SamplerID m_PointSampler, m_AnisotropicSampler;
 
@@ -132,7 +153,7 @@ namespace Gogaman
 
 		RenderGraph::ExecutableGraph m_RenderGraph;
 
-		MandelbrotStage m_MandelbrotStage;
+		Mandelbrot m_Mandelbrot;
 
 		uint16_t m_RenderResolutionWidth, m_RenderResolutionHeight;
 	};

@@ -17,6 +17,8 @@ namespace Gogaman
 		class RenderCommandRecorder;
 	}
 
+	class FrameContext;
+
 	namespace RenderGraph
 	{
 		class Graph;
@@ -30,14 +32,12 @@ namespace Gogaman
 		class Stage
 		{
 		public:
-			using ExecuteFunction = std::function<void(const ResourceManager &)>;
+			using ExecuteFunction = std::function<void(FrameContext &, ResourceManager &, RHI::RenderState *)>;
 
-			enum class Type : uint8_t
+			enum class Type : bool
 			{
 				Compute,
-				PrerecordedCompute,
-				Render,
-				PrerecordedRender
+				Render
 			};
 		private:
 			//TODO: Split this up into seperate vectors for better cache behaviour (SOA vs AOS)
@@ -74,10 +74,7 @@ namespace Gogaman
 			void ReadBuffer(const std::string &name);
 			void WriteBuffer(const std::string &inputName, const std::string &outputName);
 
-			inline void SetExecuteFunction(ExecuteFunction &&execute) { m_Execute = std::move(execute); }
-
-			//TEMPORARY
-			inline constexpr const std::vector<std::string> &GetStateUpdateTextureNames() const { return m_StateUpdateTextureNames; }
+			inline void SetExecuteCallback(ExecuteFunction &&execute) { m_Execute = std::move(execute); }
 		protected:
 			Stage()         = default;
 			Stage(Stage &&) = default;
@@ -95,7 +92,7 @@ namespace Gogaman
 			std::vector<std::string>      m_WriteBufferInputNames;
 			std::vector<std::string>      m_WriteBufferOutputNames;
 
-			std::vector<std::string> m_StateUpdateTextureNames;
+			std::vector<std::pair<std::string, RHI::Texture::State>> m_TextureStateUpdates;
 
 			ExecuteFunction m_Execute;
 		private:
@@ -139,32 +136,6 @@ namespace Gogaman
 			friend Compiler;
 		};
 
-		class PrerecordedComputeStage : public ComputeStage
-		{
-		public:
-			using RecordCommandsFunction = std::function<void(RHI::ComputeCommandRecorder &, const StateData &)>;
-		public:
-			PrerecordedComputeStage(StateData &&state)
-				: ComputeStage(std::move(state))
-			{}
-
-			PrerecordedComputeStage(PrerecordedComputeStage &&) = default;
-			
-			~PrerecordedComputeStage() = default;
-
-			PrerecordedComputeStage &operator=(PrerecordedComputeStage &&) = default;
-
-			inline void SetRecordCommandsFunction(RecordCommandsFunction &&recordCommands) { m_RecordCommands = std::move(recordCommands); }
-		private:
-			RecordCommandsFunction m_RecordCommands;
-		private:
-			friend Graph;
-
-			friend ExecutableGraph;
-
-			friend Compiler;
-		};
-
 		class RenderStage : public Stage
 		{
 		public:
@@ -199,32 +170,6 @@ namespace Gogaman
 			std::vector<std::string> m_RenderSurfaceAttachmentNames;
 
 			StateData m_StateData;
-		private:
-			friend Graph;
-
-			friend ExecutableGraph;
-
-			friend Compiler;
-		};
-
-		class PrerecordedRenderStage : public RenderStage
-		{
-		public:
-			using RecordCommandsFunction = std::function<void(RHI::RenderCommandRecorder &, const StateData &)>;
-		public:
-			PrerecordedRenderStage(StateData &&state)
-				: RenderStage(std::move(state))
-			{}
-
-			PrerecordedRenderStage(PrerecordedRenderStage &&) = default;
-
-			~PrerecordedRenderStage() = default;
-			
-			PrerecordedRenderStage &operator=(PrerecordedRenderStage &&) = default;
-
-			inline void SetRecordCommandsFunction(RecordCommandsFunction &&recordCommands) { m_RecordCommands = std::move(recordCommands); }
-		private:
-			RecordCommandsFunction m_RecordCommands;
 		private:
 			friend Graph;
 

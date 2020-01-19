@@ -54,6 +54,5 @@ void main()
 
 	vec3 color = Mandelbrot(c);
 
-	color = pow(color, vec3(1.0f / 2.22f));
 	resultValue = vec4(color, 1.0f);
 }

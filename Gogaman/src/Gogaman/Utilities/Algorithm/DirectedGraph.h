@@ -27,6 +27,7 @@ namespace Gogaman
 			return index;
 		}
 
+		/*
 		//Does not work | Indices get shifted when vertex is deleted | Needs stable array
 		inline void RemoveVertex(const VertexIndexType index)
 		{
@@ -36,7 +37,7 @@ namespace Gogaman
 			}
 
 			m_AdjacencyMatrix[index].clear();
-		}
+		}*/
 
 		inline void CreateEdge(const VertexIndexType source, const VertexIndexType destination) { m_AdjacencyMatrix[source][destination] = true; }
 		inline bool IsEdge(const VertexIndexType source, const VertexIndexType destination) const { return m_AdjacencyMatrix[source][destination]; }

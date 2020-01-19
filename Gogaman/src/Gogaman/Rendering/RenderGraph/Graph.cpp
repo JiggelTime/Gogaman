@@ -16,35 +16,18 @@ namespace Gogaman
 
 		std::pair<Stage::Type, Graph::StageIndex> Graph::StageIndexData(const StageIndex vertexIndex) const
 		{
-			StageIndex index = vertexIndex;
-			if(index < m_ComputeStages.size())
-				return { Stage::Type::Compute, index };
+			if(vertexIndex < m_ComputeStages.size())
+				return { Stage::Type::Compute, vertexIndex };
 
-			index -= m_ComputeStages.size();
-			if(index < m_PrerecordedComputeStages.size())
-				return { Stage::Type::PrerecordedCompute, index };
-
-			index -= m_PrerecordedComputeStages.size();
-			if(index < m_RenderStages.size())
-				return { Stage::Type::Render, index };
-			
-			index -= m_RenderStages.size();
-			return { Stage::Type::PrerecordedRender, index };
+			return { Stage::Type::Render, vertexIndex - m_ComputeStages.size() };
 		}
 
 		Graph::StageIndex Graph::VertexIndex(const Stage::Type stageType, const StageIndex stageIndex) const
 		{
-			switch(stageType)
-			{
-			case Stage::Type::Compute:
+			if(stageType == Stage::Type::Compute)
 				return stageIndex;
-			case Stage::Type::PrerecordedCompute:
-				return stageIndex + m_ComputeStages.size();
-			case Stage::Type::Render:
-				return stageIndex + m_ComputeStages.size() + m_PrerecordedComputeStages.size();
-			case Stage::Type::PrerecordedRender:
-				return stageIndex + m_ComputeStages.size() + m_PrerecordedComputeStages.size() + m_RenderStages.size();
-			}
+
+			return stageIndex + m_ComputeStages.size();
 		}
 	}
 }
