@@ -37,7 +37,7 @@ namespace Gogaman
 
 			auto InitializeRenderStage = [&](auto &stage)
 			{
-				std::vector<RHI::RenderSurface::Attachment> colorAttachments;
+				std::vector<RHI::RenderSurface::Attachment> *colorAttachments = new std::vector<RHI::RenderSurface::Attachment>;
 				RHI::RenderSurface::Attachment              depthStencilAttachment;
 				for(const std::string &i : stage.renderSurfaceAttachmentNames)
 				{
@@ -49,12 +49,12 @@ namespace Gogaman
 						depthStencilAttachment.textureID = textureID;
 					else
 					{
-						auto &colorAttachment = colorAttachments.emplace_back();
+						auto &colorAttachment = colorAttachments->emplace_back();
 						colorAttachment.textureID = textureID;
 					}
 				}
 
-				stage.renderSurfaceID = g_Device->GetResources().renderSurfaces.Create(colorAttachments.size(), colorAttachments.data(), std::move(depthStencilAttachment), stage.stateData.viewportWidth, stage.stateData.viewportHeight, 1);
+				stage.renderSurfaceID = g_Device->GetResources().renderSurfaces.Create(colorAttachments->size(), colorAttachments->data(), std::move(depthStencilAttachment), stage.stateData.viewportWidth, stage.stateData.viewportHeight, 1);
 
 				stage.state = std::make_unique<RHI::RenderState>(stage.stateData.descriptorGroupLayouts, *stage.stateData.vertexLayout.get(), stage.stateData.shaderProgramID, stage.renderSurfaceID, stage.stateData.depthStencilState, stage.stateData.blendState, stage.stateData.viewportWidth, stage.stateData.viewportHeight, stage.stateData.cullState);
 			};

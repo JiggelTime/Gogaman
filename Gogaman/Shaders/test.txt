@@ -1,0 +1,10 @@
+poopie(float goop)
+{
+	_zoop[69] = 420;
+	string poop = "boop";
+
+	if(goop > 20)
+	{
+		goop = 40 + 3 - 2;
+	}
+}

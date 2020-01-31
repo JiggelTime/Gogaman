@@ -177,8 +177,6 @@ namespace Gogaman
 			dynamicStateDescriptor.dynamicStateCount = 0;
 			dynamicStateDescriptor.pDynamicStates    = nullptr;
 
-			printf("descriptor layout count: %d\n\n\n", descriptorGroupLayouts.size());
-
 			std::vector<VkDescriptorSetLayout> descriptorSetLayouts;
 			descriptorSetLayouts.reserve(descriptorGroupLayouts.size());
 			for(const auto &i : descriptorGroupLayouts)

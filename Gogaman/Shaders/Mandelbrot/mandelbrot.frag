@@ -1,6 +1,6 @@
 #version 450
 
-#define MAX_ITERATION_COUNT 512.0f
+#define MAX_ITERATION_COUNT 256.0f
 
 layout(location = 0) in vec2 p_UV;
 
@@ -21,10 +21,10 @@ vec3 GenerateColor(float value)
 
 vec3 Mandelbrot(vec2 c)
 {
-	vec2 z = c;
+	vec2 z = vec2(0.0f);
 
-	float radius  = 20.0f;
-	float radius2 = radius * radius;
+	const float radius  = 20.0f;
+	const float radius2 = radius * radius;
 	
 	float i;
 	for(i = 0.0f; i < MAX_ITERATION_COUNT ; i++)
@@ -36,12 +36,10 @@ vec3 Mandelbrot(vec2 c)
 
 	float distance = length(z);
 
-	float interpolatedIteration = log2(log(distance) / log(radius));
+	i -= log2(log(distance) / log(radius));
 
-	i -= interpolatedIteration;
 	float value = i / MAX_ITERATION_COUNT;
-
-	vec3 color = GenerateColor(sin(value) * 21.3f);
+	vec3 color = GenerateColor(sin(value) * 19.3f);
 	return color;
 }
 

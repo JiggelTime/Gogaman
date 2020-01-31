@@ -36,6 +36,7 @@
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Stage.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanFence.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Lexer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -156,5 +157,7 @@
     <ClInclude Include="src\Gogaman\Rendering\FrameContext.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Fence.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\LinearFence.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Lexer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Token.h" />
   </ItemGroup>
 </Project>

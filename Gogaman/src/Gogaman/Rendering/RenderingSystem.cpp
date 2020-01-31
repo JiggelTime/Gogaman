@@ -586,9 +586,9 @@ namespace Gogaman
 	{
 		using namespace RHI;
 
-		auto LoadShader = [](const char *filepath)
+		auto LoadShader = [](const std::string &filepath)
 		{
-			FILE *file = fopen(filepath, "rb");
+			FILE *file = fopen(filepath.c_str(), "rb");
 			fseek(file, 0, SEEK_END);
 			uint32_t size = ftell(file);
 			fseek(file, 0, SEEK_SET);
@@ -599,11 +599,14 @@ namespace Gogaman
 			return std::pair<uint32_t, uint8_t *>(size, buffer);
 		};
 
+		const std::string shaderDirectory = "D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/";
+		//const std::string shaderDirectory = "D:/Shaders/";
+
 		//Mandelbrot shader
-		auto vertexShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/v_Mandelbrot.spv");
+		auto vertexShaderData = LoadShader(shaderDirectory + "v_Mandelbrot.spv");
 		v_MandelbrotShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
 
-		auto pixelShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/p_Mandelbrot.spv");
+		auto pixelShaderData = LoadShader(shaderDirectory + "p_Mandelbrot.spv");
 		p_MandebrotShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
 
 		auto &mandelbrotShaderProgram = g_Device->GetResources().shaderPrograms.Create(mandelbrotShaderProgramID);
@@ -611,10 +614,10 @@ namespace Gogaman
 		mandelbrotShaderProgram.SetShader<Shader::Stage::Pixel>(p_MandebrotShaderID);
 
 		//Postprocess shader
-		auto v_PostProcessShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/v_Postprocess.spv");
+		auto v_PostProcessShaderData = LoadShader(shaderDirectory + "v_Postprocess.spv");
 		v_PostprocessShaderID = g_Device->GetResources().shaders.Create(v_PostProcessShaderData.first, v_PostProcessShaderData.second);
 
-		auto p_PostProcessShaderData = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/p_Postprocess.spv");
+		auto p_PostProcessShaderData = LoadShader(shaderDirectory + "p_Postprocess.spv");
 		p_PostprocessShaderID = g_Device->GetResources().shaders.Create(p_PostProcessShaderData.first, p_PostProcessShaderData.second);
 
 		auto &shaderProgram = g_Device->GetResources().shaderPrograms.Create(postprocessShaderProgramID);
@@ -667,23 +670,6 @@ namespace Gogaman
 		mandelbulbStage.SetExecuteCallback([this](FrameContext &frameContext, const RenderGraph::ResourceManager &resourceManager, RHI::RenderState *state)
 		{
 			//GM_LOG_CORE_INFO("Executing mandelbrot stage! :D");
-
-			if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_1))
-				zoom += 0.8f * zoom * Time::GetDeltaTime();
-			if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_2))
-				zoom -= 0.8f * zoom * Time::GetDeltaTime();
-
-			if(Input::IsKeyPressed(GM_KEY_W))
-				position.y += 1.8f * zoom * Time::GetDeltaTime();
-			else if(Input::IsKeyPressed(GM_KEY_S))
-				position.y -= 1.8f * zoom * Time::GetDeltaTime();
-			if(Input::IsKeyPressed(GM_KEY_A))
-				position.x += 1.8f * zoom * Time::GetDeltaTime();
-			else if(Input::IsKeyPressed(GM_KEY_D))
-				position.x -= 1.8f * zoom * Time::GetDeltaTime();
-
-			smoothPosition = glm::mix(smoothPosition, position, 0.04f);
-			smoothZoom = glm::mix(smoothZoom, zoom, 0.02f);
 
 			ShaderData shaderData;
 			shaderData.positionAndZoom.x = smoothPosition.x;
@@ -761,6 +747,24 @@ namespace Gogaman
 
 	void RenderingSystem::Mandelbrot::Render(FrameContext &frameContext)
 	{
+		//Controls
+		if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_1))
+			zoom += 0.8f * zoom * Time::GetDeltaTime();
+		if(Input::IsMouseButtonPressed(GM_MOUSE_BUTTON_2))
+			zoom -= 0.8f * zoom * Time::GetDeltaTime();
+
+		if(Input::IsKeyPressed(GM_KEY_W))
+			position.y += 1.8f * zoom * Time::GetDeltaTime();
+		else if(Input::IsKeyPressed(GM_KEY_S))
+			position.y -= 1.8f * zoom * Time::GetDeltaTime();
+		if(Input::IsKeyPressed(GM_KEY_A))
+			position.x += 1.8f * zoom * Time::GetDeltaTime();
+		else if(Input::IsKeyPressed(GM_KEY_D))
+			position.x -= 1.8f * zoom * Time::GetDeltaTime();
+
+		smoothPosition = glm::mix(smoothPosition, position, 0.04f);
+		smoothZoom = glm::mix(smoothZoom, zoom, 0.02f);
+
 		renderGraph->Execute(frameContext);
 		/*
 		using namespace RHI;

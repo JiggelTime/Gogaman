@@ -18,8 +18,8 @@ namespace Gogaman
 			//Rendering resolution scale
 			const float resScale        = 1.0f;
 			//Window resolution
-			const uint16_t screenWidth  = 3840;
-			const uint16_t screenHeight = 2160;
+			const uint16_t screenWidth  = 3800;
+			const uint16_t screenHeight = 2100;
 			const float aspectRatio     = float(screenWidth) / float(screenHeight);
 
 		//Controls

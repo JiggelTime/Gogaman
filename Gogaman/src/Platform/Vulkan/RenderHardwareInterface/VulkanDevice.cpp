@@ -323,7 +323,7 @@ namespace Gogaman
 				deviceDescriptor.enabledLayerCount   = (uint32_t)requiredValidationLayerNames.size();
 				deviceDescriptor.ppEnabledLayerNames = requiredValidationLayerNames.data();
 			#else
-				deviceDescriptor.enabledLayerCount   = 0
+				deviceDescriptor.enabledLayerCount   = 0;
 			#endif
 			deviceDescriptor.enabledExtensionCount   = (uint32_t)requiredDeviceExtensionNames.size();
 			deviceDescriptor.ppEnabledExtensionNames = requiredDeviceExtensionNames.data();
@@ -372,8 +372,10 @@ namespace Gogaman
 
 			vkDestroySurfaceKHR(m_NativeData.vulkanInstance, m_NativeData.vulkanSurface, nullptr);
 
-			auto DestroyDebugMessengerFunction = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_NativeData.vulkanInstance, "vkDestroyDebugUtilsMessengerEXT");
-			DestroyDebugMessengerFunction(m_NativeData.vulkanInstance, m_NativeData.vulkanDebugMessenger, nullptr);
+			#if GM_RHI_DEBUGGING_ENABLED
+				auto DestroyDebugMessengerFunction = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(m_NativeData.vulkanInstance, "vkDestroyDebugUtilsMessengerEXT");
+				DestroyDebugMessengerFunction(m_NativeData.vulkanInstance, m_NativeData.vulkanDebugMessenger, nullptr);
+			#endif
 
 			vkDestroyInstance(m_NativeData.vulkanInstance, nullptr);
 		}
