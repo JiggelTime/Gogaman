@@ -15,8 +15,7 @@
 #include "Gogaman/Rendering/ModelMatrixSystem.h"
 #include "Gogaman/Rendering/RenderingSystem.h"
 
-#include "Gogaman/Rendering/FlexShader/Token.h"
-#include "Gogaman/Rendering/FlexShader/Lexer.h"
+#include "Gogaman/Rendering/FlexShader/Compiler.h"
 
 namespace Gogaman
 {
@@ -71,31 +70,7 @@ namespace Gogaman
 
 		const std::string source = LoadShader("D:/dev/Gogaman/Gogaman/Shaders/test.txt");
 
-		const auto tokens = FlexShader::Tokenize(source);
-
-		const std::string names[]{
-			"Number",
-			"Identifier",
-			"String",
-			"Colon",
-			"Semicolon",
-			"LeftParenthesis",
-			"RightParenthesis",
-			"LeftSquareBracket",
-			"RightSquareBracket",
-			"LeftBrace",
-			"RightBrace",
-			"Equal",
-			"Less",
-			"Greater",
-			"Plus",
-			"Minus"
-		};
-
-		for(const FlexShader::Token i : tokens)
-		{
-			std::cout << names[(uint8_t)i.type] << ": " << i.lexeme << std::endl;
-		}
+		FlexShader::Compile(source);
 
 		while(m_IsRunning)
 		{

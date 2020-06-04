@@ -5,6 +5,7 @@ namespace Gogaman
 	namespace FlexShader
 	{
 		struct Token;
+
 		/*
 		enum class AttributeFlag : uint8_t
 		{

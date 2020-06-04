@@ -1,10 +1,13 @@
-poopie(float goop)
 {
-	_zoop[69] = 420;
-	string poop = "boop";
+	int boba;
 
-	if(goop > 20)
+	component test
 	{
-		goop = 40 + 3 - 2;
+		float chort = 3;
+		int gort;
+		//Test comment
+		//gort = chort;
+		
+		gort = bort;
 	}
 }

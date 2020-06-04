@@ -66,6 +66,7 @@ namespace FlexData
 			uint32_t digest = 0;
 
 			auto HashFloat = [&](const float value) { digest ^= std::hash<float>()(value) + 0x9e3779b9 + (digest << 6) + (digest >> 2); };
+
 			HashFloat(other.position[0]);
 			HashFloat(other.position[1]);
 			HashFloat(other.position[2]);

@@ -9,14 +9,14 @@ namespace Gogaman
 	{
 		//Least significant digit radix sort | Time complexity: O(5n) | Space complexity: O(n)
 		template<typename ValueType>
-		inline std::pair<uint32_t, ValueType> *Sort(const uint32_t numKeys, std::pair<uint32_t, ValueType> *keys)
+		inline std::pair<uint32_t, ValueType> *Sort(const uint32_t keyCount, std::pair<uint32_t, ValueType> *keys)
 		{
 			//Generate histograms
 			uint32_t key                  = 0;
 			uint32_t previousKey          = 0;
 			uint32_t histograms[4][0x100] = { 0 };
 			bool     sortRequired         = false;
-			for(uint32_t i = 0; i < numKeys; i++)
+			for(uint32_t i = 0; i < keyCount; i++)
 			{
 				key = keys[i].first;
 				if(key < previousKey)
@@ -38,7 +38,7 @@ namespace Gogaman
 				uint8_t  unsortedRadixPlaceIndices[4];
 				for(auto i = 0; i < 4; i++)
 				{
-					if(histograms[i][(firstKey >> (i << 3)) & 0xff] != numKeys)
+					if(histograms[i][(firstKey >> (i << 3)) & 0xff] != keyCount)
 						unsortedRadixPlaceIndices[unsortedRadixPlaces++] = i;
 				}
 
@@ -56,10 +56,10 @@ namespace Gogaman
 				}
 
 				//Permutation
-				auto *buffer = new std::pair<uint32_t, ValueType>[numKeys];
+				auto *buffer = new std::pair<uint32_t, ValueType>[keyCount];
 				for(auto i = 0; i < unsortedRadixPlaces; i++)
 				{
-					for(uint32_t j = 0; j < numKeys; j++)
+					for(uint32_t j = 0; j < keyCount; j++)
 					{
 						auto element = keys[j];
 						buffer[histograms[unsortedRadixPlaceIndices[i]][(element.first >> (unsortedRadixPlaceIndices[i] << 3)) & 0xff]++] = element;

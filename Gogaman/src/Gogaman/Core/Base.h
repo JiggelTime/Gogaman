@@ -2,11 +2,6 @@
 
 #include "Logging/Log.h"
 
-#define GM_RENDERING_API_NONE   0
-#define GM_RENDERING_API_VULKAN 1
-
-#define GM_RENDERING_API GM_RENDERING_API_VULKAN
-
 //Debug vs release build features
 #if 1
 	#define GM_DEBUG_ASSERTIONS_ENABLED           1
@@ -86,3 +81,9 @@ void DeallocateVirtual(void *memory, const uint64_t size);
 */
 
 #define GM_BIND_EVENT_CALLBACK(x) std::bind(&x, this, std::placeholders::_1)
+
+//Renderer
+#define GM_RENDERING_API_NONE   0
+#define GM_RENDERING_API_VULKAN 1
+
+#define GM_RENDERING_API GM_RENDERING_API_VULKAN

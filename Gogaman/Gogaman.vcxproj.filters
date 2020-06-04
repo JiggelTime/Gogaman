@@ -37,6 +37,11 @@
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
     <ClCompile Include="src\Platform\Vulkan\RenderHardwareInterface\VulkanFence.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Lexer.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Parser.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Compiler.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Visitor.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\FlexShader.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\SPIR-V\Generator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -159,5 +164,12 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\LinearFence.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Lexer.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Token.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Parser.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\AbstractSyntaxTree.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Compiler.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Visitor.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\FlexShader.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\SPIR-V\Generator.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\ComponentInstance.h" />
   </ItemGroup>
 </Project>

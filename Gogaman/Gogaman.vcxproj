@@ -18,7 +18,12 @@
     <ClCompile Include="src\Gogaman\Core\Application.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Compiler.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\FlexShader.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Lexer.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Parser.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\SPIR-V\Generator.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Visitor.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\PerspectiveCamera.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\Compiler.cpp" />
@@ -69,8 +74,15 @@
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\AbstractFence.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\Fence.h" />
     <ClInclude Include="src\Gogaman\RenderHardwareInterface\LinearFence.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\AbstractSyntaxTree.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Compiler.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\ComponentInstance.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\FlexShader.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Lexer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Parser.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\SPIR-V\Generator.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Token.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Visitor.h" />
     <ClInclude Include="src\Gogaman\Rendering\FrameContext.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Graph.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Resource.h" />
@@ -242,7 +254,8 @@
       <PreprocessorDefinitions>GM_DEBUG=1;GM_PLATFORM_WINDOWS;GM_BUILD_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <OmitFramePointers>false</OmitFramePointers>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>assimp-vc140-mt.lib;opengl32.lib;glfw3.lib;AntTweakBar64.lib;libfbxsdk-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -271,7 +284,8 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
       <PreprocessorDefinitions>GM_PLATFORM_WINDOWS;GM_BUILD_DLL;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

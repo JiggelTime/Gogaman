@@ -3,7 +3,7 @@
 
 //TODO: These options should be in config (gives "cant open glm.hpp no file or directory" error in #include glm.hpp in config.h
 //#include "Gogaman/Core/Config.h"
-#define GM_LOG_TO_FILE  1
+#define GM_LOG_TO_FILE  0
 #define GM_LOG_FILEPATH "Gogaman.log"
 
 namespace Gogaman
