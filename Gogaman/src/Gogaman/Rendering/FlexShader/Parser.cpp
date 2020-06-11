@@ -14,12 +14,12 @@ namespace Gogaman
 
 		AST::Node::Abstract *NullParseError(Parser &parser, const int8_t associativePrecedence, const Token &token)
 		{
-			GM_DEBUG_ASSERT(false, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid", GetTokenString(token).c_str());
+			GM_DEBUG_ASSERT(false, "Failed to parse FlexShader | Invalid syntax | Line: %d | Token \"%s\" is invalid", token.line, GetTokenString(token).c_str());
 		}
 
 		AST::Node::Abstract *LeftParseError(Parser &parser, const int8_t rightAssociativePrecedence, const Token &token, AST::Node::Abstract *leftNode)
 		{
-			GM_DEBUG_ASSERT(false, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid", GetTokenString(token).c_str());
+			GM_DEBUG_ASSERT(false, "Failed to parse FlexShader | Invalid syntax | Line: %d | Token \"%s\" is invalid", token.line, GetTokenString(token).c_str());
 		}
 
 		const Token &Parser::GetCurrentToken() const
@@ -157,7 +157,6 @@ namespace Gogaman
 
 				m_CursorPosition++;
 
-				//new
 				bool isLeftTokenConditionalParseFound = false;
 				for(uint8_t i = 0; i < m_LeftTokenConditionalParseConditions[(uint8_t)token.type].size(); i++)
 				{
@@ -168,7 +167,6 @@ namespace Gogaman
 						break;
 					}
 				}
-				//endnew
 
 				if(!isLeftTokenConditionalParseFound)
 					node = m_LeftTokenParseCallbacks[(uint8_t)token.type](*this, m_LeftTokenRightAssociativePrecedences[(uint8_t)token.type], token, node);

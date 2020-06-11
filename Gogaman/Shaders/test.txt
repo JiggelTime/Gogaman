@@ -1,13 +1,22 @@
 {
-	int boba;
 
-	component test
-	{
-		float chort = 3;
-		int gort;
-		//Test comment
-		//gort = chort;
-		
-		gort = bort;
-	}
+int globalVal;
+
+float TestFunc(int argVal1)
+{
+	float localVal = 0;
+	globalVal = val1;
+}
+
+int TestFunc2(int argVal1)
+{
+	int localVal = argVal1;
+}
+
+//localVal = 100;
+
+float testVal = TestFunc(5);
+
+int testVal2 = TestFunc2(3);
+
 }

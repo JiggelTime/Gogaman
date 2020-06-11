@@ -103,9 +103,10 @@ namespace Gogaman
 				{
 					GM_AST_NODE_ACCEPT_FUNCTIONS(FunctionPrototype)
 
-					std::string              name;
-					Type                     returnType;
-					std::vector<std::string> argumentNames;
+					std::string                        name;
+					Type                               returnType;
+					//std::vector<std::string> argumentNames;
+					std::vector<VariableDeclaration *> arguments;
 				};
 
 				struct Function : public Statement

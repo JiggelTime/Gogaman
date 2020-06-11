@@ -13,6 +13,8 @@ namespace Gogaman
 		{
 			std::vector<Token> tokens;
 	
+			uint16_t lineCount = 1;
+
 			uint32_t cursorPosition = 0;
 			while(cursorPosition < source.length())
 			{
@@ -22,6 +24,7 @@ namespace Gogaman
 				{
 					Token &token = tokens.emplace_back();
 					token.type   = type;
+					token.line   = lineCount;
 					token.lexeme = lexeme;
 				};
 	
@@ -30,14 +33,22 @@ namespace Gogaman
 					AddToken(type, std::string_view(source.c_str() + cursorPosition, 1));
 				};
 
-				//Skip white-space
+				//New line
+				if(character == '\n')
+				{
+					lineCount++;
+					cursorPosition++;
+					continue;
+				}
+
+				//White-space
 				if(isspace(character))
 				{
 					cursorPosition++;
 					continue;
 				}
 
-				//Skip comment
+				//Comment
 				if((character == '/') && (source[cursorPosition + 1] == '/'))
 				{
 					cursorPosition += 2;

@@ -36,6 +36,7 @@ namespace Gogaman
 			};
 
 			std::string_view lexeme;
+			uint16_t         line;
 			Type             type;
 		};
 
@@ -71,9 +72,6 @@ namespace Gogaman
 			return std::string(names[(uint8_t)type]);
 		}
 
-		inline std::string GetTokenString(const Token &token)
-		{
-			return GetTokenTypeString(token.type).append(": ").append(token.lexeme);
-		}
+		inline std::string GetTokenString(const Token &token) { return GetTokenTypeString(token.type).append(": ").append(token.lexeme); }
 	}
 }

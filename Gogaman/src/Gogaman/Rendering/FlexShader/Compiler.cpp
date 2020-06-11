@@ -22,7 +22,6 @@ namespace Gogaman
 			AST::Node::Statement *node = static_cast<AST::Node::Statement *>(leftNode);
 
 			//parser.AdvanceCursor();
-
 			return node;
 		}
 
@@ -40,7 +39,6 @@ namespace Gogaman
 
 			//Should it advance?
 			//parser.AdvanceCursor();
-
 			return node;
 		}
 
@@ -51,26 +49,26 @@ namespace Gogaman
 			node->returnType = static_cast<AST::Node::VariableDeclaration *>(leftNode)->type;
 			node->name       = static_cast<AST::Node::VariableDeclaration *>(leftNode)->name;
 
-			parser.AdvanceCursor();
+			//parser.AdvanceCursor();
 			while(parser.GetCurrentToken().type != Token::Type::RightParenthesis)
 			{
 				if(parser.GetCurrentToken().type == Token::Type::Comma)
 				{
 					parser.AdvanceCursor();
+					//Assert that current token is not a comma here
 					continue;
 				}
 
-				GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::Identifier, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected identifier", GetTokenString(parser.GetCurrentToken()).c_str());
+				//GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::Identifier, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected identifier", GetTokenString(parser.GetCurrentToken()).c_str());
 
-				node->argumentNames.emplace_back(parser.GetCurrentToken().lexeme);
+				//It probably should be this:
+				//node->arguments.emplace_back(static_cast<AST::Node::VariableDeclaration *>(parser.Parse(GM_FLEX_SHADER_COMMA_PRECEDENCE)));
+				node->arguments.emplace_back(static_cast<AST::Node::VariableDeclaration *>(parser.Parse(associativePrecedence)));
 
-				parser.AdvanceCursor();
+				//parser.AdvanceCursor();
 			}
 
-			GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::RightParenthesis, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected \")\"", GetTokenString(parser.GetCurrentToken()).c_str());
-
 			parser.AdvanceCursor();
-
 			return node;
 		}
 
@@ -78,9 +76,8 @@ namespace Gogaman
 		{
 			AST::Node::Function *node = new AST::Node::Function;
 			node->prototype = static_cast<AST::Node::FunctionPrototype *>(leftNode);
-			node->body      = static_cast<AST::Node::StatementBlock *>(parser.Parse(associativePrecedence));
-
-			parser.AdvanceCursor();
+			//node->body      = static_cast<AST::Node::StatementBlock *>(parser.Parse(associativePrecedence));
+			node->body = ParseStatementBlock(parser, 0, token);
 
 			return node;
 		}
@@ -89,9 +86,8 @@ namespace Gogaman
 		{
 			AST::Node::FunctionCall *node = new AST::Node::FunctionCall;
 			node->name = token.lexeme;
-			if(parser.GetCurrentToken().type == Token::Type::LeftParenthesis)
-				GM_LOG_CORE_INFO("need to advance before parsing args");
 
+			parser.AdvanceCursor();
 			while(parser.GetCurrentToken().type != Token::Type::RightParenthesis)
 			{
 				node->arguments.emplace_back(static_cast<AST::Node::Expression *>(parser.Parse(GM_FLEX_SHADER_COMMA_PRECEDENCE)));
@@ -100,10 +96,7 @@ namespace Gogaman
 					parser.AdvanceCursor();
 			}
 
-			GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::RightParenthesis, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected \")\"", GetTokenString(parser.GetCurrentToken()).c_str());
-
 			parser.AdvanceCursor();
-
 			return node;
 		}
 
@@ -118,7 +111,6 @@ namespace Gogaman
 			node->body = static_cast<AST::Node::StatementBlock *>(parser.Parse(associativePrecedence));
 
 			//parser.AdvanceCursor();
-
 			return node;
 		}
 
@@ -134,7 +126,6 @@ namespace Gogaman
 
 			//Advance cursor? YES! function prototype relies on the token being left parenthesis
 			parser.AdvanceCursor();
-
 			return node;
 		}
 
@@ -285,10 +276,22 @@ namespace Gogaman
 			AST::ValidationVisitor validator;
 			rootNode->Accept(validator);
 
-			const auto &symbols = validator.GetSymbolTable();
-			for(auto i = symbols.begin(); i != symbols.end(); i++)
+			const auto &symbols0 = validator.GetSymbolTable(0);
+			for(auto i = symbols0.begin(); i != symbols0.end(); i++)
 			{
-				GM_LOG_CORE_INFO("Symbol | Name: %s | Type: %s", i->first.c_str(), GetTypeString(i->second).c_str());
+				GM_LOG_CORE_INFO("Global namespace | Symbol | Name: %s | Type: %s", i->first.c_str(), GetTypeString(i->second).c_str());
+			}
+
+			const auto &symbols1 = validator.GetSymbolTable(1);
+			for(auto i = symbols1.begin(); i != symbols1.end(); i++)
+			{
+				GM_LOG_CORE_INFO("Component namespace | Symbol | Name: %s | Type: %s", i->first.c_str(), GetTypeString(i->second).c_str());
+			}
+
+			const auto &symbols2 = validator.GetSymbolTable(2);
+			for(auto i = symbols2.begin(); i != symbols2.end(); i++)
+			{
+				GM_LOG_CORE_INFO("Function namespace | Symbol | Name: %s | Type: %s", i->first.c_str(), GetTypeString(i->second).c_str());
 			}
 
 			return rootNode;

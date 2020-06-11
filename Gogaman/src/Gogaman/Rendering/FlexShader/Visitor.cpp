@@ -29,15 +29,14 @@ namespace Gogaman
 			void PrintVisitor::VisitFunctionPrototype(Node::FunctionPrototype &node)
 			{
 				std::string spaces;
-				spaces.append(m_Depth * 2, ' ');
+				spaces.append(m_Depth++ * 2, ' ');
 
-				std::string argumentNames;
-				for(auto i : node.argumentNames)
-				{
-					argumentNames.append(i).append(", ");
-				}
+				GM_LOG_CORE_INFO("%sFunction Prototype | Name: %s | Return type: %s | Arguments:", spaces.c_str(), node.name.c_str(), GetTypeString(node.returnType).c_str());
 
-				GM_LOG_CORE_INFO("%sFunction Prototype | Name: %s | Return type: %s | Argument names: %s", spaces.c_str(), node.name.c_str(), GetTypeString(node.returnType).c_str(), argumentNames.c_str());
+				for(const auto i : node.arguments)
+					i->Accept(*this);
+
+				m_Depth -= 2;
 			}
 
 			void PrintVisitor::VisitFunction(Node::Function &node)
@@ -150,7 +149,7 @@ namespace Gogaman
 
 			Type ValidationVisitor::VisitStatementBlock(Node::StatementBlock &node)
 			{
-				for(auto i : node.statements)
+				for(const auto i : node.statements)
 				{
 					i->Accept(*this);
 				}
@@ -160,37 +159,51 @@ namespace Gogaman
 
 			Type ValidationVisitor::VisitFunctionPrototype(Node::FunctionPrototype &node)
 			{
-				GM_DEBUG_ASSERT(!m_SymbolTable.contains(node.name), "Failed to validate FlexShader function prototype | Symbol \"%s\" redefinition", node.name.c_str());
+				//GM_DEBUG_ASSERT(!m_SymbolTable.contains(node.name), "Failed to validate FlexShader function prototype | Symbol \"%s\" redefinition", node.name.c_str());
 				
-				m_SymbolTable[node.name] = node.returnType;
+				m_SymbolTables[m_CurrentNamespaceDepth - 1][node.name] = node.returnType;
+
+				for(const auto i : node.arguments)
+					i->Accept(*this);
 
 				return node.returnType;
 			}
 
 			Type ValidationVisitor::VisitFunction(Node::Function &node)
 			{
+				//Assert that current depth is < 2
+				m_CurrentNamespaceDepth++;
+
+				const Type returnType = node.prototype->Accept(*this);
+
 				node.body->Accept(*this);
 
-				return node.prototype->Accept(*this);
+				m_SymbolTables[m_CurrentNamespaceDepth].clear();
+				m_CurrentNamespaceDepth--;
+
+				return returnType;
 			}
 
-			Type ValidationVisitor::VisitFunctionCall(Node::FunctionCall &node)
-			{
-				return GetType(node.name);
-			}
+			Type ValidationVisitor::VisitFunctionCall(Node::FunctionCall &node) { return GetType(node.name); }
 
 			Type ValidationVisitor::VisitComponent(Node::Component &node)
 			{
+				//Assert that current depth is 0
+				m_CurrentNamespaceDepth++;
+
 				node.body->Accept(*this);
+
+				m_SymbolTables[m_CurrentNamespaceDepth].clear();
+				m_CurrentNamespaceDepth--;
 
 				return Type::None;
 			}
 
 			Type ValidationVisitor::VisitVariableDeclaration(Node::VariableDeclaration &node)
 			{
-				GM_DEBUG_ASSERT(!m_SymbolTable.contains(node.name), "Failed to validate FlexShader variable declaration | Symbol \"%s\" redefinition", node.name.c_str());
+				//GM_DEBUG_ASSERT(!m_SymbolTable.contains(node.name), "Failed to validate FlexShader variable declaration | Symbol \"%s\" redefinition", node.name.c_str());
 
-				m_SymbolTable[node.name] = node.type;
+				m_SymbolTables[m_CurrentNamespaceDepth][node.name] = node.type;
 
 				return node.type;
 			}
@@ -230,9 +243,19 @@ namespace Gogaman
 
 			Type ValidationVisitor::GetType(const std::string &symbol)
 			{
-				GM_DEBUG_ASSERT(m_SymbolTable.contains(symbol), "Failed to get FlexShader type | Undefined symbol \"%s\"", symbol.c_str());
+				uint8_t i = m_CurrentNamespaceDepth;
+				while(true)
+				{
+					if(m_SymbolTables[i].contains(symbol))
+						return m_SymbolTables[i][symbol];
 
-				return m_SymbolTable[symbol];
+					if(i-- == 0)
+						break;
+				}
+
+				GM_DEBUG_ASSERT(false, "Failed to get FlexShader type | Undefined symbol \"%s\"", symbol.c_str());
+
+				//return m_SymbolTable[symbol];
 			}
 
 			void ModuleVisitor::VisitStatementBlock(Node::StatementBlock &node)

@@ -79,7 +79,10 @@ namespace Gogaman
 			class ValidationVisitor
 			{
 			public:
-				ValidationVisitor()  = default;
+				ValidationVisitor()
+					: m_CurrentNamespaceDepth(0)
+				{}
+
 				~ValidationVisitor() = default;
 
 				//Non-terminals
@@ -111,9 +114,11 @@ namespace Gogaman
 				Type GetType(const std::string &symbol);
 
 				//Can remove. Only needed for debugging
-				inline constexpr const std::unordered_map<std::string, Type> &GetSymbolTable() const { return m_SymbolTable; }
+				inline constexpr const std::unordered_map<std::string, Type> &GetSymbolTable(const uint8_t depth) const { return m_SymbolTables[depth]; }
 			private:
-				std::unordered_map<std::string, Type> m_SymbolTable;
+				//Global, component, function namespaces
+				std::unordered_map<std::string, Type> m_SymbolTables[3];
+				uint8_t                               m_CurrentNamespaceDepth;
 			};
 
 			class ModuleVisitor : public AbstractVisitor<ModuleVisitor>
