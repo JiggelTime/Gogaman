@@ -4,13 +4,13 @@
 
 //Debug vs release build features
 #if 1
-	#define GM_DEBUG_ASSERTIONS_ENABLED           1
-	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED 1
-	#define GM_RHI_DEBUGGING_ENABLED              1
+	#define GM_DEBUG_ASSERTIONS_ENABLED           TRUE
+	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED TRUE
+	#define GM_RHI_DEBUGGING_ENABLED              TRUE
 #else
-	#define GM_ASSERTIONS_ENABLED                 0
-	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED 0
-	#define GM_RHI_DEBUGGING_ENABLED              0
+	#define GM_ASSERTIONS_ENABLED                 FALSE
+	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED FALSE
+	#define GM_RHI_DEBUGGING_ENABLED              FALSE
 #endif
 
 #define GM_ASSERT(x, ...)\

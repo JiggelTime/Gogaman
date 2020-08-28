@@ -18,7 +18,7 @@ namespace Gogaman
 				GM_DEBUG_ASSERT(false, "Failed to begin command buffer recording");
 		}
 
-		void CommandBuffer::StopRecording()
+		void CommandBuffer::EndRecording()
 		{
 			if(vkEndCommandBuffer(m_NativeData.vulkanCommandBuffer) != VK_SUCCESS)
 				GM_DEBUG_ASSERT(false, "Failed to end command buffer recording");

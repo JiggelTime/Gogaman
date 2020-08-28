@@ -38,7 +38,7 @@ namespace Gogaman
 			
 			inline void IndexedInstancedRender(const uint32_t indexCount, const uint32_t startIndexOffset, const uint32_t startVertexOffset, const uint32_t instanceCount, const uint32_t startInstanceOffset) { this->GetImplementation().IndexedInstancedRender(indexCount, startIndexOffset, startVertexOffset, instanceCount, startInstanceOffset); }
 
-			inline void StopRecording() { this->GetImplementation().StopRecording(); }
+			inline void EndRecording() { this->GetImplementation().EndRecording(); }
 		private:
 			AbstractRenderCommandRecorder(CommandBuffer *commandBuffer, RenderState *state)
 				: TransferCommandRecorder(commandBuffer), m_State(state)

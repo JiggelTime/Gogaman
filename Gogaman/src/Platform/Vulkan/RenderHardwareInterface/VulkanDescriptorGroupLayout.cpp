@@ -10,7 +10,7 @@ namespace Gogaman
 		DescriptorGroupLayout::DescriptorGroupLayout(const uint32_t bindingCount, Binding *bindings, const Shader::StageFlag shaderVisibilityFlags)
 			: AbstractDescriptorGroupLayout(bindingCount, bindings, shaderVisibilityFlags)
 		{
-			GM_DEBUG_ASSERT(m_BindingCount > 0, "Failed to construct descriptor group layout | Invalid bindings");
+			GM_DEBUG_ASSERT(m_BindingCount, "Failed to construct descriptor group layout | Invalid bindings");
 
 			VkDescriptorSetLayoutBinding *descriptorSetLayoutBindingDescriptors = new VkDescriptorSetLayoutBinding[m_BindingCount];
 			for(uint32_t i = 0; i < m_BindingCount; i++)

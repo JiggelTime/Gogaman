@@ -93,11 +93,11 @@ namespace Gogaman
 			vkCmdDrawIndexed(m_CommandBuffer->GetNativeData().vulkanCommandBuffer, indexCount, instanceCount, startIndexOffset, startVertexOffset, startInstanceOffset);
 		}
 
-		void RenderCommandRecorder::StopRecording()
+		void RenderCommandRecorder::EndRecording()
 		{
 			vkCmdEndRenderPass(m_CommandBuffer->GetNativeData().vulkanCommandBuffer);
 
-			m_CommandBuffer->StopRecording();
+			m_CommandBuffer->EndRecording();
 		}
 	}
 }

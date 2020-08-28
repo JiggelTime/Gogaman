@@ -83,7 +83,7 @@ namespace Gogaman
 					commandRecorder.UpdateState(m_ResourceManager.GetTexture(i.first), i.second);
 				}
 
-				commandRecorder.StopRecording();
+				commandRecorder.EndRecording();
 				frameContext.GetComputeQueue().Submit(commandBufferID);
 				//MAKE EXECUTION FUNCTION FOR COMPUTE TAKE A COMPUTESTATE, TEMPORARY NULLPTR BECAUSE CAN'T BE BOTHERED RN
 				stage.execute(frameContext, m_ResourceManager, nullptr);
@@ -106,7 +106,7 @@ namespace Gogaman
 					}
 				}
 
-				commandRecorder.StopRecording();
+				commandRecorder.EndRecording();
 				frameContext.GetRenderQueue().Submit(commandBufferID);
 
 				stage.execute(frameContext, m_ResourceManager, stage.state.get());

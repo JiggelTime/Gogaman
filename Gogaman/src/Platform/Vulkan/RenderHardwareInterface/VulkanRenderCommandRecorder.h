@@ -34,7 +34,7 @@ namespace Gogaman
 
 			void IndexedInstancedRender(const uint32_t indexCount, const uint32_t startIndexOffset, const uint32_t startVertexOffset, const uint32_t instanceCount, const uint32_t startInstanceOffset);
 		
-			void StopRecording();
+			void EndRecording();
 		private:
 			//friend AbstractRenderCommandRecorder;
 		};

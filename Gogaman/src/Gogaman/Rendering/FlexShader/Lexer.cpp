@@ -9,7 +9,7 @@ namespace Gogaman
 {
 	namespace FlexShader
 	{
-		std::vector<Token> Tokenize(const std::string &source)
+		std::vector<Token> Lex(const std::string &source)
 		{
 			std::vector<Token> tokens;
 	
@@ -25,13 +25,10 @@ namespace Gogaman
 					Token &token = tokens.emplace_back();
 					token.type   = type;
 					token.line   = lineCount;
-					token.lexeme = lexeme;
+					token.lexeme = std::move(lexeme);
 				};
 	
-				auto AddAtom = [&](const Token::Type type)
-				{
-					AddToken(type, std::string_view(source.c_str() + cursorPosition, 1));
-				};
+				auto AddAtom = [&](const Token::Type type) { AddToken(type, std::string_view(source.c_str() + cursorPosition, 1)); };
 
 				//New line
 				if(character == '\n')
@@ -48,20 +45,32 @@ namespace Gogaman
 					continue;
 				}
 
-				//Comment
+				//Single-line comment
 				if((character == '/') && (source[cursorPosition + 1] == '/'))
+				{
+					cursorPosition += 2;
+
+					while(source[cursorPosition] != '\n')
+						cursorPosition++;
+
+					cursorPosition++;
+					continue;
+				}
+
+				//Multi-line comment
+				if((character == '/') && (source[cursorPosition + 1] == '*'))
 				{
 					cursorPosition += 2;
 
 					while(true)
 					{
-						if(source[cursorPosition] == '\n')
+						if((source[cursorPosition] == '*') && (source[cursorPosition + 1] == '/'))
 							break;
 
 						cursorPosition++;
 					}
 
-					cursorPosition++;
+					cursorPosition += 2;
 					continue;
 				}
 	
@@ -72,6 +81,16 @@ namespace Gogaman
 					while(true)
 					{
 						cursorPosition++;
+
+						if(source[cursorPosition] == '.')
+						{
+							while(true)
+							{
+								cursorPosition++;
+								if(!isdigit(source[cursorPosition]))
+									break;
+							}
+						}
 	
 						if(!isdigit(source[cursorPosition]))
 							break;
@@ -85,6 +104,16 @@ namespace Gogaman
 				{
 					const uint32_t initialPosition = cursorPosition;
 
+					//replace this loop with find_last_of(")
+					/*
+					auto GetExtension = [](const std::string &filepath)
+					{
+						const auto periodIndex = filepath.find_last_of('.');
+						return filepath.substr(periodIndex + 1);
+					};
+
+					if(GetExtension(i) == "flex")
+					*/
 					while(true)
 					{
 						cursorPosition++;
@@ -108,14 +137,15 @@ namespace Gogaman
 					{
 						cursorPosition++;
 	
-						if(!isalnum(source[cursorPosition]) && source[cursorPosition] != '_')
+						//if(!isalnum(source[cursorPosition]) && source[cursorPosition] != '_')
+						if(!isalnum(source[cursorPosition]) && source[cursorPosition] != '_' && source[cursorPosition] != '.')
 							break;
 					}
 
 					std::string_view characters(source.c_str() + initialPosition, cursorPosition - initialPosition);
 					
 					bool isKeyword = false;
-					const std::vector<std::string> keywords = { "int", "float", "component" };
+					const std::vector<std::string> keywords = { "void", "int", "float", "float2", "float3", "float4", "Sampler", "input", "output", "component", "if", "else", "return" };
 					for(const auto &i : keywords)
 					{
 						if(characters == i)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Gogaman/Utilities/Algorithm/DirectedGraph.h"
-
 #include "Stage.h"
 
 namespace Gogaman

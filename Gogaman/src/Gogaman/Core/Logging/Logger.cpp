@@ -3,7 +3,7 @@
 
 //TODO: These options should be in config (gives "cant open glm.hpp no file or directory" error in #include glm.hpp in config.h
 //#include "Gogaman/Core/Config.h"
-#define GM_LOG_TO_FILE  0
+#define GM_LOG_TO_FILE  FALSE
 #define GM_LOG_FILEPATH "Gogaman.log"
 
 namespace Gogaman
@@ -13,11 +13,11 @@ namespace Gogaman
 		if(level >= m_LogLevel)
 		{
 			unsigned int  messageLength = 0;
-			va_list       args;
-			va_start(args, format);
-			messageLength = _vscprintf(format, args) + 1;
+			va_list       arguments;
+			va_start(arguments, format);
+			messageLength = _vscprintf(format, arguments) + 1;
 			char *message = new char[messageLength];
-			vsprintf_s(message, messageLength, format, args);
+			vsprintf_s(message, messageLength, format, arguments);
 
 			std::ostringstream output;
 			output << "[" << m_Name << "] ";
@@ -55,7 +55,7 @@ namespace Gogaman
 				}
 			#endif
 
-			va_end(args);
+			va_end(arguments);
 			delete[] message;
 		}
 	}

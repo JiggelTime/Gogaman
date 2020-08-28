@@ -1,22 +1,41 @@
 {
-
-int globalVal;
-
-float TestFunc(int argVal1)
-{
-	float localVal = 0;
-	globalVal = val1;
-}
-
-int TestFunc2(int argVal1)
-{
-	int localVal = argVal1;
-}
-
-//localVal = 100;
-
-float testVal = TestFunc(5);
-
-int testVal2 = TestFunc2(3);
-
+	component TestComp
+	{
+		float4 testVec4;
+		int testInt;
+		float2 testVec2;
+		//Texture(2D?) albedo;
+		Sampler testSampler;
+	}
+	
+	component TestComp2 : TestInterface
+	{
+		int testFloat;
+		
+		float testFunc()
+		{
+			float someValue = 2;
+		}
+	}
+	
+	component TestComp3 : TestInterface
+	{
+		int testInt;
+		int testInt2;
+		
+		int testFunc() {}
+	}
+	
+	{
+		int goga;
+	}
+	
+	TestInterface instance;
+	
+	float main
+	{
+		instance.testFunc();
+	}
+	
+	//plast.testFunc();
 }

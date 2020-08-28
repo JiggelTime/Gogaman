@@ -35,6 +35,8 @@
 #include "RenderableComponent.h"
 #include "LightComponent.h"
 
+#include "Gogaman/Rendering/FlexShader/FlexShader.h"
+
 #include <FlexData.h>
 
 #define GM_RENDERING_SYSTEM_RENDERABLE_GROUP_INDEX        0
@@ -369,7 +371,7 @@ namespace Gogaman
 			}
 		}
 
-		transferCommandRecorder.StopRecording();
+		transferCommandRecorder.EndRecording();
 		//g_Device->SubmitTransferCommands(1, transferCommandBuffer.get());
 
 		//Import point lights
@@ -479,7 +481,7 @@ namespace Gogaman
 			commandRecorder.IndexedRender(g_Device->GetResources().buffers.Get(renderableComponent.indexBufferID).GetSize() / sizeof(uint16_t), 0, 0);
 		}
 
-		commandRecorder.StopRecording();
+		commandRecorder.EndRecording();
 
 		g_Device->SubmitRenderCommands(1, m_CommandBuffers[swapChainImageIndex].get());
 		
@@ -528,10 +530,10 @@ namespace Gogaman
 			auto GetExtension = [](const std::string &filepath)
 			{
 				const auto periodIndex = filepath.find_last_of('.');
-				return filepath.substr(periodIndex);
+				return filepath.substr(periodIndex + 1);
 			};
 
-			if(GetExtension(i) == ".flex")
+			if(GetExtension(i) == "flex")
 				ImportFlexData(i);
 		}
 
@@ -586,7 +588,7 @@ namespace Gogaman
 	{
 		using namespace RHI;
 
-		auto LoadShader = [](const std::string &filepath)
+		const auto LoadShader = [](const std::string &filepath)
 		{
 			FILE *file = fopen(filepath.c_str(), "rb");
 			fseek(file, 0, SEEK_END);
@@ -599,15 +601,38 @@ namespace Gogaman
 			return std::pair<uint32_t, uint8_t *>(size, buffer);
 		};
 
+		const auto LoadTextFile = [](const char *filepath)
+		{
+			FILE *file = fopen(filepath, "rb");
+
+			fseek(file, 0, SEEK_END);
+			uint32_t size = ftell(file);
+			rewind(file);
+
+			char *buffer = new char[size + 1u];
+			fread(buffer, size, 1, file);
+
+			fclose(file);
+
+			buffer[size] = '\0';
+
+			std::string source = buffer;
+			delete[] buffer;
+
+			return source;
+		};
+
 		const std::string shaderDirectory = "D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/";
-		//const std::string shaderDirectory = "D:/Shaders/";
+
+		FlexShader::Module testModule(LoadTextFile("D:/dev/Gogaman/Gogaman/Shaders/Mandelbrot/flexFragTest.txt"));
 
 		//Mandelbrot shader
 		auto vertexShaderData = LoadShader(shaderDirectory + "v_Mandelbrot.spv");
+		//auto pixelShaderData = LoadShader(shaderDirectory + "p_Mandelbrot.spv");
+		auto pixelShaderData = testModule.CompileKernel("main");
+		p_MandebrotShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
 		v_MandelbrotShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
 
-		auto pixelShaderData = LoadShader(shaderDirectory + "p_Mandelbrot.spv");
-		p_MandebrotShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
 
 		auto &mandelbrotShaderProgram = g_Device->GetResources().shaderPrograms.Create(mandelbrotShaderProgramID);
 		mandelbrotShaderProgram.SetShader<Shader::Stage::Vertex>(v_MandelbrotShaderID);
@@ -662,7 +687,7 @@ namespace Gogaman
 		auto &mandelbulbStage = graph.CreateRenderStage(std::move(mandelbulbState));
 
 		RenderGraph::Texture raw;
-		raw.format = RHI::Texture::Format::RGBW8;
+		raw.format = RHI::Texture::Format::X16F;
 		raw.width  = Application::GetInstance().GetWindow().GetWidth();
 		raw.height = Application::GetInstance().GetWindow().GetHeight();
 		mandelbulbStage.CreateTexture("RAW", raw, RHI::Texture::State::RenderSurfaceAttachment);
@@ -678,18 +703,18 @@ namespace Gogaman
 			
 			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
 
-			g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
-			mandelbulbDescriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
+			//g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
+			//mandelbulbDescriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
 
 			RHI::CommandBufferID commandBufferID = frameContext.GetRenderQueue().AvailableCommandBuffer();
 			RHI::CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
 
 			RHI::RenderCommandRecorder commandRecorder(commandBuffer, state);
 
-			commandRecorder.BindDescriptorGroup(0, *mandelbulbDescriptorGroups[swapChainImageIndex].get());
+			//commandRecorder.BindDescriptorGroup(0, *mandelbulbDescriptorGroups[swapChainImageIndex].get());
 			commandRecorder.Render(3, 0);
 
-			commandRecorder.StopRecording();
+			commandRecorder.EndRecording();
 
 			frameContext.GetRenderQueue().Submit(commandBufferID);
 		});
@@ -735,7 +760,7 @@ namespace Gogaman
 			commandRecorder.BindDescriptorGroup(0, *postprocessDescriptorGroups[swapChainImageIndex].get());
 			commandRecorder.Render(3, 0);
 
-			commandRecorder.StopRecording();
+			commandRecorder.EndRecording();
 
 			frameContext.GetRenderQueue().Submit(commandBufferID);
 		});
@@ -804,7 +829,7 @@ namespace Gogaman
 		commandRecorder.BindDescriptorGroup(0, *descriptorGroups[swapChainImageIndex].get());
 		commandRecorder.Render(3, 0);
 
-		commandRecorder.StopRecording();
+		commandRecorder.EndRecording();
 
 		//g_Device->SubmitRenderCommands(1, commandBuffers[swapChainImageIndex].get());
 		frameContext.GetRenderQueue().Submit(commandBufferID);*/

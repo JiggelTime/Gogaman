@@ -27,7 +27,7 @@ namespace Gogaman
 			inline void CopyData(Buffer &source, Buffer &destination) { this->GetImplementation().CopyData(source, destination); }
 			inline void CopyData(Buffer &source, Texture &destination) { this->GetImplementation().CopyData(source, destination); }
 
-			inline void StopRecording() { m_CommandBuffer->StopRecording(); }
+			inline void EndRecording() { m_CommandBuffer->EndRecording(); }
 		private:
 			AbstractTransferCommandRecorder(CommandBuffer *commandBuffer)
 				: m_CommandBuffer(commandBuffer)

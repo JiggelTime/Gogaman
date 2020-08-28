@@ -1,0 +1,10 @@
+{
+	float Double(float value) { return value * 2; }
+
+	void main()
+	{
+		float test = Double(2.5) * 2;
+		output float result = test / 13;
+		return;
+	}
+}

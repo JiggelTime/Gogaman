@@ -51,7 +51,7 @@ namespace FlexData
 
 	struct FlexVertexData
 	{
-		inline bool operator==(const FlexVertexData &other) const { return !memcmp(this, &other, sizeof(*this)); }
+		bool operator==(const FlexVertexData &) const = default;
 
 		float position[3];
 		float uv[2];
@@ -59,13 +59,13 @@ namespace FlexData
 		float tangent[3];
 	};
 
-	struct FlexVertexDataHashFunction
+	struct HashFlexVertexData
 	{
 		inline uint32_t operator()(const FlexVertexData &other) const
 		{
 			uint32_t digest = 0;
 
-			auto HashFloat = [&](const float value) { digest ^= std::hash<float>()(value) + 0x9e3779b9 + (digest << 6) + (digest >> 2); };
+			const auto HashFloat = [&](const float value) { digest ^= std::hash<float>()(value) + 0x9e3779b9 + (digest << 6) + (digest >> 2); };
 
 			HashFloat(other.position[0]);
 			HashFloat(other.position[1]);
@@ -141,6 +141,8 @@ namespace FlexData
 			this->pointLights.insert(this->pointLights.end(), std::make_move_iterator(other.pointLights.begin()), std::make_move_iterator(other.pointLights.end()));
 			
 			this->directionalLights.insert(this->directionalLights.end(), std::make_move_iterator(other.directionalLights.begin()), std::make_move_iterator(other.directionalLights.end()));
+
+			return *this;
 		}
 
 		FlexHeaderData                        header;

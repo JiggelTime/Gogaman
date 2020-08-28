@@ -6,6 +6,6 @@ namespace Gogaman
 	{
 		struct Token;
 
-		std::vector<Token> Tokenize(const std::string &source);
+		std::vector<Token> Lex(const std::string &source);
 	}
 }

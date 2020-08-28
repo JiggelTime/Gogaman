@@ -26,7 +26,7 @@ namespace Gogaman
 			CommandBuffer &operator=(CommandBuffer &&)      = default;
 
 			void StartRecording();
-			void StopRecording();
+			void EndRecording();
 
 			inline constexpr const NativeData &GetNativeData() const { return m_NativeData; }
 			inline constexpr       NativeData &GetNativeData()       { return m_NativeData; }

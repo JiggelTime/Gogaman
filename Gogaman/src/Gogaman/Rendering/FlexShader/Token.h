@@ -10,29 +10,37 @@ namespace Gogaman
 		{
 			enum class Type : uint8_t
 			{
+				//Literals
 				Number,
 				String,
+
+				//Names
 				Identifier,
 				Keyword,
-				Comma,
-				Dot,
-				Slash,
-				//Backslash,
-				Colon,
+
+				//Separators
 				Semicolon,
-				Percent,
-				Asterisk,
 				LeftParenthesis,
 				RightParenthesis,
-				LeftSquareBracket,
-				RightSquareBracket,
 				LeftBrace,
 				RightBrace,
+				LeftSquareBracket,
+				RightSquareBracket,
+
+				//Operators
+				Plus,
+				Minus,
+				Asterisk,
+				Slash,
+				Percent,
 				Equal,
 				Less,
 				Greater,
-				Plus,
-				Minus
+
+				//Miscellaneous
+				Comma,
+				Dot,
+				Colon
 			};
 
 			std::string_view lexeme;
@@ -48,25 +56,24 @@ namespace Gogaman
 			"String",
 			"Identifier",
 			"Keyword",
-			"Comma",
-			"Dot",
-			"Slash",
-			//"Backslash",
-			"Colon",
 			"Semicolon",
-			"Percent",
-			"Asterisk",
 			"LeftParenthesis",
 			"RightParenthesis",
-			"LeftSquareBracket",
-			"RightSquareBracket",
 			"LeftBrace",
 			"RightBrace",
+			"LeftSquareBracket",
+			"RightSquareBracket",
+			"Plus",
+			"Minus",
+			"Asterisk",
+			"Slash",
+			"Percent",
 			"Equal",
 			"Less",
 			"Greater",
-			"Plus",
-			"Minus"
+			"Comma",
+			"Dot",
+			"Colon"
 			};
 
 			return std::string(names[(uint8_t)type]);

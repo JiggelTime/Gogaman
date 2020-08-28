@@ -179,7 +179,7 @@ namespace Gogaman
 			meshData.vertexBuffer.reserve(3 * numTriangles);
 			meshData.indexBuffer.reserve(3 * numTriangles);
 
-			std::unordered_map<FlexData::FlexVertexData, uint16_t, FlexData::FlexVertexDataHashFunction> vertexIndices;
+			std::unordered_map<FlexData::FlexVertexData, uint16_t, FlexData::HashFlexVertexData> vertexIndices;
 			
 			//auto UpdateBoundingSphere = [](FlexData::FlexSphereData &boundingSphere, const glm::vec3 &point) {};
 

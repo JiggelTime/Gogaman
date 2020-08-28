@@ -9,6 +9,8 @@
 
 #include "ExecutableGraph.h"
 
+#include "Gogaman/Utilities/Algorithm/DirectedGraph.h"
+
 namespace Gogaman
 {
 	namespace RenderGraph

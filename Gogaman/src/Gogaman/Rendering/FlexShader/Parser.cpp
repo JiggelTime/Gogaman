@@ -12,14 +12,21 @@ namespace Gogaman
 		using NullTokenParseFunction = std::function<AST::Node::Abstract *(Parser &, const int8_t, const Token &)>;
 		using LeftTokenParseFunction = std::function<AST::Node::Abstract *(Parser &, const int8_t, const Token &, AST::Node::Abstract *)>;
 
-		AST::Node::Abstract *NullParseError(Parser &parser, const int8_t associativePrecedence, const Token &token)
+		AST::Node::Abstract *NullParseError(Parser &parser, const int8_t bindingPower, const Token &token)
 		{
 			GM_DEBUG_ASSERT(false, "Failed to parse FlexShader | Invalid syntax | Line: %d | Token \"%s\" is invalid", token.line, GetTokenString(token).c_str());
 		}
 
-		AST::Node::Abstract *LeftParseError(Parser &parser, const int8_t rightAssociativePrecedence, const Token &token, AST::Node::Abstract *leftNode)
+		AST::Node::Abstract *LeftParseError(Parser &parser, const int8_t rightBindingPower, const Token &token, AST::Node::Abstract *leftNode)
 		{
 			GM_DEBUG_ASSERT(false, "Failed to parse FlexShader | Invalid syntax | Line: %d | Token \"%s\" is invalid", token.line, GetTokenString(token).c_str());
+		}
+
+		const Token &Parser::Peek() const
+		{
+			GM_DEBUG_ASSERT(m_CursorPosition + 1 < m_Tokens.size(), "Failed to peek | End of tokens reached");
+
+			return m_Tokens[m_CursorPosition + 1];
 		}
 
 		const Token &Parser::GetCurrentToken() const
@@ -34,104 +41,105 @@ namespace Gogaman
 		{
 			for(uint8_t i = 0; i < GM_FLEX_SHADER_TOKEN_TYPE_COUNT; i++)
 			{
-				//m_NullTokenAssociativePrecedences[i]     = GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE;
-				//m_LeftTokenLeftAssociativePrecedences[i] = GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE;
-				m_NullTokenAssociativePrecedences[i]     = 0;
-				m_LeftTokenLeftAssociativePrecedences[i] = 0;
+				//m_NullTokenBindingPowers[i]     = GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE;
+				//m_LeftTokenLeftBindingPowers[i] = GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE;
+				m_NullTokenBindingPowers[i]     = 0;
+				m_LeftTokenLeftBindingPowers[i] = 0;
 
 				m_NullTokenParseCallbacks[i] = NullParseError;
 				m_LeftTokenParseCallbacks[i] = LeftParseError;
 			}
 		}
 
-		void Parser::AddNullTokenTypes(const int8_t associativePrecedence, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
+		void Parser::AddNullTokenTypes(const int8_t bindingPower, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(associativePrecedence != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add null token types | Invalid associative precedence");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add null token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
 				m_NullTokenParseCallbacks[(uint8_t)i]         = parseCallback;
-				m_NullTokenAssociativePrecedences[(uint8_t)i] = associativePrecedence;
+				m_NullTokenBindingPowers[(uint8_t)i] = bindingPower;
 
-				if(m_LeftTokenLeftAssociativePrecedences[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
 				{
 					m_LeftTokenParseCallbacks[(uint8_t)i]              = LeftParseError;
-					m_LeftTokenLeftAssociativePrecedences[(uint8_t)i]  = 0;
-					m_LeftTokenRightAssociativePrecedences[(uint8_t)i] = 0;
+					m_LeftTokenLeftBindingPowers[(uint8_t)i]  = 0;
+					m_LeftTokenRightBindingPowers[(uint8_t)i] = 0;
 				}
 			}
 		}
 
-		void Parser::AddLeftTokenTypes(const int8_t associativePrecedence, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
+		void Parser::AddLeftTokenTypes(const int8_t bindingPower, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(associativePrecedence != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add left token types | Invalid associative precedence");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add left token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
 				m_LeftTokenParseCallbacks[(uint8_t)i]              = parseCallback;
-				m_LeftTokenLeftAssociativePrecedences[(uint8_t)i]  = associativePrecedence;
-				m_LeftTokenRightAssociativePrecedences[(uint8_t)i] = associativePrecedence;
+				m_LeftTokenLeftBindingPowers[(uint8_t)i]  = bindingPower;
+				m_LeftTokenRightBindingPowers[(uint8_t)i] = bindingPower;
 
-				if(m_NullTokenAssociativePrecedences[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
 				{
 					m_NullTokenParseCallbacks[(uint8_t)i]         = NullParseError;
-					m_NullTokenAssociativePrecedences[(uint8_t)i] = 0;
+					m_NullTokenBindingPowers[(uint8_t)i] = 0;
 				}
 			}
 		}
 
-		void Parser::AddRightTokenTypes(const int8_t associativePrecedence, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
+		void Parser::AddRightTokenTypes(const int8_t bindingPower, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(associativePrecedence != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add right token types | Invalid associative precedence");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add right token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
 				m_LeftTokenParseCallbacks[(uint8_t)i]              = parseCallback;
-				m_LeftTokenLeftAssociativePrecedences[(uint8_t)i]  = associativePrecedence;
-				m_LeftTokenRightAssociativePrecedences[(uint8_t)i] = associativePrecedence - 1;
+				m_LeftTokenLeftBindingPowers[(uint8_t)i]  = bindingPower;
+				m_LeftTokenRightBindingPowers[(uint8_t)i] = bindingPower - 1;
 
-				if(m_NullTokenAssociativePrecedences[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
 				{
 					m_NullTokenParseCallbacks[(uint8_t)i]         = NullParseError;
-					m_NullTokenAssociativePrecedences[(uint8_t)i] = 0;
+					m_NullTokenBindingPowers[(uint8_t)i] = 0;
 				}
 			}
 		}
 
-		void Parser::AddConditionalNullTokenTypes(const int8_t associativePrecedence, const NullTokenParseConditionFunction &parseCondition, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
+		void Parser::AddConditionalNullTokenTypes(const int8_t bindingPower, const NullTokenParseConditionFunction &parseCondition, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(associativePrecedence != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add conditional null token types | Invalid associative precedence");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add conditional null token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
 				m_NullTokenConditionalParseConditions[(uint8_t)i].emplace_back(parseCondition);
 				m_NullTokenConditionalParseCallbacks[(uint8_t)i].emplace_back(parseCallback);
-				m_NullTokenAssociativePrecedences[(uint8_t)i] = associativePrecedence;
+				//m_NullTokenBindingPowers[(uint8_t)i] = bindingPower;
+				m_NullTokenConditionalBindingPowers[(uint8_t)i].emplace_back(bindingPower);
 
 				//figure this out. new
-				if(m_LeftTokenLeftAssociativePrecedences[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
 				{
 					m_LeftTokenParseCallbacks[(uint8_t)i] = LeftParseError;
-					m_LeftTokenLeftAssociativePrecedences[(uint8_t)i] = 0;
-					m_LeftTokenRightAssociativePrecedences[(uint8_t)i] = 0;
+					m_LeftTokenLeftBindingPowers[(uint8_t)i] = 0;
+					m_LeftTokenRightBindingPowers[(uint8_t)i] = 0;
 				}
 			}
 		}
 
-		void Parser::AddConditionalLeftTokenTypes(const int8_t associativePrecedence, const LeftTokenParseConditionFunction &parseCondition, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
+		void Parser::AddConditionalLeftTokenTypes(const int8_t bindingPower, const LeftTokenParseConditionFunction &parseCondition, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(associativePrecedence != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add conditional left token types | Invalid associative precedence");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add conditional left token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
 				m_LeftTokenConditionalParseConditions[(uint8_t)i].emplace_back(parseCondition);
 				m_LeftTokenConditionalParseCallbacks[(uint8_t)i].emplace_back(parseCallback);
-				m_LeftTokenLeftAssociativePrecedences[(uint8_t)i]  = associativePrecedence;
-				m_LeftTokenRightAssociativePrecedences[(uint8_t)i] = associativePrecedence;
+				m_LeftTokenLeftBindingPowers[(uint8_t)i]  = bindingPower;
+				m_LeftTokenRightBindingPowers[(uint8_t)i] = bindingPower;
 			}
 		}
 
-		AST::Node::Abstract *Parser::Parse(const int8_t rightAssociativePrecedence)
+		AST::Node::Abstract *Parser::Parse(const int8_t rightBindingPower)
 		{
 			Token &token = m_Tokens[m_CursorPosition++];
 
@@ -140,19 +148,19 @@ namespace Gogaman
 			{
 				if(m_NullTokenConditionalParseConditions[(uint8_t)token.type][i](*this, token))
 				{
-					node = m_NullTokenConditionalParseCallbacks[(uint8_t)token.type][i](*this, m_NullTokenAssociativePrecedences[(uint8_t)token.type], token);
+					node = m_NullTokenConditionalParseCallbacks[(uint8_t)token.type][i](*this, m_NullTokenConditionalBindingPowers[(uint8_t)token.type][i], token);
 					break;
 				}
 			}
 
 			if(!node)
-				node = m_NullTokenParseCallbacks[(uint8_t)token.type](*this, m_NullTokenAssociativePrecedences[(uint8_t)token.type], token);
+				node = m_NullTokenParseCallbacks[(uint8_t)token.type](*this, m_NullTokenBindingPowers[(uint8_t)token.type], token);
 
 			while(m_CursorPosition < m_Tokens.size())
 			{
 				token = m_Tokens[m_CursorPosition];
 
-				if(m_LeftTokenLeftAssociativePrecedences[(uint8_t)token.type] <= rightAssociativePrecedence)
+				if(m_LeftTokenLeftBindingPowers[(uint8_t)token.type] <= rightBindingPower)
 					break;
 
 				m_CursorPosition++;
@@ -162,14 +170,14 @@ namespace Gogaman
 				{
 					if(m_LeftTokenConditionalParseConditions[(uint8_t)token.type][i](*this, token, node))
 					{
-						node = m_LeftTokenConditionalParseCallbacks[(uint8_t)token.type][i](*this, m_LeftTokenRightAssociativePrecedences[(uint8_t)token.type], token, node);
+						node = m_LeftTokenConditionalParseCallbacks[(uint8_t)token.type][i](*this, m_LeftTokenRightBindingPowers[(uint8_t)token.type], token, node);
 						isLeftTokenConditionalParseFound = true;
 						break;
 					}
 				}
 
 				if(!isLeftTokenConditionalParseFound)
-					node = m_LeftTokenParseCallbacks[(uint8_t)token.type](*this, m_LeftTokenRightAssociativePrecedences[(uint8_t)token.type], token, node);
+					node = m_LeftTokenParseCallbacks[(uint8_t)token.type](*this, m_LeftTokenRightBindingPowers[(uint8_t)token.type], token, node);
 			}
 
 			return node;

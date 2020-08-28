@@ -18,9 +18,7 @@ namespace Gogaman
 			const VertexIndexType index = m_AdjacencyMatrix.size();
 
 			for(VertexIndexType i = 0; i < m_AdjacencyMatrix.size(); i++)
-			{
 				m_AdjacencyMatrix[i].emplace_back(false);
-			}
 
 			m_AdjacencyMatrix.emplace_back().assign(m_AdjacencyMatrix.size(), false);
 

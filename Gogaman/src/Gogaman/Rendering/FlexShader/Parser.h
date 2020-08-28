@@ -19,40 +19,40 @@ namespace Gogaman
 			Parser(std::vector<Token> &&tokens);
 			~Parser() = default;
 
-			void AddNullTokenTypes(const int8_t associativePrecedence, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
-			void AddLeftTokenTypes(const int8_t associativePrecedence, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
-			void AddRightTokenTypes(const int8_t associativePrecedence, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
+			void AddNullTokenTypes(const int8_t bindingPower, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
+			void AddLeftTokenTypes(const int8_t bindingPower, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
+			void AddRightTokenTypes(const int8_t bindingPower, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
 
-			void AddConditionalNullTokenTypes(const int8_t associativePrecedence, const NullTokenParseConditionFunction &parseCondition, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
-			void AddConditionalLeftTokenTypes(const int8_t associativePrecedence, const LeftTokenParseConditionFunction &parseCondition, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
+			void AddConditionalNullTokenTypes(const int8_t bindingPower, const NullTokenParseConditionFunction &parseCondition, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
+			void AddConditionalLeftTokenTypes(const int8_t bindingPower, const LeftTokenParseConditionFunction &parseCondition, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes);
 
 			void AdvanceCursor() { m_CursorPosition++; }
 
+			const Token &Peek() const;
+
 			const Token &GetCurrentToken() const;
 
-			AST::Node::Abstract *Parse(const int8_t rightAssociativePrecedence = 0);
+			AST::Node::Abstract *Parse(const int8_t rightBindingPower = 0);
 		private:
 			NullTokenParseFunction m_NullTokenParseCallbacks[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
-			int8_t                 m_NullTokenAssociativePrecedences[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
+			int8_t                 m_NullTokenBindingPowers[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
 
 			LeftTokenParseFunction m_LeftTokenParseCallbacks[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
-			int8_t                 m_LeftTokenLeftAssociativePrecedences[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
-			int8_t                 m_LeftTokenRightAssociativePrecedences[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
+			int8_t                 m_LeftTokenLeftBindingPowers[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
+			int8_t                 m_LeftTokenRightBindingPowers[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
 
 			std::vector<NullTokenParseConditionFunction> m_NullTokenConditionalParseConditions[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
 			std::vector<NullTokenParseFunction>          m_NullTokenConditionalParseCallbacks[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
+			std::vector<int8_t>                          m_NullTokenConditionalBindingPowers[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
 
 			std::vector<LeftTokenParseConditionFunction> m_LeftTokenConditionalParseConditions[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
 			std::vector<LeftTokenParseFunction>          m_LeftTokenConditionalParseCallbacks[GM_FLEX_SHADER_TOKEN_TYPE_COUNT];
-
-			//Doesn't belong here...
-			//std::unordered_map<std::string, std::string> m_SymbolTable;
 
 			std::vector<Token> m_Tokens;
 			uint32_t           m_CursorPosition;
 		};
 
-		AST::Node::Abstract *NullParseError(Parser &parser, const int8_t associativePrecedence, const Token &token);
-		AST::Node::Abstract *LeftParseError(Parser &parser, const int8_t rightAssociativePrecedence, const Token &token, AST::Node::Abstract *leftNode);
+		AST::Node::Abstract *NullParseError(Parser &parser, const int8_t bindingPower, const Token &token);
+		AST::Node::Abstract *LeftParseError(Parser &parser, const int8_t rightBindingPower, const Token &token, AST::Node::Abstract *leftNode);
 	}
 }

@@ -17,7 +17,7 @@ namespace Gogaman
 			AbstractCommandBuffer &operator=(AbstractCommandBuffer &&)      = default;
 
 			inline void StartRecording() { this->GetImplementation().StartRecording(); }
-			inline void StopRecording()  { this->GetImplementation().StopRecording();  }
+			inline void EndRecording()  { this->GetImplementation().EndRecording();  }
 
 			inline constexpr const auto &GetNativeData() const { return this->GetImplementation().GetNativeData(); }
 			inline constexpr auto       &GetNativeData()       { return this->GetImplementation().GetNativeData(); }
