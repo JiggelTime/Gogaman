@@ -23,6 +23,7 @@
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Lexer.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Parser.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\SemanticAnalyzer.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Transformer.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Translator.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Visitor.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\RenderGraph\ExecutableGraph.cpp" />
@@ -60,6 +61,7 @@
     <ClCompile Include="src\Platform\Windows\WindowsInput.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="E:\SPIRV_Dissasembler.h" />
     <ClInclude Include="src\Gogaman\BoundingVolumeComponent.h" />
     <ClInclude Include="src\Gogaman\Core\AbstractTime.h" />
     <ClInclude Include="src\Gogaman\Core\AbstractWindow.h" />
@@ -87,6 +89,7 @@
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Parser.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\SemanticAnalyzer.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Token.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Transformer.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Translator.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Type.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Visitor.h" />
@@ -95,6 +98,7 @@
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\Resource.h" />
     <ClInclude Include="src\Gogaman\Rendering\RenderGraph\ResourceManager.h" />
     <ClInclude Include="src\Gogaman\Utilities\Algorithm\DirectedGraph.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Cast.h" />
     <ClInclude Include="src\Gogaman\Utilities\Geometry\Sphere.h" />
     <ClInclude Include="src\Gogaman\Utilities\Geometry\BoundingBox3D.h" />
     <ClInclude Include="src\Gogaman\Utilities\Geometry\Plane.h" />

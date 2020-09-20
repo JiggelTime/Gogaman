@@ -108,7 +108,7 @@ namespace Gogaman
 				std::string spaces;
 				spaces.append(m_Depth * 2, ' ');
 
-				GM_LOG_CORE_INFO("%sVariable declaration | Name: %s | Type: %s", spaces.c_str(), node.name.c_str(), GetTypeString(node.type).c_str());
+				GM_LOG_CORE_INFO("%sVariable declaration | Name: %s | Type: %s | Specifier: %s", spaces.c_str(), node.name.c_str(), GetTypeString(node.type).c_str(), GetVariableSpecifierString(node.specifier).c_str());
 			}
 
 			void LogVisitor::VisitComponentInstantiation(Node::ComponentInstantiation &node)
@@ -119,12 +119,28 @@ namespace Gogaman
 				GM_LOG_CORE_INFO("%sComponent instantiation | Name: %s | Typename: %s", spaces.c_str(), node.name.c_str(), node.typeName.c_str());
 			}
 
-			void LogVisitor::VisitNumericLiteral(Node::NumericLiteral &node)
+			void LogVisitor::VisitBooleanLiteral(Node::BooleanLiteral &node)
 			{
 				std::string spaces;
 				spaces.append(m_Depth * 2, ' ');
 
-				GM_LOG_CORE_INFO("%sNumeric literal | Value: %s", spaces.c_str(), std::string(node.value).c_str());
+				GM_LOG_CORE_INFO("%sBoolean literal | Value: %s", spaces.c_str(), node.value ? "true" : "false");
+			}
+
+			void LogVisitor::VisitIntegerLiteral(Node::IntegerLiteral &node)
+			{
+				std::string spaces;
+				spaces.append(m_Depth * 2, ' ');
+
+				GM_LOG_CORE_INFO("%sInteger literal | Value: %d", spaces.c_str(), node.value);
+			}
+
+			void LogVisitor::VisitFloatingPointLiteral(Node::FloatingPointLiteral &node)
+			{
+				std::string spaces;
+				spaces.append(m_Depth * 2, ' ');
+
+				GM_LOG_CORE_INFO("%sFloating point literal | Value: %f", spaces.c_str(), node.value);
 			}
 
 			void LogVisitor::VisitStringLiteral(Node::StringLiteral &node)
@@ -143,12 +159,37 @@ namespace Gogaman
 				GM_LOG_CORE_INFO("%sIdentifier | Name: %s", spaces.c_str(), std::string(node.name).c_str());
 			}
 
+			void LogVisitor::VisitVector(Node::Vector &node)
+			{
+				std::string spaces;
+				spaces.append(m_Depth++ * 2, ' ');
+
+				GM_LOG_CORE_INFO("%sVector | Values:", spaces.c_str());
+
+				for(auto i : node.expressions)
+					i->Accept(*this);
+
+				m_Depth--;
+			}
+
+			void LogVisitor::VisitMemberSelection(Node::MemberSelection &node)
+			{
+				std::string spaces;
+				spaces.append(m_Depth++ * 2, ' ');
+
+				GM_LOG_CORE_INFO("%sMember access | Member name: %s | Object:", spaces.c_str(), node.memberName.c_str());
+
+				node.object->Accept(*this);
+
+				m_Depth--;
+			}
+
 			void LogVisitor::VisitBinaryOperation(Node::BinaryOperation &node)
 			{
 				std::string spaces;
 				spaces.append(m_Depth++ * 2, ' ');
 
-				GM_LOG_CORE_INFO("%sBinary operation | Type: %s", spaces.c_str(), GetTokenTypeString(node.operatorType).c_str());
+				GM_LOG_CORE_INFO("%sBinary operation | Operator: %s", spaces.c_str(), GetTokenTypeString(node.operatorType).c_str());
 				node.leftOperand->Accept(*this);
 				node.rightOperand->Accept(*this);
 
@@ -252,8 +293,6 @@ namespace Gogaman
 				node.body->Accept(*this);
 			}
 
-			void SpecializationVisitor::VisitVariableDeclaration(Node::VariableDeclaration &node) {}
-
 			void SpecializationVisitor::VisitComponentInstantiation(Node::ComponentInstantiation &node)
 			{
 				for(const auto &i : m_ComponentNames)
@@ -265,9 +304,16 @@ namespace Gogaman
 				}
 			}
 
-			void SpecializationVisitor::VisitNumericLiteral(Node::NumericLiteral &node) {}
-			void SpecializationVisitor::VisitStringLiteral(Node::StringLiteral &node)   {}
-			void SpecializationVisitor::VisitIdentifier(Node::Identifier &node)         {}
+			void SpecializationVisitor::VisitVector(Node::Vector &node)
+			{
+				for(auto i : node.expressions)
+					i->Accept(*this);
+			}
+
+			void SpecializationVisitor::VisitMemberSelection(Node::MemberSelection &node)
+			{
+				//SUTFF !~!!!!!!!!!!!!!!
+			}
 
 			void SpecializationVisitor::VisitBinaryOperation(Node::BinaryOperation &node)
 			{
@@ -293,164 +339,6 @@ namespace Gogaman
 			{
 				if(node.value)
 					node.value->Accept(*this);
-			}
-
-			Node::Abstract *ModuleVisitor::VisitAbstract(Node::Abstract &node, const std::string &componentName) { return &node; }
-
-			Node::Abstract *ModuleVisitor::VisitExpression(Node::Expression &node, const std::string &componentName) { return &node; }
-
-			Node::Abstract *ModuleVisitor::VisitStatement(Node::Statement &node, const std::string &componentName) { return &node; }
-
-			Node::Abstract *ModuleVisitor::VisitStatementBlock(Node::StatementBlock &node, const std::string &componentName)
-			{
-				Node::StatementBlock *block = new Node::StatementBlock;
-				for(const auto i : node.statements)
-				{
-					Node::Statement *statement = static_cast<Node::Statement *>(i->Accept(*this, componentName));
-					if(statement)
-						block->statements.emplace_back(statement);
-				}
-
-				return block->statements.empty() ? nullptr : (block->statements.size() == 1 ? block->statements.front() : block);
-			}
-
-			Node::Abstract *ModuleVisitor::VisitFunctionPrototype(Node::FunctionPrototype &node, const std::string &componentName) { return &node; }
-
-			Node::Abstract *ModuleVisitor::VisitFunction(Node::Function &node, const std::string &componentName)
-			{
-				//node.prototype = static_cast<Node::FunctionPrototype *>(node.prototype->Accept(*this, componentName));
-
-				if(!componentName.empty())
-				{
-					m_ComponentFunctions[componentName].emplace_back(&node);
-					return nullptr;
-				}
-
-				return &node;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitFunctionCall(Node::FunctionCall &node, const std::string &componentName) { return &node; }
-
-			Node::Abstract *ModuleVisitor::VisitComponent(Node::Component &node, const std::string &componentName)
-			{
-				//Assert component name is empty
-
-				//Group all "normal" types into one constant buffer
-				if(m_ComponentData[node.name].constantBufferSize)
-				{
-					RHI::DescriptorGroupLayout::Binding &binding = m_ComponentData[componentName].bindings.emplace_back();
-					binding.type = RHI::DescriptorHeap::Type::ShaderConstantBuffer;
-
-					GM_LOG_CORE_INFO("Component %s | Constant buffer size: %d", node.name.c_str(), m_ComponentData[node.name].constantBufferSize);
-				}
-
-				return node.body->Accept(*this, node.name);
-			}
-
-			Node::Abstract *ModuleVisitor::VisitVariableDeclaration(Node::VariableDeclaration &node, const std::string &componentName)
-			{
-				if(!componentName.empty())
-				{
-					switch(node.type)
-					{
-					case Type::Integer:
-					case Type::Float:
-						m_ComponentData[componentName].constantBufferSize += 4;
-						break;
-					case Type::Float2:
-						m_ComponentData[componentName].constantBufferSize += 8;
-						break;
-					case Type::Float3:
-						m_ComponentData[componentName].constantBufferSize += 12;
-						break;
-					case Type::Float4:
-						m_ComponentData[componentName].constantBufferSize += 16;
-						break;
-					case Type::Sampler:
-					{
-						RHI::DescriptorGroupLayout::Binding &binding = m_ComponentData[componentName].bindings.emplace_back();
-						binding.type = RHI::DescriptorHeap::Type::Sampler;
-					}
-						break;
-					default:
-						GM_DEBUG_ASSERT(false, "Invalid FlexShader component member variable declaration | Type \"%s\" is invalid | Component: \"%s\" | Name: \"%s\"", GetTypeString(node.type).c_str(), componentName.c_str(), node.name.c_str());
-					}
-
-					m_ComponentVariableDeclarations[componentName].emplace_back(&node);
-					return nullptr;
-				}
-
-				return &node;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitComponentInstantiation(Node::ComponentInstantiation &node, const std::string &componentName)
-			{
-				Node::StatementBlock *block = new Node::StatementBlock;
-
-				for(Node::VariableDeclaration *i : m_ComponentVariableDeclarations[node.typeName])
-				{
-					Node::VariableDeclaration *variableDeclaration = static_cast<Node::VariableDeclaration *>(block->statements.emplace_back(new Node::VariableDeclaration));
-					variableDeclaration->name = '$' + node.name + '$' + i->name;
-					m_ResolvedComponentVariableNames[i->name] = variableDeclaration->name;
-
-					variableDeclaration->type = i->type;
-				}
-
-				for(Node::Function *i : m_ComponentFunctions[node.typeName])
-				{
-					Node::Function *function = static_cast<Node::Function *>(block->statements.emplace_back(new Node::Function));
-					function->prototype = i->prototype;
-					function->prototype->name = '$' + node.name + '$' + i->prototype->name;
-					function->body = static_cast<Node::StatementBlock *>(i->body->Accept(*this));
-				}
-
-				return block;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitNumericLiteral(Node::NumericLiteral &node, const std::string &componentName) { return &node; }
-			Node::Abstract *ModuleVisitor::VisitStringLiteral(Node::StringLiteral &node, const std::string &componentName)   { return &node; }
-
-			Node::Abstract *ModuleVisitor::VisitIdentifier(Node::Identifier &node, const std::string &componentName)
-			{
-				if(!componentName.empty())
-					for(const Node::VariableDeclaration *i : m_ComponentVariableDeclarations[componentName])
-						if(i->name == node.name)
-							node.name = '$' + componentName + '$' + node.name;
-
-				if(m_ResolvedComponentVariableNames.contains(node.name))
-					node.name = m_ResolvedComponentVariableNames[node.name];
-
-				return &node;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitBinaryOperation(Node::BinaryOperation &node, const std::string &componentName)
-			{
-				node.leftOperand  = static_cast<Node::Expression *>(node.leftOperand->Accept(*this, componentName));
-				node.rightOperand = static_cast<Node::Expression *>(node.rightOperand->Accept(*this, componentName));
-				return &node;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitAssignment(Node::Assignment &node, const std::string &componentName)
-			{
-				node.lValue = static_cast<Node::Identifier *>(node.lValue->Accept(*this, componentName));
-				node.rValue = static_cast<Node::Expression *>(node.rValue->Accept(*this, componentName));
-				return &node;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitBranch(Node::Branch &node, const std::string &componentName)
-			{
-				node.condition    = static_cast<Node::Expression *>(node.condition->Accept(*this, componentName));
-				node.ifBody       = static_cast<Node::Statement *>(node.ifBody->Accept(*this, componentName));
-				if(node.elseBody)
-					node.elseBody = static_cast<Node::Statement *>(node.elseBody->Accept(*this, componentName));
-				return &node;
-			}
-
-			Node::Abstract *ModuleVisitor::VisitReturn(Node::Return &node, const std::string &componentName)
-			{
-				if(node.value)
-					node.value = static_cast<Node::Expression *>(node.value->Accept(*this, componentName));
-				return &node;
 			}
 		}
 	}

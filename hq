@@ -1,0 +1,68 @@
+[33m096986a[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m Create FlexShader intermediate representation and SPIR-V backend
+[33m00f4400[m[33m ([m[1;31morigin/master[m[33m)[m Add hierarchical namespace resolution to FlexShader validator
+[33me810926[m Create FlexShader parser and validator
+[33m88f90e1[m Create FlexShader lexer
+[33m7bfcde6[m Create frame context
+[33m2dff6e9[m Create render graph
+[33mc84d5ce[m Create directed graph and directed acyclic graph
+[33m6531cca[m Create texture importer
+[33mc77f3b8[m Create render hardware interface copy data transfer commands
+[33m0c3b1f9[m Create render hardware interface vertex layout
+[33mc67293f[m Update README file
+[33m769dd2d[m Fix resource container
+[33mbf02d2d[m Create Vulkan render hardware interface descriptor group, descriptor heap, command buffer, and command heap
+[33m2eabe02[m Create Vulkan render hardware interface sampler
+[33m3bd445d[m Create Vulkan render hardware interface state
+[33mf134c37[m Add render pass creation to Vulkan render hardware interface render surface
+[33m0eab76a[m Create Vulkan render hardware interface texture and render surface
+[33m4b414de[m Add swap chain creation to Vulkan render hardware interface device
+[33mca8f70c[m Add presentation queue creation to Vulkan render hardware interface device
+[33m1372af2[m Create Vulkan render hardware interface device
+[33mba073e0[m improve render graph
+[33m05fb8c3[m fix stable dynamic array
+[33m0fbd2cc[m update readme file
+[33m5920bb5[m create render graph system
+[33m6ca7b78[m refactor OpenGL shader compilation
+[33m7a77862[m generalize resource container
+[33m30e74e6[m create bounding volume system
+[33m3fb4dc4[m improve resource container
+[33me22c34a[m create resource container and begin stateless rendering system
+[33m34cdf4b[m remove old camera system
+[33m59810ec[m add frustum culling and add bounding volumes to FlexData
+[33m8adc4da[m update tracked files based on new .gitignore
+[33m849a680[m add intermediate directory (bin-int) to .gitignore
+[33m607f357[m improve logging system
+[33mb28b2a1[m add (incomplete) Ray3D, Plane, Sphere, and Frustum
+[33m726895e[m add lazy updating to PerspectiveCamera
+[33mbeb6bbf[m begin physically-based camera
+[33mcbe27a8[m create time class
+[33m0de11c1[m create shader uniform location cache
+[33m1a1b6b1[m delete readme files from dependencies
+[33m76c6f54[m add .gitignore override for dependencies
+[33mf4ec44f[m begin renderer renderCommand system
+[33m5bc5895[m fix default material texture values in FBX importer
+[33m30d4ac8[m add support for mesh transforms, point lights, and directional lights to FlexData
+[33m985be3c[m add material/texture support to FlexData and FBX importer
+[33m85b0c36[m change move constructor and move assignment operator in rendering API classes
+[33m12c2671[m various small changes
+[33meac509a[m fix render system
+[33ma3f16dc[m add CRTP to abstract graphics API classes and add render device context
+[33m93f0f9e[m refactor almost everything
+[33m7512d9d[m change from dynamic to static library and remove assimp from dependencies
+[33m2358107[m fix event system
+[33mb3c37a7[m improve event queue
+[33m404554f[m create vertex buffer and vertex array buffer
+[33mccb5419[m create event queue
+[33m8298520[m begin event system
+[33m7279b60[m implement abstracted OpenGL framebuffer in renderer
+[33m31ea7e6[m add OpenGL framebuffer abstraction
+[33m1f74e37[m add Texture1D and refactor framebuffers
+[33m2293dc1[m refactor renderer and improve OpenGL abstraction
+[33m94eccb1[m improve resource manager
+[33med6ba72[m add models to resource manager
+[33m6c3facb[m create resource manager
+[33m2936f3e[m add CMake
+[33md092396[m add logging system
+[33m511b709[m create sandbox application and entry point
+[33md5f2f23[m change VCT shadow offset
+[33m95558bf[m initial commit

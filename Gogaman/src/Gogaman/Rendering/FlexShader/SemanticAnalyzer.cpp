@@ -12,16 +12,12 @@ namespace Gogaman
 	{
 		namespace AST
 		{
-			Type SemanticAnalyzer::VisitAbstract(Node::Abstract &node)     { return Type::None; }
-			Type SemanticAnalyzer::VisitExpression(Node::Expression &node) { return Type::None; }
-			Type SemanticAnalyzer::VisitStatement(Node::Statement &node)   { return Type::None; }
-
 			Type SemanticAnalyzer::VisitStatementBlock(Node::StatementBlock &node)
 			{
 				for(const auto i : node.statements)
 					i->Accept(*this);
 
-				return Type::None;
+				return Type::Void;
 			}
 
 			Type SemanticAnalyzer::VisitFunctionPrototype(Node::FunctionPrototype &node)
@@ -64,7 +60,7 @@ namespace Gogaman
 				m_SymbolTables[m_CurrentScopeDepth].clear();
 				m_CurrentScopeDepth--;
 
-				return Type::None;
+				return Type::Void;
 			}
 
 			Type SemanticAnalyzer::VisitVariableDeclaration(Node::VariableDeclaration &node)
@@ -76,18 +72,47 @@ namespace Gogaman
 				return node.type;
 			}
 
-			Type SemanticAnalyzer::VisitComponentInstantiation(Node::ComponentInstantiation &node) { return Type::None; }
+			Type SemanticAnalyzer::VisitIdentifier(Node::Identifier &node) { return GetType(node.name); }
 
-			Type SemanticAnalyzer::VisitNumericLiteral(Node::NumericLiteral &node)
+			Type SemanticAnalyzer::VisitVector(Node::Vector &node)
 			{
-				//Assume that all numeric literals are floating point literals
-				//Eventually need to add seperate token type for integer literals
-				return Type::Float;
+				Type listBaseType = node.expressions.front()->Accept(*this);;
+				for(auto i = node.expressions.begin() + 1; i != node.expressions.end(); i++)
+				{
+					Node::Expression *node = *i;
+					if(node->Accept(*this) != listBaseType)
+						listBaseType = Type::Void;
+				}
+
+				switch(listBaseType)
+				{
+				case Type::Boolean:
+					return Type::Boolean;
+				case Type::Integer:
+					return Type::Integer;
+				case Type::Float:
+					switch(node.expressions.size())
+					{
+					case 1:
+						return Type::Float;
+					case 2:
+						return Type::Float2;
+					case 3:
+						return Type::Float3;
+					case 4:
+						return Type::Float4;
+					default:
+						return Type::Void;
+					}
+				default:
+					return Type::Void;
+				}
 			}
 
-			Type SemanticAnalyzer::VisitStringLiteral(Node::StringLiteral &node) { return Type::None; }
-
-			Type SemanticAnalyzer::VisitIdentifier(Node::Identifier &node) { return GetType(node.name); }
+			Type SemanticAnalyzer::VisitMemberSelection(Node::MemberSelection &node)
+			{
+				return Type::Void;
+			}
 
 			Type SemanticAnalyzer::VisitBinaryOperation(Node::BinaryOperation &node)
 			{
@@ -108,8 +133,6 @@ namespace Gogaman
 
 				return leftType;
 			}
-
-			Type SemanticAnalyzer::VisitBranch(Node::Branch &node) { return Type::None; }
 
 			Type SemanticAnalyzer::VisitReturn(Node::Return &node)
 			{

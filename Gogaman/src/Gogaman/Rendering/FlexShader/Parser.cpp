@@ -62,7 +62,7 @@ namespace Gogaman
 
 				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
 				{
-					m_LeftTokenParseCallbacks[(uint8_t)i]              = LeftParseError;
+					m_LeftTokenParseCallbacks[(uint8_t)i]     = LeftParseError;
 					m_LeftTokenLeftBindingPowers[(uint8_t)i]  = 0;
 					m_LeftTokenRightBindingPowers[(uint8_t)i] = 0;
 				}
@@ -75,14 +75,14 @@ namespace Gogaman
 
 			for(const Token::Type i : tokenTypes)
 			{
-				m_LeftTokenParseCallbacks[(uint8_t)i]              = parseCallback;
+				m_LeftTokenParseCallbacks[(uint8_t)i]     = parseCallback;
 				m_LeftTokenLeftBindingPowers[(uint8_t)i]  = bindingPower;
 				m_LeftTokenRightBindingPowers[(uint8_t)i] = bindingPower;
 
 				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
 				{
-					m_NullTokenParseCallbacks[(uint8_t)i]         = NullParseError;
-					m_NullTokenBindingPowers[(uint8_t)i] = 0;
+					m_NullTokenParseCallbacks[(uint8_t)i] = NullParseError;
+					m_NullTokenBindingPowers[(uint8_t)i]  = 0;
 				}
 			}
 		}

@@ -36,15 +36,15 @@ namespace Gogaman
 			AST::SpecializationVisitor specializer(componentNames);
 			m_RootNode->Accept(specializer);
 
-			AST::ModuleVisitor moduleVisitor;
-			AST::Node::Abstract *transformedRootNode = m_RootNode->Accept(moduleVisitor);
+			AST::Transformer moduleVisitor;
+			AST::Node::Abstract *transformedRootNode = m_RootNode->Accept(moduleVisitor).front();
 
 			AST::SemanticAnalyzer semanticAnalyzer;
 			transformedRootNode->Accept(semanticAnalyzer);
 
 			//(Temporary) log transformed AST
-			//AST::LogVisitor logger;
-			//transformedRootNode->Accept(logger);
+			AST::LogVisitor logger;
+			transformedRootNode->Accept(logger);
 
 			//Generate descriptor layouts from component data
 			for(const auto i : moduleVisitor.GetComponentData())

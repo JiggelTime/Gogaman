@@ -20,8 +20,6 @@ namespace Gogaman
 		AST::Node::Statement *ParseStatement(Parser &parser, const int8_t bindingPower, const Token &token, AST::Node::Abstract *leftNode)
 		{
 			AST::Node::Statement *node = static_cast<AST::Node::Statement *>(leftNode);
-
-			//parser.AdvanceCursor();
 			return node;
 		}
 
@@ -36,20 +34,16 @@ namespace Gogaman
 			}
 
 			GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::RightBrace, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected \"}\"", GetTokenString(parser.GetCurrentToken()).c_str());
-
-			//Should it advance?
-			//parser.AdvanceCursor();
 			return node;
 		}
 
 		AST::Node::FunctionPrototype *ParseFunctionPrototype(Parser &parser, const int8_t bindingPower, const Token &token, AST::Node::Abstract *leftNode)
 		{
 			AST::Node::FunctionPrototype *node = new AST::Node::FunctionPrototype;
-			//FunctionPrototype node should just store VariableDeclaration node, otherwise the leftNode here will never be deleted
 			node->returnType = static_cast<AST::Node::VariableDeclaration *>(leftNode)->type;
 			node->name       = static_cast<AST::Node::VariableDeclaration *>(leftNode)->name;
+			//delete leftNode
 
-			//parser.AdvanceCursor();
 			while(parser.GetCurrentToken().type != Token::Type::RightParenthesis)
 			{
 				if(parser.GetCurrentToken().type == Token::Type::Comma)
@@ -128,22 +122,16 @@ namespace Gogaman
 		{
 			AST::Node::VariableDeclaration *node = new AST::Node::VariableDeclaration;
 
-			if((uint8_t)GetVariableSpecifierFlag(std::string(token.lexeme)))
+			if(GetVariableSpecifier(std::string(token.lexeme)) != VariableSpecifier::None)
 			{
-				node->specifierFlags = (uint8_t)GetVariableSpecifierFlag(std::string(token.lexeme));
-				while((uint8_t)GetVariableSpecifierFlag(std::string(parser.GetCurrentToken().lexeme)))
-				{
-					node->specifierFlags |= (uint8_t)GetVariableSpecifierFlag(std::string(parser.GetCurrentToken().lexeme));
-					parser.AdvanceCursor();
-				}
-
-				node->type = GetType(std::string(parser.GetCurrentToken().lexeme));
+				node->specifier = GetVariableSpecifier(std::string(token.lexeme));
+				node->type      = GetType(std::string(parser.GetCurrentToken().lexeme));
 				parser.AdvanceCursor();
 			}
 			else
 			{
-				node->specifierFlags = 0;
-				node->type           = GetType(std::string(token.lexeme));
+				node->specifier = VariableSpecifier::None;
+				node->type      = GetType(std::string(token.lexeme));
 			}
 
 			//Assert that it's an identifier here
@@ -167,6 +155,33 @@ namespace Gogaman
 			//GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::Identifier, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected identifier", GetTokenString(parser.GetCurrentToken()).c_str());
 
 			//Advance cursor? YES! function prototype relies on the token being left parenthesis
+			parser.AdvanceCursor();
+			return node;
+		}
+
+		AST::Node::Vector *ParseVector(Parser &parser, const int8_t bindingPower, const Token &token, AST::Node::Abstract *leftNode)
+		{
+			AST::Node::Vector *node = new AST::Node::Vector;
+			node->expressions.emplace_back(static_cast<AST::Node::Expression *>(leftNode));
+			while(true)
+			{
+				node->expressions.emplace_back(static_cast<AST::Node::Expression *>(parser.Parse(bindingPower)));
+
+				if(parser.GetCurrentToken().type != Token::Type::Comma)
+					break;
+
+				parser.AdvanceCursor();
+			}
+
+			//GM_DEBUG_ASSERT(parser.GetCurrentToken().type == Token::Type::RightBrace, "Failed to parse FlexShader | Invalid syntax | Token \"%s\" is invalid, expected \"}\"", GetTokenString(parser.GetCurrentToken()).c_str());
+			return node;
+		}
+
+		AST::Node::MemberSelection *ParseMemberSelection(Parser &parser, const uint8_t bindingPower, const Token &token, AST::Node::Abstract *leftNode)
+		{
+			AST::Node::MemberSelection *node = new AST::Node::MemberSelection;
+			node->object     = static_cast<AST::Node::Identifier *>(leftNode);
+			node->memberName = parser.GetCurrentToken().lexeme;
 			parser.AdvanceCursor();
 			return node;
 		}
@@ -227,10 +242,24 @@ namespace Gogaman
 			return node;
 		}
 
-		AST::Node::NumericLiteral *ParseNumericLiteral(Parser &parser, const int8_t bindingPower, const Token &token)
+		AST::Node::BooleanLiteral *ParseBooleanLiteral(Parser &parser, const int8_t bindingPower, const Token &token)
 		{
-			AST::Node::NumericLiteral *node = new AST::Node::NumericLiteral;
-			node->value = token.lexeme;
+			AST::Node::BooleanLiteral *node = new AST::Node::BooleanLiteral;
+			node->value = token.lexeme == "true" ? true : false;
+			return node;
+		}
+
+		AST::Node::IntegerLiteral *ParseIntegerLiteral(Parser &parser, const int8_t bindingPower, const Token &token)
+		{
+			AST::Node::IntegerLiteral *node = new AST::Node::IntegerLiteral;
+			node->value = strtoul(std::string(token.lexeme).c_str(), nullptr, 10);
+			return node;
+		}
+
+		AST::Node::FloatingPointLiteral *ParseFloatingPointLiteral(Parser &parser, const int8_t bindingPower, const Token &token)
+		{
+			AST::Node::FloatingPointLiteral *node = new AST::Node::FloatingPointLiteral;
+			node->value = atof(std::string(token.lexeme).c_str());
 			return node;
 		}
 
@@ -251,6 +280,10 @@ namespace Gogaman
 		AST::Node::Abstract *Parse(std::vector<Token> &&tokens)
 		{
 			Parser parser(std::move(tokens));
+
+			parser.AddLeftTokenTypes(6, ParseVector, { Token::Type::Comma });
+
+			parser.AddLeftTokenTypes(6, ParseMemberSelection, { Token::Type::Dot });
 
 			parser.AddLeftTokenTypes(6, ParseFunctionPrototype, { Token::Type::LeftParenthesis });
 			
@@ -284,13 +317,15 @@ namespace Gogaman
 			//= += -= *= /= %=
 			parser.AddLeftTokenTypes(3, ParseAssignment, { Token::Type::Equal });
 
-			parser.AddNullTokenTypes(-1, ParseNumericLiteral, { Token::Type::Number });
-			parser.AddNullTokenTypes(-1, ParseStringLiteral,  { Token::Type::String });
-			parser.AddNullTokenTypes(-1, ParseIdentifier, { Token::Type::Identifier });
+			parser.AddNullTokenTypes(-1, ParseBooleanLiteral,       { Token::Type::BooleanLiteral });
+			parser.AddNullTokenTypes(-1, ParseIntegerLiteral,       { Token::Type::IntegerLiteral });
+			parser.AddNullTokenTypes(-1, ParseFloatingPointLiteral, { Token::Type::FloatingPointLiteral });
+			parser.AddNullTokenTypes(-1, ParseStringLiteral,        { Token::Type::StringLiteral });
+			parser.AddNullTokenTypes(-1, ParseIdentifier,           { Token::Type::Identifier });
 
 			parser.AddConditionalNullTokenTypes(-1, [](Parser &parser, const Token &token)
 				{
-					return (GetType(std::string(token.lexeme)) != Type::None) || (token.lexeme == "input") || (token.lexeme == "output");
+					return IsTypeName(std::string(token.lexeme)) || (token.lexeme == "input") || (token.lexeme == "output");
 				}, ParseVariableDeclaration, { Token::Type::Keyword });
 
 			parser.AddConditionalNullTokenTypes(-1, [](Parser &parser, const Token &token)

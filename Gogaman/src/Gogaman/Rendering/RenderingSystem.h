@@ -38,9 +38,13 @@ namespace Gogaman
 	private:
 		struct Mandelbrot
 		{
+			//struct ShaderData
+			//{
+			//	glm::vec3 positionAndZoom;
+			//};
 			struct ShaderData
 			{
-				glm::vec3 positionAndZoom;
+				float testVal;
 			};
 
 			void Initialize();

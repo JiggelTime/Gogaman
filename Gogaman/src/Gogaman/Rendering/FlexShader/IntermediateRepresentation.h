@@ -4,6 +4,8 @@
 
 #include "Gogaman/Rendering/FlexShader/Type.h"
 
+#define GM_FLEX_SHADER_IR_INVALID_ADDRESS_DATA 3288334335
+
 namespace Gogaman
 {
 	namespace FlexShader
@@ -19,6 +21,10 @@ namespace Gogaman
 				Divide,
 				Modulo,
 
+				//Miscellaneous
+				Variable,
+				Subscript,
+				VectorSwizzle,
 				Assignment,
 
 				//Control flow
@@ -42,6 +48,9 @@ namespace Gogaman
 				"Multiply",
 				"Divide",
 				"Modulo",
+				"Variable",
+				"Subscript",
+				"VectorSwizzle",
 				"Assignment",
 				"Branch",
 				"BranchOnNotEqual",
@@ -62,7 +71,7 @@ namespace Gogaman
 				{
 					Variable,
 					Function,
-					Constant,
+					ConstantOrVector,
 					InstructionPointer
 				};
 
@@ -72,33 +81,54 @@ namespace Gogaman
 					{
 					"Variable",
 					"Function",
-					"Constant",
+					"ConstantOrVector",
 					"InstructionPointer"
 					};
 
 					return std::string(names[(uint8_t)type]);
 				}
 			public:
-				Address(const uint32_t value = 0x3FFFFFFF, const Type type = Type::InstructionPointer)
+				Address(const Type type = Type::InstructionPointer, const uint32_t value = 0x3FFFFFF, const FlexShader::Type dataType = FlexShader::Type::Void)
 				{
-					GM_DEBUG_ASSERT(value <= 0x3FFFFFFF, "Failed to construct FlexShader intermediate representation address | Invalid value");
-					m_Data = value | ((uint32_t)type << 30);
+					GM_DEBUG_ASSERT(value <= 0x3FFFFFF, "Failed to construct FlexShader intermediate representation address | Invalid value");
+					m_Data = ((uint32_t)type << 30) | ((uint32_t)dataType << 26) | value;
 				}
 
 				~Address() = default;
 
-				inline const uint32_t GetValue() const { return m_Data & 0x3fffffff; }
-
 				inline const Type GetType() const { return (Type)(m_Data >> 30); }
 
-				inline const bool IsValid() const { return m_Data != UINT32_MAX; }
+				inline const FlexShader::Type GetDataType() const { return (FlexShader::Type)((m_Data & 0x3FFFFFFF) >> 26); }
+
+				inline const uint32_t GetValue() const { return m_Data & 0x3FFFFFF; }
+
+				inline const bool IsValid() const { return m_Data != GM_FLEX_SHADER_IR_INVALID_ADDRESS_DATA; }
 			private:
 				uint32_t m_Data;
 			};
 
 			struct Instruction
 			{
-				Address   address1, address2;
+				Instruction(const Operation operation, const Address address1 = {}, const Address address2 = {})
+					: operation(operation), address1(address1), address2(address2)
+				{}
+
+				Instruction(const Operation operation, const Address address, const uint32_t data)
+					: operation(operation), address1(address), data2(data)
+				{}
+
+				union
+				{
+					uint32_t data1;
+					Address  address1;
+				};
+
+				union
+				{
+					uint32_t data2;
+					Address  address2;
+				};
+
 				Operation operation;
 			};
 
@@ -135,9 +165,25 @@ namespace Gogaman
 				std::vector<Instruction> instructions;
 				std::vector<uint32_t>    executionOrder;
 
-				std::vector<std::pair<Type, uint8_t>>           variableSymbolTable;
+				//std::vector<std::pair<Type, VariableSpecifier>> variableSymbolTable;
+				std::vector<VariableSpecifier>                  variableSpecifiers;
 				std::unordered_map<uint32_t, FunctionSignature> functionSignatures;
-				std::vector<uint32_t>                           constantValues;
+
+				//std::vector<uint32_t>                           constantValues;
+				//std::vector<Type>                               constantTypes;
+
+				std::vector<uint32_t> integerConstantValues;
+				std::vector<float>    floatConstantValues;
+
+				std::vector<Address *> integer2Values;
+				std::vector<Address *> integer3Values;
+				std::vector<Address *> integer4Values;
+
+				std::vector<Address *> float2Values;
+				std::vector<Address *> float3Values;
+				std::vector<Address *> float4Values;
+
+				std::vector<Address> descriptors[16];
 
 				//Address entryPoint;
 			};
@@ -152,10 +198,10 @@ namespace Gogaman
 					{
 						if(instruction.address2.IsValid())
 						{
-							GM_LOG_CORE_INFO("%d: %s | Address 1: %d (%s) | Address 2: %d (%s)", executionIndex, GetOperationString(instruction.operation).c_str(), instruction.address1.GetValue(), Address::GetTypeString(instruction.address1.GetType()).c_str(), instruction.address2.GetValue(), Address::GetTypeString(instruction.address2.GetType()).c_str());
+							GM_LOG_CORE_INFO("%d: %s | Address 1: %d %s (%s) | Address 2: %d %s (%s)", executionIndex, GetOperationString(instruction.operation).c_str(), instruction.address1.GetValue(), GetTypeString(instruction.address1.GetDataType()).c_str(), Address::GetTypeString(instruction.address1.GetType()).c_str(), instruction.address2.GetValue(), GetTypeString(instruction.address2.GetDataType()).c_str(), Address::GetTypeString(instruction.address2.GetType()).c_str());
 						}
 						else
-							GM_LOG_CORE_INFO("%d: %s | Address 1: %d (%s)", executionIndex, GetOperationString(instruction.operation).c_str(), instruction.address1.GetValue(), Address::GetTypeString(instruction.address1.GetType()).c_str());
+							GM_LOG_CORE_INFO("%d: %s | Address 1: %d %s (%s)", executionIndex, GetOperationString(instruction.operation).c_str(), instruction.address1.GetValue(), GetTypeString(instruction.address1.GetDataType()).c_str(), Address::GetTypeString(instruction.address1.GetType()).c_str());
 					}
 					else
 						GM_LOG_CORE_INFO("%d: %s", executionIndex, GetOperationString(instruction.operation).c_str());					

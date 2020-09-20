@@ -628,11 +628,13 @@ namespace Gogaman
 
 		//Mandelbrot shader
 		auto vertexShaderData = LoadShader(shaderDirectory + "v_Mandelbrot.spv");
+		v_MandelbrotShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
+		delete[] vertexShaderData.second;
+		
 		//auto pixelShaderData = LoadShader(shaderDirectory + "p_Mandelbrot.spv");
 		auto pixelShaderData = testModule.CompileKernel("main");
 		p_MandebrotShaderID = g_Device->GetResources().shaders.Create(pixelShaderData.first, pixelShaderData.second);
-		v_MandelbrotShaderID = g_Device->GetResources().shaders.Create(vertexShaderData.first, vertexShaderData.second);
-
+		delete[] pixelShaderData.second;
 
 		auto &mandelbrotShaderProgram = g_Device->GetResources().shaderPrograms.Create(mandelbrotShaderProgramID);
 		mandelbrotShaderProgram.SetShader<Shader::Stage::Vertex>(v_MandelbrotShaderID);
@@ -641,9 +643,11 @@ namespace Gogaman
 		//Postprocess shader
 		auto v_PostProcessShaderData = LoadShader(shaderDirectory + "v_Postprocess.spv");
 		v_PostprocessShaderID = g_Device->GetResources().shaders.Create(v_PostProcessShaderData.first, v_PostProcessShaderData.second);
+		delete[] v_PostProcessShaderData.second;
 
 		auto p_PostProcessShaderData = LoadShader(shaderDirectory + "p_Postprocess.spv");
 		p_PostprocessShaderID = g_Device->GetResources().shaders.Create(p_PostProcessShaderData.first, p_PostProcessShaderData.second);
+		delete[] p_PostProcessShaderData.second;
 
 		auto &shaderProgram = g_Device->GetResources().shaderPrograms.Create(postprocessShaderProgramID);
 		shaderProgram.SetShader<Shader::Stage::Vertex>(v_PostprocessShaderID);
@@ -687,7 +691,7 @@ namespace Gogaman
 		auto &mandelbulbStage = graph.CreateRenderStage(std::move(mandelbulbState));
 
 		RenderGraph::Texture raw;
-		raw.format = RHI::Texture::Format::X16F;
+		raw.format = RHI::Texture::Format::XY16F;
 		raw.width  = Application::GetInstance().GetWindow().GetWidth();
 		raw.height = Application::GetInstance().GetWindow().GetHeight();
 		mandelbulbStage.CreateTexture("RAW", raw, RHI::Texture::State::RenderSurfaceAttachment);
@@ -697,21 +701,24 @@ namespace Gogaman
 			//GM_LOG_CORE_INFO("Executing mandelbrot stage! :D");
 
 			ShaderData shaderData;
-			shaderData.positionAndZoom.x = smoothPosition.x;
-			shaderData.positionAndZoom.y = smoothPosition.y;
-			shaderData.positionAndZoom.z = smoothZoom;
+			//shaderData.positionAndZoom.x = smoothPosition.x;
+			//shaderData.positionAndZoom.y = smoothPosition.y;
+			//shaderData.positionAndZoom.z = smoothZoom;
+
+			shaderData.testVal = cos(Time::GetTime() * 0.17f) * 0.5f + 0.5f;
+			//shaderData.testVal[1] = Time::GetTime();
 			
 			const auto swapChainImageIndex = g_Device->GetNativeData().vulkanSwapChainImageIndex;
 
-			//g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
-			//mandelbulbDescriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
+			g_Device->GetResources().buffers.Get(shaderDataBuffers[swapChainImageIndex]).SetData(&shaderData);
+			mandelbulbDescriptorGroups[swapChainImageIndex]->SetShaderConstantBuffer(0, shaderDataBuffers[swapChainImageIndex]);
 
 			RHI::CommandBufferID commandBufferID = frameContext.GetRenderQueue().AvailableCommandBuffer();
 			RHI::CommandBuffer *commandBuffer = &g_Device->GetResources().commandBuffers.Get(commandBufferID);
 
 			RHI::RenderCommandRecorder commandRecorder(commandBuffer, state);
 
-			//commandRecorder.BindDescriptorGroup(0, *mandelbulbDescriptorGroups[swapChainImageIndex].get());
+			commandRecorder.BindDescriptorGroup(0, *mandelbulbDescriptorGroups[swapChainImageIndex].get());
 			commandRecorder.Render(3, 0);
 
 			commandRecorder.EndRecording();

@@ -10,7 +10,7 @@ namespace Gogaman
 		using ComponentTypeID = uint8_t;
 
 		//Hashmap: key = typeName, value = typeID or Type
-		//ModuleVisitor will populate this using Components
+		//Transformer will populate this using Components
 		//Will use to lookup layout when creating a component instance. Possibly for patching function calls during specialization too?
 		#if 0
 		class Component

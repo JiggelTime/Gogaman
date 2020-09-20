@@ -7,13 +7,14 @@
 #include "Type.h"
 
 #include "Visitor.h"
+#include "Transformer.h"
 #include "SemanticAnalyzer.h"
 #include "Translator.h"
 
 #define GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(x)\
 inline virtual void Accept(LogVisitor &visitor) { visitor.Visit##x(*this); }\
-inline virtual Abstract *Accept(ModuleVisitor &visitor, const std::string &componentName = "") { return visitor.Visit##x(*this, componentName); }\
 inline virtual void Accept(SpecializationVisitor &visitor) { visitor.Visit##x(*this); }\
+inline virtual std::vector<Abstract *> Accept(Transformer &visitor, const std::string &componentName = "") { return visitor.Visit##x(*this, componentName); }\
 inline virtual Type Accept(SemanticAnalyzer &visitor) { return visitor.Visit##x(*this); }\
 inline virtual IR::Address Accept(Translator &visitor) { return visitor.Visit##x(*this); }
 
@@ -53,9 +54,9 @@ namespace Gogaman
 				{
 					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(VariableDeclaration)
 					
-					std::string name;
-					Type        type;
-					uint8_t     specifierFlags;
+					std::string       name;
+					Type              type;
+					VariableSpecifier specifier;
 				};
 
 				struct ComponentInstantiation : public Statement
@@ -99,11 +100,25 @@ namespace Gogaman
 					StatementBlock *body;
 				};
 
-				struct NumericLiteral : public Expression
+				struct BooleanLiteral : public Expression
 				{
-					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(NumericLiteral)
+					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(BooleanLiteral)
 
-					std::string value;
+					bool value;
+				};
+
+				struct IntegerLiteral : public Expression
+				{
+					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(IntegerLiteral)
+
+					uint32_t value;
+				};
+
+				struct FloatingPointLiteral : public Expression
+				{
+					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(FloatingPointLiteral)
+
+					float value;
 				};
 
 				struct StringLiteral : public Expression
@@ -118,6 +133,21 @@ namespace Gogaman
 					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(Identifier)
 
 					std::string name;
+				};
+
+				struct Vector : public Expression
+				{
+					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(Vector)
+
+					std::vector<Expression *> expressions;
+				};
+
+				struct MemberSelection : public Expression
+				{
+					GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(MemberSelection)
+
+					std::string memberName;
+					Identifier  *object;
 				};
 
 				struct BinaryOperation : public Expression

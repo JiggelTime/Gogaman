@@ -1,6 +1,6 @@
 #pragma once
 
-#define GM_FLEX_SHADER_TOKEN_TYPE_COUNT 22
+#define GM_FLEX_SHADER_TOKEN_TYPE_COUNT 24
 
 namespace Gogaman
 {
@@ -11,14 +11,19 @@ namespace Gogaman
 			enum class Type : uint8_t
 			{
 				//Literals
-				Number,
-				String,
+				BooleanLiteral,
+				IntegerLiteral,
+				FloatingPointLiteral,
+				StringLiteral,
 
 				//Names
 				Identifier,
 				Keyword,
 
-				//Separators
+				//Delimiters
+				Comma,
+				Dot,
+				Colon,
 				Semicolon,
 				LeftParenthesis,
 				RightParenthesis,
@@ -35,12 +40,7 @@ namespace Gogaman
 				Percent,
 				Equal,
 				Less,
-				Greater,
-
-				//Miscellaneous
-				Comma,
-				Dot,
-				Colon
+				Greater
 			};
 
 			std::string_view lexeme;
@@ -52,28 +52,30 @@ namespace Gogaman
 		{
 			const std::string names[]
 			{
-			"Number",
-			"String",
-			"Identifier",
-			"Keyword",
-			"Semicolon",
-			"LeftParenthesis",
-			"RightParenthesis",
-			"LeftBrace",
-			"RightBrace",
-			"LeftSquareBracket",
-			"RightSquareBracket",
-			"Plus",
-			"Minus",
-			"Asterisk",
-			"Slash",
-			"Percent",
-			"Equal",
-			"Less",
-			"Greater",
-			"Comma",
-			"Dot",
-			"Colon"
+				"BooleanLiteral",
+				"IntegerLiteral",
+				"FloatingPointLiteral",
+				"StringLiteral",
+				"Identifier",
+				"Keyword",
+				"Comma",
+				"Dot",
+				"Colon",
+				"Semicolon",
+				"LeftParenthesis",
+				"RightParenthesis",
+				"LeftBrace",
+				"RightBrace",
+				"LeftSquareBracket",
+				"RightSquareBracket",
+				"Plus",
+				"Minus",
+				"Asterisk",
+				"Slash",
+				"Percent",
+				"Equal",
+				"Less",
+				"Greater"
 			};
 
 			return std::string(names[(uint8_t)type]);

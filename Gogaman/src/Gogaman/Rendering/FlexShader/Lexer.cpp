@@ -67,6 +67,9 @@ namespace Gogaman
 						if((source[cursorPosition] == '*') && (source[cursorPosition + 1] == '/'))
 							break;
 
+						if(source[cursorPosition] == '\n')
+							lineCount++;
+
 						cursorPosition++;
 					}
 
@@ -76,14 +79,15 @@ namespace Gogaman
 	
 				if(isdigit(character))
 				{
+					Token::Type literalType = Token::Type::IntegerLiteral;
 					const uint32_t initialPosition = cursorPosition;
-	
 					while(true)
 					{
 						cursorPosition++;
 
 						if(source[cursorPosition] == '.')
 						{
+							literalType = Token::Type::FloatingPointLiteral;
 							while(true)
 							{
 								cursorPosition++;
@@ -96,7 +100,10 @@ namespace Gogaman
 							break;
 					}
 	
-					AddToken(Token::Type::Number, std::string_view(source.c_str() + initialPosition, cursorPosition - initialPosition));
+					AddToken(literalType, std::string_view(source.c_str() + initialPosition, cursorPosition - initialPosition));
+					if((literalType == Token::Type::FloatingPointLiteral) && ((source[cursorPosition] == 'f') || (source[cursorPosition] == 'F')))
+						cursorPosition++;
+
 					continue;
 				}
 
@@ -124,7 +131,7 @@ namespace Gogaman
 							break;
 					}
 
-					AddToken(Token::Type::String, std::string_view(source.c_str() + initialPosition + 1, cursorPosition - (initialPosition + 1)));
+					AddToken(Token::Type::StringLiteral, std::string_view(source.c_str() + initialPosition + 1, cursorPosition - (initialPosition + 1)));
 					cursorPosition++;
 					continue;
 				}
@@ -137,15 +144,20 @@ namespace Gogaman
 					{
 						cursorPosition++;
 	
-						//if(!isalnum(source[cursorPosition]) && source[cursorPosition] != '_')
-						if(!isalnum(source[cursorPosition]) && source[cursorPosition] != '_' && source[cursorPosition] != '.')
+						if(!isalnum(source[cursorPosition]) && source[cursorPosition] != '_')
 							break;
 					}
 
 					std::string_view characters(source.c_str() + initialPosition, cursorPosition - initialPosition);
 					
+					if((characters == "true") || (characters == "false"))
+					{
+						AddToken(Token::Type::BooleanLiteral, std::move(characters));
+						continue;
+					}
+
 					bool isKeyword = false;
-					const std::vector<std::string> keywords = { "void", "int", "float", "float2", "float3", "float4", "Sampler", "input", "output", "component", "if", "else", "return" };
+					const std::vector<std::string> keywords = { "void", "bool", "int", "float", "float2", "float3", "float4", "Sampler", "input", "output", "component", "if", "else", "return" };
 					for(const auto &i : keywords)
 					{
 						if(characters == i)

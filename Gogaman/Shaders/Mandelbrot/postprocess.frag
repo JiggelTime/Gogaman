@@ -9,9 +9,11 @@ layout(set = 0, binding = 1) uniform texture2D inputTexture;
 
 void main()
 {
-	float sampled = texture(sampler2D(inputTexture, pointSampler), p_UV).r;
+	vec2 sampled;
+	sampled.x = texture(sampler2D(inputTexture, pointSampler), p_UV).r;
+	sampled.y = texture(sampler2D(inputTexture, pointSampler), p_UV).g;
 
-	vec3 color = vec3(sampled, sampled / 10.0f, sampled * 5.0f);
+	vec3 color = vec3(sampled.x, sampled.y, sampled.x / sampled.y);
 
 	//Gamma correction
 	color = pow(color, vec3(1.0f / 2.22f));

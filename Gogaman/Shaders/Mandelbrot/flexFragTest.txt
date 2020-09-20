@@ -1,10 +1,19 @@
 {
-	float Double(float value) { return value * 2; }
-
+	component Timer
+	{
+		float time;
+	}
+	
 	void main()
 	{
-		float test = Double(2.5) * 2;
-		output float result = test / 13;
+		input float2 uv;
+		
+		Timer timer;
+
+		//output float result = goga.x * goga.y;
+		output float2 result;
+		result.r = uv.y;
+		result.g = uv.x;
 		return;
 	}
 }

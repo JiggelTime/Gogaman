@@ -44,6 +44,7 @@
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\SyntacticAnalysis.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Lexer.cpp" />
     <ClCompile Include="src\Platform\Vulkan\FlexShader\VulkanCodeGenerator.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\Transformer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Gogaman\ECS\Component.h" />
@@ -179,5 +180,8 @@
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\CodeGenerator.h" />
     <ClInclude Include="src\Platform\Vulkan\FlexShader\VulkanCodeGenerator.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\Type.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Transformer.h" />
+    <ClInclude Include="E:\SPIRV_Dissasembler.h" />
+    <ClInclude Include="src\Gogaman\Utilities\Cast.h" />
   </ItemGroup>
 </Project>
