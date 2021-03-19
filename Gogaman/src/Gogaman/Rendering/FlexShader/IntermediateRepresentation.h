@@ -12,14 +12,60 @@ namespace Gogaman
 	{
 		namespace IR
 		{
+			enum class IntrinsicFunction : uint8_t
+			{
+				None,
+				Sin,
+				Cos,
+				Tan,
+				Power,
+				NaturalExponentiation,
+				NaturalLogarithm,
+				SquareRoot,
+				InverseSquareRoot,
+				Step,
+				SmoothStep
+			};
+
+			inline IntrinsicFunction GetIntrinsicFunction(const std::string &name)
+			{
+				if(name == "sin")
+					return IntrinsicFunction::Sin;
+				else if(name == "cos")
+					return IntrinsicFunction::Cos;
+				else if(name == "tan")
+					return IntrinsicFunction::Tan;
+				else if(name == "pow")
+					return IntrinsicFunction::Power;
+				else if(name == "exp")
+					return IntrinsicFunction::NaturalExponentiation;
+				else if(name == "log")
+					return IntrinsicFunction::NaturalLogarithm;
+				else if(name == "sqrt")
+					return IntrinsicFunction::SquareRoot;
+				else if(name == "inverseSqrt")
+					return IntrinsicFunction::InverseSquareRoot;
+				else if(name == "step")
+					return IntrinsicFunction::Step;
+				else if(name == "smoothstep")
+					return IntrinsicFunction::SmoothStep;
+				else
+					return IntrinsicFunction::None;
+			}
+
 			enum class Operation : uint8_t
 			{
 				//Arithmetic
-				Add,
-				Subtract,
-				Multiply,
-				Divide,
-				Modulo,
+				IntegerAdd,
+				IntegerSubtract,
+				IntegerMultiply,
+				IntegerDivide,
+				IntegerModulo,
+				FloatAdd,
+				FloatSubtract,
+				FloatMultiply,
+				FloatDivide,
+				FloatModulo,
 
 				//Miscellaneous
 				Variable,
@@ -36,29 +82,36 @@ namespace Gogaman
 				EndFunction,
 				Return,
 				FunctionParameter,
-				FunctionCall
+				FunctionCall,
+				IntrinsicFunctionCall
 			};
 
 			inline std::string GetOperationString(const Operation operation)
 			{
 				const std::string names[]
 				{
-				"Add",
-				"Subtract",
-				"Multiply",
-				"Divide",
-				"Modulo",
-				"Variable",
-				"Subscript",
-				"VectorSwizzle",
-				"Assignment",
-				"Branch",
-				"BranchOnNotEqual",
-				"BeginFunction",
-				"EndFunction",
-				"Return",
-				"FunctionParameter",
-				"FunctionCall"
+					"IntegerAdd",
+					"IntegerSubtract",
+					"IntegerMultiply",
+					"IntegerDivide",
+					"IntegerModulo",
+					"FloatAdd",
+					"FloatSubtract",
+					"FloatMultiply",
+					"FloatDivide",
+					"FloatModulo",
+					"Variable",
+					"Subscript",
+					"VectorSwizzle",
+					"Assignment",
+					"Branch",
+					"BranchOnNotEqual",
+					"BeginFunction",
+					"EndFunction",
+					"Return",
+					"FunctionParameter",
+					"FunctionCall",
+					"IntrinsicFunctionCall"
 				};
 
 				return std::string(names[(uint8_t)operation]);
@@ -79,10 +132,10 @@ namespace Gogaman
 				{
 					const std::string names[]
 					{
-					"Variable",
-					"Function",
-					"ConstantOrVector",
-					"InstructionPointer"
+						"Variable",
+						"Function",
+						"ConstantOrVector",
+						"InstructionPointer"
 					};
 
 					return std::string(names[(uint8_t)type]);
@@ -95,6 +148,10 @@ namespace Gogaman
 				}
 
 				~Address() = default;
+
+				inline uint32_t operator()() const { return std::hash<uint32_t>()(m_Data); }
+
+				inline bool operator==(const Address &other) const { return m_Data == other.m_Data; }
 
 				inline const Type GetType() const { return (Type)(m_Data >> 30); }
 
@@ -115,6 +172,10 @@ namespace Gogaman
 
 				Instruction(const Operation operation, const Address address, const uint32_t data)
 					: operation(operation), address1(address), data2(data)
+				{}
+
+				Instruction(const Operation operation, const uint32_t data)
+					: operation(operation), data1(data), address2({})
 				{}
 
 				union
@@ -165,12 +226,8 @@ namespace Gogaman
 				std::vector<Instruction> instructions;
 				std::vector<uint32_t>    executionOrder;
 
-				//std::vector<std::pair<Type, VariableSpecifier>> variableSymbolTable;
 				std::vector<VariableSpecifier>                  variableSpecifiers;
 				std::unordered_map<uint32_t, FunctionSignature> functionSignatures;
-
-				//std::vector<uint32_t>                           constantValues;
-				//std::vector<Type>                               constantTypes;
 
 				std::vector<uint32_t> integerConstantValues;
 				std::vector<float>    floatConstantValues;

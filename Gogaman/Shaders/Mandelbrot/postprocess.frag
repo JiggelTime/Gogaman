@@ -13,7 +13,7 @@ void main()
 	sampled.x = texture(sampler2D(inputTexture, pointSampler), p_UV).r;
 	sampled.y = texture(sampler2D(inputTexture, pointSampler), p_UV).g;
 
-	vec3 color = vec3(sampled.x, sampled.y, sampled.x / sampled.y);
+	vec3 color = vec3(sampled.x, sampled.y, 0.0f);
 
 	//Gamma correction
 	color = pow(color, vec3(1.0f / 2.22f));

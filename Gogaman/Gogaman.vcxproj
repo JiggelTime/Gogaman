@@ -18,6 +18,7 @@
     <ClCompile Include="src\Gogaman\Core\Application.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractRenderSurface.cpp" />
     <ClCompile Include="src\Gogaman\RenderHardwareInterface\AbstractTexture.cpp" />
+    <ClCompile Include="src\Gogaman\Rendering\FlexShader\StaticSingleAssignment.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\SyntacticAnalysis.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\FlexShader.cpp" />
     <ClCompile Include="src\Gogaman\Rendering\FlexShader\Lexer.cpp" />
@@ -81,6 +82,8 @@
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\AbstractCodeGenerator.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\AbstractSyntaxTree.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\CodeGenerator.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\Optimizer.h" />
+    <ClInclude Include="src\Gogaman\Rendering\FlexShader\StaticSingleAssignment.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\SyntacticAnalysis.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\ComponentInstance.h" />
     <ClInclude Include="src\Gogaman\Rendering\FlexShader\FlexShader.h" />

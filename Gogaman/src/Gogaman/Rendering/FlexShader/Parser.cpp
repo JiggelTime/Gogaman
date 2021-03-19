@@ -3,7 +3,7 @@
 
 #include "Gogaman/Core/Base.h"
 
-#define GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE INT8_MAX
+#define GM_FLEX_SHADER_INVALID_BINDING_POWER INT8_MAX
 
 namespace Gogaman
 {
@@ -41,8 +41,8 @@ namespace Gogaman
 		{
 			for(uint8_t i = 0; i < GM_FLEX_SHADER_TOKEN_TYPE_COUNT; i++)
 			{
-				//m_NullTokenBindingPowers[i]     = GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE;
-				//m_LeftTokenLeftBindingPowers[i] = GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE;
+				//m_NullTokenBindingPowers[i]     = GM_FLEX_SHADER_INVALID_BINDING_POWER;
+				//m_LeftTokenLeftBindingPowers[i] = GM_FLEX_SHADER_INVALID_BINDING_POWER;
 				m_NullTokenBindingPowers[i]     = 0;
 				m_LeftTokenLeftBindingPowers[i] = 0;
 
@@ -53,14 +53,14 @@ namespace Gogaman
 
 		void Parser::AddNullTokenTypes(const int8_t bindingPower, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add null token types | Invalid binding power");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_BINDING_POWER, "Failed to add null token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
-				m_NullTokenParseCallbacks[(uint8_t)i]         = parseCallback;
+				m_NullTokenParseCallbacks[(uint8_t)i] = parseCallback;
 				m_NullTokenBindingPowers[(uint8_t)i] = bindingPower;
 
-				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_BINDING_POWER)
 				{
 					m_LeftTokenParseCallbacks[(uint8_t)i]     = LeftParseError;
 					m_LeftTokenLeftBindingPowers[(uint8_t)i]  = 0;
@@ -71,7 +71,7 @@ namespace Gogaman
 
 		void Parser::AddLeftTokenTypes(const int8_t bindingPower, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add left token types | Invalid binding power");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_BINDING_POWER, "Failed to add left token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
@@ -79,7 +79,7 @@ namespace Gogaman
 				m_LeftTokenLeftBindingPowers[(uint8_t)i]  = bindingPower;
 				m_LeftTokenRightBindingPowers[(uint8_t)i] = bindingPower;
 
-				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_BINDING_POWER)
 				{
 					m_NullTokenParseCallbacks[(uint8_t)i] = NullParseError;
 					m_NullTokenBindingPowers[(uint8_t)i]  = 0;
@@ -89,7 +89,7 @@ namespace Gogaman
 
 		void Parser::AddRightTokenTypes(const int8_t bindingPower, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add right token types | Invalid binding power");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_BINDING_POWER, "Failed to add right token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
@@ -97,7 +97,7 @@ namespace Gogaman
 				m_LeftTokenLeftBindingPowers[(uint8_t)i]  = bindingPower;
 				m_LeftTokenRightBindingPowers[(uint8_t)i] = bindingPower - 1;
 
-				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_NullTokenBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_BINDING_POWER)
 				{
 					m_NullTokenParseCallbacks[(uint8_t)i]         = NullParseError;
 					m_NullTokenBindingPowers[(uint8_t)i] = 0;
@@ -107,7 +107,7 @@ namespace Gogaman
 
 		void Parser::AddConditionalNullTokenTypes(const int8_t bindingPower, const NullTokenParseConditionFunction &parseCondition, const NullTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add conditional null token types | Invalid binding power");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_BINDING_POWER, "Failed to add conditional null token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{
@@ -117,7 +117,7 @@ namespace Gogaman
 				m_NullTokenConditionalBindingPowers[(uint8_t)i].emplace_back(bindingPower);
 
 				//figure this out. new
-				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE)
+				if(m_LeftTokenLeftBindingPowers[(uint8_t)i] == GM_FLEX_SHADER_INVALID_BINDING_POWER)
 				{
 					m_LeftTokenParseCallbacks[(uint8_t)i] = LeftParseError;
 					m_LeftTokenLeftBindingPowers[(uint8_t)i] = 0;
@@ -128,7 +128,7 @@ namespace Gogaman
 
 		void Parser::AddConditionalLeftTokenTypes(const int8_t bindingPower, const LeftTokenParseConditionFunction &parseCondition, const LeftTokenParseFunction &parseCallback, const std::vector<Token::Type> &tokenTypes)
 		{
-			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_ASSOCIATIVE_PRECEDENCE, "Failed to add conditional left token types | Invalid binding power");
+			GM_DEBUG_ASSERT(bindingPower != GM_FLEX_SHADER_INVALID_BINDING_POWER, "Failed to add conditional left token types | Invalid binding power");
 
 			for(const Token::Type i : tokenTypes)
 			{

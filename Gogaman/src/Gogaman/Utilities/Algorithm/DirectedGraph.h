@@ -89,6 +89,67 @@ namespace Gogaman
 			return outgoingDegree;
 		}
 
+		inline std::vector<VertexIndexType> PreOrder(const VertexIndexType start) const
+		{
+			std::vector<VertexIndexType> preOrder;
+			preOrder.reserve(GetVertexCount());
+
+			std::stack<VertexIndexType> vertices;
+			vertices.emplace(start);
+			std::vector<bool> discoveredVertexLabels(GetVertexCount(), false);
+			while(!vertices.empty())
+			{
+				const VertexIndexType vertex = vertices.top();
+				vertices.pop();
+
+				preOrder.emplace_back(vertex);
+				
+				if(!discoveredVertexLabels[vertex])
+				{
+					discoveredVertexLabels[vertex] = true;
+					for(const VertexIndexType i : OutgoingConnections(vertex))
+						vertices.emplace(i);
+				}
+			}
+
+			return preOrder;
+		}
+
+		inline std::vector<VertexIndexType> PostOrder(const VertexIndexType start) const
+		{
+			std::vector<VertexIndexType> postOrder;
+			postOrder.reserve(GetVertexCount());
+
+			std::stack<VertexIndexType> vertices;
+			vertices.emplace(start);
+			std::vector<bool> discoveredVertexLabels(GetVertexCount(), false);
+			discoveredVertexLabels[start] = true;
+			while(!vertices.empty())
+			{
+				const VertexIndexType vertex = vertices.top();
+				bool isTail = true;
+
+				for(const VertexIndexType i : OutgoingConnections(vertex))
+				{
+					if(!discoveredVertexLabels[i])
+					{
+						vertices.emplace(i);
+						discoveredVertexLabels[i] = true;
+						isTail = false;
+						break;
+					}
+				}
+
+				if(isTail)
+				{
+					vertices.pop();
+					postOrder.emplace_back(vertex);
+				}
+			}
+
+			return postOrder;
+		}
+
 		inline constexpr VertexIndexType GetVertexCount() const { return m_AdjacencyMatrix.size(); }
 	private:
 		std::vector<std::vector<bool>> m_AdjacencyMatrix;
@@ -109,11 +170,10 @@ namespace Gogaman
 			while(!vertices.empty())
 			{
 				const VertexIndexType vertex = vertices.top();
-
 				vertices.pop();
 
 				const std::vector<VertexIndexType> adjacentVertices = DirectedGraph<VertexIndexType>::OutgoingConnections(vertex);
-				for(const VertexIndexType &i : adjacentVertices)
+				for(const VertexIndexType i : adjacentVertices)
 					vertices.emplace(i);
 
 				if(!vertices.empty() && vertices.top() == rootIndex)
@@ -140,7 +200,7 @@ namespace Gogaman
 				vertices.pop();
 
 				const std::vector<VertexIndexType> adjacentVertices = isReversed ? DirectedGraph<VertexIndexType>::IncomingConnections(vertex) : DirectedGraph<VertexIndexType>::OutgoingConnections(vertex);
-				for(const VertexIndexType &i : adjacentVertices)
+				for(const VertexIndexType i : adjacentVertices)
 					vertices.emplace(i);
 			}
 		}
@@ -162,7 +222,7 @@ namespace Gogaman
 				vertices.pop();
 
 				const std::vector<VertexIndexType> adjacentVertices = isReversed ? DirectedGraph<VertexIndexType>::IncomingConnections(vertex) : DirectedGraph<VertexIndexType>::OutgoingConnections(vertex);
-				for(const VertexIndexType &i : adjacentVertices)
+				for(const VertexIndexType i : adjacentVertices)
 					vertices.emplace(i);
 			}
 		}

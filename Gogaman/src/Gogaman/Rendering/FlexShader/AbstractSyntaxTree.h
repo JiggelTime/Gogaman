@@ -12,11 +12,11 @@
 #include "Translator.h"
 
 #define GM_FLEX_SHADER_AST_NODE_ACCEPT_FUNCTIONS(x)\
-inline virtual void Accept(LogVisitor &visitor) { visitor.Visit##x(*this); }\
-inline virtual void Accept(SpecializationVisitor &visitor) { visitor.Visit##x(*this); }\
-inline virtual std::vector<Abstract *> Accept(Transformer &visitor, const std::string &componentName = "") { return visitor.Visit##x(*this, componentName); }\
-inline virtual Type Accept(SemanticAnalyzer &visitor) { return visitor.Visit##x(*this); }\
-inline virtual IR::Address Accept(Translator &visitor) { return visitor.Visit##x(*this); }
+	inline virtual void Accept(LogVisitor &visitor) { visitor.Visit##x(*this); }\
+	inline virtual void Accept(SpecializationVisitor &visitor) { visitor.Visit##x(*this); }\
+	inline virtual std::vector<Abstract *> Accept(Transformer &visitor, const std::string &componentName = "") { return visitor.Visit##x(*this, componentName); }\
+	inline virtual Type Accept(SemanticAnalyzer &visitor) { return visitor.Visit##x(*this); }\
+	inline virtual IR::Address Accept(Translator &visitor) { return visitor.Visit##x(*this); }
 
 namespace Gogaman
 {

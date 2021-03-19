@@ -231,7 +231,7 @@ namespace Gogaman
 					AddAtom(Token::Type::Minus);
 					break;
 				default:
-					GM_DEBUG_ASSERT(false, "Failed to tokenize FlexShader | Character \"%c\" is invalid", character);
+					GM_DEBUG_ASSERT(false, "Failed to tokenize FlexShader | Line %d | Character \"%c\" is invalid", lineCount, character);
 					break;
 				}
 

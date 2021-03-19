@@ -6,14 +6,12 @@
 #if 1
 	#define GM_DEBUG_ASSERTIONS_ENABLED           TRUE
 	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED TRUE
-	#define GM_RHI_DEBUGGING_ENABLED              TRUE
+	#define GM_RHI_DEBUGGING_ENABLED              FALSE
 #else
 	#define GM_ASSERTIONS_ENABLED                 FALSE
 	#define GM_STABLE_ARRAY_ID_VALIDATION_ENABLED FALSE
 	#define GM_RHI_DEBUGGING_ENABLED              FALSE
 #endif
-
-#define GM_ASSERT(x) if(!(x)) abort();
 
 #define GM_ASSERT(x, ...)\
 	if(!(x))\
@@ -30,7 +28,6 @@
 
 #define GM_STATIC_ASSERT(x)          static_assert(x);
 #if GM_DEBUG_ASSERTIONS_ENABLED
-	#define GM_DEBUG_ASSERT(x)      GM_ASSERT(x)
 	#define GM_DEBUG_ASSERT(x, ...) GM_ASSERT(x, __VA_ARGS__)
 
 	#define GM_DEBUG_STATIC_ASSERT(x) GM_STATIC_ASSERT(x)

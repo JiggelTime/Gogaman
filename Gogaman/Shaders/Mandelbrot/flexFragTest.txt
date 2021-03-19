@@ -1,19 +1,16 @@
 {
-	component Timer
-	{
-		float time;
-	}
-	
 	void main()
 	{
 		input float2 uv;
-		
-		Timer timer;
 
-		//output float result = goga.x * goga.y;
-		output float2 result;
-		result.r = uv.y;
-		result.g = uv.x;
+		float2 intr;
+		intr.x = sin(uv.x % 10.0f);
+		intr.y = cos(uv.y);
+
+		output float2 result = intr;
+
+		float2 testVal = result;
+
 		return;
 	}
 }

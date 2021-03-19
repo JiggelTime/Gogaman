@@ -16,6 +16,8 @@ namespace Gogaman
 
 			uint32_t currentID = 1;
 
+			const uint32_t glslStd450InstructionSetID = currentID++;
+
 			//OpTypeVoid
 			m_TypeDeclarationInstructions.AddInstruction(19, currentID);
 			m_TypeIDs[(uint8_t)Type::Void] = currentID++;
@@ -256,14 +258,17 @@ namespace Gogaman
 				}
 				case Address::Type::InstructionPointer:
 				{
-					//if(loadVariable)
+					if(loadVariable)
 					{
 						const Instruction &intr = intermediateRepresentation.instructions[address.GetValue()];
 						if(intr.operation == Operation::VectorSwizzle)
 						{
-							//OpLoad
-							irStream.AddInstruction(61, m_TypeIDs[intr.data2 & 0xFF], currentID, instructionResultIDs[address.GetValue()]);
-							return currentID++;
+							if(GetTypeComponentCount((Type)(intr.data2 & 0xFF)) == 1)
+							{
+								//OpLoad
+								irStream.AddInstruction(61, m_TypeIDs[intr.data2 & 0xFF], currentID, instructionResultIDs[address.GetValue()]);
+								return currentID++;
+							}
 						}
 					}
 
@@ -286,36 +291,76 @@ namespace Gogaman
 				Instruction instruction = intermediateRepresentation.instructions[instructionIndex];
 				switch(instruction.operation)
 				{
-				case Operation::Add:
+				case Operation::IntegerAdd:
+					//OpFAdd
+					irStream.AddInstruction(128, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
+					break;
+				case Operation::IntegerSubtract:
+					//OpFSub
+					irStream.AddInstruction(130, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()],  instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
+					break;
+				case Operation::IntegerMultiply:
+					//OpFMul
+					irStream.AddInstruction(132, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
+					break;
+				case Operation::IntegerDivide:
+					//OpFDiv
+					irStream.AddInstruction(135, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
+					break;
+				case Operation::IntegerModulo:
+					//OpFMod
+					irStream.AddInstruction(139, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
+					break;
+				case Operation::FloatAdd:
 					//OpFAdd
 					irStream.AddInstruction(129, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
 					break;
-				case Operation::Subtract:
+				case Operation::FloatSubtract:
 					//OpFSub
 					irStream.AddInstruction(131, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()],  instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
 					break;
-				case Operation::Multiply:
+				case Operation::FloatMultiply:
 					//OpFMul
 					irStream.AddInstruction(133, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
 					break;
-				case Operation::Divide:
+				case Operation::FloatDivide:
 					//OpFDiv
 					irStream.AddInstruction(136, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
 					break;
-				case Operation::Modulo:
+				case Operation::FloatModulo:
 					//OpFMod
 					irStream.AddInstruction(141, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], GetAddressID(instruction.address1, true), GetAddressID(instruction.address2, true));
 					break;
 				case Operation::VectorSwizzle:
 				{
-					const Type resultType = (Type)(instruction.data2 & 0xFF);
-					const uint32_t vectorAddress = GetAddressID(instruction.address1);
-					if(GetTypeComponentCount(resultType) == 1)
-						//OpAccessChain
-						irStream.AddInstruction(65, m_FunctionVariableTypeIDs[(uint8_t)resultType], instructionResultIDs[i], vectorAddress, structMemberAccessConstantIDs[(instruction.data2 >> 8) & 3]);
-					//else
+					const Type    resultType     = (Type)(instruction.data2 & 0xFF);
+					const uint8_t componentCount = GetTypeComponentCount(resultType);
+					if(componentCount == 1)
+					{
+						if(intermediateRepresentation.variableSpecifiers[instruction.address1.GetValue()] == VariableSpecifier::None)
+							//OpAccessChain
+							irStream.AddInstruction(65, m_FunctionVariableTypeIDs[(uint8_t)resultType], instructionResultIDs[i], GetAddressID(instruction.address1), structMemberAccessConstantIDs[(instruction.data2 >> 8) & 3]);
+						else if(intermediateRepresentation.variableSpecifiers[instruction.address1.GetValue()] == VariableSpecifier::Input)
+							//OpAccessChain
+							irStream.AddInstruction(65, m_InputVariableTypeIDs[(uint8_t)resultType], instructionResultIDs[i], GetAddressID(instruction.address1), structMemberAccessConstantIDs[(instruction.data2 >> 8) & 3]);
+						else if(intermediateRepresentation.variableSpecifiers[instruction.address1.GetValue()] == VariableSpecifier::Output)
+							//OpAccessChain
+							irStream.AddInstruction(65, m_OutputVariableTypeIDs[(uint8_t)resultType], instructionResultIDs[i], GetAddressID(instruction.address1), structMemberAccessConstantIDs[(instruction.data2 >> 8) & 3]);
+						else
+							//OpAccessChain
+							irStream.AddInstruction(65, descriptorTypeID, instructionResultIDs[i], GetAddressID(instruction.address1), structMemberAccessConstantIDs[(instruction.data2 >> 8) & 3]);
+					}
+					else
+					{
+						std::vector<uint32_t> components;
+						components.reserve(componentCount);
+						for(uint8_t i = 0; i < componentCount; i++)
+							components.emplace_back((instruction.data2 >> (8 + i * 2)) & 3);
+
+						const uint32_t vectorAddress = GetAddressID(instruction.address1, true);
 						//OpVectorShuffle
-						//irStream.AddInstruction(79, )
+						irStream.AddInstruction(79, m_TypeIDs[(uint8_t)resultType], instructionResultIDs[i], vectorAddress, vectorAddress, components);
+					}
 					break;
 				}
 				case Operation::Assignment:
@@ -398,6 +443,7 @@ namespace Gogaman
 				case Operation::FunctionParameter:
 				{
 					std::vector<uint32_t> argumentIDs;
+					#if 0
 					while(instruction.operation == Operation::FunctionParameter)
 					{
 						if(instruction.address1.GetType() == Address::Type::ConstantOrVector)
@@ -412,9 +458,65 @@ namespace Gogaman
 						instruction = intermediateRepresentation.instructions[intermediateRepresentation.executionOrder[++i]];
 						instructionResultIDs[i] = currentID++;
 					}
+					#endif
+					while(instruction.operation == Operation::FunctionParameter)
+					{
+						argumentIDs.emplace_back(GetAddressID(instruction.address1, true));
 
-					//OpFunctionCall
-					irStream.AddInstruction(57, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], functionIDs[instruction.address1.GetValue()], argumentIDs);
+						instruction = intermediateRepresentation.instructions[intermediateRepresentation.executionOrder[++i]];
+						instructionResultIDs[i] = currentID++;
+					}
+
+					if(instruction.operation == Operation::FunctionCall)
+						//OpFunctionCall
+						irStream.AddInstruction(57, m_TypeIDs[(uint8_t)instruction.address1.GetDataType()], instructionResultIDs[i], functionIDs[instruction.address1.GetValue()], argumentIDs);
+					else
+					{
+						switch((IntrinsicFunction)instruction.data1)
+						{
+						case IntrinsicFunction::Sin:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 13, argumentIDs);
+							break;
+						case IntrinsicFunction::Cos:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 14, argumentIDs);
+							break;
+						case IntrinsicFunction::Tan:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 15, argumentIDs);
+							break;
+						case IntrinsicFunction::Power:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 20, argumentIDs);
+							break;
+						case IntrinsicFunction::NaturalExponentiation:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 27, argumentIDs);
+							break;
+						case IntrinsicFunction::NaturalLogarithm:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 28, argumentIDs);
+							break;
+						case IntrinsicFunction::SquareRoot:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 31, argumentIDs);
+							break;
+						case IntrinsicFunction::InverseSquareRoot:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 32, argumentIDs);
+							break;
+						case IntrinsicFunction::Step:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 48, argumentIDs);
+							break;
+						case IntrinsicFunction::SmoothStep:
+							//OpExtInst
+							irStream.AddInstruction(12, m_TypeIDs[(uint8_t)Type::Float], instructionResultIDs[i], glslStd450InstructionSetID, 49, argumentIDs);
+							break;
+						}
+					}
+
 					break;
 				}
 				case Operation::FunctionCall:
@@ -432,8 +534,7 @@ namespace Gogaman
 			//Generator's magic number
 			m_Instructions += 0;
 			//Bound
-			//TEMP to make room for OpExtInsImport
-			m_Instructions += currentID + 1;
+			m_Instructions += currentID;
 			//m_Stream += currentID;
 			//Schema
 			m_Instructions += 0;
@@ -445,10 +546,8 @@ namespace Gogaman
 			m_Instructions.AddInstruction(17, 1);
 
 			//Import extended instruction sets
-			const auto words = PackStringLiteral("GLSL.std.450");
-			uint32_t std450ResultID = 1;
 			//OpExtInstImport
-			m_Instructions.AddInstruction(11, currentID, words);
+			m_Instructions.AddInstruction(11, glslStd450InstructionSetID, PackStringLiteral("GLSL.std.450"));
 
 			//OpMemoryModel | Addressing model: Logical | Memory model: GLSL450
 			m_Instructions.AddInstruction(14, 0, 1);

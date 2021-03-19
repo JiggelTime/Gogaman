@@ -281,9 +281,10 @@ namespace Gogaman
 		{
 			Parser parser(std::move(tokens));
 
-			parser.AddLeftTokenTypes(6, ParseVector, { Token::Type::Comma });
+			//This used to have a binding power of 6 for some reason. It turned multiple function call parameters into a vector
+			parser.AddLeftTokenTypes(2, ParseVector, { Token::Type::Comma });
 
-			parser.AddLeftTokenTypes(6, ParseMemberSelection, { Token::Type::Dot });
+			parser.AddLeftTokenTypes(7, ParseMemberSelection, { Token::Type::Dot });
 
 			parser.AddLeftTokenTypes(6, ParseFunctionPrototype, { Token::Type::LeftParenthesis });
 			

@@ -48,7 +48,12 @@ namespace Gogaman
 				return returnType;
 			}
 
-			Type SemanticAnalyzer::VisitFunctionCall(Node::FunctionCall &node) { return GetType(node.name); }
+			Type SemanticAnalyzer::VisitFunctionCall(Node::FunctionCall &node)
+			{
+				//TODO: check if intrinsic
+
+				return GetType(node.name);
+			}
 
 			Type SemanticAnalyzer::VisitComponent(Node::Component &node)
 			{
@@ -111,7 +116,10 @@ namespace Gogaman
 
 			Type SemanticAnalyzer::VisitMemberSelection(Node::MemberSelection &node)
 			{
-				return Type::Void;
+				if((uint8_t)GetType(node.object->name) < (uint8_t)Type::Float)
+					return Type((uint8_t)Type::Integer + (node.memberName.size() - 1));
+				else
+					return Type((uint8_t)Type::Float + (node.memberName.size() - 1));
 			}
 
 			Type SemanticAnalyzer::VisitBinaryOperation(Node::BinaryOperation &node)

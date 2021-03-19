@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "FlexShader.h"
 
-#include "Gogaman/Utilities/Algorithm/DirectedGraph.h"
-
-//include "Token.h"
 #include "Lexer.h"
 
 #include "Visitor.h"
@@ -12,9 +9,13 @@
 
 #include "IntermediateRepresentation.h"
 
+#include "StaticSingleAssignment.h"
+
+#include "Optimizer.h"
+
 #include "CodeGenerator.h"
 
-#define GM_FLEX_SHADER_ENABLE_AST_LOGGING TRUE
+#define GM_FLEX_SHADER_ENABLE_AST_LOGGING FALSE
 #define GM_FLEX_SHADER_ENABLE_IR_LOGGING  TRUE
 
 namespace Gogaman
@@ -40,7 +41,7 @@ namespace Gogaman
 			AST::Node::Abstract *transformedRootNode = m_RootNode->Accept(moduleVisitor).front();
 
 			AST::SemanticAnalyzer semanticAnalyzer;
-			transformedRootNode->Accept(semanticAnalyzer);
+			//transformedRootNode->Accept(semanticAnalyzer);
 
 			//(Temporary) log transformed AST
 			AST::LogVisitor logger;
@@ -62,44 +63,10 @@ namespace Gogaman
 			#if GM_FLEX_SHADER_ENABLE_IR_LOGGING
 				LogIR(intermediateRepresentation);
 			#endif
-			/*
-			//Generate CFG
-			const auto IsBranchInstruction = [](const IR::Instruction &instruction) { return (instruction.operation == IR::Operation::UnconditionalBranch) || (instruction.operation == IR::Operation::ConditionalBranch); };
 
-			std::vector<uint32_t> branchInstructionIndices;
-			for(auto i = 0; i < intermediateRepresentation.instructions.size(); i++)
-				if(IsBranchInstruction(intermediateRepresentation.instructions[i]))
-					branchInstructionIndices.emplace_back(i);
+			IR::SSA ssa(intermediateRepresentation);
 
-			DirectedGraph<uint16_t> controlFlowGraph;
-			std::vector<std::pair<uint32_t, uint32_t>> basicBlocks;
-			uint32_t currentLeader = 0;
-			for(const uint32_t i : branchInstructionIndices)
-			{
-				const IR::Instruction &instruction = intermediateRepresentation.instructions[i];
-
-				const uint32_t jumpTarget = instruction.operation == IR::Operation::UnconditionalBranch ? instruction.address1.GetValue() : instruction.address2.GetValue();
-
-				const uint16_t sourceVertexIndex = controlFlowGraph.CreateVertex();
-				basicBlocks.emplace_back(currentLeader, i);
-
-				basicBlocks.emplace_back(jumpTarget, jumpTarget);
-				for(uint32_t j = jumpTarget + 1; j < intermediateRepresentation.instructions.size(); j++)
-				{
-					if(IsBranchInstruction(intermediateRepresentation.instructions[j]))
-					{
-						basicBlocks.back().second = j;
-						break;
-					}
-				}
-
-				controlFlowGraph.CreateEdge(sourceVertexIndex, controlFlowGraph.CreateVertex());
-
-				currentLeader = i + 1;
-				if(currentLeader == intermediateRepresentation.instructions.size())
-					break;
-			}
-			*/
+			//IR::Optimize(intermediateRepresentation);
 
 			CodeGenerator *generator = new CodeGenerator(intermediateRepresentation, entryPointName);
 			return generator->GetData();

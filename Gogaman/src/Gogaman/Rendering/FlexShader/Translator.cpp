@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Translator.h"
 
-//#include "Type.h"
 #include "AbstractSyntaxTree.h"
 
 namespace Gogaman
@@ -58,9 +57,18 @@ namespace Gogaman
 				AddInstruction(IR::Operation::FunctionParameter, i);
 			}
 
-			m_IR.executionOrder.emplace_back(m_IR.instructions.size());
-			AddInstruction(IR::Operation::FunctionCall, GetSymbolAddress(node.name));
-			return { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() - 1, GetSymbolAddress(node.name).GetDataType() };
+			if(IR::GetIntrinsicFunction(node.name) == IR::IntrinsicFunction::None)
+			{
+				m_IR.executionOrder.emplace_back(m_IR.instructions.size());
+				AddInstruction(IR::Operation::FunctionCall, GetSymbolAddress(node.name));
+				return { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() - 1, GetSymbolAddress(node.name).GetDataType() };
+			}
+			else
+			{
+				m_IR.executionOrder.emplace_back(m_IR.instructions.size());
+				AddInstruction(IR::Operation::IntrinsicFunctionCall, (uint32_t)IR::GetIntrinsicFunction(node.name));
+				return { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() - 1 };
+			}
 		}
 
 		IR::Address Translator::VisitVariableDeclaration(AST::Node::VariableDeclaration &node)
@@ -175,15 +183,15 @@ namespace Gogaman
 					break;
 				case 'y':
 				case 'g':
-					components |= 1 << (i * 2 + 8);
+					components |= 1 << (8 + i * 2);
 					break;
 				case 'z':
 				case 'b':
-					components |= 2 << (i * 2 + 8);
+					components |= 2 << (8 + i * 2);
 					break;
 				case 'w':
 				case 'a':
-					components |= 3 << (i * 2 + 8);
+					components |= 3 << (8 + i * 2);
 					break;
 				default:
 					break;
@@ -197,41 +205,64 @@ namespace Gogaman
 
 		IR::Address Translator::VisitBinaryOperation(AST::Node::BinaryOperation &node)
 		{
-			IR::Operation operation;
-			switch(node.operatorType)
-			{
-			case Token::Type::Plus:
-				operation = IR::Operation::Add;
-				break;
-			case Token::Type::Minus:
-				operation = IR::Operation::Subtract;
-				break;
-			case Token::Type::Asterisk:
-				operation = IR::Operation::Multiply;
-				break;
-			case Token::Type::Slash:
-				operation = IR::Operation::Divide;
-				break;
-			case Token::Type::Percent:
-				operation = IR::Operation::Modulo;
-				break;
-			}
+			const IR::Address leftAddress  = node.leftOperand->Accept(*this);
+			const IR::Address rightAddress = node.rightOperand->Accept(*this);
 
-			AddInstruction(operation, node.leftOperand->Accept(*this), node.rightOperand->Accept(*this));
+			IR::Operation operation;
+			if(leftAddress.GetDataType() <= Type::Integer4)
+				switch(node.operatorType)
+				{
+				case Token::Type::Plus:
+					operation = IR::Operation::IntegerAdd;
+					break;
+				case Token::Type::Minus:
+					operation = IR::Operation::IntegerSubtract;
+					break;
+				case Token::Type::Asterisk:
+					operation = IR::Operation::IntegerMultiply;
+					break;
+				case Token::Type::Slash:
+					operation = IR::Operation::IntegerDivide;
+					break;
+				case Token::Type::Percent:
+					operation = IR::Operation::IntegerModulo;
+					break;
+				}
+			else
+				switch(node.operatorType)
+				{
+				case Token::Type::Plus:
+					operation = IR::Operation::FloatAdd;
+					break;
+				case Token::Type::Minus:
+					operation = IR::Operation::FloatSubtract;
+					break;
+				case Token::Type::Asterisk:
+					operation = IR::Operation::FloatMultiply;
+					break;
+				case Token::Type::Slash:
+					operation = IR::Operation::FloatDivide;
+					break;
+				case Token::Type::Percent:
+					operation = IR::Operation::FloatModulo;
+					break;
+				}
+
+			AddInstruction(operation, leftAddress, rightAddress);
 			m_IR.executionOrder.emplace_back(m_IR.instructions.size() - 1);
 			return { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() - 1 };
 		}
 
 		IR::Address Translator::VisitAssignment(AST::Node::Assignment &node)
 		{
-			const IR::Address lValue = node.lValue->Accept(*this);
-			const IR::Address rValue = node.rValue->Accept(*this);
+			const IR::Address leftAddress  = node.lValue->Accept(*this);
+			const IR::Address rightAddress = node.rValue->Accept(*this);
 
 			if(node.operatorType == Token::Type::Equal)
-				AddInstruction(IR::Operation::Assignment, lValue, rValue);
+				AddInstruction(IR::Operation::Assignment, leftAddress, rightAddress);
 
 			m_IR.executionOrder.emplace_back(m_IR.instructions.size() - 1);
-			return { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() - 1, lValue.GetDataType() };
+			return { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() - 1, leftAddress.GetDataType() };
 		}
 
 		IR::Address Translator::VisitBranch(AST::Node::Branch &node)
@@ -243,7 +274,7 @@ namespace Gogaman
 
 				node.ifBody->Accept(*this);
 
-				const uint32_t jumpExecutionIndex = m_IR.executionOrder.emplace_back(m_IR.executionOrder.size());
+				const uint32_t branchExecutionIndex = m_IR.executionOrder.emplace_back(m_IR.executionOrder.size());
 
 				const uint32_t branchTarget = m_IR.instructions.size();
 				node.elseBody->Accept(*this);
@@ -251,7 +282,7 @@ namespace Gogaman
 				m_IR.executionOrder[branchOnNotEqualExecutionIndex] = m_IR.instructions.size();
 				AddInstruction(IR::Operation::BranchOnNotEqual, condition, IR::Address { IR::Address::Type::InstructionPointer, branchTarget });
 				
-				m_IR.executionOrder[jumpExecutionIndex] = m_IR.instructions.size();
+				m_IR.executionOrder[branchExecutionIndex] = m_IR.instructions.size();
 				AddInstruction(IR::Operation::Branch, IR::Address { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.executionOrder.size() });
 			}
 			else
