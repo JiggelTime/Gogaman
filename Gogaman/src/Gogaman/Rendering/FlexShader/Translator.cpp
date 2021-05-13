@@ -270,6 +270,7 @@ namespace Gogaman
 			const IR::Address condition = node.condition->Accept(*this);
 			if(node.elseBody)
 			{
+				/*
 				const uint32_t branchOnNotEqualExecutionIndex = m_IR.executionOrder.emplace_back(m_IR.executionOrder.size());
 
 				node.ifBody->Accept(*this);
@@ -284,6 +285,23 @@ namespace Gogaman
 				
 				m_IR.executionOrder[branchExecutionIndex] = m_IR.instructions.size();
 				AddInstruction(IR::Operation::Branch, IR::Address { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.executionOrder.size() });
+				*/
+
+				const uint32_t branchOnNotEqualInstructionIndex = m_IR.instructions.size();
+				m_IR.executionOrder.emplace_back(branchOnNotEqualInstructionIndex);
+				AddInstruction(IR::Operation::BranchOnNotEqual, condition, IR::Address { IR::Address::Type::InstructionPointer, 0 });
+
+				node.ifBody->Accept(*this);
+
+				const uint32_t branchInstructionIndex = m_IR.instructions.size();
+				m_IR.executionOrder.emplace_back(branchInstructionIndex);
+				AddInstruction(IR::Operation::Branch, IR::Address { IR::Address::Type::InstructionPointer, 0 });
+
+				m_IR.instructions[branchOnNotEqualInstructionIndex].address2 = IR::Address { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.instructions.size() };
+				
+				node.elseBody->Accept(*this);
+
+				m_IR.instructions[branchInstructionIndex].address1 = IR::Address { IR::Address::Type::InstructionPointer, (uint32_t)m_IR.executionOrder.size() };
 			}
 			else
 			{

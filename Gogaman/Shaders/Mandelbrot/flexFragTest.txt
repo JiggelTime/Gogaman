@@ -1,16 +1,19 @@
 {
 	void main()
 	{
-		input float2 uv;
+		float test;
+		if(88.)
+		{
+			if(999.) test = 3.0f;
+			else test = 4.0f;
+		}
+		else
+			test = 2.0f;
 
-		float2 intr;
-		intr.x = sin(uv.x % 10.0f);
-		intr.y = cos(uv.y);
+		float test2 = test * 0.3f;
 
-		output float2 result = intr;
-
-		float2 testVal = result;
-
-		return;
+		//input float2 uv;
+		//output float2 result = uv;
+		//return;
 	}
 }

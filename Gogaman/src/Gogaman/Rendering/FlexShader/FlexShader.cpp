@@ -45,7 +45,7 @@ namespace Gogaman
 
 			//(Temporary) log transformed AST
 			AST::LogVisitor logger;
-			transformedRootNode->Accept(logger);
+			//transformedRootNode->Accept(logger);
 
 			//Generate descriptor layouts from component data
 			for(const auto i : moduleVisitor.GetComponentData())

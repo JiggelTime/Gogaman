@@ -24,7 +24,7 @@ namespace Gogaman
 					std::vector<Node::VariableDeclaration *> variables;
 				};
 			public:
-				Transformer() = default;
+				Transformer()  = default;
 				~Transformer() = default;
 
 				inline std::vector<Node::Abstract *> VisitAbstract(Node::Abstract &node, const std::string &componentName)     { return { (Node::Abstract *)&node }; }

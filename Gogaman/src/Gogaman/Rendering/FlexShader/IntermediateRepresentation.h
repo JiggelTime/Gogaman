@@ -117,6 +117,8 @@ namespace Gogaman
 				return std::string(names[(uint8_t)operation]);
 			}
 
+			struct HashAddress;
+
 			class Address
 			{
 			public:
@@ -149,8 +151,6 @@ namespace Gogaman
 
 				~Address() = default;
 
-				inline uint32_t operator()() const { return std::hash<uint32_t>()(m_Data); }
-
 				inline bool operator==(const Address &other) const { return m_Data == other.m_Data; }
 
 				inline const Type GetType() const { return (Type)(m_Data >> 30); }
@@ -162,6 +162,13 @@ namespace Gogaman
 				inline const bool IsValid() const { return m_Data != GM_FLEX_SHADER_IR_INVALID_ADDRESS_DATA; }
 			private:
 				uint32_t m_Data;
+			private:
+				friend HashAddress;
+			};
+
+			struct HashAddress
+			{
+				inline uint32_t operator()(const Address &address) const { return std::hash<uint32_t>()(address.m_Data); }
 			};
 
 			struct Instruction
